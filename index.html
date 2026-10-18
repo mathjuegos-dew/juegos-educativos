@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula Interactiva de Matemática - Prof. Jhon Dewis</title>
+  <!-- Fuentes de Google -->
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================
+       VARIABLES DE COLOR (MODO DÍA POR DEFECTO)
+       ========================================= */
+    :root {
+      --primario: #4f46e5;
+      --texto: #1e293b;
+      --texto-secundario: #64748b;
+      --fondo-base: #e0f2fe;
+      --punto-1: #cbd5e1;
+      --punto-2: #e2e8f0;
+      --tarjeta-bg: rgba(255, 255, 255, 0.9);
+      --boton-curso-bg: #f8fafc;
+      --boton-curso-borde: #e2e8f0;
+      --barra-bg: rgba(255, 255, 255, 0.9);
+      --barra-borde: #e0e7ff;
+      --titulo-seccion: #1e1b4b;
+      --migas-hover: #eef2ff;
+      --footer-bg: rgba(255, 255, 255, 0.88);
+      --footer-borde: #cbd5e1;
+      --firma-gradiente: linear-gradient(135deg, #312e81, #6d28d9, #be185d);
+    }
+
+    /* =========================================
+       VARIABLES DE COLOR (MODO NOCTURNO ESTELAR)
+       ========================================= */
+    body.modo-nocturno {
+      --primario: #818cf8;
+      --texto: #f8fafc;
+      --texto-secundario: #cbd5e1;
+      --fondo-base: #050816;
+      --tarjeta-bg: rgba(15, 23, 42, 0.82);
+      --boton-curso-bg: rgba(30, 41, 59, 0.85);
+      --boton-curso-borde: #334155;
+      --barra-bg: rgba(15, 23, 42, 0.85);
+      --barra-borde: #3b4262;
+      --titulo-seccion: #e0e7ff;
+      --migas-hover: #334155;
+      --footer-bg: rgba(7, 11, 25, 0.9);
+      --footer-borde: #334155;
+      --firma-gradiente: linear-gradient(135deg, #a5b4fc, #e879f9, #f472b6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* En modo día usamos un cielo celeste luminoso y suave */
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--texto);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--fondo-base);
+      background-image: linear-gradient(180deg, #7dd3fc 0%, #bae6fd 45%, #e0f2fe 80%, #f0fdf4 100%);
+      background-size: cover;
+      background-attachment: fixed;
+      transition: background-color 0.5s ease, color 0.3s ease;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* En modo nocturno ponemos nebulosa espacial */
+    body.modo-nocturno {
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(79, 70, 229, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(219, 39, 119, 0.15) 0%, transparent 50%),
+        linear-gradient(180deg, #030614 0%, #0a1128 50%, #070b19 100%);
+      background-size: cover;
+      background-attachment: fixed;
+    }
+
+    /* Lienzo de fondo animado (Día: Nubes + Newton | Noche: Estrellas + Niño Silueta) */
+    #cieloEstrellado {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 1;
+      transition: opacity 0.6s ease;
+    }
+
+    /* Encabezado colorido y educativo */
+    header {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 50%, #db2777 100%);
+      color: white;
+      text-align: center;
+      padding: 2.5rem 1rem 3rem;
+      border-bottom-left-radius: 35px;
+      border-bottom-right-radius: 35px;
+      box-shadow: 0 10px 25px rgba(109, 40, 217, 0.25);
+      position: relative;
+      z-index: 2;
+    }
+
+    body.modo-nocturno header {
+      background: linear-gradient(135deg, rgba(49, 46, 129, 0.92) 0%, rgba(88, 28, 135, 0.92) 50%, rgba(157, 23, 77, 0.92) 100%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(139, 92, 246, 0.25);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Botón Día / Noche */
+    .btn-tema {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      background: rgba(255, 255, 255, 0.22);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.95rem;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-tema:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(1.05);
+    }
+
+    header h1 {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 2.5rem;
+      margin-bottom: 0.6rem;
+      text-shadow: 0 3px 6px rgba(0,0,0,0.25);
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.2);
+      display: inline-block;
+      padding: 0.4rem 1.4rem;
+      border-radius: 50px;
+      backdrop-filter: blur(4px);
+      font-weight: 700;
+    }
+
+    main {
+      max-width: 1100px;
+      width: 100%;
+      margin: -1.5rem auto 2rem;
+      padding: 0 1.2rem;
+      flex: 1;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Barra superior (Migas de pan + Botón volver) */
+    .barra-navegacion {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.8rem;
+      background: var(--barra-bg);
+      backdrop-filter: blur(10px);
+      padding: 0.9rem 1.5rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      border: 2px solid var(--barra-borde);
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .migas-pan {
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      font-weight: 800;
+    }
+
+    .migas-pan span {
+      color: var(--primario);
+      cursor: pointer;
+      padding: 0.2rem 0.6rem;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .migas-pan span:hover {
+      background-color: var(--migas-hover);
+    }
+
+    .btn-volver {
+      padding: 0.6rem 1.3rem;
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #b45309;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .btn-volver:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #b45309;
+    }
+
+    .btn-volver:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #b45309;
+    }
+
+    /* Título de la sección actual */
+    .titulo-seccion {
+      text-align: center;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.8rem;
+      color: var(--titulo-seccion);
+      margin-bottom: 1.5rem;
+      transition: color 0.3s;
+      text-shadow: 0 2px 10px rgba(255,255,255,0.6);
+    }
+
+    body.modo-nocturno .titulo-seccion {
+      text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    /* Cuadrícula de Grados y Tarjetas */
+    .grid-tarjetas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.6rem;
+    }
+
+    /* Tarjeta contenedora de cada Grado */
+    .tarjeta-grado {
+      background: var(--tarjeta-bg);
+      backdrop-filter: blur(12px);
+      border-radius: 26px;
+      padding: 1.8rem 1.4rem;
+      text-align: center;
+      border: 3px solid #e2e8f0;
+      box-shadow: 0 10px 0 #cbd5e1, 0 15px 25px rgba(0,0,0,0.12);
+      transition: background 0.3s, transform 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cabecera-grado {
+      margin-bottom: 1.2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px dashed var(--boton-curso-borde);
+    }
+
+    .icono-circulo {
+      width: 75px;
+      height: 75px;
+      margin: 0 auto 0.8rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.08);
+    }
+
+    .tarjeta-grado h2 {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.6rem;
+      color: var(--texto);
+      margin-bottom: 0.2rem;
+    }
+
+    .descripcion-grado {
+      color: var(--texto-secundario);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    /* Lista de los 4 cursos ADENTRO de cada grado */
+    .lista-cursos-interna {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      flex: 1;
+    }
+
+    .btn-curso-interno {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--boton-curso-bg);
+      border: 2px solid var(--boton-curso-borde);
+      border-radius: 16px;
+      padding: 0.9rem 1.1rem;
+      cursor: pointer;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.1rem;
+      color: var(--texto);
+      box-shadow: 0 4px 0 var(--boton-curso-borde);
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .btn-curso-interno:hover {
+      transform: translateY(-3px);
+      border-color: var(--primario);
+      box-shadow: 0 6px 0 var(--primario);
+    }
+
+    .btn-curso-interno:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 var(--primario);
+    }
+
+    .curso-izq {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .curso-icono {
+      font-size: 1.5rem;
+    }
+
+    .flecha-ir {
+      background: #eef2ff;
+      color: #4f46e5;
+      padding: 0.25rem 0.65rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    body.modo-nocturno .flecha-ir {
+      background: rgba(79, 70, 229, 0.35);
+      color: #e0e7ff;
+    }
+
+    /* Colores por Grado */
+    .grado-4 {
+      border-color: #38bdf8;
+      box-shadow: 0 10px 0 #0284c7, 0 15px 25px rgba(2, 132, 199, 0.2);
+    }
+    .grado-4 .icono-circulo { background: #e0f2fe; }
+
+    .grado-5 {
+      border-color: #34d399;
+      box-shadow: 0 10px 0 #059669, 0 15px 25px rgba(5, 150, 105, 0.2);
+    }
+    .grado-5 .icono-circulo { background: #d1fae5; }
+
+    .grado-6 {
+      border-color: #fbbf24;
+      box-shadow: 0 10px 0 #d97706, 0 15px 25px rgba(217, 119, 6, 0.2);
+    }
+    .grado-6 .icono-circulo { background: #fef3c7; }
+
+    /* Tarjetas de Temas y Actividades */
+    .tarjeta {
+      background: var(--tarjeta-bg);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 1.8rem 1.4rem;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
+      border: 3px solid #a78bfa;
+      box-shadow: 0 10px 0 #7c3aed, 0 15px 25px rgba(124, 58, 237, 0.18);
+    }
+
+    .tarjeta:hover {
+      transform: translateY(-8px) scale(1.02);
+    }
+
+    .tarjeta h2 {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.35rem;
+      margin-bottom: 0.6rem;
+      color: var(--texto);
+    }
+
+    .tarjeta .etiqueta {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.45rem 1.2rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+
+    /* Tarjeta de ¡Juguemos! */
+    .tarjeta-juego {
+      border-color: #f472b6;
+      box-shadow: 0 10px 0 #db2777, 0 15px 25px rgba(219, 39, 119, 0.18);
+    }
+    .tarjeta-juego .icono-circulo { background: #fce7f3; }
+    .tarjeta-juego .etiqueta {
+      background: linear-gradient(135deg, #ec4899, #db2777);
+      color: white;
+    }
+
+    /* Tarjeta de Cuestionario */
+    .tarjeta-cuestionario {
+      border-color: #38bdf8;
+      box-shadow: 0 10px 0 #0284c7, 0 15px 25px rgba(2, 132, 199, 0.18);
+    }
+    .tarjeta-cuestionario .icono-circulo { background: #e0f2fe; }
+    .tarjeta-cuestionario .etiqueta {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white;
+    }
+
+    /* Ajustes modo nocturno */
+    body.modo-nocturno .grado-4 .icono-circulo { background: rgba(56, 189, 248, 0.2); }
+    body.modo-nocturno .grado-5 .icono-circulo { background: rgba(52, 211, 153, 0.2); }
+    body.modo-nocturno .grado-6 .icono-circulo { background: rgba(251, 191, 36, 0.2); }
+    body.modo-nocturno .tarjeta-juego .icono-circulo { background: rgba(244, 114, 182, 0.2); }
+    body.modo-nocturno .tarjeta-cuestionario .icono-circulo { background: rgba(56, 189, 248, 0.2); }
+
+    /* Modal de aviso amigable */
+    .modal-aviso {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+    .modal-aviso.activo {
+      display: flex;
+    }
+    .modal-caja {
+      background: var(--tarjeta-bg);
+      color: var(--texto);
+      border: 3px solid var(--primario);
+      border-radius: 24px;
+      padding: 2rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+      font-family: 'Fredoka', sans-serif;
+    }
+    .modal-caja h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.8rem;
+      color: var(--primario);
+    }
+    .modal-caja p {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.05rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+    .modal-caja button {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      border: none;
+      padding: 0.65rem 1.8rem;
+      border-radius: 50px;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #3730a3;
+    }
+
+    /* Pie de página con firma elegante en cursiva */
+    footer {
+      background: var(--footer-bg);
+      backdrop-filter: blur(10px);
+      border-top: 3px dashed var(--footer-borde);
+      text-align: center;
+      padding: 1.5rem 1rem;
+      margin-top: 3rem;
+      transition: background 0.3s, border-color 0.3s;
+      position: relative;
+      z-index: 2;
+    }
+
+    footer .texto-footer {
+      color: var(--texto-secundario);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    footer .firma-profesor {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2.4rem;
+      background: var(--firma-gradiente);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      padding: 0 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .btn-tema {
+        position: static;
+        margin: 0 auto 1rem;
+        width: fit-content;
+      }
+      header h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lienzo para el cielo animado (Día: Nubes + Newton | Noche: Estrellas + Silueta Niño pensando fórmulas) -->
+  <canvas id="cieloEstrellado"></canvas>
+
+  <header>
+    <button class="btn-tema" id="btnTema" onclick="alternarTema()">
+      🌙 Modo Nocturno
+    </button>
+
+    <h1>🎒 Mundo Matemático Interactivo 🌟</h1>
+    <p>¡Elige tu grado y tu curso para empezar a jugar y practicar!</p>
+  </header>
+
+  <main>
+    <!-- Barra de ubicación -->
+    <div class="barra-navegacion">
+      <div class="migas-pan" id="migas">
+        <span onclick="mostrarGradosYCursos()">🏠 Inicio</span>
+      </div>
+      <button class="btn-volver" id="btnVolver" style="display: none;" onclick="volverAtras()">⬅ Regresar</button>
+    </div>
+
+    <!-- Título dinámico -->
+    <h2 class="titulo-seccion" id="tituloSeccion">✨ Selecciona un Curso dentro de tu Grado ✨</h2>
+
+    <!-- Contenedor dinámico -->
+    <div id="contenedor" class="grid-tarjetas"></div>
+  </main>
+
+  <!-- Cuadro de mensaje para próximos juegos y cuestionarios -->
+  <div class="modal-aviso" id="modalAviso">
+    <div class="modal-caja">
+      <h3 id="tituloModalAviso">🎮 ¡Muy Pronto!</h3>
+      <p id="textoModalAviso"></p>
+      <button onclick="cerrarModalAviso()">¡Entendido!</button>
+    </div>
+  </div>
+
+  <footer>
+    <p class="texto-footer">Plataforma Interactiva de Matemática — Creada con dedicación por:</p>
+    <div class="firma-profesor">Prof. Jhon Dewis</div>
+  </footer>
+
+  <script>
+    // =========================================================
+    // FUNCIÓN AUXILIAR PARA CREAR LAS 2 OPCIONES DE CADA TEMA:
+    // 1) "¡Juguemos!" y 2) "Cuestionario"
+    // Cuando tengas el link de un juego o cuestionario,
+    // puedes cambiar el "#" directamente en el tema correspondiente.
+    // =========================================================
+    function crearTema(bimestre, nombre, icono, enlaceJuego = "#", enlaceCuestionario = "#") {
+      return {
+        bimestre: bimestre,
+        nombre: nombre,
+        icono: icono,
+        juegos: [
+          { nombre: "¡Juguemos!", tipo: "juego", icono: "🎮", enlace: enlaceJuego },
+          { nombre: "Cuestionario", tipo: "cuestionario", icono: "📝", enlace: enlaceCuestionario }
+        ]
+      };
+    }
+
+    // =========================================================
+    // CATÁLOGO DE GRADOS -> 4 CURSOS -> 10 TEMAS POR CURSO
+    // =========================================================
+    const datosEscuela = {
+      "4to de Primaria": {
+        icono: "🚀",
+        clase: "grado-4",
+        descripcion: "Exploradores de los números",
+        cursos: {
+          "Aritmética": {
+            icono: "🔢",
+            temas: [
+              crearTema(1, "Tema 1: Conjuntos y Pertenencia", "⭕"),
+              crearTema(1, "Tema 2: Operaciones con Conjuntos", "🔗"),
+              crearTema(1, "Tema 3: Numeración hasta la Decena de Millar", "🔢"),
+              crearTema(2, "Tema 4: Adición y Sustracción de Naturales", "➕"),
+              crearTema(2, "Tema 5: Multiplicación y Propiedades", "✖️"),
+              crearTema(2, "Tema 6: División Exacta e Inexacta", "➗"),
+              crearTema(3, "Tema 7: Operaciones Combinadas", "🧮"),
+              crearTema(3, "Tema 8: Múltiplos y Divisores", "🎲"),
+              crearTema(4, "Tema 9: Fracciones y Clasificación", "🍕"),
+              crearTema(4, "Tema 10: Números Decimales", "🎯")
+            ]
+          },
+          "Álgebra": {
+            icono: "⚖️",
+            temas: [
+              crearTema(1, "Tema 1: Patrones Numéricos y Gráficos", "🧩"),
+              crearTema(1, "Tema 2: Igualdades y Equivalencias", "⚖️"),
+              crearTema(1, "Tema 3: Números Enteros en la Recta", "📏"),
+              crearTema(2, "Tema 4: Potenciación de Números Naturales", "🚀"),
+              crearTema(2, "Tema 5: Radicación Básica", "🌱"),
+              crearTema(2, "Tema 6: Expresiones Algebraicas", "🔤"),
+              crearTema(3, "Tema 7: Términos Semejantes", "🔗"),
+              crearTema(3, "Tema 8: Ecuaciones de la forma x + a = b", "🕵️"),
+              crearTema(4, "Tema 9: Ecuaciones de la forma ax + b = c", "🎯"),
+              crearTema(4, "Tema 10: Inecuaciones de Primer Grado", "📈")
+            ]
+          },
+          "Geometría": {
+            icono: "📐",
+            temas: [
+              crearTema(1, "Tema 1: Nociones Geométricas y Segmentos", "📏"),
+              crearTema(1, "Tema 2: Ángulos y su Clasificación", "🧭"),
+              crearTema(1, "Tema 3: Rectas Paralelas y Perpendiculares", "🛤️"),
+              crearTema(2, "Tema 4: Polígonos y sus Elementos", "🔷"),
+              crearTema(2, "Tema 5: Triángulos y Propiedades", "🔺"),
+              crearTema(2, "Tema 6: Cuadriláteros", "🟩"),
+              crearTema(3, "Tema 7: Circunferencia y Círculo", "⭕"),
+              crearTema(3, "Tema 8: Perímetros de Figuras Planas", "📐"),
+              crearTema(4, "Tema 9: Áreas de Regiones Poligonales", "🗺️"),
+              crearTema(4, "Tema 10: Sólidos Geométricos", "🧊")
+            ]
+          },
+          "Razonamiento Matemático": {
+            icono: "🧠",
+            temas: [
+              crearTema(1, "Tema 1: Sucesiones Numéricas y Alfabéticas", "🪜"),
+              crearTema(1, "Tema 2: Analogías y Distribuciones", "🔢"),
+              crearTema(1, "Tema 3: Pirámides Numéricas", "🧱"),
+              crearTema(2, "Tema 4: Criptoaritmética", "🔐"),
+              crearTema(2, "Tema 5: Conteo de Segmentos y Ángulos", "🔍"),
+              crearTema(2, "Tema 6: Conteo de Triángulos y Cuadriláteros", "🔺"),
+              crearTema(3, "Tema 7: Operadores Matemáticos", "⚙️"),
+              crearTema(3, "Tema 8: Cuadrados Mágicos", "✨"),
+              crearTema(4, "Tema 9: Orden de Información", "📋"),
+              crearTema(4, "Tema 10: Planteo de Ecuaciones", "💡")
+            ]
+          }
+        }
+      },
+      "5to de Primaria": {
+        icono: "🌟",
+        clase: "grado-5",
+        descripcion: "Aventureros matemáticos",
+        cursos: {
+          "Aritmética": {
+            icono: "🔢",
+            temas: [
+              crearTema(1, "Tema 1: Teoría de Conjuntos y Problemas", "⭕"),
+              crearTema(1, "Tema 2: Numeración hasta la Centena de Millar", "🔢"),
+              crearTema(1, "Tema 3: Cuatro Operaciones en N", "🧮"),
+              crearTema(2, "Tema 4: Teoría de la Divisibilidad", "🎲"),
+              crearTema(2, "Tema 5: Números Primos y Compuestos", "🔑"),
+              crearTema(2, "Tema 6: Mínimo Común Múltiplo y MCD", "🔗"),
+              crearTema(3, "Tema 7: Operaciones con Fracciones", "🍕"),
+              crearTema(3, "Tema 8: Números Decimales y Generatriz", "🎯"),
+              crearTema(4, "Tema 9: Razones y Proporciones", "⚖️"),
+              crearTema(4, "Tema 10: Regla de Tres y Porcentajes", "💯")
+            ]
+          },
+          "Álgebra": {
+            icono: "⚖️",
+            temas: [
+              crearTema(1, "Tema 1: Números Enteros (Z) y Operaciones", "🌡️"),
+              crearTema(1, "Tema 2: Teoría de Exponentes", "🚀"),
+              crearTema(1, "Tema 3: Radicación y Propiedades", "🌱"),
+              crearTema(2, "Tema 4: Expresiones Algebraicas y Grados", "🔤"),
+              crearTema(2, "Tema 5: Reducción de Términos Semejantes", "🧩"),
+              crearTema(2, "Tema 6: Operaciones con Polinomios", "📊"),
+              crearTema(3, "Tema 7: Productos Notables Básicos", "⚡"),
+              crearTema(3, "Tema 8: Ecuaciones Lineales de Primer Grado", "🕵️"),
+              crearTema(4, "Tema 9: Sistema de Ecuaciones Simples", "⚖️"),
+              crearTema(4, "Tema 10: Inecuaciones Lineales", "📈")
+            ]
+          },
+          "Geometría": {
+            icono: "📐",
+            temas: [
+              crearTema(1, "Tema 1: Operaciones con Segmentos", "📏"),
+              crearTema(1, "Tema 2: Ángulos Complementarios y Suplementarios", "🧭"),
+              crearTema(1, "Tema 3: Ángulos entre Paralelas y una Secante", "🛤️"),
+              crearTema(2, "Tema 4: Triángulos y Teoremas Fundamentales", "🔺"),
+              crearTema(2, "Tema 5: Líneas Notables en el Triángulo", "📐"),
+              crearTema(2, "Tema 6: Polígonos: Diagonales y Ángulos", "🔷"),
+              crearTema(3, "Tema 7: Cuadriláteros y Propiedades", "🟩"),
+              crearTema(3, "Tema 8: Circunferencia y Ángulos Asociados", "⭕"),
+              crearTema(4, "Tema 9: Áreas de Regiones Planas", "🗺️"),
+              crearTema(4, "Tema 10: Prisma, Pirámide y Volumen", "🧊")
+            ]
+          },
+          "Razonamiento Matemático": {
+            icono: "🧠",
+            temas: [
+              crearTema(1, "Tema 1: Sucesiones Numéricas y Literales", "🪜"),
+              crearTema(1, "Tema 2: Analogías y Distribuciones Numéricas", "🔢"),
+              crearTema(1, "Tema 3: Criptoaritmética Avanzada", "🔐"),
+              crearTema(2, "Tema 4: Operadores Matemáticos con Tablas", "⚙️"),
+              crearTema(2, "Tema 5: Conteo de Figuras por Fórmulas", "🔍"),
+              crearTema(2, "Tema 6: Método del Cangrejo y del Rombo", "🦀"),
+              crearTema(3, "Tema 7: Planteo de Ecuaciones", "💡"),
+              crearTema(3, "Tema 8: Problemas sobre Edades", "⏳"),
+              crearTema(4, "Tema 9: Fracciones en Razonamiento", "🍕"),
+              crearTema(4, "Tema 10: Orden de Información Lineal y Circular", "📋")
+            ]
+          }
+        }
+      },
+      "6to de Primaria": {
+        icono: "🏆",
+        clase: "grado-6",
+        descripcion: "Maestros de primaria",
+        cursos: {
+          "Aritmética": {
+            icono: "🔢",
+            temas: [
+              crearTema(1, "Tema 1: Conjuntos y Producto Cartesiano", "⭕"),
+              crearTema(1, "Tema 2: Sistemas de Numeración y Cambio de Base", "🔢"),
+              crearTema(1, "Tema 3: Divisibilidad y Criterios", "🎲"),
+              crearTema(2, "Tema 4: Números Primos, MCM y MCD", "🔑"),
+              crearTema(2, "Tema 5: Números Racionales (Fracciones)", "🍕"),
+              crearTema(2, "Tema 6: Números Decimales y Fracción Generatriz", "🎯"),
+              crearTema(3, "Tema 7: Razones y Proporciones", "⚖️"),
+              crearTema(3, "Tema 8: Magnitudes Proporcionales", "📊"),
+              crearTema(4, "Tema 9: Regla de Tres Simple y Compuesta", "🧮"),
+              crearTema(4, "Tema 10: Tanto por Ciento y Estadística", "💯")
+            ]
+          },
+          "Álgebra": {
+            icono: "🧮",
+            temas: [
+              crearTema(1, "Tema 1: Operaciones Combinadas en Z", "🌡️"),
+              crearTema(1, "Tema 2: Leyes de Exponentes y Ecuaciones Exponenciales", "🚀"),
+              crearTema(1, "Tema 3: Radicación y Radicales", "🌱"),
+              crearTema(2, "Tema 4: Polinomios: Grados y Valor Numérico", "🔤"),
+              crearTema(2, "Tema 5: Multiplicación y División de Polinomios", "✖️"),
+              crearTema(2, "Tema 6: Productos Notables", "⚡"),
+              crearTema(3, "Tema 7: Factorización de Polinomios", "🧩"),
+              crearTema(3, "Tema 8: Ecuaciones de Primer Grado con Fracciones", "🕵️"),
+              crearTema(4, "Tema 9: Sistema de Ecuaciones Lineales", "⚖️"),
+              crearTema(4, "Tema 10: Inecuaciones y Funciones Básicas", "📈")
+            ]
+          },
+          "Geometría": {
+            icono: "📐",
+            temas: [
+              crearTema(1, "Tema 1: Segmentos y Puntos Colineales", "📏"),
+              crearTema(1, "Tema 2: Ángulos y Rectas Paralelas", "🧭"),
+              crearTema(1, "Tema 3: Triángulos y Líneas Notables", "🔺"),
+              crearTema(2, "Tema 4: Triángulos Rectángulos y Pitágoras", "📐"),
+              crearTema(2, "Tema 5: Polígonos Regulares e Irregulares", "🔷"),
+              crearTema(2, "Tema 6: Cuadriláteros: Trapecio y Paralelogramo", "🟩"),
+              crearTema(3, "Tema 7: Circunferencia: Propiedades y Ángulos", "⭕"),
+              crearTema(3, "Tema 8: Proporcionalidad y Semejanza", "🔍"),
+              crearTema(4, "Tema 9: Áreas de Regiones Sombreadas", "🗺️"),
+              crearTema(4, "Tema 10: Sólidos Geométricos y Cuerpos Redondos", "🧊")
+            ]
+          },
+          "Razonamiento Matemático": {
+            icono: "🧠",
+            temas: [
+              crearTema(1, "Tema 1: Sucesiones y Series Notables", "🪜"),
+              crearTema(1, "Tema 2: Distribuciones Numéricas y Gráficas", "🔢"),
+              crearTema(1, "Tema 3: Criptoaritmética y Habilidad Operativa", "🔐"),
+              crearTema(2, "Tema 4: Operadores Matemáticos Compuestos", "⚙️"),
+              crearTema(2, "Tema 5: Cuatro Operaciones: Cangrejo, Rombo y Rectángulo", "🦀"),
+              crearTema(2, "Tema 6: Conteo de Figuras y Trazos", "🔺"),
+              crearTema(3, "Tema 7: Planteo de Ecuaciones y Edades", "⏳"),
+              crearTema(3, "Tema 8: Móviles y Cronometría Básica", "⏱️"),
+              crearTema(4, "Tema 9: Fracciones y Porcentajes Aplicados", "💯"),
+              crearTema(4, "Tema 10: Análisis Combinatorio y Probabilidades", "🎲")
+            ]
+          }
+        }
+      }
+    };
+
+    let gradoActual = null;
+    let cursoActual = null;
+    let temaActual = null;
+
+    const contenedor = document.getElementById("contenedor");
+    const migas = document.getElementById("migas");
+    const btnVolver = document.getElementById("btnVolver");
+    const tituloSeccion = document.getElementById("tituloSeccion");
+    const btnTema = document.getElementById("btnTema");
+
+    // =========================================================
+    // ANIMACIÓN DE FONDO:
+    // - MODO DÍA: Nubes suaves + Isaac Newton y la manzana
+    // - MODO NOCTURNO: Cielo estrellado + Silueta de niño observando el cosmos y pensando fórmulas
+    // =========================================================
+    const canvas = document.getElementById("cieloEstrellado");
+    const ctx = canvas.getContext("2d");
+    let estrellas = [];
+    let estrellaFugaz = null;
+    let nubes = [];
+
+    // Estado de la manzana de Isaac Newton (Modo Día)
+    const estadoManzana = {
+      fase: "enArbol",
+      temporizador: 0,
+      x: 0,
+      y: 0,
+      vy: 0,
+      vx: 0,
+      rotacion: 0,
+      mostrarIdea: false,
+      tiempoIdea: 0,
+      frotarCabeza: 0,
+      indiceFormula: 0,
+      formulas: ["¡Eureka! 💡", "g = 9.8 m/s² 🍎", "F = m · a ⚡"]
+    };
+
+    // Estado del niño en silueta pensando fórmulas hacia el universo (Modo Nocturno)
+    const pensamientosNocturnos = [];
+    const listaFormulasCosmos = [
+      "a² + b² = c²",
+      "π ≈ 3.1416",
+      "E = m · c²",
+      "∑ xᵢ = ∞",
+      "x = (-b ± √Δ) / 2a",
+      "V = (4/3)·π·r³",
+      "f(x) = ax + b",
+      "A = π · r²",
+      "sen²θ + cos²θ = 1"
+    ];
+    let temporizadorPensamiento = 0;
+    let indiceFormulaCosmos = 0;
+    let tiempoAnimacionNoche = 0;
+
+    function ajustarCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      crearEstrellas();
+      crearNubes();
+    }
+
+    function crearEstrellas() {
+      estrellas = [];
+      const cantidad = Math.floor((canvas.width * canvas.height) / 6500);
+      const colores = ["#ffffff", "#e0e7ff", "#fae8ff", "#fef3c7", "#bae6fd"];
+
+      for (let i = 0; i < cantidad; i++) {
+        estrellas.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radio: Math.random() * 1.9 + 0.4,
+          velY: -(Math.random() * 0.22 + 0.05),
+          velX: (Math.random() - 0.5) * 0.12,
+          alpha: Math.random(),
+          cambioAlpha: (Math.random() * 0.015 + 0.004) * (Math.random() < 0.5 ? 1 : -1),
+          color: colores[Math.floor(Math.random() * colores.length)]
+        });
+      }
+    }
+
+    function crearNubes() {
+      nubes = [];
+      const cantidadNubes = Math.max(6, Math.floor(canvas.width / 220));
+      for (let i = 0; i < cantidadNubes; i++) {
+        nubes.push({
+          x: Math.random() * (canvas.width + 300) - 150,
+          y: 40 + Math.random() * (canvas.height * 0.55),
+          escala: 0.55 + Math.random() * 0.75,
+          velX: 0.18 + Math.random() * 0.28,
+          opacidad: 0.55 + Math.random() * 0.35
+        });
+      }
+    }
+
+    function dibujarNube(x, y, escala, opacidad) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(escala, escala);
+      ctx.fillStyle = `rgba(255, 255, 255, ${opacidad})`;
+      ctx.shadowColor = "rgba(186, 230, 253, 0.5)";
+      ctx.shadowBlur = 15;
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 32, Math.PI * 0.5, Math.PI * 1.5);
+      ctx.arc(28, -22, 34, Math.PI * 1.0, Math.PI * 1.85);
+      ctx.arc(68, -14, 28, Math.PI * 1.15, Math.PI * 1.95);
+      ctx.arc(92, 4, 24, Math.PI * 1.5, Math.PI * 0.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function dibujarManzana(x, y, radio, rotacion = 0) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotacion);
+
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.arc(-radio * 0.28, 0, radio * 0.85, 0, Math.PI * 2);
+      ctx.arc(radio * 0.28, 0, radio * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+      ctx.beginPath();
+      ctx.arc(-radio * 0.4, -radio * 0.25, radio * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "#78350f";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, -radio * 0.65);
+      ctx.quadraticCurveTo(2, -radio * 1.2, 5, -radio * 1.25);
+      ctx.stroke();
+
+      ctx.fillStyle = "#22c55e";
+      ctx.beginPath();
+      ctx.ellipse(5, -radio * 0.95, radio * 0.45, radio * 0.22, -Math.PI / 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // =========================================================
+    // ESCENA DIURNA: Sol, Nubes, Colina e Isaac Newton
+    // =========================================================
+    function animarEscenaDia() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const solX = Math.min(140, canvas.width * 0.12);
+      const solY = 120;
+      const gradSol = ctx.createRadialGradient(solX, solY, 10, solX, solY, 95);
+      gradSol.addColorStop(0, "rgba(254, 240, 138, 0.95)");
+      gradSol.addColorStop(0.4, "rgba(253, 224, 71, 0.45)");
+      gradSol.addColorStop(1, "rgba(253, 224, 71, 0)");
+      ctx.fillStyle = gradSol;
+      ctx.beginPath();
+      ctx.arc(solX, solY, 95, 0, Math.PI * 2);
+      ctx.fill();
+
+      nubes.forEach(n => {
+        n.x += n.velX;
+        if (n.x - 60 > canvas.width) {
+          n.x = -180;
+          n.y = 40 + Math.random() * (canvas.height * 0.5);
+        }
+        dibujarNube(n.x, n.y, n.escala, n.opacidad);
+      });
+
+      const baseSuelo = canvas.height;
+      ctx.save();
+      ctx.fillStyle = "rgba(134, 239, 172, 0.45)";
+      ctx.beginPath();
+      ctx.moveTo(0, baseSuelo);
+      ctx.quadraticCurveTo(canvas.width * 0.3, baseSuelo - 150, canvas.width * 0.65, baseSuelo - 50);
+      ctx.quadraticCurveTo(canvas.width * 0.85, baseSuelo - 110, canvas.width, baseSuelo - 60);
+      ctx.lineTo(canvas.width, baseSuelo);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(74, 222, 128, 0.55)";
+      ctx.beginPath();
+      ctx.moveTo(0, baseSuelo);
+      ctx.quadraticCurveTo(canvas.width * 0.25, baseSuelo - 60, canvas.width * 0.55, baseSuelo - 85);
+      ctx.quadraticCurveTo(canvas.width * 0.82, baseSuelo - 115, canvas.width, baseSuelo - 75);
+      ctx.lineTo(canvas.width, baseSuelo);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      const escalaEscena = canvas.width < 650 ? 0.72 : 0.95;
+      const arbolX = canvas.width - (canvas.width < 650 ? 105 : 165);
+      const arbolY = canvas.height - (canvas.width < 650 ? 55 : 72);
+
+      ctx.save();
+      ctx.translate(arbolX, arbolY);
+      ctx.scale(escalaEscena, escalaEscena);
+
+      ctx.fillStyle = "rgba(22, 101, 52, 0.18)";
+      ctx.beginPath();
+      ctx.ellipse(-20, 8, 115, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#78350f";
+      ctx.beginPath();
+      ctx.moveTo(-18, 5);
+      ctx.quadraticCurveTo(-12, -70, -14, -155);
+      ctx.lineTo(16, -155);
+      ctx.quadraticCurveTo(14, -70, 22, 5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = "#78350f";
+      ctx.lineWidth = 12;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-6, -125);
+      ctx.quadraticCurveTo(-45, -145, -68, -140);
+      ctx.stroke();
+
+      const circulosCopa = [
+        { x: 0, y: -205, r: 58, c: "#16a34a" },
+        { x: -52, y: -175, r: 50, c: "#22c55e" },
+        { x: 48, y: -178, r: 48, c: "#15803d" },
+        { x: -75, y: -145, r: 38, c: "#16a34a" },
+        { x: -25, y: -150, r: 46, c: "#4ade80" },
+        { x: 25, y: -148, r: 44, c: "#22c55e" }
+      ];
+      circulosCopa.forEach(c => {
+        ctx.fillStyle = c.c;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      dibujarManzana(32, -185, 8, 0.1);
+      dibujarManzana(-20, -210, 8, -0.15);
+      dibujarManzana(45, -145, 8, 0.2);
+      dibujarManzana(-85, -152, 8, -0.1);
+
+      const newtonX = -46;
+      const newtonY = -8;
+
+      ctx.fillStyle = "#1e293b";
+      ctx.beginPath();
+      ctx.roundRect(newtonX - 38, newtonY - 6, 36, 12, 6);
+      ctx.fill();
+      ctx.fillStyle = "#0f172a";
+      ctx.beginPath();
+      ctx.ellipse(newtonX - 40, newtonY - 2, 8, 11, -0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#4338ca";
+      ctx.beginPath();
+      ctx.moveTo(newtonX - 10, newtonY - 48);
+      ctx.lineTo(newtonX + 18, newtonY - 48);
+      ctx.lineTo(newtonX + 22, newtonY + 4);
+      ctx.lineTo(newtonX - 16, newtonY + 4);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#f8fafc";
+      ctx.beginPath();
+      ctx.ellipse(newtonX - 2, newtonY - 44, 7, 10, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#fef3c7";
+      ctx.strokeStyle = "#b45309";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(newtonX - 32, newtonY - 30, 22, 15, 3);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = "#3730a3";
+      ctx.lineWidth = 9;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(newtonX + 4, newtonY - 38);
+      ctx.lineTo(newtonX - 14, newtonY - 22);
+      ctx.stroke();
+
+      const sacudida = estadoManzana.frotarCabeza > 0 ? Math.sin(estadoManzana.frotarCabeza * 0.8) * 2.5 : 0;
+      const cabezaX = newtonX + 2 + sacudida;
+      const cabezaY = newtonY - 64;
+
+      ctx.fillStyle = "#fed7aa";
+      ctx.beginPath();
+      ctx.arc(cabezaX, cabezaY, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#1e293b";
+      if (estadoManzana.frotarCabeza > 0) {
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#1e293b";
+        ctx.beginPath();
+        ctx.arc(cabezaX - 5, cabezaY - 2, 3, 0, Math.PI);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cabezaX - 6, cabezaY + 6, 3, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(cabezaX - 5, cabezaY - 1, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#1e293b";
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(cabezaX - 4, cabezaY + 5, 3.5, 0.1, Math.PI * 0.85);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "#e2e8f0";
+      const rizos = [
+        { x: cabezaX - 2, y: cabezaY - 14, r: 8 },
+        { x: cabezaX + 8, y: cabezaY - 12, r: 9 },
+        { x: cabezaX + 14, y: cabezaY - 4, r: 9 },
+        { x: cabezaX + 15, y: cabezaY + 6, r: 8 },
+        { x: cabezaX + 12, y: cabezaY + 14, r: 7 },
+        { x: cabezaX - 10, y: cabezaY - 11, r: 7 }
+      ];
+      rizos.forEach(rizo => {
+        ctx.beginPath();
+        ctx.arc(rizo.x, rizo.y, rizo.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      const origenManzanaX = -44;
+      const origenManzanaY = -132;
+      const topeCabezaY = cabezaY - 18;
+
+      if (estadoManzana.fase === "enArbol") {
+        estadoManzana.x = origenManzanaX;
+        estadoManzana.y = origenManzanaY;
+        estadoManzana.temporizador++;
+
+        if (estadoManzana.temporizador > 140) {
+          estadoManzana.rotacion = Math.sin(estadoManzana.temporizador * 0.4) * 0.25;
+        } else {
+          estadoManzana.rotacion = 0;
+        }
+
+        if (estadoManzana.temporizador > 195) {
+          estadoManzana.fase = "cayendo";
+          estadoManzana.vy = 0.8;
+          estadoManzana.temporizador = 0;
+        }
+      } else if (estadoManzana.fase === "cayendo") {
+        estadoManzana.vy += 0.22;
+        estadoManzana.y += estadoManzana.vy;
+        estadoManzana.rotacion += 0.06;
+
+        if (estadoManzana.y >= topeCabezaY) {
+          estadoManzana.y = topeCabezaY;
+          estadoManzana.fase = "rebotando";
+          estadoManzana.vy = -3.8;
+          estadoManzana.vx = -1.6;
+          estadoManzana.mostrarIdea = true;
+          estadoManzana.tiempoIdea = 150;
+          estadoManzana.frotarCabeza = 55;
+        }
+      } else if (estadoManzana.fase === "rebotando") {
+        estadoManzana.vy += 0.22;
+        estadoManzana.x += estadoManzana.vx;
+        estadoManzana.y += estadoManzana.vy;
+        estadoManzana.rotacion -= 0.12;
+
+        if (estadoManzana.y >= 2) {
+          estadoManzana.y = 2;
+          estadoManzana.fase = "suelo";
+          estadoManzana.temporizador = 0;
+        }
+      } else if (estadoManzana.fase === "suelo") {
+        estadoManzana.temporizador++;
+        if (estadoManzana.temporizador > 140) {
+          estadoManzana.fase = "enArbol";
+          estadoManzana.temporizador = 0;
+          estadoManzana.indiceFormula = (estadoManzana.indiceFormula + 1) % estadoManzana.formulas.length;
+        }
+      }
+
+      if (estadoManzana.frotarCabeza > 0) {
+        estadoManzana.frotarCabeza--;
+      }
+
+      dibujarManzana(estadoManzana.x, estadoManzana.y, 9.5, estadoManzana.rotacion);
+
+      if (estadoManzana.mostrarIdea && estadoManzana.tiempoIdea > 0) {
+        estadoManzana.tiempoIdea--;
+        const alphaIdea = Math.min(1, estadoManzana.tiempoIdea / 25);
+        const flotarY = (150 - estadoManzana.tiempoIdea) * 0.12;
+
+        ctx.save();
+        ctx.globalAlpha = alphaIdea;
+
+        if (estadoManzana.tiempoIdea > 105) {
+          ctx.fillStyle = "#facc15";
+          ctx.font = "14px sans-serif";
+          ctx.fillText("✨", cabezaX - 24, cabezaY - 20);
+          ctx.fillText("⭐", cabezaX + 12, cabezaY - 22);
+        }
+
+        const burbujaX = cabezaX - 85;
+        const burbujaY = cabezaY - 68 - flotarY;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.strokeStyle = "#6366f1";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(burbujaX, burbujaY, 125, 32, 16);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#312e81";
+        ctx.font = "bold 13px 'Fredoka', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(estadoManzana.formulas[estadoManzana.indiceFormula], burbujaX + 62.5, burbujaY + 20);
+
+        ctx.restore();
+
+        if (estadoManzana.tiempoIdea <= 0) {
+          estadoManzana.mostrarIdea = false;
+        }
+      }
+
+      ctx.restore();
+    }
+
+    // =========================================================
+    // ESCENA NOCTURNA: Silueta del niño observando el universo
+    // y pensando en fórmulas matemáticas animadas
+    // =========================================================
+    function dibujarEscenaNocturnaSilueta() {
+      tiempoAnimacionNoche += 0.03;
+      const baseSuelo = canvas.height;
+
+      ctx.save();
+
+      // 1. Colinas nocturnas en silueta oscura (contra el cielo estrellado)
+      ctx.fillStyle = "#030613";
+      ctx.beginPath();
+      ctx.moveTo(0, baseSuelo);
+      ctx.quadraticCurveTo(canvas.width * 0.28, baseSuelo - 95, canvas.width * 0.62, baseSuelo - 40);
+      ctx.quadraticCurveTo(canvas.width * 0.85, baseSuelo - 115, canvas.width, baseSuelo - 65);
+      ctx.lineTo(canvas.width, baseSuelo);
+      ctx.closePath();
+      ctx.fill();
+
+      // Colina principal derecha donde se sienta la silueta del niño
+      ctx.fillStyle = "#02040a";
+      ctx.strokeStyle = "rgba(129, 140, 248, 0.28)"; // Sutil halo de luz estelar en el borde de la colina
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, baseSuelo);
+      ctx.quadraticCurveTo(canvas.width * 0.35, baseSuelo - 35, canvas.width * 0.65, baseSuelo - 65);
+      ctx.quadraticCurveTo(canvas.width * 0.84, baseSuelo - 110, canvas.width, baseSuelo - 80);
+      ctx.lineTo(canvas.width, baseSuelo);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 2. Posición de la silueta del niño observando el cosmos
+      const escala = canvas.width < 650 ? 0.78 : 1;
+      const posX = canvas.width - (canvas.width < 650 ? 115 : 185);
+      const posY = baseSuelo - (canvas.width < 650 ? 68 : 84);
+
+      ctx.translate(posX, posY);
+      ctx.scale(escala, escala);
+
+      // Movimiento suave de respiración e inclinación de cabeza mirando las estrellas
+      const balanceoCabeza = Math.sin(tiempoAnimacionNoche * 0.9) * 0.06;
+      const elevacionPecho = Math.sin(tiempoAnimacionNoche * 1.4) * 1.2;
+
+      // Color 100% silueta negra/azul profundo con borde de luz de luna
+      const colorSilueta = "#02040a";
+      const bordeLuz = "rgba(165, 180, 252, 0.45)";
+
+      // --- SILUETA DE PEQUEÑO TELESCOPIO AL LADO DEL NIÑO ---
+      ctx.save();
+      ctx.translate(-68, 4);
+      ctx.strokeStyle = colorSilueta;
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = "round";
+      // Trípode
+      ctx.beginPath();
+      ctx.moveTo(0, -28); ctx.lineTo(-14, 6);
+      ctx.moveTo(0, -28); ctx.lineTo(0, 8);
+      ctx.moveTo(0, -28); ctx.lineTo(14, 6);
+      ctx.stroke();
+      // Tubo del telescopio apuntando al cielo
+      ctx.rotate(-0.55);
+      ctx.fillStyle = colorSilueta;
+      ctx.strokeStyle = bordeLuz;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(-18, -34, 38, 9, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // --- SILUETA DEL NIÑO SENTADO MIRANDO AL UNIVERSO ---
+      ctx.fillStyle = colorSilueta;
+      ctx.strokeStyle = bordeLuz;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      // Espalda, torso y piernas flexionadas (en silueta pura)
+      ctx.beginPath();
+      ctx.moveTo(-4, 6); // Base cadera
+      ctx.quadraticCurveTo(-24, 4, -32, -12); // Muslo hacia rodilla levantada
+      ctx.quadraticCurveTo(-36, 2, -44, 8);   // Pantorrilla y pie
+      ctx.lineTo(-28, 10);
+      ctx.quadraticCurveTo(-20, -2, -10, 4);
+      ctx.quadraticCurveTo(14, 6, 16, -8);    // Espalda baja
+      ctx.quadraticCurveTo(18, -28 + elevacionPecho, 10, -44 + elevacionPecho); // Espalda alta
+      ctx.quadraticCurveTo(-4, -46 + elevacionPecho, -10, -32 + elevacionPecho); // Pecho
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Brazo en silueta (apoyando el codo en la rodilla, mano en la barbilla pensando, o señalando al cielo)
+      const cicloGesto = Math.sin(tiempoAnimacionNoche * 0.45);
+      ctx.beginPath();
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = colorSilueta;
+      if (cicloGesto > 0.25) {
+        // Gesto 1: Apuntando con asombro hacia una constelación / fórmula
+        ctx.moveTo(-2, -38 + elevacionPecho);
+        ctx.quadraticCurveTo(-22, -46, -36, -64);
+      } else {
+        // Gesto 2: Mano en el mentón pensando profundamente
+        ctx.moveTo(-2, -38 + elevacionPecho);
+        ctx.quadraticCurveTo(-20, -26, -10, -50 + elevacionPecho);
+      }
+      ctx.stroke();
+
+      // Contorno de luz sutil en el brazo
+      ctx.lineWidth = 1.3;
+      ctx.strokeStyle = bordeLuz;
+      ctx.stroke();
+
+      // Cabeza del niño en silueta (inclinada mirando hacia arriba a la izquierda)
+      const cabX = 2;
+      const cabY = -58 + elevacionPecho;
+
+      ctx.save();
+      ctx.translate(cabX, cabY);
+      ctx.rotate(balanceoCabeza - 0.22); // Mirando hacia las estrellas
+
+      ctx.fillStyle = colorSilueta;
+      ctx.strokeStyle = bordeLuz;
+      ctx.lineWidth = 1.5;
+
+      // Cráneo y perfil mirando al cielo
+      ctx.beginPath();
+      ctx.arc(0, 0, 14.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Silueta de la nariz respingada de niño mirando arriba y mechones de cabello
+      ctx.beginPath();
+      ctx.moveTo(-13, -4);
+      ctx.quadraticCurveTo(-18, -3, -14, 2); // Perfil nariz pequeña
+      // Mechones de cabello despeinado en la silueta
+      ctx.moveTo(-8, -12);
+      ctx.quadraticCurveTo(-14, -20, -4, -15);
+      ctx.moveTo(-2, -14);
+      ctx.quadraticCurveTo(-5, -23, 3, -15);
+      ctx.moveTo(4, -14);
+      ctx.quadraticCurveTo(6, -21, 10, -12);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+
+      // --- PUNTITOS DE PENSAMIENTO Y FÓRMULAS MATEMÁTICAS ANIMADAS ---
+      // Tres burbujitas ascendentes que nacen de la cabeza del niño
+      const pulsoBurbuja = (tiempoAnimacionNoche * 2) % (Math.PI * 2);
+      const miniBurbujas = [
+        { dx: -14, dy: -76, r: 3.2 },
+        { dx: -24, dy: -88, r: 4.8 },
+        { dx: -36, dy: -102, r: 6.5 }
+      ];
+
+      miniBurbujas.forEach((b, idx) => {
+        const latido = 1 + Math.sin(pulsoBurbuja - idx * 0.7) * 0.18;
+        ctx.save();
+        ctx.fillStyle = "rgba(165, 180, 252, 0.25)";
+        ctx.strokeStyle = "rgba(199, 210, 254, 0.7)";
+        ctx.lineWidth = 1.4;
+        ctx.shadowColor = "#818cf8";
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(b.dx, b.dy + elevacionPecho, b.r * latido, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Generar nuevas fórmulas matemáticas flotantes cada cierto tiempo
+      temporizadorPensamiento++;
+      if (temporizadorPensamiento > 95) {
+        temporizadorPensamiento = 0;
+        pensamientosNocturnos.push({
+          texto: listaFormulasCosmos[indiceFormulaCosmos],
+          x: -48,
+          y: -118 + elevacionPecho,
+          vx: -0.35 - Math.random() * 0.35, // Se desplazan suavemente hacia el universo
+          vy: -0.45 - Math.random() * 0.25,
+          vida: 0,
+          maxVida: 240,
+          semilla: Math.random() * 10
+        });
+        indiceFormulaCosmos = (indiceFormulaCosmos + 1) % listaFormulasCosmos.length;
+      }
+
+      // Dibujar y animar las fórmulas pensadas por el niño
+      for (let i = pensamientosNocturnos.length - 1; i >= 0; i--) {
+        const p = pensamientosNocturnos[i];
+        p.vida++;
+        p.x += p.vx + Math.sin(p.vida * 0.04 + p.semilla) * 0.25;
+        p.y += p.vy;
+
+        // Aparece suavemente y se desvanece en el cosmos
+        let alpha = 1;
+        if (p.vida < 30) alpha = p.vida / 30;
+        else if (p.vida > p.maxVida - 50) alpha = (p.maxVida - p.vida) / 50;
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+        ctx.font = "bold 14px 'Fredoka', sans-serif";
+        const anchoTexto = ctx.measureText(p.texto).width;
+        const padX = 14;
+        const anchoNube = anchoTexto + padX * 2;
+        const altoNube = 30;
+
+        // Nube de pensamiento traslúcida y brillante en la noche
+        ctx.fillStyle = "rgba(15, 23, 42, 0.78)";
+        ctx.strokeStyle = "rgba(165, 180, 252, 0.75)";
+        ctx.lineWidth = 1.6;
+        ctx.shadowColor = "#818cf8";
+        ctx.shadowBlur = 12;
+
+        ctx.beginPath();
+        ctx.roundRect(p.x - anchoNube / 2, p.y - altoNube / 2, anchoNube, altoNube, 15);
+        ctx.fill();
+        ctx.stroke();
+
+        // Fórmula matemática brillante adentro
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = "#c084fc";
+        ctx.fillStyle = "#e0e7ff";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(p.texto, p.x, p.y + 1);
+
+        ctx.restore();
+
+        if (p.vida >= p.maxVida) {
+          pensamientosNocturnos.splice(i, 1);
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function animarFondo() {
+      if (document.body.classList.contains("modo-nocturno")) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 1. Dibujar y mover cada estrella
+        estrellas.forEach(e => {
+          e.x += e.velX;
+          e.y += e.velY;
+          e.alpha += e.cambioAlpha;
+
+          if (e.alpha <= 0.15 || e.alpha >= 1) {
+            e.cambioAlpha *= -1;
+          }
+
+          if (e.y < 0) e.y = canvas.height;
+          if (e.x < 0) e.x = canvas.width;
+          if (e.x > canvas.width) e.x = 0;
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0.1, Math.min(1, e.alpha));
+          ctx.fillStyle = e.color;
+          ctx.shadowBlur = e.radio * 4;
+          ctx.shadowColor = e.color;
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, e.radio, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // 2. Estrella fugaz ocasional
+        if (!estrellaFugaz && Math.random() < 0.004) {
+          estrellaFugaz = {
+            x: Math.random() * canvas.width * 0.8,
+            y: Math.random() * canvas.height * 0.4,
+            largo: 70,
+            vel: 7,
+            alpha: 1
+          };
+        }
+
+        if (estrellaFugaz) {
+          ctx.save();
+          ctx.strokeStyle = `rgba(255, 255, 255, ${estrellaFugaz.alpha})`;
+          ctx.lineWidth = 2;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "#ffffff";
+          ctx.beginPath();
+          ctx.moveTo(estrellaFugaz.x, estrellaFugaz.y);
+          ctx.lineTo(estrellaFugaz.x - estrellaFugaz.largo, estrellaFugaz.y - estrellaFugaz.largo * 0.5);
+          ctx.stroke();
+          ctx.restore();
+
+          estrellaFugaz.x += estrellaFugaz.vel;
+          estrellaFugaz.y += estrellaFugaz.vel * 0.5;
+          estrellaFugaz.alpha -= 0.02;
+
+          if (estrellaFugaz.alpha <= 0) {
+            estrellaFugaz = null;
+          }
+        }
+
+        // 3. Silueta del niño observando el universo y pensando fórmulas matemáticas
+        dibujarEscenaNocturnaSilueta();
+
+      } else {
+        // Modo Día: Cielo diurno con nubes suaves e Isaac Newton con la manzana
+        animarEscenaDia();
+      }
+      requestAnimationFrame(animarFondo);
+    }
+
+    window.addEventListener("resize", ajustarCanvas);
+    window.onload = function () {
+      ajustarCanvas();
+      animarFondo();
+    };
+
+    // =========================================================
+    // ALTERNAR DÍA / NOCHE
+    // =========================================================
+    function alternarTema() {
+      document.body.classList.toggle("modo-nocturno");
+      const esNocturno = document.body.classList.contains("modo-nocturno");
+      if (esNocturno) {
+        btnTema.innerHTML = "☀️ Modo Día";
+        localStorage.setItem("temaPreferido", "nocturno");
+      } else {
+        btnTema.innerHTML = "🌙 Modo Nocturno";
+        localStorage.setItem("temaPreferido", "dia");
+      }
+    }
+
+    if (localStorage.getItem("temaPreferido") === "nocturno") {
+      document.body.classList.add("modo-nocturno");
+      btnTema.innerHTML = "☀️ Modo Día";
+    }
+
+    // 1. PANTALLA PRINCIPAL: Muestra 4to, 5to y 6to CON SUS 4 CURSOS ADENTRO
+    function mostrarGradosYCursos() {
+      gradoActual = null;
+      cursoActual = null;
+      temaActual = null;
+      btnVolver.style.display = "none";
+      tituloSeccion.innerHTML = "✨ Selecciona un Curso dentro de tu Grado ✨";
+      actualizarMigas();
+      contenedor.innerHTML = "";
+
+      for (let grado in datosEscuela) {
+        const info = datosEscuela[grado];
+        const tarjetaGrado = document.createElement("div");
+        tarjetaGrado.className = `tarjeta-grado ${info.clase}`;
+
+        let htmlCursos = "";
+        for (let nombreCurso in info.cursos) {
+          const cursoObj = info.cursos[nombreCurso];
+          htmlCursos += `
+            <button class="btn-curso-interno" onclick="mostrarTemas('${grado}', '${nombreCurso}')">
+              <div class="curso-izq">
+                <span class="curso-icono">${cursoObj.icono}</span>
+                <span>${nombreCurso}</span>
+              </div>
+              <span class="flecha-ir">${cursoObj.temas.length} temas ➔</span>
+            </button>
+          `;
+        }
+
+        tarjetaGrado.innerHTML = `
+          <div class="cabecera-grado">
+            <div class="icono-circulo">${info.icono}</div>
+            <h2>${grado}</h2>
+            <p class="descripcion-grado">${info.descripcion}</p>
+          </div>
+          <div class="lista-cursos-interna">
+            ${htmlCursos}
+          </div>
+        `;
+
+        contenedor.appendChild(tarjetaGrado);
+      }
+    }
+
+    // 2. PANTALLA DE TEMAS (Al elegir uno de los 4 cursos)
+    function mostrarTemas(grado, curso) {
+      gradoActual = grado;
+      cursoActual = curso;
+      temaActual = null;
+      btnVolver.style.display = "inline-block";
+      tituloSeccion.innerHTML = `📚 Temas de ${curso} (${grado})`;
+      actualizarMigas();
+      contenedor.innerHTML = "";
+
+      const temas = datosEscuela[grado].cursos[curso].temas;
+      temas.forEach((tema, indice) => {
+        const tarjeta = document.createElement("div");
+        tarjeta.className = "tarjeta";
+        tarjeta.innerHTML = `
+          <div class="icono-circulo" style="background:rgba(167, 139, 250, 0.2);">${tema.icono}</div>
+          <h2>${tema.nombre}</h2>
+          <span class="etiqueta">🎮 ¡Juguemos! + 📝 Cuestionario ➔</span>
+        `;
+        tarjeta.onclick = () => mostrarJuegos(grado, curso, indice);
+        contenedor.appendChild(tarjeta);
+      });
+    }
+
+    // 3. PANTALLA DE ACTIVIDADES DEL TEMA ELEGIDO (¡Juguemos! y Cuestionario)
+    function mostrarJuegos(grado, curso, indiceTema) {
+      gradoActual = grado;
+      cursoActual = curso;
+      const temaObj = datosEscuela[grado].cursos[curso].temas[indiceTema];
+      temaActual = temaObj;
+
+      btnVolver.style.display = "inline-block";
+      tituloSeccion.innerHTML = `🎯 ${temaObj.nombre}`;
+      actualizarMigas();
+      contenedor.innerHTML = "";
+
+      temaObj.juegos.forEach(actividad => {
+        const esCuestionario = actividad.tipo === "cuestionario";
+        const tarjeta = document.createElement("div");
+        tarjeta.className = esCuestionario ? "tarjeta tarjeta-cuestionario" : "tarjeta tarjeta-juego";
+        tarjeta.innerHTML = `
+          <div class="icono-circulo">${actividad.icono}</div>
+          <h2>${actividad.nombre}</h2>
+          <span class="etiqueta">${esCuestionario ? "📝 ¡RESOLVER AHORA!" : "▶ ¡JUGAR AHORA!"}</span>
+        `;
+        tarjeta.onclick = () => abrirActividad(actividad, temaObj.nombre);
+        contenedor.appendChild(tarjeta);
+      });
+    }
+
+    // 4. ABRIR JUEGO O CUESTIONARIO
+    function abrirActividad(actividad, nombreTema) {
+      if (actividad.enlace === "#") {
+        const esCuestionario = actividad.tipo === "cuestionario";
+        document.getElementById("tituloModalAviso").textContent = esCuestionario ? "📝 ¡Cuestionario muy pronto!" : "🎮 ¡Juego muy pronto!";
+        document.getElementById("textoModalAviso").textContent = `Próximamente: Aquí se abrirá "${actividad.nombre}" del ${nombreTema}.`;
+        document.getElementById("modalAviso").classList.add("activo");
+      } else {
+        window.location.href = actividad.enlace;
+      }
+    }
+
+    function cerrarModalAviso() {
+      document.getElementById("modalAviso").classList.remove("activo");
+    }
+
+    // Botón Regresar
+    function volverAtras() {
+      if (temaActual) {
+        mostrarTemas(gradoActual, cursoActual);
+      } else if (cursoActual) {
+        mostrarGradosYCursos();
+      }
+    }
+
+    // Barra de ruta (Inicio > Grado - Curso > Tema)
+    function actualizarMigas() {
+      let html = `<span onclick="mostrarGradosYCursos()">🏠 Inicio</span>`;
+      if (gradoActual && cursoActual) {
+        html += ` ❯ <span onclick="mostrarTemas('${gradoActual}', '${cursoActual}')">${gradoActual} (${cursoActual})</span>`;
+      }
+      if (temaActual) {
+        html += ` ❯ <span>${temaActual.nombre}</span>`;
+      }
+      migas.innerHTML = html;
+    }
+
+    // Iniciar
+    mostrarGradosYCursos();
+  </script>
+</body>
+</html>
