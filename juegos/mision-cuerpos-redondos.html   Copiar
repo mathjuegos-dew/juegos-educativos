@@ -736,14 +736,59 @@
   .math-pill {
     background: #060b1e;
     border-left: 3px solid var(--primary);
-    padding: 7px 10px;
+    padding: 9px 12px;
     border-radius: 8px;
-    margin: 6px 0;
-    font-size: 0.88rem;
+    margin: 7px 0;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .math-pill strong {
     color: var(--primary);
+  }
+
+  /* Fracciones matemáticas visuales para primaria */
+  .math-frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 4px;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .math-frac .num {
+    border-bottom: 2px solid #fff;
+    padding: 0 5px 2px;
+    font-size: 0.9em;
+  }
+
+  .math-frac .den {
+    padding: 2px 5px 0;
+    font-size: 0.9em;
+  }
+
+  .data-summary-bar {
+    background: rgba(15, 23, 52, 0.92);
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    border-radius: 10px;
+    padding: 6px 10px;
+    margin-top: 7px;
+    font-size: 0.82rem;
+    color: #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .data-summary-bar strong {
+    color: var(--warning);
   }
 
   .example-box {
@@ -751,10 +796,10 @@
     background: rgba(0, 230, 118, 0.08);
     border: 1px dashed var(--success);
     border-radius: 10px;
-    padding: 8px 10px;
-    font-size: 0.81rem;
+    padding: 9px 11px;
+    font-size: 0.84rem;
     color: #d1fae5;
-    line-height: 1.38;
+    line-height: 1.5;
   }
 
   .note-sphere {
@@ -935,9 +980,9 @@
           <div class="viewer-header">
             <span class="viewer-badge">🔬 HOLOGRAMA 3D INTERACTIVO</span>
             <div class="shape-tabs" id="previewTabs">
-              <button class="shape-tab active" data-shape="cylinder">Cilindro</button>
-              <button class="shape-tab" data-shape="cone">Cono</button>
-              <button class="shape-tab" data-shape="sphere">Esfera</button>
+              <button class="shape-tab active" data-shape="cylinder">1. Cilindro</button>
+              <button class="shape-tab" data-shape="cone">2. Cono</button>
+              <button class="shape-tab" data-shape="sphere">3. Esfera</button>
             </div>
           </div>
           <div class="canvas-3d-wrap" id="previewWrap">
@@ -1010,16 +1055,23 @@
       <!-- Columna Izquierda: Visor 3D Interactivo -->
       <div class="viewer-panel">
         <div class="viewer-header">
-          <span class="viewer-badge" id="viewerShapeTitle">🧊 MODELO 3D: CILINDRO</span>
+          <span class="viewer-badge" id="viewerShapeTitle">🧊 FIGURA 1: CILINDRO</span>
           <div class="shape-tabs" id="gameShapeTabs">
-            <button class="shape-tab" data-shape="cylinder">Cilindro</button>
-            <button class="shape-tab" data-shape="cone">Cono</button>
-            <button class="shape-tab" data-shape="sphere">Esfera</button>
+            <button class="shape-tab" data-shape="cylinder">1. Cilindro</button>
+            <button class="shape-tab" data-shape="cone">2. Cono</button>
+            <button class="shape-tab" data-shape="sphere">3. Esfera</button>
           </div>
         </div>
 
         <div class="canvas-3d-wrap" id="gameCanvasWrap">
           <canvas id="viewer3dCanvas"></canvas>
+        </div>
+
+        <div class="data-summary-bar" id="viewerDataSummary">
+          <span>📐 <strong>Datos en la figura 3D:</strong> <span id="viewerDataText">Observa el modelo 3D</span></span>
+          <button class="btn-mini" id="btnReturnQuestionShape" style="display:none; background:#f59e0b; color:#040814; border-color:#fef08a;">
+            🎯 Volver a la figura del problema
+          </button>
         </div>
 
         <div class="viewer-footer">
@@ -1143,60 +1195,84 @@
       <button class="btn-nav" id="btnCloseFormulas" style="background:#ef4444; border-color:#fca5a5;">✖ CERRAR</button>
     </div>
 
-    <p style="font-size:0.88rem; color:#cbd5e1; margin-top:10px;">
-      💡 <strong>Recuerda las unidades:</strong> Las <strong>Áreas</strong> miden superficies y se expresan en <strong>unidades cuadradas ($\text{cm}^2, \text{m}^2$)</strong>. El <strong>Volumen</strong> mide el espacio que ocupa el cuerpo y se expresa en <strong>unidades cúbicas ($\text{cm}^3, \text{m}^3$)</strong>. ($\pi \approx 3.14$).
+    <p style="font-size:0.92rem; color:#e2e8f0; margin-top:10px; line-height:1.5;">
+      💡 <strong>Recuerda las unidades:</strong> Las <strong>Áreas</strong> miden superficies y se expresan en <strong>unidades cuadradas (cm², m²)</strong>. El <strong>Volumen</strong> mide el espacio que ocupa el cuerpo y se expresa en <strong>unidades cúbicas (cm³, m³)</strong>. Valor de <strong>π ≈ 3.14</strong>.
     </p>
 
     <div class="formula-grid">
-      <!-- CILINDRO -->
+      <!-- FIGURA 1: CILINDRO -->
       <div class="formula-card">
         <h3>🥫 1. CILINDRO RECTO</h3>
-        <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:6px;">
-          Tiene <strong>2 bases circulares iguales</strong> y paralelas, radio ($r$), altura ($h$) y generatriz ($g = h$).
+        <p style="font-size:0.83rem; color:#cbd5e1; margin-bottom:8px; line-height:1.4;">
+          Tiene <strong>2 bases circulares iguales</strong> y paralelas, radio (<strong>r</strong>), altura (<strong>h</strong>) y generatriz (<strong>g = h</strong>).
         </p>
-        <div class="math-pill"><strong>Área Lateral ($A_L$):</strong> $A_L = 2\pi r h$</div>
-        <div class="math-pill"><strong>Área Total ($A_T$):</strong> $A_T = 2\pi r(h + r)$</div>
-        <div class="math-pill"><strong>Volumen ($V$):</strong> $V = \pi r^2 h$</div>
+        <div class="math-pill">
+          <strong>Área Lateral (A<sub>L</sub>):</strong>
+          <span>A<sub>L</sub> = 2 × π × r × h</span>
+        </div>
+        <div class="math-pill">
+          <strong>Área Total (A<sub>T</sub>):</strong>
+          <span>A<sub>T</sub> = 2 × π × r × (h + r)</span>
+        </div>
+        <div class="math-pill">
+          <strong>Volumen (V):</strong>
+          <span>V = π × r² × h</span>
+        </div>
         <div class="example-box">
-          <strong>✏️ Ejemplo resuelto ($r = 3\text{ cm}, h = 5\text{ cm}$):</strong><br>
-          • $A_L = 2 \cdot \pi \cdot 3 \cdot 5 = 30\pi\text{ cm}^2 \approx 94.2\text{ cm}^2$<br>
-          • $A_T = 2 \cdot \pi \cdot 3(5 + 3) = 48\pi\text{ cm}^2 \approx 150.72\text{ cm}^2$<br>
-          • $V = \pi \cdot 3^2 \cdot 5 = 45\pi\text{ cm}^3 \approx 141.3\text{ cm}^3$
+          <strong>✏️ Ejemplo resuelto (r = 3 cm, h = 5 cm):</strong><br>
+          • <strong>A<sub>L</sub></strong> = 2 × π × 3 × 5 = <strong>30π cm²</strong> (≈ 94.2 cm²)<br>
+          • <strong>A<sub>T</sub></strong> = 2 × π × 3 × (5 + 3) = 6π × 8 = <strong>48π cm²</strong> (≈ 150.72 cm²)<br>
+          • <strong>V</strong> = π × 3² × 5 = π × 9 × 5 = <strong>45π cm³</strong> (≈ 141.3 cm³)
         </div>
       </div>
 
-      <!-- CONO -->
+      <!-- FIGURA 2: CONO -->
       <div class="formula-card">
         <h3>🍦 2. CONO CIRCULAR RECTO</h3>
-        <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:6px;">
-          Tiene <strong>1 base circular</strong>, <strong>1 vértice (cúspide)</strong>, radio ($r$), altura ($h$) y generatriz ($g$, donde $g^2 = r^2 + h^2$).
+        <p style="font-size:0.83rem; color:#cbd5e1; margin-bottom:8px; line-height:1.4;">
+          Tiene <strong>1 base circular</strong>, <strong>1 vértice (cúspide)</strong>, radio (<strong>r</strong>), altura (<strong>h</strong>) y generatriz (<strong>g</strong>, donde <strong>g² = r² + h²</strong>).
         </p>
-        <div class="math-pill"><strong>Área Lateral ($A_L$):</strong> $A_L = \pi r g$</div>
-        <div class="math-pill"><strong>Área Total ($A_T$):</strong> $A_T = \pi r(g + r)$</div>
-        <div class="math-pill"><strong>Volumen ($V$):</strong> $V = \frac{\pi r^2 h}{3}$</div>
+        <div class="math-pill">
+          <strong>Área Lateral (A<sub>L</sub>):</strong>
+          <span>A<sub>L</sub> = π × r × g</span>
+        </div>
+        <div class="math-pill">
+          <strong>Área Total (A<sub>T</sub>):</strong>
+          <span>A<sub>T</sub> = π × r × (g + r)</span>
+        </div>
+        <div class="math-pill">
+          <strong>Volumen (V):</strong>
+          <span>V = <span class="math-frac"><span class="num">π × r² × h</span><span class="den">3</span></span></span>
+        </div>
         <div class="example-box">
-          <strong>✏️ Ejemplo resuelto ($r = 3\text{ cm}, h = 4\text{ cm}, g = 5\text{ cm}$):</strong><br>
-          • $A_L = \pi \cdot 3 \cdot 5 = 15\pi\text{ cm}^2 \approx 47.1\text{ cm}^2$<br>
-          • $A_T = \pi \cdot 3(5 + 3) = 24\pi\text{ cm}^2 \approx 75.36\text{ cm}^2$<br>
-          • $V = \frac{\pi \cdot 3^2 \cdot 4}{3} = 12\pi\text{ cm}^3 \approx 37.68\text{ cm}^3$
+          <strong>✏️ Ejemplo resuelto (r = 3 cm, h = 4 cm, g = 5 cm):</strong><br>
+          • <strong>A<sub>L</sub></strong> = π × 3 × 5 = <strong>15π cm²</strong> (≈ 47.1 cm²)<br>
+          • <strong>A<sub>T</sub></strong> = π × 3 × (5 + 3) = 3π × 8 = <strong>24π cm²</strong> (≈ 75.36 cm²)<br>
+          • <strong>V</strong> = (π × 3² × 4) ÷ 3 = 36π ÷ 3 = <strong>12π cm³</strong> (≈ 37.68 cm³)
         </div>
       </div>
 
-      <!-- ESFERA -->
+      <!-- FIGURA 3: ESFERA -->
       <div class="formula-card">
         <h3>⚽ 3. ESFERA</h3>
-        <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:6px;">
-          Todos los puntos de su superficie están a la misma distancia (radio $r$) del <strong>Centro</strong>. Su diámetro es $D = 2r$.
+        <p style="font-size:0.83rem; color:#cbd5e1; margin-bottom:8px; line-height:1.4;">
+          Todos los puntos de su superficie están a la misma distancia (radio <strong>r</strong>) del <strong>Centro</strong>. Su diámetro es <strong>D = 2 × r</strong>.
         </p>
-        <div class="math-pill"><strong>Área de Superficie ($A$):</strong> $A = 4\pi r^2$</div>
-        <div class="math-pill"><strong>Volumen ($V$):</strong> $V = \frac{4\pi r^3}{3}$</div>
+        <div class="math-pill">
+          <strong>Área de Superficie (A):</strong>
+          <span>A = 4 × π × r²</span>
+        </div>
+        <div class="math-pill">
+          <strong>Volumen (V):</strong>
+          <span>V = <span class="math-frac"><span class="num">4 × π × r³</span><span class="den">3</span></span></span>
+        </div>
         <div class="note-sphere">
-          ⚠️ <strong>¡Importante!</strong> La esfera NO tiene bases ni área lateral diferenciada; posee una única superficie curva continua.
+          ⚠️ <strong>¡Importante!</strong> La esfera NO tiene bases planas ni área lateral diferenciada; posee una única superficie curva continua.
         </div>
         <div class="example-box">
-          <strong>✏️ Ejemplo resuelto ($r = 3\text{ cm}$):</strong><br>
-          • $A = 4 \cdot \pi \cdot 3^2 = 36\pi\text{ cm}^2 \approx 113.04\text{ cm}^2$<br>
-          • $V = \frac{4 \cdot \pi \cdot 3^3}{3} = 36\pi\text{ cm}^3 \approx 113.04\text{ cm}^3$
+          <strong>✏️ Ejemplo resuelto (r = 3 cm):</strong><br>
+          • <strong>A</strong> = 4 × π × 3² = 4 × π × 9 = <strong>36π cm²</strong> (≈ 113.04 cm²)<br>
+          • <strong>V</strong> = (4 × π × 3³) ÷ 3 = (4 × π × 27) ÷ 3 = <strong>36π cm³</strong> (≈ 113.04 cm³)
         </div>
       </div>
     </div>
@@ -1407,22 +1483,25 @@
 
   // =========================================================================
   // 3. MOTOR HOLOGRÁFICO 3D INTERACTIVO (CILINDRO, CONO Y ESFERA)
+  //    CON COINCIDENCIA EXACTA DE ELEMENTOS Y DATOS DEL PROBLEMA
   // =========================================================================
-  function create3DViewer(canvasId, wrapId) {
+  function create3DViewer(canvasId, wrapId, defaultLabels) {
     const canvas = document.getElementById(canvasId);
     const wrap = document.getElementById(wrapId);
     const ctx = canvas.getContext('2d');
 
     let state = {
       shape: 'cylinder', // 'cylinder' | 'cone' | 'sphere'
-      rotX: -0.32,
-      rotY: 0.55,
+      rotX: -0.34,
+      rotY: 0.52,
       autoRotate: true,
       isDragging: false,
       lastX: 0,
       lastY: 0,
       highlight: null, // 'r' | 'h' | 'g' | 'base' | 'vertex' | 'center' | 'diameter' | null
-      labels: { r: 'r', h: 'h', g: 'g', d: 'D = 2r' }
+      labels: defaultLabels || { r: 'r', h: 'h', g: 'g = h' },
+      scaleR: 1,
+      scaleH: 1
     };
 
     function resize() {
@@ -1433,13 +1512,11 @@
 
     // Proyección 3D a 2D con perspectiva
     function project(x, y, z) {
-      // Rotación Y
       const cosY = Math.cos(state.rotY);
       const sinY = Math.sin(state.rotY);
       const x1 = x * cosY - z * sinY;
       const z1 = z * cosY + x * sinY;
 
-      // Rotación X
       const cosX = Math.cos(state.rotX);
       const sinX = Math.sin(state.rotX);
       const y2 = y * cosX - z1 * sinX;
@@ -1457,7 +1534,7 @@
       };
     }
 
-    function drawLine3D(p1, p2, color, width = 2, dashed = false) {
+    function drawLine3D(p1, p2, color, width = 2.5, dashed = false) {
       const a = project(p1.x, p1.y, p1.z);
       const b = project(p2.x, p2.y, p2.z);
       ctx.save();
@@ -1489,20 +1566,23 @@
       if (!text) return;
       const pt = project(p.x, p.y, p.z);
       ctx.save();
-      ctx.font = '800 12px Nunito, sans-serif';
-      const padX = 7;
+      ctx.font = '800 12.5px Nunito, sans-serif';
+      const padX = 8;
       const textW = ctx.measureText(text).width;
       const boxW = textW + padX * 2;
-      const boxH = 22;
+      const boxH = 23;
 
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+      ctx.shadowBlur = 6;
       ctx.fillStyle = bgColor;
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.4;
       ctx.beginPath();
-      ctx.roundRect(pt.x - boxW / 2, pt.y - boxH / 2, boxW, boxH, 6);
+      ctx.roundRect(pt.x - boxW / 2, pt.y - boxH / 2, boxW, boxH, 7);
       ctx.fill();
       ctx.stroke();
 
+      ctx.shadowBlur = 0;
       ctx.fillStyle = textColor;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -1510,14 +1590,18 @@
       ctx.restore();
     }
 
+    // -----------------------------------------------------------------
+    // FIGURA 1: CILINDRO (Respeta exactamente las etiquetas activas)
+    // -----------------------------------------------------------------
     function renderCylinder() {
-      const R = 75;
-      const H = 136;
+      const R = 74 * state.scaleR;
+      const H = 132 * state.scaleH;
       const halfH = H / 2;
       const segs = 28;
+      const L = state.labels || {};
       const baseHighlight = state.highlight === 'base';
 
-      // Polígonos laterales sombreados
+      // Superficie lateral
       const quads = [];
       for (let i = 0; i < segs; i++) {
         const a1 = (i / segs) * Math.PI * 2;
@@ -1532,14 +1616,14 @@
         const proj3 = project(p3.x, p3.y, p3.z);
         const proj4 = project(p4.x, p4.y, p4.z);
         const avgZ = (proj1.z + proj2.z + proj3.z + proj4.z) / 4;
-        quads.push({ proj1, proj2, proj3, proj4, avgZ, idx: i });
+        quads.push({ proj1, proj2, proj3, proj4, avgZ });
       }
 
       quads.sort((a, b) => b.avgZ - a.avgZ);
 
       quads.forEach(q => {
         ctx.fillStyle = 'rgba(0, 242, 254, 0.11)';
-        ctx.strokeStyle = 'rgba(0, 242, 254, 0.24)';
+        ctx.strokeStyle = 'rgba(0, 242, 254, 0.22)';
         ctx.lineWidth = 0.8;
         ctx.beginPath();
         ctx.moveTo(q.proj1.x, q.proj1.y);
@@ -1551,7 +1635,7 @@
         ctx.stroke();
       });
 
-      // Dibujar bases circulares (Superior e Inferior)
+      // 2 Bases circulares
       [-halfH, halfH].forEach(yLevel => {
         ctx.save();
         ctx.beginPath();
@@ -1570,37 +1654,64 @@
         ctx.restore();
       });
 
-      // Eje de Altura (h)
-      const hColor = state.highlight === 'h' ? '#ffea00' : '#00e676';
-      drawLine3D({ x: 0, y: -halfH, z: 0 }, { x: 0, y: halfH, z: 0 }, hColor, state.highlight === 'h' ? 4 : 2.5, true);
-      drawPoint3D({ x: 0, y: -halfH, z: 0 }, 4, '#ffffff');
+      // Centros de las bases
+      drawPoint3D({ x: 0, y: -halfH, z: 0 }, 3.5, '#ffffff');
       drawPoint3D({ x: 0, y: halfH, z: 0 }, 4, '#ffffff');
 
-      // Radio (r) en la base inferior
-      const rColor = state.highlight === 'r' ? '#ffea00' : '#f43f5e';
-      drawLine3D({ x: 0, y: halfH, z: 0 }, { x: R, y: halfH, z: 0 }, rColor, state.highlight === 'r' ? 4 : 3, false);
+      // Altura (h): solo se dibuja si está en L.h o si el highlight es 'h'
+      if (L.h || state.highlight === 'h') {
+        const isH = state.highlight === 'h';
+        const hColor = isH ? '#ffea00' : '#00e676';
+        drawLine3D({ x: 0, y: -halfH, z: 0 }, { x: 0, y: halfH, z: 0 }, hColor, isH ? 4 : 2.6, true);
+        if (L.h) drawLabel3D({ x: 18, y: -6, z: 0 }, L.h, hColor, '#040814');
+      }
 
-      // Generatriz (g) en el borde lateral izquierdo
-      const gColor = state.highlight === 'g' ? '#ffea00' : '#c084fc';
-      drawLine3D({ x: -R, y: -halfH, z: 0 }, { x: -R, y: halfH, z: 0 }, gColor, state.highlight === 'g' ? 4 : 3, false);
+      // Diámetro (d): línea completa que cruza la base circular (de -R a +R), ¡NUNCA en la pared vertical!
+      if (L.d || state.highlight === 'diameter') {
+        const isD = state.highlight === 'diameter';
+        const dColor = isD ? '#ffea00' : '#38bdf8';
+        drawLine3D({ x: -R, y: -halfH, z: 0 }, { x: R, y: -halfH, z: 0 }, dColor, isD ? 4.2 : 3.2, false);
+        drawPoint3D({ x: -R, y: -halfH, z: 0 }, 4, dColor);
+        drawPoint3D({ x: R, y: -halfH, z: 0 }, 4, dColor);
+        if (L.d) drawLabel3D({ x: 0, y: -halfH - 18, z: 0 }, L.d, dColor, '#040814');
+      }
 
-      // Etiquetas 3D
-      drawLabel3D({ x: R * 0.52, y: halfH + 14, z: 0 }, state.labels.r || 'r', rColor, '#fff');
-      drawLabel3D({ x: 14, y: 0, z: 0 }, state.labels.h || 'h', hColor, '#040814');
-      drawLabel3D({ x: -R - 22, y: 0, z: 0 }, state.labels.g || 'g = h', gColor, '#040814');
-      if (baseHighlight) {
-        drawLabel3D({ x: 0, y: -halfH - 18, z: 0 }, '2 Bases Circulares', '#ffea00', '#040814');
+      // Radio (r): desde el centro de la base inferior (0, halfH, 0) hasta el borde (R, halfH, 0)
+      if (L.r || state.highlight === 'r') {
+        const isR = state.highlight === 'r';
+        const rColor = isR ? '#ffea00' : '#f43f5e';
+        const rTextColor = isR ? '#040814' : '#ffffff';
+        drawLine3D({ x: 0, y: halfH, z: 0 }, { x: R, y: halfH, z: 0 }, rColor, isR ? 4.2 : 3.2, false);
+        drawPoint3D({ x: R, y: halfH, z: 0 }, 4, rColor);
+        if (L.r) drawLabel3D({ x: R * 0.55, y: halfH + 17, z: 0 }, L.r, rColor, rTextColor);
+      }
+
+      // Generatriz (g): línea vertical en el borde lateral izquierdo (-R, -halfH, 0) a (-R, halfH, 0)
+      if (L.g || state.highlight === 'g') {
+        const isG = state.highlight === 'g';
+        const gColor = isG ? '#ffea00' : '#c084fc';
+        drawLine3D({ x: -R, y: -halfH, z: 0 }, { x: -R, y: halfH, z: 0 }, gColor, isG ? 4.2 : 3.2, false);
+        if (L.g) drawLabel3D({ x: -R - 24, y: 0, z: 0 }, L.g, gColor, '#040814');
+      }
+
+      // Etiqueta de bases si se consulta por las bases
+      if (L.base || baseHighlight) {
+        drawLabel3D({ x: 0, y: -halfH - 18, z: 0 }, L.base || '2 Bases Circulares', '#ffea00', '#040814');
       }
     }
 
+    // -----------------------------------------------------------------
+    // FIGURA 2: CONO CIRCULAR RECTO (Respeta exactamente las etiquetas)
+    // -----------------------------------------------------------------
     function renderCone() {
-      const R = 82;
-      const H = 144;
+      const R = 80 * state.scaleR;
+      const H = 142 * state.scaleH;
       const halfH = H / 2;
       const segs = 28;
       const apex = { x: 0, y: -halfH, z: 0 };
+      const L = state.labels || {};
 
-      // Caras laterales triangulares
+      // Superficie lateral cónica
       const tris = [];
       for (let i = 0; i < segs; i++) {
         const a1 = (i / segs) * Math.PI * 2;
@@ -1619,7 +1730,7 @@
 
       tris.forEach(t => {
         ctx.fillStyle = 'rgba(192, 132, 252, 0.14)';
-        ctx.strokeStyle = 'rgba(192, 132, 252, 0.26)';
+        ctx.strokeStyle = 'rgba(192, 132, 252, 0.25)';
         ctx.lineWidth = 0.8;
         ctx.beginPath();
         ctx.moveTo(t.pApex.x, t.pApex.y);
@@ -1648,34 +1759,63 @@
       ctx.stroke();
       ctx.restore();
 
+      // Centro de la base
+      drawPoint3D({ x: 0, y: halfH, z: 0 }, 4, '#ffffff');
+
       // Altura (h)
-      const hColor = state.highlight === 'h' ? '#ffea00' : '#00e676';
-      drawLine3D(apex, { x: 0, y: halfH, z: 0 }, hColor, state.highlight === 'h' ? 4 : 2.5, true);
+      if (L.h || state.highlight === 'h') {
+        const isH = state.highlight === 'h';
+        const hColor = isH ? '#ffea00' : '#00e676';
+        drawLine3D(apex, { x: 0, y: halfH, z: 0 }, hColor, isH ? 4 : 2.6, true);
+        if (L.h) drawLabel3D({ x: 20, y: 10, z: 0 }, L.h, hColor, '#040814');
+      }
+
+      // Diámetro (d) en la base del cono si aplica
+      if (L.d || state.highlight === 'diameter') {
+        const isD = state.highlight === 'diameter';
+        const dColor = isD ? '#ffea00' : '#38bdf8';
+        drawLine3D({ x: -R, y: halfH, z: 0 }, { x: R, y: halfH, z: 0 }, dColor, isD ? 4.2 : 3.2, false);
+        if (L.d) drawLabel3D({ x: 0, y: halfH + 18, z: 0 }, L.d, dColor, '#040814');
+      }
 
       // Radio (r)
-      const rColor = state.highlight === 'r' ? '#ffea00' : '#f43f5e';
-      drawLine3D({ x: 0, y: halfH, z: 0 }, { x: R, y: halfH, z: 0 }, rColor, state.highlight === 'r' ? 4 : 3, false);
+      if (L.r || state.highlight === 'r') {
+        const isR = state.highlight === 'r';
+        const rColor = isR ? '#ffea00' : '#f43f5e';
+        const rTextColor = isR ? '#040814' : '#ffffff';
+        drawLine3D({ x: 0, y: halfH, z: 0 }, { x: R, y: halfH, z: 0 }, rColor, isR ? 4.2 : 3.2, false);
+        drawPoint3D({ x: R, y: halfH, z: 0 }, 4, rColor);
+        if (L.r) drawLabel3D({ x: R * 0.55, y: halfH + 17, z: 0 }, L.r, rColor, rTextColor);
+      }
 
-      // Generatriz (g)
-      const gColor = state.highlight === 'g' ? '#ffea00' : '#00f2fe';
-      drawLine3D(apex, { x: -R, y: halfH, z: 0 }, gColor, state.highlight === 'g' ? 4.2 : 3, false);
+      // Generatriz (g): borde inclinado desde el vértice hasta (-R, halfH, 0)
+      if (L.g || state.highlight === 'g') {
+        const isG = state.highlight === 'g';
+        const gColor = isG ? '#ffea00' : '#00f2fe';
+        drawLine3D(apex, { x: -R, y: halfH, z: 0 }, gColor, isG ? 4.2 : 3.2, false);
+        if (L.g) drawLabel3D({ x: -R * 0.58 - 22, y: -2, z: 0 }, L.g, gColor, '#040814');
+      }
 
       // Vértice o Cúspide
       const vHighlight = state.highlight === 'vertex';
       drawPoint3D(apex, vHighlight ? 7.5 : 5, vHighlight ? '#ffea00' : '#ffffff');
-      drawPoint3D({ x: 0, y: halfH, z: 0 }, 4, '#ffffff');
+      if (L.vertex || vHighlight) {
+        drawLabel3D({ x: 0, y: -halfH - 20, z: 0 }, L.vertex || 'Vértice o Cúspide', vHighlight ? '#ffea00' : '#e2e8f0', '#040814');
+      }
 
-      // Etiquetas 3D
-      drawLabel3D({ x: 0, y: -halfH - 20, z: 0 }, 'Vértice', vHighlight ? '#ffea00' : '#e2e8f0', '#040814');
-      drawLabel3D({ x: R * 0.52, y: halfH + 15, z: 0 }, state.labels.r || 'r', rColor, '#fff');
-      drawLabel3D({ x: 16, y: 8, z: 0 }, state.labels.h || 'h', hColor, '#040814');
-      drawLabel3D({ x: -R * 0.58 - 18, y: 0, z: 0 }, state.labels.g || 'g', gColor, '#040814');
+      if (L.base || baseHighlight) {
+        drawLabel3D({ x: 0, y: halfH + 22, z: 0 }, L.base || '1 Base Circular', '#ffea00', '#040814');
+      }
     }
 
+    // -----------------------------------------------------------------
+    // FIGURA 3: ESFERA (Coincidencia total con los datos del problema)
+    // -----------------------------------------------------------------
     function renderSphere() {
-      const R = 88;
+      const R = 86 * state.scaleR;
       const rings = 10;
       const segs = 28;
+      const L = state.labels || {};
 
       // Silueta esférica sombreada
       const centerProj = project(0, 0, 0);
@@ -1693,15 +1833,15 @@
       grad.addColorStop(0.65, 'rgba(59, 130, 246, 0.16)');
       grad.addColorStop(1, 'rgba(15, 23, 42, 0.45)');
       ctx.fillStyle = grad;
-      ctx.strokeStyle = '#00f2fe';
-      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = state.highlight === 'base' ? '#ffea00' : '#00f2fe';
+      ctx.lineWidth = state.highlight === 'base' ? 3.2 : 2.2;
       ctx.beginPath();
       ctx.arc(centerProj.x, centerProj.y, outerR, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
       ctx.restore();
 
-      // Paralelos (Latitud)
+      // Paralelos (Latitud) con ecuador resaltado
       for (let i = 1; i < rings; i++) {
         const phi = (i / rings) * Math.PI;
         const y = Math.cos(phi) * R;
@@ -1713,7 +1853,7 @@
           if (j === 0) ctx.moveTo(pt.x, pt.y);
           else ctx.lineTo(pt.x, pt.y);
         }
-        ctx.strokeStyle = i === rings / 2 ? 'rgba(0, 242, 254, 0.55)' : 'rgba(148, 163, 184, 0.22)';
+        ctx.strokeStyle = i === rings / 2 ? 'rgba(0, 242, 254, 0.58)' : 'rgba(148, 163, 184, 0.2)';
         ctx.lineWidth = i === rings / 2 ? 1.8 : 0.9;
         ctx.stroke();
       }
@@ -1731,25 +1871,45 @@
           if (j === 0) ctx.moveTo(pt.x, pt.y);
           else ctx.lineTo(pt.x, pt.y);
         }
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
         ctx.lineWidth = 0.9;
         ctx.stroke();
       }
 
-      // Diámetro o Radio
-      if (state.highlight === 'diameter') {
-        drawLine3D({ x: -R, y: 0, z: 0 }, { x: R, y: 0, z: 0 }, '#ffea00', 4, false);
-        drawLabel3D({ x: 0, y: -22, z: 0 }, state.labels.d || 'Diámetro (D = 2r)', '#ffea00', '#040814');
-      } else {
-        const rColor = state.highlight === 'r' ? '#ffea00' : '#f43f5e';
-        drawLine3D({ x: 0, y: 0, z: 0 }, { x: R, y: 0, z: 0 }, rColor, 3.5, false);
-        drawLabel3D({ x: R * 0.52, y: -16, z: 0 }, state.labels.r || 'r', rColor, '#fff');
+      // Diámetro (d): línea de extremo a extremo pasando por el centro (-R a +R)
+      if (L.d || state.highlight === 'diameter') {
+        const isD = state.highlight === 'diameter';
+        const dColor = isD ? '#ffea00' : '#38bdf8';
+        drawLine3D({ x: -R, y: 0, z: 0 }, { x: R, y: 0, z: 0 }, dColor, isD ? 4.2 : 3.2, false);
+        drawPoint3D({ x: -R, y: 0, z: 0 }, 4, dColor);
+        drawPoint3D({ x: R, y: 0, z: 0 }, 4, dColor);
+        if (L.d) drawLabel3D({ x: 0, y: -22, z: 0 }, L.d, dColor, '#040814');
+      }
+
+      // Radio (r): desde el centro (0,0,0) hasta el borde derecho (R,0,0)
+      if (L.r || state.highlight === 'r') {
+        const isR = state.highlight === 'r';
+        const rColor = isR ? '#ffea00' : '#f43f5e';
+        const rTextColor = isR ? '#040814' : '#ffffff';
+        drawLine3D({ x: 0, y: 0, z: 0 }, { x: R, y: 0, z: 0 }, rColor, isR ? 4.2 : 3.5, false);
+        drawPoint3D({ x: R, y: 0, z: 0 }, 4.5, rColor);
+        if (L.r) {
+          const offsetY = L.d ? 22 : -18;
+          drawLabel3D({ x: R * 0.54, y: offsetY, z: 0 }, L.r, rColor, rTextColor);
+        }
       }
 
       // Centro de la Esfera
       const cHighlight = state.highlight === 'center';
-      drawPoint3D({ x: 0, y: 0, z: 0 }, cHighlight ? 7 : 5, cHighlight ? '#ffea00' : '#00e676');
-      drawLabel3D({ x: -24, y: 20, z: 0 }, 'Centro', cHighlight ? '#ffea00' : '#00e676', '#040814');
+      drawPoint3D({ x: 0, y: 0, z: 0 }, cHighlight ? 7.5 : 5.5, cHighlight ? '#ffea00' : '#00e676');
+      if (L.center || cHighlight) {
+        drawLabel3D({ x: -26, y: 24, z: 0 }, L.center || 'Centro', cHighlight ? '#ffea00' : '#00e676', '#040814');
+      }
+
+      // Etiqueta especial de superficie si se consulta
+      if (L.surface) {
+        drawLabel3D({ x: 0, y: -R - 16, z: 0 }, L.surface, '#00f2fe', '#040814');
+      }
     }
 
     function drawFrame() {
@@ -1759,7 +1919,7 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (state.autoRotate && !state.isDragging) {
-        state.rotY += 0.012;
+        state.rotY += 0.011;
       }
 
       if (state.shape === 'cylinder') renderCylinder();
@@ -1769,7 +1929,6 @@
       requestAnimationFrame(drawFrame);
     }
 
-    // Eventos de interacción Mouse y Touch para girar en 3D
     wrap.addEventListener('pointerdown', e => {
       state.isDragging = true;
       state.lastX = e.clientX;
@@ -1797,14 +1956,28 @@
       setConfig(cfg) {
         if (cfg.shape) state.shape = cfg.shape;
         state.highlight = cfg.highlight || null;
-        state.labels = Object.assign({ r: 'r', h: 'h', g: 'g', d: 'D = 2r' }, cfg.labels || {});
+        state.labels = cfg.labels ? { ...cfg.labels } : {};
+        state.scaleR = cfg.scaleR || 1;
+        state.scaleH = cfg.scaleH || 1;
       },
-      setShape(s) {
+      setShapeWithDefaults(s) {
         state.shape = s;
+        state.scaleR = 1;
+        state.scaleH = 1;
+        if (s === 'cylinder') {
+          state.highlight = 'base';
+          state.labels = { r: 'Radio (r)', h: 'Altura (h)', g: 'Generatriz (g = h)' };
+        } else if (s === 'cone') {
+          state.highlight = 'vertex';
+          state.labels = { vertex: 'Vértice', r: 'Radio (r)', h: 'Altura (h)', g: 'Generatriz (g)' };
+        } else {
+          state.highlight = 'center';
+          state.labels = { center: 'Centro', r: 'Radio (r)', d: 'Diámetro (D = 2r)' };
+        }
       },
       resetView() {
-        state.rotX = -0.32;
-        state.rotY = 0.55;
+        state.rotX = -0.34;
+        state.rotY = 0.52;
       },
       toggleAutoRotate() {
         state.autoRotate = !state.autoRotate;
@@ -1816,11 +1989,15 @@
     };
   }
 
-  const previewViewer = create3DViewer('preview3dCanvas', 'previewWrap');
-  const gameViewer = create3DViewer('viewer3dCanvas', 'gameCanvasWrap');
+  const previewViewer = create3DViewer('preview3dCanvas', 'previewWrap', {
+    r: 'Radio (r)',
+    h: 'Altura (h)',
+    g: 'Generatriz (g = h)'
+  });
+  const gameViewer = create3DViewer('viewer3dCanvas', 'gameCanvasWrap', {});
 
   // =========================================================================
-  // 4. BANCO DE 50 PREGUNTAS VERIFICADAS (10 POR CADA UNO DE LOS 5 NIVELES)
+  // 4. BANCO DE 50 PREGUNTAS SIN LATEX CRUDO Y CON DATOS 3D 100% COINCIDENTES
   // =========================================================================
   const LEVELS_INFO = [
     {
@@ -1862,60 +2039,74 @@
         cat: 'Nivel 1 • Objetos Cotidianos',
         shape: 'cylinder',
         highlight: 'base',
-        q: 'Observa el holograma 3D. ¿ a qué cuerpo redondo se parece una lata de conservas o una batería cilíndrica?',
+        labels: { base: '2 Bases Circulares', h: 'Altura (h)', r: 'Radio (r)' },
+        dataSummary: 'Figura 1 (Cilindro): 2 bases circulares iguales y superficie lateral curva.',
+        q: 'Observa el holograma 3D. ¿A qué cuerpo redondo se parece una lata de leche o una batería cilíndrica?',
         options: ['Cilindro', 'Cono', 'Esfera', 'Pirámide'],
         ans: 0,
-        exp: 'Una lata de conservas tiene 2 bases circulares iguales y una superficie lateral curva, por lo que es un Cilindro.'
+        exp: 'Una lata de conservas o leche tiene <strong>2 bases circulares iguales</strong> y una superficie lateral curva: es un <strong>Cilindro</strong>.'
       },
       {
         cat: 'Nivel 1 • Objetos Cotidianos',
         shape: 'cone',
         highlight: 'vertex',
+        labels: { vertex: 'Vértice o Cúspide', base: '1 Base Circular' },
+        dataSummary: 'Figura 2 (Cono): 1 base circular y 1 vértice superior.',
         q: 'Un gorro de fiesta de cumpleaños y un barquillo de helado tienen la forma geométrica de un:',
         options: ['Cilindro', 'Esfera', 'Cono', 'Prisma'],
         ans: 2,
-        exp: 'El gorro de fiesta y el barquillo tienen una sola base circular y terminan en una punta llamada vértice: son Conos.'
+        exp: 'El gorro de fiesta y el barquillo tienen <strong>1 sola base circular</strong> y terminan en una punta llamada <strong>vértice</strong>: son <strong>Conos</strong>.'
       },
       {
         cat: 'Nivel 1 • Objetos Cotidianos',
         shape: 'sphere',
         highlight: 'center',
+        labels: { center: 'Centro', r: 'Radio (r)' },
+        dataSummary: 'Figura 3 (Esfera): Superficie totalmente curva a igual distancia del Centro.',
         q: 'Un balón de fútbol, una canica de vidrio y el planeta Tierra representan geométricamente a una:',
         options: ['Circunferencia plana', 'Esfera', 'Cilindro', 'Cono'],
         ans: 1,
-        exp: 'Son cuerpos tridimensionales totalmente redondos donde todos los puntos de su superficie equidistan del centro: una Esfera.'
+        exp: 'Son cuerpos 3D totalmente redondos donde todos los puntos de su superficie están a la misma distancia del <strong>Centro</strong>: una <strong>Esfera</strong>.'
       },
       {
         cat: 'Nivel 1 • Propiedades 3D',
         shape: 'cylinder',
         highlight: 'base',
-        q: '¿Cuál de los tres cuerpos redondos tiene exactamente DOS bases circulares paralelas y congruentes (iguales)?',
+        labels: { base: '2 Bases Circulares Paralelas' },
+        dataSummary: 'Cilindro: Posee exactamente 2 bases circulares congruentes.',
+        q: '¿Cuál de los tres cuerpos redondos tiene exactamente DOS bases circulares paralelas e iguales?',
         options: ['El Cono', 'La Esfera', 'El Cilindro', 'Ninguno'],
         ans: 2,
-        exp: 'El cilindro posee exactamente 2 bases circulares planas y paralelas (una superior y otra inferior).'
+        exp: 'El <strong>Cilindro</strong> posee exactamente <strong>2 bases circulares planas</strong> y paralelas (una superior y otra inferior).'
       },
       {
         cat: 'Nivel 1 • Propiedades 3D',
         shape: 'cone',
         highlight: 'base',
+        labels: { vertex: '1 Vértice', base: '1 Base Circular' },
+        dataSummary: 'Cono: 1 base circular plana y 1 vértice.',
         q: '¿Qué cuerpo redondo tiene UNA sola base circular y una superficie lateral curva que se une en un vértice?',
         options: ['La Esfera', 'El Cono', 'El Cilindro', 'El Cubo'],
         ans: 1,
-        exp: 'El cono circular recto tiene exactamente 1 base circular y 1 vértice o cúspide.'
+        exp: 'El <strong>Cono circular recto</strong> tiene exactamente <strong>1 base circular</strong> y <strong>1 vértice o cúspide</strong>.'
       },
       {
         cat: 'Nivel 1 • Propiedades 3D',
         shape: 'sphere',
-        highlight: null,
-        q: '¿Cuál de los siguientes cuerpos geométricos NO tiene ninguna base plana ni aristas?',
+        highlight: 'base',
+        labels: { center: 'Centro', surface: 'Superficie Curva Continua (0 Bases)' },
+        dataSummary: 'Figura 3 (Esfera): 0 bases planas y 0 vértices.',
+        q: '¿Cuál de los siguientes cuerpos geométricos NO tiene ninguna base plana ni vértices?',
         options: ['Cilindro', 'Cono', 'Esfera', 'Pirámide hexagonal'],
         ans: 2,
-        exp: 'La esfera está formada por una única superficie curva continua; no tiene bases planas ni vértices.'
+        exp: 'La <strong>Esfera</strong> está formada por una única superficie curva continua; no tiene bases planas ni aristas ni vértices.'
       },
       {
         cat: 'Nivel 1 • Cuerpos de Revolución',
         shape: 'cylinder',
         highlight: 'h',
+        labels: { h: 'Eje de Giro (360°)', r: 'Radio (r)' },
+        dataSummary: 'Cuerpo de revolución: giro de 360° alrededor de un eje.',
         q: '¿Por qué al cilindro, al cono y a la esfera se les llama también «cuerpos de revolución»?',
         options: [
           'Porque tienen caras cuadradas',
@@ -1924,34 +2115,40 @@
           'Porque solo existen en el espacio exterior'
         ],
         ans: 1,
-        exp: 'Se llaman cuerpos de revolución porque se generan al rotar una figura plana (rectángulo, triángulo rectángulo o semicírculo) alrededor de un eje.'
+        exp: 'Se llaman <strong>cuerpos de revolución</strong> porque se generan al rotar una figura plana (rectángulo, triángulo rectángulo o semicírculo) 360° alrededor de un eje.'
       },
       {
         cat: 'Nivel 1 • Cuerpos de Revolución',
         shape: 'cylinder',
         highlight: 'g',
+        labels: { h: 'Eje', g: 'Lado que gira (g)', r: 'Ancho (r)' },
+        dataSummary: 'Giro de un rectángulo 360° → Cilindro.',
         q: 'Si hacemos girar rápidamente un RECTÁNGULO una vuelta completa (360°) alrededor de uno de sus lados, ¿qué cuerpo 3D se forma?',
         options: ['Un Cono', 'Una Esfera', 'Un Cilindro', 'Un Cubo'],
         ans: 2,
-        exp: 'Al girar un rectángulo alrededor de uno de sus lados, el lado opuesto describe una superficie cilíndrica formando un Cilindro.'
+        exp: 'Al girar un <strong>rectángulo</strong> alrededor de uno de sus lados, el lado opuesto describe una superficie curva formando un <strong>Cilindro</strong>.'
       },
       {
         cat: 'Nivel 1 • Cuerpos de Revolución',
         shape: 'cone',
         highlight: 'g',
+        labels: { h: 'Cateto eje (h)', r: 'Cateto base (r)', g: 'Hipotenusa (g)' },
+        dataSummary: 'Giro de un triángulo rectángulo 360° → Cono.',
         q: 'Si hacemos girar un TRIÁNGULO RECTÁNGULO 360° alrededor de uno de sus catetos, ¿qué cuerpo redondo se genera?',
         options: ['Un Cono circular recto', 'Un Cilindro', 'Una Esfera', 'Un Prisma triangular'],
         ans: 0,
-        exp: 'Al girar un triángulo rectángulo sobre uno de sus catetos, la hipotenusa genera la superficie lateral de un Cono circular recto.'
+        exp: 'Al girar un <strong>triángulo rectángulo</strong> sobre uno de sus catetos, la hipotenusa genera la superficie lateral de un <strong>Cono circular recto</strong>.'
       },
       {
         cat: 'Nivel 1 • Cuerpos de Revolución',
         shape: 'sphere',
         highlight: 'diameter',
+        labels: { d: 'Diámetro (Eje de giro 360°)', center: 'Centro' },
+        dataSummary: 'Figura 3 (Esfera): Giro de un semicírculo 360° alrededor de su diámetro.',
         q: 'Si hacemos girar un SEMICÍRCULO una vuelta completa (360°) alrededor de su diámetro, obtenemos:',
         options: ['Un Cilindro hueco', 'Un Cono doble', 'Una Esfera', 'Un Círculo plano'],
         ans: 2,
-        exp: 'Un semicírculo que gira 360° alrededor de su diámetro genera una Esfera perfecta en 3D.'
+        exp: 'Un <strong>semicírculo</strong> que gira 360° alrededor de su diámetro genera una <strong>Esfera</strong> perfecta en 3D.'
       }
     ],
 
@@ -1961,60 +2158,69 @@
         cat: 'Nivel 2 • Elementos del Cono',
         shape: 'cone',
         highlight: 'vertex',
+        labels: { vertex: '¿Punto superior?', h: 'Altura (h)', r: 'Radio (r)' },
+        dataSummary: 'Cono 3D: Punto superior donde convergen las generatrices.',
         q: 'En el cono 3D, ¿cómo se llama el punto más alto donde se unen todas las líneas de la superficie lateral?',
         options: ['Centro', 'Vértice o cúspide', 'Diámetro', 'Base superior'],
         ans: 1,
-        exp: 'El punto extremo superior del cono, opuesto a su base circular, se denomina Vértice o cúspide.'
+        exp: 'El punto extremo superior del cono, opuesto a su base circular, se denomina <strong>Vértice o cúspide</strong>.'
       },
       {
         cat: 'Nivel 2 • Elementos de la Esfera',
         shape: 'sphere',
         highlight: 'center',
+        labels: { center: '¿Punto interior?', r: 'Radio (r)' },
+        dataSummary: 'Figura 3 (Esfera): Punto interior a igual distancia de toda la superficie.',
         q: 'En la esfera, ¿cómo se llama el punto interior que se encuentra exactamente a la misma distancia de cualquier punto de la superficie?',
         options: ['Vértice', 'Generatriz', 'Centro de la esfera', 'Cúspide'],
         ans: 2,
-        exp: 'El Centro es el punto interior equidistante de todos los puntos que forman la superficie esférica.'
+        exp: 'El <strong>Centro</strong> es el punto interior equidistante de todos los puntos que forman la superficie de la esfera.'
       },
       {
         cat: 'Nivel 2 • Radio y Diámetro',
         shape: 'sphere',
         highlight: 'diameter',
-        labels: { d: 'D = 14 cm' },
-        q: 'El segmento que pasa por el centro de una esfera o base circular y une dos puntos opuestos midiendo el DOBLE del radio ($D = 2r$) es el:',
+        labels: { d: 'D = 2 × r', r: 'Radio (r)', center: 'Centro' },
+        dataSummary: 'Figura 3 (Esfera): Segmento que pasa por el centro de lado a lado (D = 2 × r).',
+        q: 'El segmento que pasa por el centro de una esfera (o base circular) y une dos puntos opuestos midiendo el DOBLE del radio (<strong>D = 2 × r</strong>) es el:',
         options: ['Diámetro', 'Altura', 'Generatriz', 'Arco'],
         ans: 0,
-        exp: 'El diámetro ($D$) siempre mide el doble del radio ($D = 2r$). Por ejemplo, si $D = 14\\text{ cm}$, entonces $r = 7\\text{ cm}$.'
+        exp: 'El <strong>Diámetro (D)</strong> cruza pasando por el centro y siempre mide el doble del radio (<strong>D = 2 × r</strong>).'
       },
       {
         cat: 'Nivel 2 • Elementos del Cono',
         shape: 'cone',
         highlight: 'g',
-        labels: { r: 'r', h: 'h', g: 'g (Generatriz)' },
-        q: 'En el cono, ¿cómo se llama el segmento inclinado ($g$) que une el vértice con cualquier punto del borde de la base circular?',
+        labels: { vertex: 'Vértice', r: 'Radio (r)', h: 'Altura (h)', g: 'g (Línea inclinada)' },
+        dataSummary: 'Cono 3D: Línea exterior inclinada desde el vértice hasta el borde de la base.',
+        q: 'En el cono, ¿cómo se llama el segmento inclinado (<strong>g</strong>) que une el vértice con cualquier punto del borde de la base circular?',
         options: ['Altura', 'Radio', 'Generatriz', 'Diámetro'],
         ans: 2,
-        exp: 'La generatriz ($g$) del cono es el segmento inclinado exterior que va desde el vértice hasta el borde de la circunferencia de la base.'
+        exp: 'La <strong>generatriz (g)</strong> del cono es el segmento inclinado exterior que va desde el vértice hasta el borde de la base circular.'
       },
       {
         cat: 'Nivel 2 • Elementos del Cilindro',
         shape: 'cylinder',
         highlight: 'h',
-        labels: { r: 'r', h: 'h = 10 cm', g: 'g = 10 cm' },
-        q: 'En un cilindro circular recto, ¿qué relación existe entre la medida de su altura ($h$) y su generatriz ($g$)?',
+        labels: { h: 'h = 10 cm', g: 'g = 10 cm', r: 'r = 4 cm' },
+        dataSummary: 'Cilindro recto: Altura (h = 10 cm) y Generatriz lateral (g = 10 cm).',
+        q: 'En un cilindro circular recto, ¿qué relación existe entre la medida de su altura (<strong>h</strong>) y su generatriz (<strong>g</strong>)?',
         options: [
           'La generatriz mide el doble de la altura',
-          'Son exactamente iguales (g = h)',
+          'Miden exactamente igual (g = h)',
           'La altura siempre es mayor que la generatriz',
           'El cilindro no tiene generatriz'
         ],
         ans: 1,
-        exp: 'En un cilindro recto, el borde lateral es perpendicular a las bases, por lo que su generatriz mide exactamente igual que su altura ($g = h$).'
+        exp: 'En un cilindro recto, la pared lateral es perpendicular a las bases, por lo que su generatriz mide exactamente igual que su altura (<strong>g = h</strong>).'
       },
       {
         cat: 'Nivel 2 • Desarrollo Plano',
         shape: 'cylinder',
         highlight: 'base',
-        q: 'Si desarmamos un cilindro de cartón para ver su desarrollo en el plano, ¿qué figuras planas obtenemos?',
+        labels: { base: '2 Círculos iguales', g: 'Superficie lateral (Rectángulo)' },
+        dataSummary: 'Desarrollo del cilindro: 2 tapas circulares + 1 cuerpo lateral rectangular.',
+        q: 'Si desarmamos un cilindro de cartón para ver su molde plano (desarrollo), ¿qué figuras planas obtenemos?',
         options: [
           '1 rectángulo y 2 círculos iguales',
           '2 triángulos y 1 círculo',
@@ -2022,52 +2228,58 @@
           '1 sector circular y 2 cuadrados'
         ],
         ans: 0,
-        exp: 'La superficie lateral del cilindro al extenderse forma un rectángulo, y sus dos tapas son 2 círculos congruentes.'
+        exp: 'La superficie lateral del cilindro al extenderse forma <strong>1 rectángulo</strong>, y sus dos bases son <strong>2 círculos iguales</strong>.'
       },
       {
         cat: 'Nivel 2 • Relación en el Cono',
         shape: 'cone',
         highlight: 'g',
-        labels: { r: 'r = 3 cm', h: 'h = 4 cm', g: 'g = 5 cm' },
-        q: 'En el interior del cono recto, el radio ($r$), la altura ($h$) y la generatriz ($g$) forman un triángulo rectángulo. ¿Cuál de los tres es el lado más largo (hipotenusa)?',
+        labels: { r: 'r = 3 cm', h: 'h = 4 cm', g: 'g = 5 cm (Hipotenusa)' },
+        dataSummary: 'Triángulo rectángulo en el cono: r = 3 cm, h = 4 cm, g = 5 cm.',
+        q: 'En el interior del cono recto, el radio (<strong>r</strong>), la altura (<strong>h</strong>) y la generatriz (<strong>g</strong>) forman un triángulo rectángulo. ¿Cuál de los tres es el lado más largo (hipotenusa)?',
         options: ['El radio (r)', 'La altura (h)', 'La generatriz (g)', 'Todos miden igual'],
         ans: 2,
-        exp: 'La generatriz ($g$) es la hipotenusa del triángulo rectángulo ($g^2 = r^2 + h^2$), por lo que siempre es mayor que el radio y que la altura.'
+        exp: 'La <strong>generatriz (g)</strong> es la hipotenusa del triángulo rectángulo (<strong>g² = r² + h²</strong>), por lo que siempre es el lado más largo.'
       },
       {
         cat: 'Nivel 2 • Cálculo de Elemento',
         shape: 'cone',
         highlight: 'g',
         labels: { r: 'r = 6 cm', h: 'h = 8 cm', g: 'g = ?' },
-        q: 'Un cono tiene un radio $r = 6\\text{ cm}$ y una altura $h = 8\\text{ cm}$. Usando $g^2 = r^2 + h^2$, ¿cuánto mide su generatriz ($g$)?',
+        scaleR: 0.95,
+        scaleH: 1.02,
+        dataSummary: 'Datos del problema: Radio r = 6 cm, Altura h = 8 cm, Generatriz g = ?',
+        q: 'Un cono tiene un radio <strong>r = 6 cm</strong> y una altura <strong>h = 8 cm</strong>. Usando el teorema de Pitágoras (<strong>g² = r² + h²</strong>), ¿cuánto mide su generatriz (<strong>g</strong>)?',
         options: ['9 cm', '10 cm', '12 cm', '14 cm'],
         ans: 1,
-        exp: 'Aplicando Pitágoras: $g^2 = 6^2 + 8^2 = 36 + 64 = 100$. Sacando la raíz cuadrada: $g = \\sqrt{100} = 10\\text{ cm}$.'
+        exp: 'Reemplazamos los datos: <strong>g² = 6² + 8² = 36 + 64 = 100</strong>. Sacando la raíz cuadrada: <strong>g = √100 = 10 cm</strong>.'
       },
       {
         cat: 'Nivel 2 • Cálculo de Radio',
         shape: 'cylinder',
         highlight: 'r',
-        labels: { r: 'r = ?', h: 'h = 15 cm', g: 'D = 18 cm' },
-        q: 'La base circular de un tanque cilíndrico tiene un diámetro de $18\\text{ cm}$. ¿Cuánto mide su radio ($r$)?',
+        labels: { d: 'D = 18 cm', r: 'r = ?' },
+        dataSummary: 'Datos del problema: Diámetro de la base D = 18 cm, Radio r = ?',
+        q: 'La base circular de un tanque cilíndrico tiene un diámetro de <strong>D = 18 cm</strong>. ¿Cuánto mide su radio (<strong>r</strong>)?',
         options: ['36 cm', '9 cm', '6 cm', '18 cm'],
         ans: 1,
-        exp: 'El radio es siempre la mitad del diámetro: $r = 18 \\div 2 = 9\\text{ cm}$.'
+        exp: 'El radio es siempre la mitad del diámetro: <strong>r = 18 cm ÷ 2 = 9 cm</strong>.'
       },
       {
         cat: 'Nivel 2 • Propiedad de la Esfera',
         shape: 'sphere',
         highlight: 'r',
-        labels: { r: 'r = 5 cm' },
-        q: '¿Por qué en una esfera NO hablamos de «área lateral» ni de «área de la base»?',
+        labels: { center: 'Centro', r: 'r = 5 cm', surface: '1 Sola Superficie Curva' },
+        dataSummary: 'Figura 3 (Esfera): r = 5 cm • Sin bases planas (superficie única).',
+        q: '¿Por qué en la Figura 3 (Esfera) NO existe «área lateral» separada del «área de la base»?',
         options: [
           'Porque la esfera es una figura plana',
-          'Porque tiene una única superficie curva continua y carece de bases',
+          'Porque tiene una única superficie curva continua y no tiene bases',
           'Porque su radio vale cero',
           'Porque tiene 6 caras laterales'
         ],
         ans: 1,
-        exp: 'A diferencia del cilindro y el cono, la esfera no tiene bases planas; toda su envoltura es una sola superficie curva continua.'
+        exp: 'A diferencia del cilindro y el cono, la <strong>esfera</strong> no tiene bases planas; toda su envoltura es una sola superficie curva continua.'
       }
     ],
 
@@ -2077,98 +2289,130 @@
         cat: 'Nivel 3 • Fórmulas de Área',
         shape: 'cylinder',
         highlight: 'g',
-        q: '¿Cuál es la fórmula matemática correcta para calcular el Área Lateral ($A_L$) de un cilindro de radio $r$ y altura $h$?',
-        options: ['AL = 2πrh', 'AL = πr²h', 'AL = πrg', 'AL = 4πr²'],
+        labels: { r: 'Radio (r)', h: 'Altura (h)' },
+        dataSummary: 'Cilindro de radio r y altura h → Hallar fórmula de Área Lateral.',
+        q: '¿Cuál es la fórmula matemática correcta para calcular el <strong>Área Lateral (A<sub>L</sub>)</strong> de un cilindro de radio <strong>r</strong> y altura <strong>h</strong>?',
+        options: [
+          'A<sub>L</sub> = 2 × π × r × h',
+          'A<sub>L</sub> = π × r² × h',
+          'A<sub>L</sub> = π × r × g',
+          'A<sub>L</sub> = 4 × π × r²'
+        ],
         ans: 0,
-        exp: 'El área lateral de un cilindro es el borde de la base ($2\\pi r$) multiplicado por su altura ($h$): $A_L = 2\\pi r h$.'
+        exp: 'El área lateral de un cilindro es el perímetro de su base circular (<strong>2 × π × r</strong>) multiplicado por su altura (<strong>h</strong>): <strong>A<sub>L</sub> = 2 × π × r × h</strong>.'
       },
       {
         cat: 'Nivel 3 • Fórmulas de Área',
         shape: 'cone',
         highlight: 'g',
-        q: '¿Cuál es la fórmula para hallar el Área Lateral ($A_L$) de un cono circular recto de radio $r$ y generatriz $g$?',
-        options: ['AL = 2πrg', 'AL = πrg', 'AL = πr²h / 3', 'AL = 4πr²'],
+        labels: { r: 'Radio (r)', g: 'Generatriz (g)' },
+        dataSummary: 'Cono de radio r y generatriz g → Hallar fórmula de Área Lateral.',
+        q: '¿Cuál es la fórmula para hallar el <strong>Área Lateral (A<sub>L</sub>)</strong> de un cono circular recto de radio <strong>r</strong> y generatriz <strong>g</strong>?',
+        options: [
+          'A<sub>L</sub> = 2 × π × r × g',
+          'A<sub>L</sub> = π × r × g',
+          'A<sub>L</sub> = (π × r² × h) ÷ 3',
+          'A<sub>L</sub> = 4 × π × r²'
+        ],
         ans: 1,
-        exp: 'El área lateral de un cono se calcula multiplicando $\\pi$ por el radio ($r$) y por la generatriz ($g$): $A_L = \\pi r g$.'
+        exp: 'El área lateral de un cono se calcula multiplicando <strong>π</strong> por el radio (<strong>r</strong>) y por la generatriz (<strong>g</strong>): <strong>A<sub>L</sub> = π × r × g</strong>.'
       },
       {
         cat: 'Nivel 3 • Fórmulas de Área',
         shape: 'sphere',
         highlight: 'r',
-        q: '¿Con qué fórmula se calcula el Área de la Superficie ($A$) de una esfera de radio $r$?',
-        options: ['A = 2πr²', 'A = 4πr²', 'A = πr(g + r)', 'A = 4πr³ / 3'],
+        labels: { center: 'Centro', r: 'Radio (r)', surface: 'A = 4 × π × r²' },
+        dataSummary: 'Figura 3 (Esfera) de radio r → Hallar fórmula de Área de Superficie.',
+        q: '¿Con qué fórmula se calcula el <strong>Área de la Superficie (A)</strong> de una esfera de radio <strong>r</strong>?',
+        options: [
+          'A = 2 × π × r²',
+          'A = 4 × π × r²',
+          'A = π × r × (g + r)',
+          'A = (4 × π × r³) ÷ 3'
+        ],
         ans: 1,
-        exp: 'El área total de la superficie de una esfera equivale exactamente al área de 4 círculos máximos: $A = 4\\pi r^2$.'
+        exp: 'El área de la superficie de una esfera equivale exactamente a 4 veces el área de su círculo máximo: <strong>A = 4 × π × r²</strong>.'
       },
       {
         cat: 'Nivel 3 • Cálculo en Cilindro',
         shape: 'cylinder',
         highlight: 'h',
-        labels: { r: 'r = 4 cm', h: 'h = 10 cm', g: 'g = 10 cm' },
-        q: 'Calcula el Área Lateral ($A_L$) de un cilindro cuyo radio mide $r = 4\\text{ cm}$ y su altura es $h = 10\\text{ cm}$ (en términos de $\\pi$).',
+        labels: { r: 'r = 4 cm', h: 'h = 10 cm' },
+        scaleR: 0.9,
+        scaleH: 1.08,
+        dataSummary: 'Datos del problema: Cilindro con r = 4 cm y h = 10 cm.',
+        q: 'Calcula el <strong>Área Lateral (A<sub>L</sub>)</strong> de un cilindro cuyo radio mide <strong>r = 4 cm</strong> y su altura es <strong>h = 10 cm</strong>.',
         options: ['40π cm²', '80π cm²', '160π cm²', '28π cm²'],
         ans: 1,
-        exp: 'Usamos $A_L = 2\\pi r h = 2 \\cdot \\pi \\cdot 4 \\cdot 10 = 80\\pi\\text{ cm}^2$.'
+        exp: 'Usamos la fórmula <strong>A<sub>L</sub> = 2 × π × r × h</strong> = 2 × π × 4 × 10 = <strong>80π cm²</strong>.'
       },
       {
         cat: 'Nivel 3 • Área Total del Cilindro',
         shape: 'cylinder',
         highlight: 'base',
-        labels: { r: 'r = 3 cm', h: 'h = 7 cm', g: 'g = 7 cm' },
-        q: 'Halla el Área Total ($A_T$) de un cilindro con radio $r = 3\\text{ cm}$ y altura $h = 7\\text{ cm}$ usando $A_T = 2\\pi r(h + r)$.',
+        labels: { r: 'r = 3 cm', h: 'h = 7 cm' },
+        dataSummary: 'Datos del problema: Cilindro con r = 3 cm y h = 7 cm.',
+        q: 'Halla el <strong>Área Total (A<sub>T</sub>)</strong> de un cilindro con radio <strong>r = 3 cm</strong> y altura <strong>h = 7 cm</strong> usando <strong>A<sub>T</sub> = 2 × π × r × (h + r)</strong>.',
         options: ['42π cm²', '60π cm²', '30π cm²', '63π cm²'],
         ans: 1,
-        exp: 'Sustituimos en $A_T = 2\\pi r(h + r) = 2 \\cdot \\pi \\cdot 3 \\cdot (7 + 3) = 6\\pi \\cdot 10 = 60\\pi\\text{ cm}^2$.'
+        exp: 'Sustituimos los datos: <strong>A<sub>T</sub> = 2 × π × 3 × (7 + 3)</strong> = 6π × 10 = <strong>60π cm²</strong>.'
       },
       {
         cat: 'Nivel 3 • Área Lateral del Cono',
         shape: 'cone',
         highlight: 'g',
         labels: { r: 'r = 5 cm', h: 'h = 12 cm', g: 'g = 13 cm' },
-        q: 'Un cono tiene radio $r = 5\\text{ cm}$, altura $h = 12\\text{ cm}$ y generatriz $g = 13\\text{ cm}$. ¿Cuál es su Área Lateral ($A_L = \\pi r g$)?',
+        dataSummary: 'Datos del problema: Cono con r = 5 cm, h = 12 cm y g = 13 cm.',
+        q: 'Un cono tiene radio <strong>r = 5 cm</strong>, altura <strong>h = 12 cm</strong> y generatriz <strong>g = 13 cm</strong>. ¿Cuál es su <strong>Área Lateral (A<sub>L</sub> = π × r × g)</strong>?',
         options: ['60π cm²', '65π cm²', '90π cm²', '130π cm²'],
         ans: 1,
-        exp: '¡Cuidado con confundir altura y generatriz! Para el área lateral usamos $g = 13\\text{ cm}$: $A_L = \\pi \\cdot 5 \\cdot 13 = 65\\pi\\text{ cm}^2$.'
+        exp: 'Para el área lateral del cono usamos el radio y la generatriz (<strong>g = 13 cm</strong>): <strong>A<sub>L</sub> = π × 5 × 13 = 65π cm²</strong>.'
       },
       {
         cat: 'Nivel 3 • Área Total del Cono',
         shape: 'cone',
         highlight: 'base',
-        labels: { r: 'r = 4 cm', h: 'h = 3 cm', g: 'g = 5 cm' },
-        q: 'Calcula el Área Total ($A_T = \\pi r(g + r)$) de un cono cuyo radio es $r = 4\\text{ cm}$ y su generatriz es $g = 5\\text{ cm}$.',
+        labels: { r: 'r = 4 cm', g: 'g = 5 cm' },
+        dataSummary: 'Datos del problema: Cono con radio r = 4 cm y generatriz g = 5 cm.',
+        q: 'Calcula el <strong>Área Total</strong> de un cono cuyo radio es <strong>r = 4 cm</strong> y su generatriz es <strong>g = 5 cm</strong> usando <strong>A<sub>T</sub> = π × r × (g + r)</strong>.',
         options: ['20π cm²', '36π cm²', '45π cm²', '16π cm²'],
         ans: 1,
-        exp: 'Aplicamos $A_T = \\pi r(g + r) = \\pi \\cdot 4 \\cdot (5 + 4) = 4\\pi \\cdot 9 = 36\\pi\\text{ cm}^2$.'
+        exp: 'Aplicamos la fórmula: <strong>A<sub>T</sub> = π × 4 × (5 + 4)</strong> = 4π × 9 = <strong>36π cm²</strong>.'
       },
       {
         cat: 'Nivel 3 • Área de la Esfera',
         shape: 'sphere',
         highlight: 'r',
-        labels: { r: 'r = 5 cm' },
-        q: '¿Cuál es el Área de la superficie de una esfera cuyo radio mide $r = 5\\text{ cm}$? ($A = 4\\pi r^2$)',
-        options: ['20π cm²', '50π cm²', '100π cm²', '500π/3 cm²'],
+        labels: { center: 'Centro', r: 'r = 5 cm' },
+        scaleR: 1.02,
+        dataSummary: 'Datos en la Figura 3 (Esfera): Radio r = 5 cm.',
+        q: 'Observa la Figura 3 (Esfera) con radio <strong>r = 5 cm</strong>. ¿Cuál es el <strong>Área de su superficie (A = 4 × π × r²)</strong>?',
+        options: ['20π cm²', '50π cm²', '100π cm²', '125π cm²'],
         ans: 2,
-        exp: 'Usamos $A = 4\\pi r^2 = 4 \\cdot \\pi \\cdot 5^2 = 4 \\cdot \\pi \\cdot 25 = 100\\pi\\text{ cm}^2$.'
+        exp: 'Reemplazamos <strong>r = 5 cm</strong> en la fórmula: <strong>A = 4 × π × 5² = 4 × π × 25 = 100π cm²</strong>.'
       },
       {
-        cat: 'Nivel 3 • Cálculo con π = 3.14',
+        cat: 'Nivel 3 • Cálculo con π ≈ 3.14',
         shape: 'cylinder',
         highlight: 'g',
-        labels: { r: 'r = 2 m', h: 'h = 5 m', g: 'g = 5 m' },
-        q: 'Un depósito cilíndrico tiene $r = 2\\text{ m}$ y $h = 5\\text{ m}$. Usando $\\pi \\approx 3.14$, ¿cuántos $\\text{m}^2$ mide su Área Lateral?',
+        labels: { r: 'r = 2 m', h: 'h = 5 m' },
+        dataSummary: 'Datos del problema: Cilindro con r = 2 m, h = 5 m y π ≈ 3.14.',
+        q: 'Un depósito cilíndrico tiene <strong>r = 2 m</strong> y <strong>h = 5 m</strong>. Usando <strong>π ≈ 3.14</strong>, ¿cuántos <strong>m²</strong> mide su Área Lateral?',
         options: ['31.4 m²', '62.8 m²', '20 m²', '125.6 m²'],
         ans: 1,
-        exp: 'Primero hallamos $A_L = 2\\pi r h = 2 \\cdot \\pi \\cdot 2 \\cdot 5 = 20\\pi\\text{ m}^2$. Multiplicando por $3.14$: $20 \\times 3.14 = 62.8\\text{ m}^2$.'
+        exp: 'Primero hallamos <strong>A<sub>L</sub> = 2 × π × 2 × 5 = 20π m²</strong>. Multiplicando por 3.14: <strong>20 × 3.14 = 62.8 m²</strong>.'
       },
       {
         cat: 'Nivel 3 • Esfera con Diámetro',
         shape: 'sphere',
         highlight: 'diameter',
-        labels: { d: 'D = 6 m' },
-        q: 'Una cúpula esférica tiene un diámetro de $6\\text{ m}$. ¿Cuál es el área total de su superficie en términos de $\\pi$?',
+        labels: { d: 'D = 6 m', r: 'r = 3 m', center: 'Centro' },
+        scaleR: 0.96,
+        dataSummary: 'Datos en la Figura 3 (Esfera): Diámetro D = 6 m (por lo tanto r = 3 m).',
+        q: 'Una cúpula esférica (Figura 3) tiene un diámetro <strong>D = 6 m</strong>. ¿Cuál es el área total de su superficie (<strong>A = 4 × π × r²</strong>)?',
         options: ['144π m²', '36π m²', '12π m²', '24π m²'],
         ans: 1,
-        exp: 'Si el diámetro es $6\\text{ m}$, el radio es la mitad: $r = 3\\text{ m}$. Luego $A = 4\\pi r^2 = 4 \\cdot \\pi \\cdot 3^2 = 36\\pi\\text{ m}^2$.'
+        exp: 'Como el diámetro es <strong>D = 6 m</strong>, su radio es la mitad: <strong>r = 3 m</strong>. Luego <strong>A = 4 × π × 3² = 4 × π × 9 = 36π m²</strong>.'
       }
     ],
 
@@ -2178,16 +2422,25 @@
         cat: 'Nivel 4 • Fórmulas de Volumen',
         shape: 'cylinder',
         highlight: 'h',
-        q: '¿Cuál es la fórmula para calcular el Volumen ($V$) de un cilindro de radio $r$ y altura $h$?',
-        options: ['V = 2πrh', 'V = πr²h', 'V = πr²h / 3', 'V = 4πr³ / 3'],
+        labels: { r: 'Radio (r)', h: 'Altura (h)' },
+        dataSummary: 'Cilindro de radio r y altura h → Fórmula de Volumen.',
+        q: '¿Cuál es la fórmula para calcular el <strong>Volumen (V)</strong> de un cilindro de radio <strong>r</strong> y altura <strong>h</strong>?',
+        options: [
+          'V = 2 × π × r × h',
+          'V = π × r² × h',
+          'V = (π × r² × h) ÷ 3',
+          'V = (4 × π × r³) ÷ 3'
+        ],
         ans: 1,
-        exp: 'El volumen del cilindro es el área de su base circular ($\\pi r^2$) multiplicada por la altura ($h$): $V = \\pi r^2 h$.'
+        exp: 'El volumen del cilindro es el área de su base circular (<strong>π × r²</strong>) multiplicada por la altura (<strong>h</strong>): <strong>V = π × r² × h</strong>.'
       },
       {
         cat: 'Nivel 4 • Comparación Cilindro vs Cono',
         shape: 'cone',
         highlight: 'h',
-        q: 'Si un cono y un cilindro tienen exactamente el mismo radio ($r$) y la misma altura ($h$), ¿qué relación hay entre sus volúmenes?',
+        labels: { r: 'Mismo radio (r)', h: 'Misma altura (h)' },
+        dataSummary: 'Comparación de capacidad: Cono vs. Cilindro de igual r y h.',
+        q: 'Si un cono y un cilindro tienen exactamente el mismo radio (<strong>r</strong>) y la misma altura (<strong>h</strong>), ¿qué relación hay entre sus volúmenes?',
         options: [
           'Tienen el mismo volumen',
           'El volumen del cono es la TERCERA PARTE (1/3) del volumen del cilindro',
@@ -2195,82 +2448,101 @@
           'El cono tiene mayor volumen'
         ],
         ans: 1,
-        exp: 'Como $V_{\\text{cono}} = \\frac{\\pi r^2 h}{3}$, se necesitan exactamente 3 conos llenos para igualar el volumen de 1 cilindro de igual base y altura.'
+        exp: 'Como <strong>V<sub>cono</sub> = (π × r² × h) ÷ 3</strong>, se necesitan exactamente <strong>3 conos llenos</strong> para igualar el volumen de 1 cilindro de igual base y altura.'
       },
       {
         cat: 'Nivel 4 • Fórmulas de Volumen',
         shape: 'sphere',
         highlight: 'r',
-        q: '¿Cuál es la fórmula correcta para calcular el Volumen ($V$) de una esfera de radio $r$?',
-        options: ['V = 4πr²', 'V = 4πr³ / 3', 'V = πr³ / 3', 'V = 2πr³'],
+        labels: { center: 'Centro', r: 'Radio (r)' },
+        dataSummary: 'Figura 3 (Esfera) de radio r → Fórmula de Volumen.',
+        q: '¿Cuál es la fórmula correcta para calcular el <strong>Volumen (V)</strong> de una esfera de radio <strong>r</strong>?',
+        options: [
+          'V = 4 × π × r²',
+          'V = (4 × π × r³) ÷ 3',
+          'V = (π × r³) ÷ 3',
+          'V = 2 × π × r³'
+        ],
         ans: 1,
-        exp: 'El volumen de una esfera es cuatro tercios de pi por el radio elevado al cubo: $V = \\frac{4\\pi r^3}{3}$.'
+        exp: 'El volumen de una esfera es cuatro tercios de pi por el radio elevado al cubo: <strong>V = (4 × π × r³) ÷ 3</strong>.'
       },
       {
         cat: 'Nivel 4 • Volumen del Cilindro',
         shape: 'cylinder',
         highlight: 'r',
-        labels: { r: 'r = 3 cm', h: 'h = 5 cm', g: 'g = 5 cm' },
-        q: 'Un vaso cilíndrico tiene un radio de $r = 3\\text{ cm}$ y una altura de $h = 5\\text{ cm}$. ¿Cuál es su volumen?',
+        labels: { r: 'r = 3 cm', h: 'h = 5 cm' },
+        dataSummary: 'Datos del problema: Cilindro con r = 3 cm y h = 5 cm.',
+        q: 'Un vaso cilíndrico tiene un radio de <strong>r = 3 cm</strong> y una altura de <strong>h = 5 cm</strong>. ¿Cuál es su volumen (<strong>V = π × r² × h</strong>)?',
         options: ['15π cm³', '30π cm³', '45π cm³', '75π cm³'],
         ans: 2,
-        exp: 'Aplicamos $V = \\pi r^2 h = \\pi \\cdot 3^2 \\cdot 5 = \\pi \\cdot 9 \\cdot 5 = 45\\pi\\text{ cm}^3$.'
+        exp: 'Aplicamos la fórmula: <strong>V = π × 3² × 5 = π × 9 × 5 = 45π cm³</strong>.'
       },
       {
         cat: 'Nivel 4 • Volumen del Cono',
         shape: 'cone',
         highlight: 'h',
-        labels: { r: 'r = 3 cm', h: 'h = 4 cm', g: 'g = 5 cm' },
-        q: 'Calcula el volumen de un cono cuyo radio mide $r = 3\\text{ cm}$ y su altura es $h = 4\\text{ cm}$.',
+        labels: { r: 'r = 3 cm', h: 'h = 4 cm' },
+        dataSummary: 'Datos del problema: Cono con r = 3 cm y h = 4 cm.',
+        q: 'Calcula el volumen de un cono cuyo radio mide <strong>r = 3 cm</strong> y su altura es <strong>h = 4 cm</strong> usando <strong>V = (π × r² × h) ÷ 3</strong>.',
         options: ['36π cm³', '12π cm³', '15π cm³', '24π cm³'],
         ans: 1,
-        exp: 'Usamos $V = \\frac{\\pi r^2 h}{3} = \\frac{\\pi \\cdot 3^2 \\cdot 4}{3} = \\frac{36\\pi}{3} = 12\\pi\\text{ cm}^3$.'
+        exp: 'Sustituimos los datos: <strong>V = (π × 3² × 4) ÷ 3 = (π × 9 × 4) ÷ 3 = 36π ÷ 3 = 12π cm³</strong>.'
       },
       {
         cat: 'Nivel 4 • Volumen de la Esfera',
         shape: 'sphere',
         highlight: 'r',
-        labels: { r: 'r = 3 cm' },
-        q: '¿Cuál es el volumen de una esfera cuyo radio mide $r = 3\\text{ cm}$? ($V = \\frac{4\\pi r^3}{3}$)',
+        labels: { center: 'Centro', r: 'r = 3 cm' },
+        scaleR: 0.94,
+        dataSummary: 'Datos en la Figura 3 (Esfera): Radio r = 3 cm.',
+        q: 'Observa la Figura 3 (Esfera) cuyo radio mide <strong>r = 3 cm</strong>. ¿Cuál es su volumen usando <strong>V = (4 × π × r³) ÷ 3</strong>?',
         options: ['12π cm³', '27π cm³', '36π cm³', '108π cm³'],
         ans: 2,
-        exp: 'Como $3^3 = 27$, reemplazamos: $V = \\frac{4 \\cdot \\pi \\cdot 27}{3} = 4 \\cdot \\pi \\cdot 9 = 36\\pi\\text{ cm}^3$.'
+        exp: 'Como <strong>3³ = 3 × 3 × 3 = 27</strong>, reemplazamos: <strong>V = (4 × π × 27) ÷ 3 = 4 × π × 9 = 36π cm³</strong>.'
       },
       {
-        cat: 'Nivel 4 • Problema con π = 3.14',
+        cat: 'Nivel 4 • Problema con π ≈ 3.14',
         shape: 'cylinder',
         highlight: 'h',
-        labels: { r: 'r = 2 m', h: 'h = 10 m', g: 'g = 10 m' },
-        q: 'Una cisterna cilíndrica de agua tiene $r = 2\\text{ m}$ y $h = 10\\text{ m}$. Usando $\\pi \\approx 3.14$, ¿cuál es su volumen en $\\text{m}^3$?',
+        labels: { r: 'r = 2 m', h: 'h = 10 m' },
+        scaleR: 0.85,
+        scaleH: 1.1,
+        dataSummary: 'Datos del problema: Cilindro con r = 2 m, h = 10 m y π ≈ 3.14.',
+        q: 'Una cisterna cilíndrica de agua tiene <strong>r = 2 m</strong> y <strong>h = 10 m</strong>. Usando <strong>π ≈ 3.14</strong>, ¿cuál es su volumen en <strong>m³</strong>?',
         options: ['62.8 m³', '125.6 m³', '40 m³', '314 m³'],
         ans: 1,
-        exp: 'Primero $V = \\pi r^2 h = \\pi \\cdot 2^2 \\cdot 10 = 40\\pi\\text{ m}^3$. Multiplicando por $3.14$: $40 \\times 3.14 = 125.6\\text{ m}^3$.'
+        exp: 'Primero hallamos <strong>V = π × 2² × 10 = 40π m³</strong>. Multiplicando por 3.14: <strong>40 × 3.14 = 125.6 m³</strong>.'
       },
       {
         cat: 'Nivel 4 • Volumen del Cono',
         shape: 'cone',
         highlight: 'h',
-        labels: { r: 'r = 5 cm', h: 'h = 6 cm', g: 'g = 7.8 cm' },
-        q: 'Un embudo cónico tiene radio $r = 5\\text{ cm}$ y altura $h = 6\\text{ cm}$. ¿Cuál es su capacidad en términos de $\\pi$?',
+        labels: { r: 'r = 5 cm', h: 'h = 6 cm' },
+        dataSummary: 'Datos del problema: Cono con radio r = 5 cm y altura h = 6 cm.',
+        q: 'Un embudo cónico tiene radio <strong>r = 5 cm</strong> y altura <strong>h = 6 cm</strong>. ¿Cuál es su capacidad o volumen?',
         options: ['150π cm³', '50π cm³', '30π cm³', '75π cm³'],
         ans: 1,
-        exp: 'Aplicamos $V = \\frac{\\pi r^2 h}{3} = \\frac{\\pi \\cdot 5^2 \\cdot 6}{3} = \\pi \\cdot 25 \\cdot 2 = 50\\pi\\text{ cm}^3$.'
+        exp: 'Aplicamos <strong>V = (π × 5² × 6) ÷ 3 = (π × 25 × 6) ÷ 3 = 150π ÷ 3 = 50π cm³</strong>.'
       },
       {
         cat: 'Nivel 4 • Volumen de la Esfera',
         shape: 'sphere',
         highlight: 'r',
-        labels: { r: 'r = 6 cm' },
-        q: 'Calcula el volumen de un balón esférico de radio $r = 6\\text{ cm}$ (recuerda que $6^3 = 216$).',
+        labels: { center: 'Centro', r: 'r = 6 cm' },
+        scaleR: 1.06,
+        dataSummary: 'Datos en la Figura 3 (Esfera): Radio r = 6 cm (recuerda: 6³ = 216).',
+        q: 'Calcula el volumen de un balón esférico (Figura 3) de radio <strong>r = 6 cm</strong> sabiendo que <strong>6³ = 216</strong>.',
         options: ['144π cm³', '288π cm³', '216π cm³', '72π cm³'],
         ans: 1,
-        exp: 'Usamos $V = \\frac{4\\pi r^3}{3} = \\frac{4 \\cdot \\pi \\cdot 216}{3} = 4 \\cdot \\pi \\cdot 72 = 288\\pi\\text{ cm}^3$.'
+        exp: 'Usamos <strong>V = (4 × π × 6³) ÷ 3 = (4 × π × 216) ÷ 3 = 4 × π × 72 = 288π cm³</strong>.'
       },
       {
         cat: 'Nivel 4 • Unidades de Medida',
         shape: 'cylinder',
         highlight: 'base',
-        q: 'Si medimos el radio y la altura de un cilindro en centímetros (cm), ¿en qué unidad quedan expresados su Área y su Volumen respectivamente?',
+        labels: { r: 'r (en cm)', h: 'h (en cm)' },
+        dataSummary: 'Unidades geométricas: Superficie (cm²) vs. Capacidad espacial (cm³).',
+        q: 'Si medimos el radio y la altura en centímetros (<strong>cm</strong>), ¿en qué unidad quedan expresados el <strong>Área</strong> y el <strong>Volumen</strong> respectivamente?',
         options: [
           'Área en cm y Volumen en cm²',
           'Área en cm² y Volumen en cm³',
@@ -2278,7 +2550,7 @@
           'Ambos en cm³'
         ],
         ans: 1,
-        exp: 'Las áreas siempre se expresan en unidades cuadradas ($\\text{cm}^2$) y los volúmenes en unidades cúbicas ($\\text{cm}^3$).'
+        exp: 'Las <strong>áreas</strong> siempre se expresan en unidades cuadradas (<strong>cm²</strong>) y los <strong>volúmenes</strong> en unidades cúbicas (<strong>cm³</strong>).'
       }
     ],
 
@@ -2287,103 +2559,118 @@
       {
         cat: 'Misión Final • Reto Combinado 1',
         shape: 'cylinder',
-        highlight: 'base',
-        labels: { r: 'r = 5 cm', h: 'h = 8 cm', g: 'D = 10 cm' },
-        q: 'Una lata cilíndrica tiene un DIÁMETRO de $10\\text{ cm}$ y una altura de $8\\text{ cm}$. ¿Cuál es su Área Lateral ($A_L = 2\\pi r h$)?',
+        highlight: 'diameter',
+        labels: { d: 'D = 10 cm', r: 'r = 5 cm', h: 'h = 8 cm' },
+        dataSummary: 'Datos del problema: Cilindro con Diámetro D = 10 cm (r = 5 cm) y Altura h = 8 cm.',
+        q: 'Una lata cilíndrica tiene un <strong>diámetro D = 10 cm</strong> y una <strong>altura h = 8 cm</strong>. ¿Cuál es su <strong>Área Lateral (A<sub>L</sub> = 2 × π × r × h)</strong>?',
         options: ['160π cm²', '80π cm²', '200π cm²', '40π cm²'],
         ans: 1,
-        exp: 'Si el diámetro es $10\\text{ cm}$, el radio es $r = 5\\text{ cm}$. Entonces $A_L = 2 \\cdot \\pi \\cdot 5 \\cdot 8 = 80\\pi\\text{ cm}^2$.'
+        exp: 'Si el diámetro es <strong>10 cm</strong>, el radio es la mitad: <strong>r = 5 cm</strong>. Entonces <strong>A<sub>L</sub> = 2 × π × 5 × 8 = 80π cm²</strong>.'
       },
       {
         cat: 'Misión Final • Reto Combinado 2',
         shape: 'cone',
         highlight: 'g',
         labels: { r: 'r = 3 cm', h: 'h = 4 cm', g: 'g = ?' },
-        q: 'Un cono tiene radio $r = 3\\text{ cm}$ y altura $h = 4\\text{ cm}$. Primero halla su generatriz ($g$) y luego calcula su Área Lateral ($A_L = \\pi r g$).',
+        dataSummary: 'Datos del problema: Cono con r = 3 cm y h = 4 cm → Hallar g y luego Área Lateral.',
+        q: 'Un cono tiene radio <strong>r = 3 cm</strong> y altura <strong>h = 4 cm</strong>. Primero halla su generatriz (<strong>g</strong>) y luego calcula su <strong>Área Lateral (A<sub>L</sub> = π × r × g)</strong>.',
         options: ['12π cm²', '15π cm²', '20π cm²', '24π cm²'],
         ans: 1,
-        exp: 'Por Pitágoras $g = \\sqrt{3^2 + 4^2} = \\sqrt{25} = 5\\text{ cm}$. Luego el Área Lateral es $A_L = \\pi \\cdot 3 \\cdot 5 = 15\\pi\\text{ cm}^2$.'
+        exp: 'Por Pitágoras: <strong>g = √(3² + 4²) = √25 = 5 cm</strong>. Luego el Área Lateral es <strong>A<sub>L</sub> = π × 3 × 5 = 15π cm²</strong>.'
       },
       {
         cat: 'Misión Final • Reto Combinado 3',
         shape: 'sphere',
         highlight: 'r',
-        labels: { r: 'r = 3 cm' },
-        q: 'Curiosidad matemática: En una esfera de radio $r = 3\\text{ cm}$, ¿qué ocurre con el valor numérico de su Área ($4\\pi r^2$) y su Volumen ($\\frac{4\\pi r^3}{3}$)?',
+        labels: { center: 'Centro', r: 'r = 3 cm' },
+        dataSummary: 'Datos en la Figura 3 (Esfera): Radio r = 3 cm → Comparar Área y Volumen.',
+        q: 'En una esfera (Figura 3) de radio <strong>r = 3 cm</strong>, ¿qué ocurre al calcular su <strong>Área (4 × π × r²)</strong> y su <strong>Volumen ((4 × π × r³) ÷ 3)</strong>?',
         options: [
           'El área es el doble que el volumen',
-          'Ambos dan el mismo número: 36π (36π cm² y 36π cm³)',
+          'Ambos dan el mismo valor numérico: 36π (36π cm² y 36π cm³)',
           'El volumen es el triple del área',
           'Ambos valen 12π'
         ],
         ans: 1,
-        exp: 'Para $r = 3$: Área $= 4\\pi(3^2) = 36\\pi\\text{ cm}^2$, y Volumen $= \\frac{4\\pi(3^3)}{3} = 36\\pi\\text{ cm}^3$. ¡Coinciden en valor numérico!'
+        exp: 'Para <strong>r = 3 cm</strong>: Área = <strong>4 × π × 3² = 36π cm²</strong>, y Volumen = <strong>(4 × π × 27) ÷ 3 = 36π cm³</strong>. ¡Tienen el mismo valor numérico!'
       },
       {
         cat: 'Misión Final • Reto Combinado 4',
         shape: 'cone',
         highlight: 'h',
-        labels: { r: 'r', h: 'h' },
-        q: 'Un cilindro tiene un volumen de $90\\text{ cm}^3$. ¿Cuál será el volumen de un cono que tiene exactamente el mismo radio y la misma altura?',
+        labels: { r: 'Mismo radio (r)', h: 'Misma altura (h)' },
+        dataSummary: 'Volumen del cilindro = 90 cm³ → Hallar volumen del cono de igual r y h.',
+        q: 'Un cilindro tiene un volumen de <strong>90 cm³</strong>. ¿Cuál será el volumen de un cono que tiene exactamente el mismo radio y la misma altura?',
         options: ['90 cm³', '45 cm³', '30 cm³', '270 cm³'],
         ans: 2,
-        exp: 'El volumen del cono es un tercio del volumen del cilindro de igual base y altura: $90 \\div 3 = 30\\text{ cm}^3$.'
+        exp: 'El volumen del cono es la tercera parte del volumen del cilindro de igual base y altura: <strong>90 cm³ ÷ 3 = 30 cm³</strong>.'
       },
       {
         cat: 'Misión Final • Reto Combinado 5',
         shape: 'cylinder',
         highlight: 'h',
-        labels: { r: 'r = 4 m', h: 'h = 5 m', g: 'g = 5 m' },
-        q: 'Calcula el Volumen de un silo cilíndrico de radio $r = 4\\text{ m}$ y altura $h = 5\\text{ m}$.',
+        labels: { r: 'r = 4 m', h: 'h = 5 m' },
+        dataSummary: 'Datos del problema: Cilindro con radio r = 4 m y altura h = 5 m.',
+        q: 'Calcula el <strong>Volumen (V = π × r² × h)</strong> de un silo cilíndrico de radio <strong>r = 4 m</strong> y altura <strong>h = 5 m</strong>.',
         options: ['40π m³', '80π m³', '20π m³', '100π m³'],
         ans: 1,
-        exp: 'Aplicamos $V = \\pi r^2 h = \\pi \\cdot 4^2 \\cdot 5 = \\pi \\cdot 16 \\cdot 5 = 80\\pi\\text{ m}^3$.'
+        exp: 'Aplicamos la fórmula: <strong>V = π × 4² × 5 = π × 16 × 5 = 80π m³</strong>.'
       },
       {
         cat: 'Misión Final • Reto Combinado 6',
         shape: 'sphere',
         highlight: 'diameter',
-        labels: { d: 'D = 10 cm' },
-        q: 'Una esfera de cristal tiene un DIÁMETRO de $10\\text{ cm}$. Usando $\\pi \\approx 3.14$, ¿cuál es el área de su superficie ($A = 4\\pi r^2$)?',
+        labels: { d: 'D = 10 cm', r: 'r = 5 cm', center: 'Centro' },
+        dataSummary: 'Datos en la Figura 3 (Esfera): Diámetro D = 10 cm (r = 5 cm) y π ≈ 3.14.',
+        q: 'Una esfera de cristal (Figura 3) tiene un <strong>diámetro D = 10 cm</strong>. Usando <strong>π ≈ 3.14</strong>, ¿cuál es el área de su superficie (<strong>A = 4 × π × r²</strong>)?',
         options: ['314 cm²', '1256 cm²', '157 cm²', '78.5 cm²'],
         ans: 0,
-        exp: 'El radio es $r = 10 \\div 2 = 5\\text{ cm}$. Entonces $A = 4 \\cdot \\pi \\cdot 5^2 = 100\\pi = 100 \\times 3.14 = 314\\text{ cm}^2$.'
+        exp: 'El radio es la mitad del diámetro: <strong>r = 10 ÷ 2 = 5 cm</strong>. Entonces <strong>A = 4 × π × 5² = 100π = 100 × 3.14 = 314 cm²</strong>.'
       },
       {
         cat: 'Misión Final • Reto Combinado 7',
         shape: 'cone',
         highlight: 'base',
-        labels: { r: 'r = 2 cm', h: 'h = 6 cm', g: 'g = 8 cm' },
-        q: 'Un cono tiene radio $r = 2\\text{ cm}$ y generatriz $g = 8\\text{ cm}$. ¿Cuál es su Área Total ($A_T = \\pi r(g + r)$)?',
+        labels: { r: 'r = 2 cm', g: 'g = 8 cm' },
+        dataSummary: 'Datos del problema: Cono con radio r = 2 cm y generatriz g = 8 cm.',
+        q: 'Un cono tiene radio <strong>r = 2 cm</strong> y generatriz <strong>g = 8 cm</strong>. ¿Cuál es su <strong>Área Total (A<sub>T</sub> = π × r × (g + r))</strong>?',
         options: ['16π cm²', '20π cm²', '32π cm²', '12π cm²'],
         ans: 1,
-        exp: 'Reemplazamos en $A_T = \\pi r(g + r) = \\pi \\cdot 2 \\cdot (8 + 2) = 2\\pi \\cdot 10 = 20\\pi\\text{ cm}^2$.'
+        exp: 'Reemplazamos en la fórmula: <strong>A<sub>T</sub> = π × 2 × (8 + 2) = 2π × 10 = 20π cm²</strong>.'
       },
       {
         cat: 'Misión Final • Reto Combinado 8',
         shape: 'cylinder',
         highlight: 'base',
-        labels: { r: 'r = 5 cm', h: 'h = 5 cm', g: 'g = 5 cm' },
-        q: 'En un cilindro donde el radio y la altura miden igual ($r = 5\\text{ cm}$ y $h = 5\\text{ cm}$), ¿cuál es su Área Total ($A_T = 2\\pi r(h + r)$)?',
+        labels: { r: 'r = 5 cm', h: 'h = 5 cm' },
+        scaleR: 1.05,
+        scaleH: 0.85,
+        dataSummary: 'Datos del problema: Cilindro con radio r = 5 cm y altura h = 5 cm.',
+        q: 'En un cilindro donde el radio y la altura miden igual (<strong>r = 5 cm</strong> y <strong>h = 5 cm</strong>), ¿cuál es su <strong>Área Total (A<sub>T</sub> = 2 × π × r × (h + r))</strong>?',
         options: ['50π cm²', '100π cm²', '75π cm²', '125π cm²'],
         ans: 1,
-        exp: 'Sustituimos: $A_T = 2 \\cdot \\pi \\cdot 5 \\cdot (5 + 5) = 10\\pi \\cdot 10 = 100\\pi\\text{ cm}^2$.'
+        exp: 'Sustituimos los datos: <strong>A<sub>T</sub> = 2 × π × 5 × (5 + 5) = 10π × 10 = 100π cm²</strong>.'
       },
       {
         cat: 'Misión Final • Reto Combinado 9',
         shape: 'cone',
         highlight: 'h',
-        labels: { r: 'r = 3 m', h: 'h = 10 m', g: 'g = 10.4 m' },
-        q: 'Un techo cónico tiene radio $r = 3\\text{ m}$ y altura $h = 10\\text{ m}$. Usando $\\pi \\approx 3.14$, ¿cuál es su volumen ($V = \\frac{\\pi r^2 h}{3}$)?',
+        labels: { r: 'r = 3 m', h: 'h = 10 m' },
+        scaleR: 0.88,
+        scaleH: 1.08,
+        dataSummary: 'Datos del problema: Cono con r = 3 m, h = 10 m y π ≈ 3.14.',
+        q: 'Un techo cónico tiene radio <strong>r = 3 m</strong> y altura <strong>h = 10 m</strong>. Usando <strong>π ≈ 3.14</strong>, ¿cuál es su volumen (<strong>V = (π × r² × h) ÷ 3</strong>)?',
         options: ['94.2 m³', '282.6 m³', '31.4 m³', '62.8 m³'],
         ans: 0,
-        exp: 'Calculamos $V = \\frac{\\pi \\cdot 3^2 \\cdot 10}{3} = 30\\pi\\text{ m}^3$. Multiplicando por $3.14$: $30 \\times 3.14 = 94.2\\text{ m}^3$.'
+        exp: 'Calculamos <strong>V = (π × 3² × 10) ÷ 3 = 30π m³</strong>. Multiplicando por 3.14: <strong>30 × 3.14 = 94.2 m³</strong>.'
       },
       {
         cat: 'Misión Final • Reto Maestro 10',
         shape: 'sphere',
         highlight: 'center',
-        q: '¿Cuál de las siguientes afirmaciones sobre el Cilindro, el Cono y la Esfera es TOTALMENTE VERDADERA?',
+        labels: { center: 'Centro', r: 'Radio (r)', d: 'D = 2 × r' },
+        dataSummary: 'Síntesis de los 3 cuerpos redondos: Cilindro, Cono y Esfera.',
+        q: '¿Cuál de las siguientes afirmaciones sobre el Cilindro, el Cono y la Esfera es <strong>TOTALMENTE VERDADERA</strong>?',
         options: [
           'La esfera tiene 2 bases ocultas y área lateral',
           'En el cilindro se cumple que g = h, en el cono g² = r² + h², y la esfera no tiene área lateral diferenciada',
@@ -2391,7 +2678,7 @@
           'Las áreas se miden en cm³ y los volúmenes en cm²'
         ],
         ans: 1,
-        exp: '¡Exacto! En el cilindro recto $g = h$, en el cono recto se cumple Pitágoras ($g^2 = r^2 + h^2$) y la esfera tiene una única superficie continua.'
+        exp: '¡Exacto! En el cilindro recto <strong>g = h</strong>, en el cono recto se cumple Pitágoras (<strong>g² = r² + h²</strong>) y la esfera posee una única superficie curva continua.'
       }
     ]
   };
@@ -2473,7 +2760,7 @@
       AudioEngine.click();
       document.querySelectorAll('#previewTabs .shape-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      previewViewer.setShape(btn.dataset.shape);
+      previewViewer.setShapeWithDefaults(btn.dataset.shape);
     });
   });
 
@@ -2483,20 +2770,56 @@
     this.textContent = rot ? '🔄 Auto-Giro: ON' : '⏸️ Auto-Giro: OFF';
   });
 
-  // Controles del Visor 3D en Juego
+  // Controles del Visor 3D en Juego (Garantiza que no se mezclen datos entre figuras)
+  const btnReturnQuestionShape = document.getElementById('btnReturnQuestionShape');
+  const viewerDataText = document.getElementById('viewerDataText');
+
+  function applyQuestion3DConfig(qObj) {
+    setActiveGameShapeTab(qObj.shape);
+    gameViewer.setConfig({
+      shape: qObj.shape,
+      highlight: qObj.highlight || null,
+      labels: qObj.labels || {},
+      scaleR: qObj.scaleR || 1,
+      scaleH: qObj.scaleH || 1
+    });
+    viewerDataText.textContent = qObj.dataSummary || 'Observa los elementos resaltados en la figura 3D.';
+    btnReturnQuestionShape.style.display = 'none';
+  }
+
   document.querySelectorAll('#gameShapeTabs .shape-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       AudioEngine.click();
-      setActiveGameShapeTab(btn.dataset.shape);
-      gameViewer.setShape(btn.dataset.shape);
+      const chosenShape = btn.dataset.shape;
+      const qObj = appState.currentQuestions[appState.qIndex];
+
+      if (qObj && chosenShape === qObj.shape) {
+        applyQuestion3DConfig(qObj);
+      } else {
+        setActiveGameShapeTab(chosenShape);
+        gameViewer.setShapeWithDefaults(chosenShape);
+        const shapeNames = {
+          cylinder: 'Figura 1 (Cilindro): 2 bases circulares, radio (r), altura (h) y generatriz (g = h).',
+          cone: 'Figura 2 (Cono): 1 base circular, 1 vértice, radio (r), altura (h) y generatriz (g).',
+          sphere: 'Figura 3 (Esfera): Centro, radio (r) y diámetro (D = 2r). Sin bases planas.'
+        };
+        viewerDataText.textContent = shapeNames[chosenShape];
+        btnReturnQuestionShape.style.display = 'inline-block';
+      }
     });
+  });
+
+  btnReturnQuestionShape.addEventListener('click', () => {
+    AudioEngine.click();
+    const qObj = appState.currentQuestions[appState.qIndex];
+    if (qObj) applyQuestion3DConfig(qObj);
   });
 
   function setActiveGameShapeTab(shape) {
     const titles = {
-      cylinder: '🧊 MODELO 3D: CILINDRO',
-      cone: '🧊 MODELO 3D: CONO',
-      sphere: '🧊 MODELO 3D: ESFERA'
+      cylinder: '🧊 FIGURA 1: CILINDRO',
+      cone: '🧊 FIGURA 2: CONO',
+      sphere: '🧊 FIGURA 3: ESFERA'
     };
     document.getElementById('viewerShapeTitle').textContent = titles[shape] || '🧊 MODELO 3D';
     document.querySelectorAll('#gameShapeTabs .shape-tab').forEach(b => {
@@ -2642,16 +2965,12 @@
     updateGameHUD();
     const qObj = appState.currentQuestions[appState.qIndex];
 
-    // Configurar el visor 3D según la pregunta
-    setActiveGameShapeTab(qObj.shape);
-    gameViewer.setConfig({
-      shape: qObj.shape,
-      highlight: qObj.highlight || null,
-      labels: qObj.labels || { r: 'r', h: 'h', g: 'g', d: 'D = 2r' }
-    });
+    // Configurar el visor 3D exactamente con los datos de la pregunta actual
+    applyQuestion3DConfig(qObj);
 
     document.getElementById('questionCategoryChip').textContent = qObj.cat;
-    document.getElementById('questionTextDisplay').textContent = qObj.q;
+    // Uso de innerHTML para renderizar subíndices, superíndices y símbolos matemáticos limpios
+    document.getElementById('questionTextDisplay').innerHTML = qObj.q;
 
     const feedbackBox = document.getElementById('feedbackBox');
     feedbackBox.classList.remove('show');
