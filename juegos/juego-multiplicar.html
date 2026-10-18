@@ -48,6 +48,36 @@
     width: 100%;
     height: 100%;
   }
+
+  /* Botón de Sonido Flotante */
+  #btn-sound {
+    position: absolute;
+    top: 13px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(13, 18, 38, 0.9);
+    border: 1.5px solid var(--primary);
+    color: #fff;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 40;
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.35);
+    transition: transform 0.15s, border-color 0.2s;
+  }
+  #btn-sound:active {
+    transform: scale(0.9);
+  }
+  #btn-sound.muted {
+    border-color: #ff4b72;
+    box-shadow: 0 0 10px rgba(255, 75, 114, 0.35);
+    opacity: 0.8;
+  }
+
   /* Pantallas superpuestas */
   .overlay {
     position: absolute;
@@ -217,7 +247,7 @@
     background: rgba(11, 16, 34, 0.85);
     border: 1px solid rgba(0, 242, 254, 0.35);
     border-radius: 12px;
-    padding: 8px 12px;
+    padding: 8px 46px 8px 12px;
     margin-bottom: 8px;
   }
   .pilot-info {
@@ -423,6 +453,9 @@
 <body>
 
 <div id="game-container">
+  <!-- Botón de Control de Sonido -->
+  <button id="btn-sound" title="Activar / Silenciar Efectos de Sonido" aria-label="Sonido">🔊</button>
+
   <!-- HUD del Juego -->
   <div id="hud" class="hidden">
     <div class="hud-top">
@@ -568,7 +601,172 @@
   const ADMIN_PIN = '314159';
   const STORAGE_KEY = 'mision_galactica_scores_v1';
 
+  // ==========================================
+  // MOTOR DE SONIDO GALÁCTICO (Web Audio API)
+  // ==========================================
+  const SoundFX = (function() {
+    let audioCtx = null;
+    let muted = false;
+
+    function getCtx() {
+      if (muted) return null;
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Generador auxiliar de ruido blanco (para explosiones de rocas)
+    function playNoiseBurst(duration, filterFreq, gainAmount, delay = 0) {
+      const c = getCtx();
+      if (!c) return;
+      const startTime = c.currentTime + delay;
+      const bufferSize = Math.floor(c.sampleRate * duration);
+      const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = c.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = c.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(filterFreq, startTime);
+      filter.frequency.exponentialRampToValueAtTime(65, startTime + duration);
+
+      const gain = c.createGain();
+      gain.gain.setValueAtTime(gainAmount, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(c.destination);
+
+      noise.start(startTime);
+      noise.stop(startTime + duration);
+    }
+
+    // Generador auxiliar de tonos sintetizados
+    function playTone(type, freqStart, freqEnd, duration, gainAmount, delay = 0) {
+      const c = getCtx();
+      if (!c) return;
+      const startTime = c.currentTime + delay;
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freqStart, startTime);
+      if (freqEnd !== freqStart) {
+        osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), startTime + duration);
+      }
+
+      gain.gain.setValueAtTime(gainAmount, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+      osc.connect(gain);
+      gain.connect(c.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
+    return {
+      toggleMute() {
+        muted = !muted;
+        if (!muted) this.uiClick();
+        return muted;
+      },
+      // Sonido de interfaz (Botones y selectores)
+      uiClick() {
+        playTone('sine', 580, 880, 0.065, 0.12);
+      },
+      // Sonido al iniciar misión / despegar
+      gameStart() {
+        const notes = [440, 554.37, 659.25, 880];
+        notes.forEach((f, idx) => {
+          playTone('triangle', f, f * 1.03, 0.12, 0.16, idx * 0.065);
+        });
+        playNoiseBurst(0.28, 900, 0.08, 0.05);
+      },
+      // Disparo de bala normal
+      shoot() {
+        playTone('sawtooth', 920, 170, 0.11, 0.14);
+        playTone('square', 600, 120, 0.09, 0.07);
+      },
+      // Disparo de Súper Rayo Láser (Recompensa)
+      shootLaser() {
+        playTone('sawtooth', 1500, 220, 0.22, 0.2);
+        playTone('square', 750, 110, 0.24, 0.15);
+        playNoiseBurst(0.16, 1800, 0.12);
+      },
+      // Cuando se rompe una roca con la respuesta correcta
+      rockDestroy() {
+        playNoiseBurst(0.24, 950, 0.28);
+        playTone('triangle', 587.33, 587.33, 0.1, 0.16, 0.02);
+        playTone('triangle', 880, 1174.66, 0.16, 0.18, 0.09);
+      },
+      // Cuando aparece el Jefe Final cada 5 niveles (Sirena de Alerta)
+      bossAlert() {
+        for (let i = 0; i < 2; i++) {
+          const offset = i * 0.34;
+          playTone('sawtooth', 260, 490, 0.16, 0.2, offset);
+          playTone('sawtooth', 490, 240, 0.16, 0.2, offset + 0.16);
+          playTone('square', 130, 110, 0.3, 0.14, offset);
+        }
+      },
+      // Cuando se destruye al Jefe Roca Gigante
+      bossDestroy() {
+        playNoiseBurst(0.65, 700, 0.42, 0);
+        playNoiseBurst(0.5, 1200, 0.3, 0.18);
+        const fanfare = [523.25, 659.25, 783.99, 1046.5];
+        fanfare.forEach((f, idx) => {
+          playTone('triangle', f, f, 0.18, 0.22, 0.15 + idx * 0.08);
+        });
+      },
+      // Cuando se rompe una roca incorrecta o se escapa la respuesta
+      wrongHit() {
+        playNoiseBurst(0.25, 550, 0.26);
+        playTone('sawtooth', 230, 120, 0.22, 0.2);
+        playTone('sawtooth', 165, 85, 0.28, 0.22, 0.12);
+      },
+      // Cuando el escudo absorbe el daño
+      shieldDeflect() {
+        playTone('sine', 380, 1150, 0.14, 0.22);
+        playTone('triangle', 1150, 520, 0.18, 0.18, 0.12);
+      },
+      // Al recoger una recompensa (Vida, Escudo o Láser)
+      powerUp() {
+        const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+        notes.forEach((f, idx) => {
+          playTone('sine', f, f * 1.05, 0.1, 0.16, idx * 0.05);
+        });
+      },
+      // Subida de nivel
+      levelUp() {
+        playTone('triangle', 523.25, 523.25, 0.09, 0.15, 0.05);
+        playTone('triangle', 659.25, 659.25, 0.09, 0.15, 0.13);
+        playTone('triangle', 1046.5, 1046.5, 0.18, 0.18, 0.21);
+      },
+      // Fin del juego (Game Over)
+      gameOver() {
+        const notes = [440, 392, 349.23, 261.63];
+        notes.forEach((f, idx) => {
+          playTone('sawtooth', f, f * 0.92, 0.22, 0.16, idx * 0.16);
+        });
+      }
+    };
+  })();
+
   // Elementos UI
+  const btnSound = document.getElementById('btn-sound');
   const startScreen = document.getElementById('start-screen');
   const gameoverScreen = document.getElementById('gameover-screen');
   const adminModal = document.getElementById('admin-modal');
@@ -590,6 +788,17 @@
   const opLabel = document.getElementById('op-label');
   const currentOpEl = document.getElementById('current-operation');
   const feedbackEl = document.getElementById('feedback');
+
+  // Botón para activar / silenciar sonido
+  btnSound.addEventListener('click', () => {
+    const isMuted = SoundFX.toggleMute();
+    btnSound.textContent = isMuted ? '🔇' : '🔊';
+    btnSound.classList.toggle('muted', isMuted);
+  });
+
+  // Sonidos recomendados en selectores de la interfaz
+  gameModeSelect.addEventListener('change', () => SoundFX.uiClick());
+  gameDifficultySelect.addEventListener('change', () => SoundFX.uiClick());
 
   // Estado del juego
   let gameState = 'START';
@@ -723,6 +932,7 @@
   }
 
   function applyReward(p) {
+    SoundFX.powerUp();
     createExplosion(p.x, p.y, '#ffea00', 28);
     if (p.type === 'LIFE') {
       if (lives < maxLives) {
@@ -747,6 +957,9 @@
     isBossWave = (level % 5 === 0);
 
     if (isBossWave) {
+      // Efecto de sonido cuando sale el Jefe Final
+      SoundFX.bossAlert();
+
       opBanner.classList.add('boss-mode');
       opLabel.textContent = gameDifficulty === 'reto'
         ? '☄️ ¡JEFE ROCA (VELOCIDAD x2 | FALLAR QUITA 2 ❤️)! Resuelve:'
@@ -844,21 +1057,14 @@
     const laneWidth = canvas.width / count;
 
     const speedBlock = Math.floor((level - 1) / 5);
-    // Posición dentro del ciclo de 5 niveles:
-    // 0 y 1 = inicio o recién derrotado el jefe (ej. Niveles 1-2, 6-7, 11-12)
-    // 2 y 3 = antes de que salga el jefe (ej. Niveles 3-4, 8-9, 13-14)
-    // 4 = nivel del Jefe Roca (ej. Niveles 5, 10, 15)
     const cycleStage = (level - 1) % 5;
     let progressiveSpeed;
 
     if (gameDifficulty === 'reto') {
       const velocidadNormalBase = 0.68;
-      // Antes de que salga el jefe (y hasta derrotarlo), las rocas duplican su velocidad (x2).
-      // Una vez derrotado el jefe, regresan a la velocidad normal (x1).
       const duplicarVelocidad = (cycleStage >= 2);
       progressiveSpeed = duplicarVelocidad ? (velocidadNormalBase * 2) : velocidadNormalBase;
     } else {
-      // MODO NORMAL: Velocidad original
       progressiveSpeed = Math.min(1.55, 0.42 + (speedBlock * 0.13));
     }
 
@@ -941,6 +1147,8 @@
           yTop: 115,
           alpha: 1
         });
+        // Sonido cuando sale el Súper Láser
+        SoundFX.shootLaser();
       }
     } else {
       if (bullets.length < 4) {
@@ -951,6 +1159,8 @@
           speed: 11.5,
           isLaserBeam: false
         });
+        // Sonido cuando sale la bala normal
+        SoundFX.shoot();
       }
     }
   }
@@ -980,6 +1190,7 @@
     if (shieldTimeLeft > 0) {
       shieldTimeLeft = 0;
       updateHUD();
+      SoundFX.shieldDeflect();
       createExplosion(ship.x, ship.y, '#00f2fe', 28);
       showToast('🛡️ ¡El Escudo absorbió el impacto y salvó tu vida!', '#00f2fe');
       generateQuestion();
@@ -990,8 +1201,10 @@
     updateHUD();
     showToast(reasonMsg, '#ff4b72');
     if (lives <= 0) {
+      SoundFX.gameOver();
       endGame();
     } else {
+      SoundFX.wrongHit();
       generateQuestion();
     }
   }
@@ -999,15 +1212,16 @@
   function startGame() {
     const rawName = playerNameInput.value.trim();
     if (!rawName) {
+      SoundFX.wrongHit();
       playerNameInput.style.borderColor = '#ff0844';
       playerNameInput.focus();
       return;
     }
+    SoundFX.gameStart();
     playerName = rawName;
     gameMode = gameModeSelect.value;
     gameDifficulty = gameDifficultySelect.value;
 
-    // En modo Reto el máximo de vidas es 3; en modo Normal se mantiene en 4
     maxLives = (gameDifficulty === 'reto') ? 3 : 4;
     score = 0;
     lives = 3;
@@ -1092,6 +1306,7 @@
   document.getElementById('btn-start').addEventListener('click', startGame);
   document.getElementById('btn-restart').addEventListener('click', startGame);
   document.getElementById('btn-home').addEventListener('click', () => {
+    SoundFX.uiClick();
     gameoverScreen.classList.add('hidden');
     startScreen.classList.remove('hidden');
     profSignature.classList.remove('hidden');
@@ -1099,6 +1314,7 @@
   });
 
   function openAdminModal() {
+    SoundFX.uiClick();
     adminPinInput.value = '';
     adminMsg.textContent = '';
     adminModal.classList.remove('hidden');
@@ -1107,10 +1323,12 @@
   document.getElementById('btn-open-admin-1').addEventListener('click', openAdminModal);
   document.getElementById('btn-open-admin-2').addEventListener('click', openAdminModal);
   document.getElementById('btn-close-admin').addEventListener('click', () => {
+    SoundFX.uiClick();
     adminModal.classList.add('hidden');
   });
   document.getElementById('btn-confirm-reset').addEventListener('click', () => {
     if (adminPinInput.value.trim() === ADMIN_PIN) {
+      SoundFX.powerUp();
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch (e) {}
@@ -1121,6 +1339,7 @@
         adminModal.classList.add('hidden');
       }, 900);
     } else {
+      SoundFX.wrongHit();
       adminMsg.style.color = '#ff4b72';
       adminMsg.textContent = '❌ Clave incorrecta.';
     }
@@ -1245,6 +1464,9 @@
           if (t.isCorrect) {
             correctHits++;
             if (isBossWave && bossRock) {
+              // Sonido de destrucción épica del Jefe Roca
+              SoundFX.bossDestroy();
+
               const bx = bossRock.x;
               const by = bossRock.y;
               score += 50 + (10 * level);
@@ -1261,6 +1483,9 @@
                 : `💥 ¡JEFE DESTROZADO! ¡Atrapa tu recompensa de nivel ${level}!`;
               showToast(msgBossDefeated, '#ffea00');
             } else {
+              // Sonido cuando rompe la roca correcta
+              SoundFX.rockDestroy();
+
               score += 10 * level;
               createExplosion(t.x, t.y, b.isLaserBeam ? '#e040fb' : '#00e676', 24);
 
@@ -1269,12 +1494,15 @@
                 const newCycleStage = (level - 1) % 5;
                 if (level % 5 === 0) {
                   showToast(`⚠️ ¡ALERTA! Nivel ${level}: ¡Jefe Roca Gigante!`, '#ff5722');
-                } else if (gameDifficulty === 'reto' && newCycleStage === 2) {
-                  showToast(`⚡ ¡Se acerca el Jefe! ¡Velocidad de rocas X2!`, '#ffea00');
-                } else if (gameDifficulty !== 'reto' && (level - 1) % 5 === 0) {
-                  showToast(`⚡ ¡Nivel ${level}! ¡La velocidad aumentó!`, '#ffea00');
                 } else {
-                  showToast(`¡Subiste al Nivel ${level}! 🚀`, '#00f2fe');
+                  SoundFX.levelUp();
+                  if (gameDifficulty === 'reto' && newCycleStage === 2) {
+                    showToast(`⚡ ¡Se acerca el Jefe! ¡Velocidad de rocas X2!`, '#ffea00');
+                  } else if (gameDifficulty !== 'reto' && (level - 1) % 5 === 0) {
+                    showToast(`⚡ ¡Nivel ${level}! ¡La velocidad aumentó!`, '#ffea00');
+                  } else {
+                    showToast(`¡Subiste al Nivel ${level}! 🚀`, '#00f2fe');
+                  }
                 }
               } else {
                 showToast(`¡Excelente! +${10 * level} pts`, '#00e676');
