@@ -1,0 +1,3238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LA FÁBRICA DE MONOMIOS - Prof. Jhon Dewis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fredoka:wght@400;600;700&family=Nunito:wght@600;700;800;900&family=Satisfy&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-cyan: #00f2fe;
+      --neon-blue: #4facfe;
+      --neon-amber: #fbbf24;
+      --neon-green: #10b981;
+      --neon-pink: #f43f5e;
+      --neon-purple: #a855f7;
+      --factory-dark: #0f172a;
+      --factory-panel: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Nunito', sans-serif;
+      background-color: #090d16;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
+        linear-gradient(rgba(30, 41, 59, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30, 41, 59, 0.4) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-title {
+      font-family: 'Fredoka', cursive, sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes rainbowFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes sparklePulse {
+      0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6)); }
+      50% { transform: scale(1.18) rotate(8deg); filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.95)); }
+    }
+
+    .font-signature {
+      font-family: 'Satisfy', 'Dancing Script', cursive;
+      font-weight: 400;
+      font-size: 1.08rem;
+      line-height: 1.2;
+      background: linear-gradient(
+        90deg,
+        #00f5d4 0%,
+        #38ef7d 18%,
+        #ffeb3b 36%,
+        #ff9800 54%,
+        #ff4081 72%,
+        #b388ff 88%,
+        #00f5d4 100%
+      );
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbowFlow 7s ease-in-out infinite;
+      filter: drop-shadow(0 0 4px rgba(0, 245, 212, 0.18));
+      display: inline-block;
+      padding: 0 3px;
+    }
+
+    .signature-label {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .sparkle-icon {
+      display: inline-block;
+      font-size: 0.85rem;
+      animation: sparklePulse 2.8s ease-in-out infinite;
+    }
+
+    .footer-signature-bar {
+      background: linear-gradient(180deg, rgba(7, 11, 20, 0.88) 0%, #070b14 100%);
+      border-top: 1px solid rgba(56, 189, 248, 0.14);
+      box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.45);
+    }
+
+    @media print {
+      body {
+        background: #0f172a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      #gameHud, .no-print, footer {
+        display: none !important;
+      }
+    }
+
+    /* Animated Conveyor Belt */
+    @keyframes conveyorMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 56px 0; }
+    }
+
+    .conveyor-belt {
+      background: repeating-linear-gradient(
+        90deg,
+        #334155 0px,
+        #334155 20px,
+        #1e293b 20px,
+        #1e293b 28px
+      );
+      background-size: 56px 100%;
+      animation: conveyorMove 1.2s linear infinite;
+      border-top: 4px solid #64748b;
+      border-bottom: 6px solid #0f172a;
+      box-shadow: inset 0 4px 8px rgba(0,0,0,0.6);
+    }
+
+    .conveyor-paused {
+      animation-play-state: paused;
+    }
+
+    /* Spinning Factory Gears */
+    @keyframes spinRight {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes spinLeft {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    .gear-cw {
+      animation: spinRight 10s linear infinite;
+    }
+    .gear-ccw {
+      animation: spinLeft 10s linear infinite;
+    }
+    .gear-fast {
+      animation-duration: 2.2s !important;
+    }
+
+    /* Floating Monomial Bot Animation */
+    @keyframes floatBot {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .monomial-bot {
+      animation: floatBot 2.6s ease-in-out infinite;
+    }
+
+    /* Pulse & Neon Glows */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 12px rgba(56, 189, 248, 0.4), inset 0 0 8px rgba(56, 189, 248, 0.2); }
+      50% { box-shadow: 0 0 24px rgba(56, 189, 248, 0.8), inset 0 0 14px rgba(56, 189, 248, 0.35); }
+    }
+
+    .machine-chamber {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.95) 100%);
+      border: 2px solid #38bdf8;
+      animation: pulseGlow 3s infinite;
+    }
+
+    @keyframes emergencyBlink {
+      0%, 100% { border-color: #f43f5e; box-shadow: 0 0 20px rgba(244, 63, 94, 0.5); }
+      50% { border-color: #fbbf24; box-shadow: 0 0 30px rgba(251, 191, 36, 0.7); }
+    }
+
+    .emergency-chamber {
+      animation: emergencyBlink 1.5s infinite;
+    }
+
+    /* Tactile Factory Buttons */
+    .btn-factory {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      border-bottom-width: 5px;
+      position: relative;
+    }
+    .btn-factory:active:not(:disabled) {
+      transform: translateY(3px);
+      border-bottom-width: 2px;
+    }
+    .btn-factory:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* Algebraic Expression Typography */
+    .math-expr {
+      font-family: 'Fredoka', sans-serif;
+      letter-spacing: 1px;
+    }
+    .math-var {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 700;
+      padding: 0 1px;
+    }
+    .math-exp {
+      font-family: 'Nunito', sans-serif;
+      font-style: normal;
+      font-weight: 900;
+      font-size: 0.62em;
+      vertical-align: super;
+      line-height: 0;
+      margin-left: 1px;
+      color: #fde047;
+    }
+
+    /* Block Disintegration / Extraction */
+    .alg-block {
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+    .alg-block:hover {
+      transform: scale(1.07) translateY(-2px);
+    }
+    .alg-block.removed {
+      opacity: 0.22;
+      transform: scale(0.78) rotate(-8deg);
+      filter: grayscale(85%);
+      border-style: dashed;
+    }
+
+    /* Factor Cancellation Slash */
+    .factor-pill {
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .factor-pill.canceled {
+      opacity: 0.35;
+      background-color: #334155 !important;
+      color: #94a3b8 !important;
+      transform: scale(0.88);
+    }
+    .factor-pill.canceled::after {
+      content: '';
+      position: absolute;
+      left: -4px;
+      right: -4px;
+      top: 50%;
+      height: 4px;
+      background: #f43f5e;
+      transform: rotate(-25deg);
+      border-radius: 2px;
+      box-shadow: 0 0 6px #f43f5e;
+    }
+
+    /* Shake Animation for Errors */
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .shake-anim {
+      animation: shakeError 0.45s ease-in-out;
+    }
+
+    /* Pop-in Animation */
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      80% { transform: scale(1.06); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .pop-in {
+      animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- PARTICLE CELEBRATION CANVAS -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <!-- TOP HUD (HEADS-UP DISPLAY) -->
+  <header id="gameHud" class="hidden sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b-2 border-slate-700 px-3 py-2 shadow-xl">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <!-- Left: Logo & Student Info -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="showMapScreen()" title="Ir al Mapa de Máquinas" class="btn-factory bg-slate-800 hover:bg-slate-700 text-cyan-400 border-slate-950 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 text-sm font-bold">
+          <span>🏭</span>
+          <span class="hidden sm:inline">Mapa</span>
+        </button>
+
+        <div class="flex items-center gap-2 bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-xl">
+          <span class="text-lg">🧑‍🔬</span>
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 leading-none">Ingeniero/a</div>
+            <div id="hudPlayerName" class="text-xs sm:text-sm font-extrabold text-cyan-300 truncate max-w-[110px] sm:max-w-[160px]">Estudiante</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Hearts, Score, Stars & Level Progress -->
+      <div class="flex items-center gap-2 sm:gap-4">
+        <!-- Hearts -->
+        <div id="hudHearts" class="flex items-center gap-0.5 bg-slate-800/90 border border-slate-700 px-2.5 py-1 rounded-xl text-base sm:text-lg" title="Vidas del nivel">
+          <span>❤️</span><span>❤️</span><span>❤️</span>
+        </div>
+
+        <!-- Score -->
+        <div class="flex items-center gap-1.5 bg-slate-800/90 border border-amber-500/40 px-3 py-1 rounded-xl">
+          <span class="text-amber-400 text-base">⚡</span>
+          <div>
+            <div class="text-[10px] uppercase text-slate-400 leading-none">Puntos</div>
+            <div id="hudScore" class="text-xs sm:text-sm font-black text-amber-300">0</div>
+          </div>
+        </div>
+
+        <!-- Stars -->
+        <div class="hidden md:flex items-center gap-1.5 bg-slate-800/90 border border-yellow-500/40 px-3 py-1 rounded-xl">
+          <span class="text-yellow-400 text-base">⭐</span>
+          <div>
+            <div class="text-[10px] uppercase text-slate-400 leading-none">Estrellas</div>
+            <div id="hudStars" class="text-xs sm:text-sm font-black text-yellow-300">0 / 15</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Utility Controls -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button id="btnMusicToggle" onclick="toggleAudio()" class="btn-factory bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-900 px-2.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1" title="Activar/Desactivar Música y Sonidos">
+          <span id="musicIcon">🔊</span>
+          <span id="musicLabel" class="hidden md:inline">Sonido ON</span>
+        </button>
+
+        <button onclick="openHelpModal()" class="btn-factory bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-700 px-2.5 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1" title="Ver las 4 Reglas de Oro y Ejemplos">
+          <span>📘</span>
+          <span class="hidden sm:inline">Ayuda / Ejemplos</span>
+        </button>
+
+        <button id="btnRestartLevel" onclick="restartCurrentLevel()" class="hidden btn-factory bg-rose-600 hover:bg-rose-500 text-white border-rose-900 px-2.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold" title="Reiniciar este nivel">
+          🔄 <span class="hidden lg:inline">Reiniciar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Level Progress Bar Sub-bar -->
+    <div id="hudProgressContainer" class="hidden max-w-6xl mx-auto mt-2 pt-1.5 border-t border-slate-800 flex items-center gap-3">
+      <span id="hudLevelTitle" class="text-xs font-extrabold text-cyan-400 uppercase tracking-wider whitespace-nowrap">NIVEL 1</span>
+      <div class="flex-1 h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700 p-0.5">
+        <div id="hudProgressBar" class="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 rounded-full transition-all duration-300" style="width: 10%"></div>
+      </div>
+      <span id="hudProgressText" class="text-xs font-black text-slate-300 whitespace-nowrap">1 / 10</span>
+    </div>
+  </header>
+
+  <!-- MAIN APPLICATION CONTAINER -->
+  <main class="flex-1 flex flex-col justify-center items-center p-3 sm:p-5 max-w-6xl w-full mx-auto">
+
+    <!-- ==========================================
+         SCREEN 1: START / WELCOME SCREEN
+         ========================================== -->
+    <section id="screenStart" class="w-full max-w-2xl bg-slate-900/90 border-2 border-cyan-500/60 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <!-- Decorative animated background gears -->
+      <svg class="gear-cw absolute -top-12 -right-12 w-36 h-36 text-cyan-500/10 pointer-events-none" viewBox="0 0 100 100" fill="currentColor">
+        <path d="M94.5,43.5 L85.5,41.5 C84.5,38.2 83.1,35.1 81.4,32.2 L86.5,24.5 C87.5,23 87.3,21 86,19.7 L80.3,14 C79,12.7 77,12.5 75.5,13.5 L67.8,18.6 C64.9,16.9 61.8,15.5 58.5,14.5 L56.5,5.5 C56.1,3.8 54.6,2.5 52.8,2.5 L47.2,2.5 C45.4,2.5 43.9,3.8 43.5,5.5 L41.5,14.5 C38.2,15.5 35.1,16.9 32.2,18.6 L24.5,13.5 C23,12.5 21,12.7 19.7,14 L14,19.7 C12.7,21 12.5,23 13.5,24.5 L18.6,32.2 C16.9,35.1 15.5,38.2 14.5,41.5 L5.5,43.5 C3.8,43.9 2.5,45.4 2.5,47.2 L2.5,52.8 C2.5,54.6 3.8,56.1 5.5,56.5 L14.5,58.5 C15.5,61.8 16.9,64.9 18.6,67.8 L13.5,75.5 C12.5,77 12.7,79 14,80.3 L19.7,86 C21,87.3 23,87.5 24.5,86.5 L32.2,81.4 C35.1,83.1 38.2,84.5 41.5,85.5 L43.5,94.5 C43.9,96.2 45.4,97.5 47.2,97.5 L52.8,97.5 C54.6,97.5 56.1,96.2 56.5,94.5 L58.5,85.5 C61.8,84.5 64.9,83.1 67.8,81.4 L75.5,86.5 C77,87.5 79,87.3 80.3,86 L86,80.3 C87.3,79 87.5,77 86.5,75.5 L81.4,67.8 C83.1,64.9 84.5,61.8 85.5,58.5 L94.5,56.5 C96.2,56.1 97.5,54.6 97.5,52.8 L97.5,47.2 C97.5,45.4 96.2,43.9 94.5,43.5 Z M50,65 C41.7,65 35,58.3 35,50 C35,41.7 41.7,35 50,35 C58.3,35 65,41.7 65,50 C65,58.3 58.3,65 50,65 Z"/>
+      </svg>
+
+      <div class="text-center relative z-10">
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2 bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 px-4 py-1 rounded-full text-xs sm:text-sm font-extrabold mb-3">
+          <span>⚙️</span> AVENTURA ALGEBRAICA INTERACTIVA
+        </div>
+
+        <h1 class="font-title text-3xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-amber-300 to-emerald-300 drop-shadow mb-2">
+          LA FÁBRICA DE MONOMIOS
+        </h1>
+        <p class="text-slate-300 text-sm sm:text-base max-w-lg mx-auto mb-5">
+          ¡Opera las 4 máquinas futuristas! Escanea términos semejantes, retira bloques algebraicos, suma y cancela exponentes paso a paso.
+        </p>
+
+        <!-- Animated Monomial Mascots Showcase -->
+        <div class="flex justify-center items-center gap-3 sm:gap-5 my-5">
+          <div class="monomial-bot bg-gradient-to-b from-cyan-600 to-blue-800 border-2 border-cyan-300 rounded-2xl px-4 py-3 shadow-lg flex flex-col items-center">
+            <span class="text-xs text-cyan-200 font-bold">🤖 Bot Suma</span>
+            <span class="math-expr text-2xl sm:text-3xl font-black text-white">3<span class="math-var">x</span><span class="math-exp">2</span></span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-amber-400">⚡</div>
+          <div class="monomial-bot bg-gradient-to-b from-purple-600 to-indigo-800 border-2 border-purple-300 rounded-2xl px-4 py-3 shadow-lg flex flex-col items-center" style="animation-delay: 0.4s">
+            <span class="text-xs text-purple-200 font-bold">🤖 Bot Potencia</span>
+            <span class="math-expr text-2xl sm:text-3xl font-black text-white">5<span class="math-var">x</span><span class="math-exp">3</span></span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-emerald-400">⚙️</div>
+          <div class="monomial-bot bg-gradient-to-b from-emerald-600 to-teal-800 border-2 border-emerald-300 rounded-2xl px-4 py-3 shadow-lg flex flex-col items-center" style="animation-delay: 0.8s">
+            <span class="text-xs text-emerald-200 font-bold">🤖 Resultado</span>
+            <span class="math-expr text-2xl sm:text-3xl font-black text-white">15<span class="math-var">x</span><span class="math-exp">5</span></span>
+          </div>
+        </div>
+
+        <!-- Name Input Box -->
+        <div class="bg-slate-800/90 border border-slate-600 rounded-2xl p-4 sm:p-5 max-w-md mx-auto mb-5">
+          <label for="inputStudentName" class="block text-xs sm:text-sm font-extrabold text-cyan-300 uppercase tracking-wider mb-2">
+            🪪 Ingresa tu nombre de Ingeniero/a Algebraico:
+          </label>
+          <input
+            id="inputStudentName"
+            type="text"
+            maxlength="28"
+            placeholder="Ej. Valentina, Mateo, Sofía..."
+            class="w-full bg-slate-950 border-2 border-cyan-500/60 focus:border-amber-400 rounded-xl px-4 py-3 text-center text-lg font-extrabold text-white placeholder-slate-500 outline-none transition"
+            onkeydown="if(event.key==='Enter') startGameFromWelcome()"
+          />
+          <p id="nameErrorMsg" class="hidden text-rose-400 text-xs font-bold mt-2">
+            ⚠️ Por favor, escribe tu nombre para registrar tu credencial de la fábrica.
+          </p>
+        </div>
+
+        <!-- Start Action Buttons -->
+        <div class="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto">
+          <button onclick="startGameFromWelcome()" class="btn-factory flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 border-emerald-800 font-title text-xl py-3.5 px-6 rounded-2xl shadow-lg font-bold">
+            🚀 ¡INGRESAR A LA FÁBRICA!
+          </button>
+          <button onclick="openHelpModal()" class="btn-factory bg-slate-800 hover:bg-slate-700 text-amber-300 border-slate-950 font-bold py-3.5 px-5 rounded-2xl text-sm">
+            📘 Reglas de Oro
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SCREEN 2: FACTORY LEVEL MAP
+         ========================================== -->
+    <section id="screenMap" class="hidden w-full">
+      <div class="text-center mb-5">
+        <h2 class="font-title text-2xl sm:text-4xl text-cyan-300">PANEL CENTRAL DE LA FÁBRICA</h2>
+        <p class="text-slate-300 text-sm sm:text-base">Completa cada máquina para obtener tu diploma de nivel y desbloquear la siguiente. ¡Reúne las 15 estrellas!</p>
+      </div>
+
+      <!-- 5 Levels Grid -->
+      <div id="levelsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <!-- Bottom Bar: Certificate Button, Unlock All (Teacher Mode) & Reset Progress -->
+      <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-3.5 flex flex-wrap items-center justify-center sm:justify-between gap-3">
+        <div class="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+          <span>⚙️</span> Selecciona cualquier máquina desbloqueada para operar o ver tu diploma.
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="btnViewCertificate" onclick="showCertificateScreen()" class="hidden btn-factory bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-700 px-4 py-2 rounded-xl text-xs sm:text-sm font-black">
+            🏆 Ver Gran Diploma Final
+          </button>
+          <button onclick="unlockAllLevelsTeacher()" class="btn-factory bg-slate-800 hover:bg-slate-700 text-cyan-300 border-slate-950 px-3 py-2 rounded-xl text-xs font-bold" title="Desbloquear todos los niveles para práctica libre o demostración en clase">
+            🔓 Modo Práctica Libre (Todas las Máquinas)
+          </button>
+          <button onclick="confirmResetProgress()" class="btn-factory bg-slate-800 hover:bg-rose-950 text-rose-400 border-slate-950 px-3 py-2 rounded-xl text-xs font-bold">
+            🗑️ Borrar Progreso
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SCREEN 3: INTERACTIVE MACHINE WORKSPACE
+         ========================================== -->
+    <section id="screenMachine" class="hidden w-full">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+        <!-- LEFT / MAIN COLUMN: THE MACHINE & CONVEYOR (8 cols on lg) -->
+        <div class="lg:col-span-8 flex flex-col gap-3">
+
+          <!-- Machine Header Banner -->
+          <div id="machineBanner" class="bg-slate-900 border-2 border-cyan-500/60 rounded-2xl p-3 sm:p-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div id="machineIconBadge" class="w-11 h-11 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-2xl">
+                ➕
+              </div>
+              <div>
+                <h2 id="machineTitle" class="font-title text-lg sm:text-2xl text-white leading-tight">MÁQUINA DE ADICIÓN</h2>
+                <p id="machineSubtitle" class="text-xs sm:text-sm text-cyan-300">Verifica si son términos semejantes y suma únicamente sus coeficientes.</p>
+              </div>
+            </div>
+            <div class="hidden sm:flex items-center gap-2">
+              <svg class="gear-cw w-8 h-8 text-cyan-400/60" viewBox="0 0 100 100" fill="currentColor">
+                <path d="M94.5,43.5 L85.5,41.5 C84.5,38.2 83.1,35.1 81.4,32.2 L86.5,24.5 L80.3,14 L67.8,18.6 C64.9,16.9 61.8,15.5 58.5,14.5 L56.5,5.5 L43.5,5.5 L41.5,14.5 C38.2,15.5 35.1,16.9 32.2,18.6 L19.7,14 L13.5,24.5 L18.6,32.2 C16.9,35.1 15.5,38.2 14.5,41.5 L5.5,43.5 L5.5,56.5 L14.5,58.5 C15.5,61.8 16.9,64.9 18.6,67.8 L13.5,75.5 L19.7,86 L32.2,81.4 C35.1,83.1 38.2,84.5 41.5,85.5 L43.5,94.5 L56.5,94.5 L58.5,85.5 C61.8,84.5 64.9,83.1 67.8,81.4 L80.3,86 L86.5,75.5 L81.4,67.8 C83.1,64.9 84.5,61.8 85.5,58.5 L94.5,56.5 Z M50,65 C41.7,65 35,58.3 35,50 C35,41.7 41.7,35 50,35 C58.3,35 65,41.7 65,50 C65,58.3 58.3,65 50,65 Z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- CONVEYOR BELT & MONOMIAL DISPLAY STAGE -->
+          <div id="machineStage" class="machine-chamber rounded-3xl p-4 sm:p-5 relative overflow-hidden">
+            <!-- Top Neon Pipes Decoration -->
+            <div class="flex justify-between items-center mb-3 text-xs font-extrabold uppercase tracking-wider text-slate-400">
+              <span id="stageStatusBadge" class="bg-slate-800 border border-slate-600 px-3 py-1 rounded-full text-cyan-300">
+                📡 ESCÁNER EN LÍNEA
+              </span>
+              <span id="invisibleExpHint" class="hidden bg-amber-500/20 border border-amber-400 text-amber-300 px-3 py-1 rounded-full animate-pulse">
+                💡 Recuerda: Una letra sin exponente visible tiene exponente 1 (ej. x = x¹)
+              </span>
+            </div>
+
+            <!-- Incoming Operation on Conveyor Belt -->
+            <div class="relative pt-2 pb-6">
+              <div id="operationDisplayArea" class="flex flex-wrap items-center justify-center gap-2 sm:gap-4 min-h-[110px] z-10 relative">
+                <!-- Populated dynamically per exercise -->
+              </div>
+              <!-- Conveyor Belt Track -->
+              <div id="conveyorTrack" class="conveyor-belt h-6 w-full rounded-full mt-2"></div>
+              <div class="flex justify-between px-6 -mt-1">
+                <div class="w-4 h-4 rounded-full bg-slate-500 border-2 border-slate-900"></div>
+                <div class="w-4 h-4 rounded-full bg-slate-500 border-2 border-slate-900"></div>
+                <div class="w-4 h-4 rounded-full bg-slate-500 border-2 border-slate-900"></div>
+                <div class="w-4 h-4 rounded-full bg-slate-500 border-2 border-slate-900"></div>
+              </div>
+            </div>
+
+            <!-- INTERACTIVE MECHANISM AREA (Changes dynamically based on Level 1, 2, 3, 4, 5) -->
+            <div id="interactiveMechanismArea" class="mt-2 bg-slate-950/85 border border-slate-700 rounded-2xl p-4 sm:p-5">
+              <!-- Dynamic interactive steps rendered here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: ON-SCREEN NUMERIC KEYPAD, PROFESSOR FEEDBACK & LIVE HELP (4 cols on lg) -->
+        <div class="lg:col-span-4 flex flex-col gap-3">
+
+          <!-- Interactive Keypad for quick mobile & desktop entry -->
+          <div class="bg-slate-900/95 border-2 border-slate-700 rounded-2xl p-4 shadow-xl">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-400">🔢 Panel Numérico de Control</span>
+              <span id="activeInputBadge" class="text-[11px] bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-md font-bold">Listo</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">
+              Puedes usar tu teclado físico o tocar estos botones para escribir en la casilla activa:
+            </p>
+            <div class="grid grid-cols-4 gap-2">
+              <button onclick="keypadPress('7')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">7</button>
+              <button onclick="keypadPress('8')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">8</button>
+              <button onclick="keypadPress('9')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">9</button>
+              <button onclick="keypadPress('DEL')" class="btn-factory bg-rose-700 hover:bg-rose-600 text-white border-rose-950 py-2.5 rounded-xl font-bold text-sm">⌫</button>
+
+              <button onclick="keypadPress('4')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">4</button>
+              <button onclick="keypadPress('5')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">5</button>
+              <button onclick="keypadPress('6')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">6</button>
+              <button onclick="keypadPress('-')" class="btn-factory bg-amber-600 hover:bg-amber-500 text-slate-950 border-amber-800 py-2.5 rounded-xl font-black text-xl" title="Signo Negativo (-)">−</button>
+
+              <button onclick="keypadPress('1')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">1</button>
+              <button onclick="keypadPress('2')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">2</button>
+              <button onclick="keypadPress('3')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">3</button>
+              <button onclick="keypadPress('0')" class="btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2.5 rounded-xl font-black text-lg">0</button>
+            </div>
+          </div>
+
+          <!-- Professor Guide & Pedagogical Feedback Panel -->
+          <div id="professorCard" class="bg-slate-900/95 border-2 border-indigo-500/50 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+            <div class="flex items-start gap-3">
+              <div id="profAvatar" class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400 flex items-center justify-center text-3xl shrink-0">
+                👨‍🔬
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-black uppercase tracking-wider text-indigo-300">Guía Científico</span>
+                  <span class="font-signature" style="font-size: 0.92rem;">Prof. Jhon Dewis</span>
+                </div>
+                <div id="profMessage" class="text-xs sm:text-sm text-slate-200 mt-1 leading-relaxed">
+                  ¡Observa los monomios en la cinta transportadora! Primero verifica su parte literal.
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Golden Rule Reminder -->
+            <div id="quickRuleBox" class="mt-3 pt-3 border-t border-slate-800 text-xs text-amber-300 font-bold flex items-center justify-between">
+              <span id="quickRuleText">📌 Regla: Suma coeficientes, conserva exponentes.</span>
+              <button onclick="openHelpModal()" class="underline text-cyan-300 hover:text-cyan-200 ml-2 shrink-0">Ver ejemplo</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SCREEN 4: FINAL GRADUATION CERTIFICATE
+         ========================================== -->
+    <section id="screenCertificate" class="hidden w-full max-w-3xl bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-4 border-amber-400 rounded-3xl p-6 sm:p-10 shadow-2xl text-center relative overflow-hidden">
+      <div class="inline-block bg-amber-400/20 border border-amber-300 text-amber-300 px-5 py-1 rounded-full text-xs sm:text-sm font-black uppercase tracking-widest mb-3">
+        🏆 GRAN DIPLOMA DE EXCELENCIA ALGEBRAICA 🏆
+      </div>
+
+      <h2 class="font-title text-3xl sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-cyan-300 mb-2">
+        ¡LA FÁBRICA DE MONOMIOS FUE DOMINADA!
+      </h2>
+
+      <p class="text-slate-300 text-sm sm:text-base mb-4">
+        Se otorga el presente reconocimiento oficial de Ingeniero/a Jefe de Monomios a:
+      </p>
+
+      <div id="certStudentName" class="font-title text-3xl sm:text-4xl text-cyan-300 bg-slate-950/80 border-2 border-cyan-500/50 rounded-2xl py-3 px-6 inline-block mb-6 shadow-inner">
+        Nombre del Estudiante
+      </div>
+
+      <!-- Stats Summary -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto mb-6">
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-3">
+          <div class="text-xs text-slate-400 uppercase font-bold">Puntuación Total</div>
+          <div id="certTotalScore" class="text-2xl sm:text-3xl font-black text-amber-400 mt-1">0 pts</div>
+        </div>
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-3">
+          <div class="text-xs text-slate-400 uppercase font-bold">Estrellas Ganadas</div>
+          <div id="certTotalStars" class="text-2xl sm:text-3xl font-black text-yellow-300 mt-1">15 / 15 ⭐</div>
+        </div>
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-3">
+          <div class="text-xs text-slate-400 uppercase font-bold">Máquinas Reparadas</div>
+          <div class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">5 / 5 ⚙️</div>
+        </div>
+      </div>
+
+      <!-- The 4 Golden Rules Mastered Badge -->
+      <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 max-w-xl mx-auto mb-6 text-left text-xs sm:text-sm space-y-1.5 text-slate-300">
+        <div class="font-extrabold text-amber-300 text-center mb-2">✨ LAS 4 REGLAS DE ORO DOMINADAS ✨</div>
+        <div>✅ <strong>Adición:</strong> Sumar coeficientes de términos semejantes y conservar la parte literal.</div>
+        <div>✅ <strong>Sustracción:</strong> Restar coeficientes de términos semejantes y conservar la parte literal.</div>
+        <div>✅ <strong>Multiplicación:</strong> Multiplicar coeficientes y sumar exponentes de igual base.</div>
+        <div>✅ <strong>División:</strong> Dividir coeficientes y restar exponentes de igual base (<strong><i>x</i><sup>0</sup> = 1</strong>).</div>
+      </div>
+
+      <!-- Closing Message & Discreet Signature -->
+      <div class="my-5">
+        <p class="font-title text-2xl sm:text-3xl text-emerald-300 mb-3">
+          “¡Aprender matemáticas puede ser divertido!”
+        </p>
+        <div class="inline-flex items-center justify-center gap-1.5 bg-[#070b14]/90 border border-slate-800 rounded-xl py-2 px-5 shadow-inner">
+          <span class="sparkle-icon">✨</span>
+          <span class="signature-label">Diseñado por:</span>
+          <span class="font-signature">Prof. Jhon Dewis</span>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-3 mt-4 no-print">
+        <button onclick="window.print()" class="btn-factory bg-emerald-500 hover:bg-emerald-400 text-slate-950 border-emerald-700 font-black px-5 py-3 rounded-2xl text-sm sm:text-base">
+          🖨️ Imprimir / Guardar Diploma
+        </button>
+        <button onclick="showMapScreen()" class="btn-factory bg-cyan-500 hover:bg-cyan-400 text-slate-950 border-cyan-700 font-black px-6 py-3 rounded-2xl text-sm sm:text-base">
+          🏭 Volver al Mapa de Máquinas
+        </button>
+        <button onclick="fireCelebrationConfetti()" class="btn-factory bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-700 font-black px-5 py-3 rounded-2xl text-sm sm:text-base">
+          🎉 ¡Lanzar Confeti!
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       PERSISTENT DISCREET FOOTER SIGNATURE BAR
+       ========================================== -->
+  <footer class="footer-signature-bar w-full py-1.5 px-4 mt-auto z-20">
+    <div class="max-w-6xl mx-auto flex items-center justify-center gap-1.5 opacity-90">
+      <span class="sparkle-icon">✨</span>
+      <span class="signature-label">Diseñado por:</span>
+      <span class="font-signature">Prof. Jhon Dewis</span>
+    </div>
+  </footer>
+
+  <!-- ==========================================
+       MODAL 1: STEP-BY-STEP HELP & GOLDEN RULES
+       ========================================== -->
+  <div id="modalHelp" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-slate-900 border-2 border-amber-400 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden pop-in">
+      <div class="bg-slate-800 px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">📘</span>
+          <h3 class="font-title text-xl sm:text-2xl text-amber-300">MANUAL DE LAS 4 REGLAS DE ORO Y EJEMPLOS</h3>
+        </div>
+        <button onclick="closeHelpModal()" class="btn-factory bg-rose-600 hover:bg-rose-500 text-white border-rose-900 px-3 py-1 rounded-xl font-bold text-sm">
+          ✖ Cerrar
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4 text-sm">
+        <!-- Critical Warning Banner -->
+        <div class="bg-rose-950/60 border-2 border-rose-500 rounded-2xl p-4">
+          <div class="font-black text-rose-300 text-base mb-1">⚠️ ¡CUIDADO CON CONFUNDIR LAS REGLAS!</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+            <div class="bg-slate-900/90 p-3 rounded-xl border border-emerald-500/40">
+              <div class="text-xs text-emerald-300 font-bold uppercase">En la ADICIÓN (Suma):</div>
+              <div class="math-expr text-xl text-white my-1">
+                <span class="math-var">x</span><span class="math-exp">2</span> + <span class="math-var">x</span><span class="math-exp">2</span> = 2<span class="math-var">x</span><span class="math-exp">2</span>
+              </div>
+              <div class="text-xs text-slate-300">Se suman coeficientes (<strong>1 + 1 = 2</strong>) y <strong>se conserva el exponente</strong>. ¡NO da <strong><span class="math-var">x</span><sup>4</sup></strong>!</div>
+            </div>
+            <div class="bg-slate-900/90 p-3 rounded-xl border border-purple-500/40">
+              <div class="text-xs text-purple-300 font-bold uppercase">En la MULTIPLICACIÓN:</div>
+              <div class="math-expr text-xl text-white my-1">
+                (<span class="math-var">x</span><span class="math-exp">2</span>)(<span class="math-var">x</span><span class="math-exp">2</span>) = <span class="math-var">x</span><span class="math-exp">4</span>
+              </div>
+              <div class="text-xs text-slate-300">Se multiplican coeficientes (<strong>1 × 1 = 1</strong>) y <strong>se suman los exponentes</strong> (<strong>2 + 2 = 4</strong>).</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Machines Examples -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Rule 1: Addition -->
+          <div class="bg-slate-800/80 border border-cyan-500/40 rounded-2xl p-4">
+            <div class="font-black text-cyan-300 text-base mb-1">1. MÁQUINA DE ADICIÓN (+)</div>
+            <p class="text-xs text-slate-300 mb-2">Solo se pueden sumar <strong>términos semejantes</strong> (mismas letras con los mismos exponentes).</p>
+            <div class="bg-slate-950 p-2.5 rounded-xl math-expr text-lg text-center text-white mb-1">
+              3<span class="math-var">x</span><span class="math-exp">2</span> + 5<span class="math-var">x</span><span class="math-exp">2</span> = (3 + 5)<span class="math-var">x</span><span class="math-exp">2</span> = <span class="text-emerald-400">8<span class="math-var">x</span><span class="math-exp">2</span></span>
+            </div>
+            <div class="text-xs text-rose-300 mt-1">
+              🚫 <strong>3<span class="math-var">x</span><sup>2</sup> + 5<span class="math-var">x</span><sup>3</sup></strong> → No son semejantes, ¡se rechazan!
+            </div>
+          </div>
+
+          <!-- Rule 2: Subtraction -->
+          <div class="bg-slate-800/80 border border-amber-500/40 rounded-2xl p-4">
+            <div class="font-black text-amber-300 text-base mb-1">2. MÁQUINA DE SUSTRACCIÓN (−)</div>
+            <p class="text-xs text-slate-300 mb-2">Restamos los coeficientes de términos semejantes y conservamos la parte literal intacta.</p>
+            <div class="bg-slate-950 p-2.5 rounded-xl math-expr text-lg text-center text-white mb-1">
+              9<span class="math-var">a</span><span class="math-exp">3</span> − 4<span class="math-var">a</span><span class="math-exp">3</span> = (9 − 4)<span class="math-var">a</span><span class="math-exp">3</span> = <span class="text-emerald-400">5<span class="math-var">a</span><span class="math-exp">3</span></span>
+            </div>
+            <div class="text-xs text-amber-200 mt-1">
+              💡 También puede dar negativo: <strong>3<span class="math-var">x</span><sup>2</sup> − 7<span class="math-var">x</span><sup>2</sup> = −4<span class="math-var">x</span><sup>2</sup></strong>.
+            </div>
+          </div>
+
+          <!-- Rule 3: Multiplication -->
+          <div class="bg-slate-800/80 border border-purple-500/40 rounded-2xl p-4">
+            <div class="font-black text-purple-300 text-base mb-1">3. MÁQUINA DE MULTIPLICACIÓN (×)</div>
+            <p class="text-xs text-slate-300 mb-2">Paso 1: Multiplicar coeficientes.<br>Paso 2: Sumar exponentes de igual base.</p>
+            <div class="bg-slate-950 p-2.5 rounded-xl math-expr text-lg text-center text-white mb-1">
+              (3<span class="math-var">x</span><span class="math-exp">2</span>)(4<span class="math-var">x</span><span class="math-exp">3</span>) = (3×4)<span class="math-var">x</span><span class="math-exp">2+3</span> = <span class="text-emerald-400">12<span class="math-var">x</span><span class="math-exp">5</span></span>
+            </div>
+            <div class="text-xs text-purple-200 mt-1">
+              💡 Recuerda: una letra sin exponente visible tiene exponente <strong>1</strong> (<strong><span class="math-var">y</span> = <span class="math-var">y</span><sup>1</sup></strong>).
+            </div>
+          </div>
+
+          <!-- Rule 4: Division -->
+          <div class="bg-slate-800/80 border border-emerald-500/40 rounded-2xl p-4">
+            <div class="font-black text-emerald-300 text-base mb-1">4. MÁQUINA DE DIVISIÓN (÷)</div>
+            <p class="text-xs text-slate-300 mb-2">Paso 1: Dividir coeficientes.<br>Paso 2: Restar exponentes de igual base.</p>
+            <div class="bg-slate-950 p-2.5 rounded-xl math-expr text-lg text-center text-white mb-1">
+              20<span class="math-var">x</span><span class="math-exp">6</span> ÷ 5<span class="math-var">x</span><span class="math-exp">2</span> = (20÷5)<span class="math-var">x</span><span class="math-exp">6−2</span> = <span class="text-emerald-400">4<span class="math-var">x</span><span class="math-exp">4</span></span>
+            </div>
+            <div class="text-xs text-emerald-200 mt-1">
+              💡 Si el exponente da <strong>0</strong>, recuerda que <strong><span class="math-var">x</span><sup>0</sup> = 1</strong> (la letra se convierte en 1).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800 px-5 py-2.5 border-t border-slate-700 flex justify-end items-center">
+        <button onclick="closeHelpModal()" class="btn-factory bg-emerald-500 hover:bg-emerald-400 text-slate-950 border-emerald-700 px-5 py-2 rounded-xl font-black text-sm">
+          ¡Entendido, a trabajar!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: FEEDBACK / STEP DIALOG
+       ========================================== -->
+  <div id="modalDialog" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="modalDialogBox" class="bg-slate-900 border-2 border-cyan-400 rounded-3xl max-w-lg w-full p-6 text-center shadow-2xl pop-in">
+      <div id="dialogEmoji" class="text-5xl mb-2">🎉</div>
+      <h3 id="dialogTitle" class="font-title text-2xl sm:text-3xl text-white mb-2">¡MÁQUINA COMPLETADA!</h3>
+      <div id="dialogBody" class="text-slate-200 text-sm sm:text-base mb-5 space-y-2">
+        <!-- Dynamic explanation or summary -->
+      </div>
+      <div id="dialogButtons" class="flex flex-wrap justify-center gap-3">
+        <!-- Dynamic buttons -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 3: DIPLOMA DE PARTICIPACIÓN POR NIVEL
+       ========================================== -->
+  <div id="modalLevelDiploma" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-4 border-amber-400 rounded-3xl max-w-2xl w-full p-5 sm:p-8 text-center shadow-2xl relative pop-in my-auto">
+      <!-- Top Ribbon -->
+      <div class="inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300 text-amber-300 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-2">
+        <span>🎖️</span> DIPLOMA DE PARTICIPACIÓN Y LOGRO <span>🎖️</span>
+      </div>
+
+      <h3 id="lvlDipSubtitle" class="font-title text-xl sm:text-2xl text-cyan-300 mb-3">
+        Módulo Completado: Nivel 1 — Máquina de Adición (+)
+      </h3>
+
+      <p class="text-xs sm:text-sm text-slate-300 mb-2">
+        La Fábrica de Monomios otorga el presente certificado a:
+      </p>
+
+      <div id="lvlDipStudentName" class="font-title text-2xl sm:text-4xl text-white bg-slate-950/90 border-2 border-cyan-500/50 rounded-2xl py-2.5 px-6 inline-block mb-4 shadow-inner">
+        Estudiante
+      </div>
+
+      <!-- Skill Mastered Description -->
+      <div class="bg-slate-950/75 border border-slate-700 rounded-2xl p-3.5 max-w-lg mx-auto mb-4 text-xs sm:text-sm text-slate-200 leading-relaxed">
+        <div class="text-amber-300 font-extrabold uppercase text-[11px] tracking-wider mb-1">Habilidad Algebraica Dominada:</div>
+        <div id="lvlDipSkillDesc">
+          Identificación de términos semejantes, suma correcta de coeficientes y conservación de la parte literal.
+        </div>
+      </div>
+
+      <!-- Level Metrics Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-lg mx-auto mb-4 text-xs">
+        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-2.5">
+          <div class="text-slate-400 uppercase font-bold text-[10px]">Estrellas</div>
+          <div id="lvlDipStars" class="text-base sm:text-lg font-black text-yellow-300 mt-0.5">⭐⭐⭐</div>
+        </div>
+        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-2.5">
+          <div class="text-slate-400 uppercase font-bold text-[10px]">Puntaje Total</div>
+          <div id="lvlDipScore" class="text-base sm:text-lg font-black text-amber-400 mt-0.5">100 pts</div>
+        </div>
+        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-2.5">
+          <div class="text-slate-400 uppercase font-bold text-[10px]">Precisión</div>
+          <div id="lvlDipAccuracy" class="text-base sm:text-lg font-black text-emerald-400 mt-0.5">100%</div>
+        </div>
+        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-2.5">
+          <div class="text-slate-400 uppercase font-bold text-[10px]">Fecha</div>
+          <div id="lvlDipDate" class="text-xs sm:text-sm font-black text-cyan-300 mt-1">--/--/----</div>
+        </div>
+      </div>
+
+      <!-- Seal & Discreet Signature -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 max-w-lg mx-auto pt-3 border-t border-slate-800/90 mb-5">
+        <div class="flex items-center gap-2 bg-slate-950/80 border border-emerald-500/40 px-3 py-1.5 rounded-xl">
+          <span id="lvlDipSealIcon" class="text-2xl">➕</span>
+          <div class="text-left">
+            <div class="text-[10px] uppercase text-emerald-400 font-black tracking-wider">Sello Oficial</div>
+            <div id="lvlDipSealName" class="text-xs font-bold text-slate-200">Máquina Verificada</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-[#070b14]/90 border border-slate-800 rounded-xl py-1.5 px-3.5">
+          <span class="sparkle-icon">✨</span>
+          <span class="signature-label">Diseñado por:</span>
+          <span class="font-signature">Prof. Jhon Dewis</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div id="lvlDipButtons" class="flex flex-wrap justify-center gap-2.5 no-print">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: FEEDBACK / LEVEL COMPLETE / GAME OVER
+       ========================================== -->
+  <div id="modalDialog" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="modalDialogBox" class="bg-slate-900 border-2 border-cyan-400 rounded-3xl max-w-lg w-full p-6 text-center shadow-2xl pop-in">
+      <div id="dialogEmoji" class="text-5xl mb-2">🎉</div>
+      <h3 id="dialogTitle" class="font-title text-2xl sm:text-3xl text-white mb-2">¡MÁQUINA COMPLETADA!</h3>
+      <div id="dialogBody" class="text-slate-200 text-sm sm:text-base mb-5 space-y-2">
+        <!-- Dynamic explanation or summary -->
+      </div>
+      <div id="dialogButtons" class="flex flex-wrap justify-center gap-3">
+        <!-- Dynamic buttons -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       JAVASCRIPT ENGINE: AUDIO, MATH, LEVELS & UI
+       ========================================== -->
+  <script>
+    /**************************************************************
+     * 1. STATE & LOCALSTORAGE MANAGEMENT
+     **************************************************************/
+    const STORAGE_KEY = 'fabrica_monomios_jhon_dewis_v1';
+
+    let gameState = {
+      studentName: '',
+      score: 0,
+      unlockedLevel: 1,
+      starsPerLevel: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+      soundEnabled: true
+    };
+
+    // Active session state inside a level
+    let currentSession = {
+      levelId: 1,
+      exercises: [],
+      currentIndex: 0,
+      hearts: 3,
+      stepState: {}, // Tracks interactive steps within the current exercise
+      activeInputId: null
+    };
+
+    const LEVELS_METADATA = [
+      {
+        id: 1,
+        name: 'NIVEL 1: MÁQUINA DE ADICIÓN',
+        shortName: 'Máquina de Adición (+)',
+        icon: '➕',
+        color: 'cyan',
+        totalExercises: 10,
+        desc: 'Identifica términos semejantes en la cinta transportadora, rechaza los intrusos y suma los coeficientes conservando la parte literal.',
+        skillCert: 'Identificación de términos semejantes, rechazo de términos no reducibles y adición exacta de coeficientes conservando la parte literal.',
+        ruleReminder: '📌 Regla de Adición: Solo se suman términos semejantes. Suma coeficientes y conserva los exponentes.'
+      },
+      {
+        id: 2,
+        name: 'NIVEL 2: MÁQUINA DE SUSTRACCIÓN',
+        shortName: 'Máquina de Sustracción (−)',
+        icon: '➖',
+        color: 'amber',
+        totalExercises: 10,
+        desc: 'Retira bloques algebraicos en la cámara extractora, resta los coeficientes (positivos y negativos) y conserva la parte literal.',
+        skillCert: 'Extracción de bloques algebraicos, sustracción de coeficientes con resultados positivos y negativos, y conservación intacta de la parte literal.',
+        ruleReminder: '📌 Regla de Sustracción: Resta los coeficientes de términos semejantes y conserva intacta la parte literal.'
+      },
+      {
+        id: 3,
+        name: 'NIVEL 3: MÁQUINA DE MULTIPLICACIÓN',
+        shortName: 'Máquina de Multiplicación (×)',
+        icon: '✖️',
+        color: 'purple',
+        totalExercises: 10,
+        desc: 'Completa las dos cámaras: 1° Multiplica los coeficientes en los engranajes y 2° Suma los exponentes de igual base.',
+        skillCert: 'Multiplicación de coeficientes y suma de exponentes de bases iguales, incluyendo el reconocimiento del exponente 1 implícito.',
+        ruleReminder: '📌 Regla de Multiplicación: Multiplica los coeficientes y SUMA los exponentes de bases iguales (recuerda: x = x¹).'
+      },
+      {
+        id: 4,
+        name: 'NIVEL 4: MÁQUINA DE DIVISIÓN',
+        shortName: 'Máquina de División (÷)',
+        icon: '➗',
+        color: 'emerald',
+        totalExercises: 10,
+        desc: 'Cancela factores iguales en el holograma, divide los coeficientes y resta los exponentes de igual base (incluyendo x⁰ = 1).',
+        skillCert: 'Cancelación de factores algebraicos en numerador y denominador, división de coeficientes y sustracción de exponentes de igual base (aplicando x⁰ = 1).',
+        ruleReminder: '📌 Regla de División: Divide los coeficientes y RESTA los exponentes de igual base (si da 0, x⁰ = 1).'
+      },
+      {
+        id: 5,
+        name: 'NIVEL 5: ¡EMERGENCIA EN LA FÁBRICA!',
+        shortName: 'Desafío Final (12 Reactores)',
+        icon: '🚨',
+        color: 'rose',
+        totalExercises: 12,
+        desc: '¡Las 4 máquinas se descontrolaron! Repara los 12 reactores resolviendo operaciones mezcladas y evitando cortocircuitos de reglas.',
+        skillCert: 'Dominio integral de las 4 operaciones con monomios y diferenciación experta entre las reglas de adición/sustracción y multiplicación/división.',
+        ruleReminder: '🚨 ¡No confundas reglas! Al sumar/restar conservas exponentes; al multiplicar sumas exponentes; al dividir restas exponentes.'
+      }
+    ];
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          gameState = {
+            ...gameState,
+            ...parsed,
+            starsPerLevel: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, ...(parsed.starsPerLevel || {}) }
+          };
+        }
+      } catch (e) {
+        console.warn('No se pudo leer localStorage:', e);
+      }
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+      } catch (e) {
+        console.warn('No se pudo guardar en localStorage:', e);
+      }
+      updateHudDisplay();
+    }
+
+    /**************************************************************
+     * 2. WEB AUDIO API SYNTHESIZER (NO EXTERNAL ASSETS NEEDED)
+     **************************************************************/
+    let audioCtx = null;
+    let bgMusicInterval = null;
+    let bgMusicStep = 0;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.15, vol = 0.12, delay = 0) {
+      if (!gameState.soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const startTime = audioCtx.currentTime + delay;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(vol, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
+    function sfxClick() {
+      playTone(520, 'triangle', 0.07, 0.1);
+    }
+
+    function sfxStepSuccess() {
+      playTone(587.33, 'sine', 0.12, 0.14, 0);
+      playTone(880, 'sine', 0.18, 0.14, 0.09);
+    }
+
+    function sfxCorrectAnswer() {
+      playTone(523.25, 'triangle', 0.12, 0.16, 0);    // C5
+      playTone(659.25, 'triangle', 0.12, 0.16, 0.10); // E5
+      playTone(783.99, 'triangle', 0.12, 0.16, 0.20); // G5
+      playTone(1046.50, 'triangle', 0.30, 0.18, 0.30);// C6
+    }
+
+    function sfxRejectGate() {
+      playTone(440, 'sawtooth', 0.12, 0.1, 0);
+      playTone(554.37, 'triangle', 0.22, 0.14, 0.12);
+    }
+
+    function sfxError() {
+      playTone(220, 'sawtooth', 0.18, 0.15, 0);
+      playTone(164.81, 'sawtooth', 0.28, 0.15, 0.15);
+    }
+
+    function sfxLaserCancel() {
+      playTone(980, 'sine', 0.08, 0.12, 0);
+      playTone(420, 'triangle', 0.12, 0.12, 0.05);
+    }
+
+    function sfxLevelWin() {
+      const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
+      notes.forEach((n, idx) => {
+        playTone(n, 'triangle', 0.18, 0.16, idx * 0.11);
+      });
+    }
+
+    // Gentle futuristic factory background melody loop
+    const bgMelody = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 293.66, 349.23, 440.00, 349.23];
+    function startBackgroundMusic() {
+      stopBackgroundMusic();
+      if (!gameState.soundEnabled) return;
+      bgMusicInterval = setInterval(() => {
+        if (!gameState.soundEnabled) return;
+        const note = bgMelody[bgMusicStep % bgMelody.length];
+        playTone(note, 'sine', 0.35, 0.025, 0);
+        bgMusicStep++;
+      }, 650);
+    }
+
+    function stopBackgroundMusic() {
+      if (bgMusicInterval) {
+        clearInterval(bgMusicInterval);
+        bgMusicInterval = null;
+      }
+    }
+
+    function toggleAudio() {
+      gameState.soundEnabled = !gameState.soundEnabled;
+      updateAudioButtonUI();
+      if (gameState.soundEnabled) {
+        sfxClick();
+        startBackgroundMusic();
+      } else {
+        stopBackgroundMusic();
+      }
+      saveProgress();
+    }
+
+    function updateAudioButtonUI() {
+      const icon = document.getElementById('musicIcon');
+      const label = document.getElementById('musicLabel');
+      if (gameState.soundEnabled) {
+        icon.textContent = '🔊';
+        label.textContent = 'Sonido ON';
+      } else {
+        icon.textContent = '🔇';
+        label.textContent = 'Silencio';
+      }
+    }
+
+    /**************************************************************
+     * 3. MATHEMATICAL FORMATTING & MONOMIAL UTILITIES
+     **************************************************************/
+    // Formats a monomial object { coeff: 3, vars: { x: 2, y: 3 } } into clean HTML
+    function formatMonomialHTML(coeff, varsObj, showExplicitOneExp = false) {
+      const keys = Object.keys(varsObj || {}).filter(k => varsObj[k] !== 0);
+      if (coeff === 0) return `<span class="math-expr">0</span>`;
+
+      let coeffStr = '';
+      if (keys.length === 0) {
+        coeffStr = String(coeff);
+      } else {
+        if (coeff === 1) coeffStr = '';
+        else if (coeff === -1) coeffStr = '−';
+        else coeffStr = coeff < 0 ? `−${Math.abs(coeff)}` : String(coeff);
+      }
+
+      let varsHTML = '';
+      keys.forEach(v => {
+        const exp = varsObj[v];
+        if (exp === 1 && !showExplicitOneExp) {
+          varsHTML += `<span class="math-var">${v}</span>`;
+        } else if (exp === 1 && showExplicitOneExp) {
+          varsHTML += `<span class="math-var">${v}</span><span class="math-exp text-amber-300">1</span>`;
+        } else {
+          varsHTML += `<span class="math-var">${v}</span><span class="math-exp">${exp}</span>`;
+        }
+      });
+
+      return `<span class="math-expr">${coeffStr}${varsHTML}</span>`;
+    }
+
+    // Formats only the literal part { x: 2, y: 3 } -> x²y³
+    function formatLiteralHTML(varsObj) {
+      const keys = Object.keys(varsObj || {}).filter(k => varsObj[k] !== 0);
+      if (keys.length === 0) return `<span class="text-xs font-bold text-amber-300">(Sin letras / Constante)</span>`;
+      let html = '';
+      keys.forEach(v => {
+        const exp = varsObj[v];
+        if (exp === 1) {
+          html += `<span class="math-var">${v}</span>`;
+        } else {
+          html += `<span class="math-var">${v}</span><span class="math-exp">${exp}</span>`;
+        }
+      });
+      return `<span class="math-expr">${html}</span>`;
+    }
+
+    // Canonical string key for literal part comparison, e.g. "x^2y^3"
+    function literalKey(varsObj) {
+      const keys = Object.keys(varsObj || {}).filter(k => varsObj[k] !== 0).sort();
+      if (keys.length === 0) return 'CONST';
+      return keys.map(k => `${k}^${varsObj[k]}`).join('');
+    }
+
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    /**************************************************************
+     * 4. RIGOROUS EXERCISE GENERATORS FOR ALL 5 LEVELS
+     **************************************************************/
+
+    // LEVEL 1: MÁQUINA DE ADICIÓN (10 Exercises)
+    // Includes canonical 3x² + 5x², 3x² + 5x³ (reject), single-variable and two-variable like/unlike terms
+    function generateLevel1Exercises() {
+      const list = [];
+
+      // Exercise 1: Classic Prompt Example 3x² + 5x² = 8x²
+      list.push({
+        type: 'ADD',
+        m1: { coeff: 3, vars: { x: 2 } },
+        m2: { coeff: 5, vars: { x: 2 } },
+        areLike: true,
+        ansCoeff: 8,
+        ansVars: { x: 2 },
+        distractorLiterals: [{ x: 4 }, { x: 1 }, { x: 3 }]
+      });
+
+      // Exercise 2: Classic Prompt Example 3x² + 5x³ (NOT like terms -> Reject!)
+      list.push({
+        type: 'ADD',
+        m1: { coeff: 3, vars: { x: 2 } },
+        m2: { coeff: 5, vars: { x: 3 } },
+        areLike: false,
+        rejectReason: 'Tienen la misma letra (x), pero sus exponentes son diferentes (2 y 3). ¡No son términos semejantes y no se pueden reducir!'
+      });
+
+      // Exercises 3 to 5: Single variable like terms
+      const singleVars = ['x', 'a', 'm', 'y'];
+      for (let i = 0; i < 3; i++) {
+        const v = singleVars[i % singleVars.length];
+        const exp = randInt(2, 5);
+        const c1 = randInt(2, 9);
+        const c2 = randInt(2, 9);
+        list.push({
+          type: 'ADD',
+          m1: { coeff: c1, vars: { [v]: exp } },
+          m2: { coeff: c2, vars: { [v]: exp } },
+          areLike: true,
+          ansCoeff: c1 + c2,
+          ansVars: { [v]: exp },
+          distractorLiterals: [
+            { [v]: exp * 2 }, // Classic mistake: adding exponents!
+            { [v]: exp + 1 },
+            { [v]: 1 }
+          ]
+        });
+      }
+
+      // Exercise 6: Non-like terms with different variables
+      list.push({
+        type: 'ADD',
+        m1: { coeff: 6, vars: { a: 2, b: 1 } },
+        m2: { coeff: 4, vars: { a: 1, b: 2 } },
+        areLike: false,
+        rejectReason: 'En el primer monomio "a" tiene exponente 2 y "b" tiene 1, pero en el segundo "a" tiene 1 y "b" tiene 2. ¡No son semejantes!'
+      });
+
+      // Exercises 7 to 9: Two-variable like terms (progressive difficulty)
+      for (let i = 0; i < 3; i++) {
+        const expX = randInt(1, 4);
+        const expY = randInt(2, 4);
+        const c1 = randInt(1, 8);
+        const c2 = randInt(2, 9);
+        list.push({
+          type: 'ADD',
+          m1: { coeff: c1, vars: { x: expX, y: expY } },
+          m2: { coeff: c2, vars: { x: expX, y: expY } },
+          areLike: true,
+          ansCoeff: c1 + c2,
+          ansVars: { x: expX, y: expY },
+          distractorLiterals: [
+            { x: expX * 2, y: expY * 2 },
+            { x: expY, y: expX },
+            { x: expX + 1, y: expY }
+          ]
+        });
+      }
+
+      // Exercise 10: Another non-like trap with two variables
+      const eX = randInt(2, 4);
+      list.push({
+        type: 'ADD',
+        m1: { coeff: 7, vars: { x: eX, y: 2 } },
+        m2: { coeff: 5, vars: { x: eX, y: 3 } },
+        areLike: false,
+        rejectReason: `Aunque ambos tienen <span class="math-var">x</span><sup>${eX}</sup>, los exponentes de "<span class="math-var">y</span>" son diferentes (2 y 3). Por eso no son términos semejantes.`
+      });
+
+      return list;
+    }
+
+    // LEVEL 2: MÁQUINA DE SUSTRACCIÓN (10 Exercises)
+    // Includes 9a³ − 4a³ = 5a³, interactive blocks, positive & negative results, and like-term verification
+    function generateLevel2Exercises() {
+      const list = [];
+
+      // Exercise 1: Prompt example 9a³ − 4a³ = 5a³
+      list.push({
+        type: 'SUB',
+        m1: { coeff: 9, vars: { a: 3 } },
+        m2: { coeff: 4, vars: { a: 3 } },
+        areLike: true,
+        ansCoeff: 5,
+        ansVars: { a: 3 },
+        distractorLiterals: [{ a: 0 }, { a: 6 }, { a: 1 }]
+      });
+
+      // Exercises 2 to 4: Positive visual block removals
+      const varsPool = ['x', 'm', 'y'];
+      for (let i = 0; i < 3; i++) {
+        const v = varsPool[i];
+        const exp = randInt(2, 4);
+        const c1 = randInt(6, 10);
+        const c2 = randInt(2, c1 - 1);
+        list.push({
+          type: 'SUB',
+          m1: { coeff: c1, vars: { [v]: exp } },
+          m2: { coeff: c2, vars: { [v]: exp } },
+          areLike: true,
+          ansCoeff: c1 - c2,
+          ansVars: { [v]: exp },
+          distractorLiterals: [{ [v]: exp + 1 }, { [v]: 1 }, { [v]: exp * 2 }]
+        });
+      }
+
+      // Exercise 5: Non-like terms rejection check
+      list.push({
+        type: 'SUB',
+        m1: { coeff: 8, vars: { a: 4 } },
+        m2: { coeff: 3, vars: { a: 2 } },
+        areLike: false,
+        rejectReason: 'Para restar monomios también deben ser términos semejantes. Aquí a⁴ y a² tienen distinto exponente.'
+      });
+
+      // Exercises 6 to 8: Negative results (e.g. 3x² - 7x² = -4x²)
+      for (let i = 0; i < 3; i++) {
+        const exp = randInt(2, 5);
+        const c1 = randInt(2, 5);
+        const c2 = randInt(c1 + 2, 10);
+        list.push({
+          type: 'SUB',
+          m1: { coeff: c1, vars: { x: exp } },
+          m2: { coeff: c2, vars: { x: exp } },
+          areLike: true,
+          ansCoeff: c1 - c2, // negative!
+          ansVars: { x: exp },
+          distractorLiterals: [{ x: exp * 2 }, { x: 1 }, { x: exp + 1 }]
+        });
+      }
+
+      // Exercises 9 & 10: Two variables (one positive, one negative)
+      list.push({
+        type: 'SUB',
+        m1: { coeff: 10, vars: { x: 2, y: 3 } },
+        m2: { coeff: 4, vars: { x: 2, y: 3 } },
+        areLike: true,
+        ansCoeff: 6,
+        ansVars: { x: 2, y: 3 },
+        distractorLiterals: [{ x: 4, y: 6 }, { x: 1, y: 1 }, { x: 2, y: 1 }]
+      });
+
+      list.push({
+        type: 'SUB',
+        m1: { coeff: 4, vars: { a: 2, b: 2 } },
+        m2: { coeff: 9, vars: { a: 2, b: 2 } },
+        areLike: true,
+        ansCoeff: -5,
+        ansVars: { a: 2, b: 2 },
+        distractorLiterals: [{ a: 4, b: 4 }, { a: 1, b: 2 }, { a: 2, b: 1 }]
+      });
+
+      return list;
+    }
+
+    // LEVEL 3: MÁQUINA DE MULTIPLICACIÓN (10 Exercises)
+    // Includes (3x²)(4x³) = 12x⁵ and (2x²y)(3xy³) = 6x³y⁴ with invisible exponent 1
+    function generateLevel3Exercises() {
+      const list = [];
+
+      // Exercise 1: Prompt example (3x²)(4x³) = 12x⁵
+      list.push({
+        type: 'MUL',
+        m1: { coeff: 3, vars: { x: 2 } },
+        m2: { coeff: 4, vars: { x: 3 } },
+        ansCoeff: 12,
+        ansVars: { x: 5 },
+        varList: ['x'],
+        hasInvisibleOne: false
+      });
+
+      // Exercises 2 to 4: Single variable multiplication
+      for (let i = 0; i < 3; i++) {
+        const c1 = randInt(2, 6);
+        const c2 = randInt(2, 6);
+        const e1 = i === 1 ? 1 : randInt(2, 4); // Include invisible 1 on exercise 3
+        const e2 = randInt(2, 4);
+        list.push({
+          type: 'MUL',
+          m1: { coeff: c1, vars: { x: e1 } },
+          m2: { coeff: c2, vars: { x: e2 } },
+          ansCoeff: c1 * c2,
+          ansVars: { x: e1 + e2 },
+          varList: ['x'],
+          hasInvisibleOne: (e1 === 1 || e2 === 1)
+        });
+      }
+
+      // Exercise 5: Prompt example (2x²y)(3xy³) = 6x³y⁴
+      list.push({
+        type: 'MUL',
+        m1: { coeff: 2, vars: { x: 2, y: 1 } },
+        m2: { coeff: 3, vars: { x: 1, y: 3 } },
+        ansCoeff: 6,
+        ansVars: { x: 3, y: 4 },
+        varList: ['x', 'y'],
+        hasInvisibleOne: true
+      });
+
+      // Exercises 6 to 10: Varied 1 and 2 variables with invisible exponent 1 practice
+      for (let i = 0; i < 5; i++) {
+        const twoVars = i >= 1;
+        const c1 = randInt(2, 7);
+        const c2 = randInt(2, 6);
+        if (!twoVars) {
+          const e1 = randInt(1, 4);
+          const e2 = randInt(2, 5);
+          list.push({
+            type: 'MUL',
+            m1: { coeff: c1, vars: { a: e1 } },
+            m2: { coeff: c2, vars: { a: e2 } },
+            ansCoeff: c1 * c2,
+            ansVars: { a: e1 + e2 },
+            varList: ['a'],
+            hasInvisibleOne: (e1 === 1 || e2 === 1)
+          });
+        } else {
+          const ex1 = randInt(1, 3);
+          const ex2 = randInt(1, 3);
+          const ey1 = randInt(1, 3);
+          const ey2 = randInt(1, 3);
+          list.push({
+            type: 'MUL',
+            m1: { coeff: c1, vars: { x: ex1, y: ey1 } },
+            m2: { coeff: c2, vars: { x: ex2, y: ey2 } },
+            ansCoeff: c1 * c2,
+            ansVars: { x: ex1 + ex2, y: ey1 + ey2 },
+            varList: ['x', 'y'],
+            hasInvisibleOne: (ex1 === 1 || ex2 === 1 || ey1 === 1 || ey2 === 1)
+          });
+        }
+      }
+
+      return list;
+    }
+
+    // LEVEL 4: MÁQUINA DE DIVISIÓN (10 Exercises)
+    // Includes 20x⁶ ÷ 5x² = 4x⁴, visual factor cancellation, two variables, and x⁰ = 1 cases
+    function generateLevel4Exercises() {
+      const list = [];
+
+      // Exercise 1: Prompt example 20x⁶ ÷ 5x² = 4x⁴
+      list.push({
+        type: 'DIV',
+        m1: { coeff: 20, vars: { x: 6 } },
+        m2: { coeff: 5, vars: { x: 2 } },
+        ansCoeff: 4,
+        ansVars: { x: 4 },
+        varList: ['x'],
+        hasZeroExp: false
+      });
+
+      // Exercises 2 to 4: Single variable exact divisions
+      for (let i = 0; i < 3; i++) {
+        const q = randInt(2, 7);
+        const d = randInt(2, 6);
+        const c1 = q * d;
+        const e2 = randInt(1, 3);
+        const e1 = e2 + randInt(1, 4);
+        list.push({
+          type: 'DIV',
+          m1: { coeff: c1, vars: { x: e1 } },
+          m2: { coeff: d, vars: { x: e2 } },
+          ansCoeff: q,
+          ansVars: { x: e1 - e2 },
+          varList: ['x'],
+          hasZeroExp: false
+        });
+      }
+
+      // Exercise 5: Zero exponent case with 1 variable (e.g., 15x³ ÷ 3x³ = 5x⁰ = 5)
+      list.push({
+        type: 'DIV',
+        m1: { coeff: 15, vars: { x: 3 } },
+        m2: { coeff: 3, vars: { x: 3 } },
+        ansCoeff: 5,
+        ansVars: { x: 0 },
+        varList: ['x'],
+        hasZeroExp: true
+      });
+
+      // Exercises 6 to 8: Two variables without zero exponent
+      for (let i = 0; i < 3; i++) {
+        const q = randInt(2, 6);
+        const d = randInt(2, 5);
+        const c1 = q * d;
+        const ex2 = randInt(1, 2);
+        const ex1 = ex2 + randInt(1, 3);
+        const ey2 = randInt(1, 2);
+        const ey1 = ey2 + randInt(1, 3);
+        list.push({
+          type: 'DIV',
+          m1: { coeff: c1, vars: { x: ex1, y: ey1 } },
+          m2: { coeff: d, vars: { x: ex2, y: ey2 } },
+          ansCoeff: q,
+          ansVars: { x: ex1 - ex2, y: ey1 - ey2 },
+          varList: ['x', 'y'],
+          hasZeroExp: false
+        });
+      }
+
+      // Exercises 9 & 10: Two variables where one variable cancels out to exponent 0 (y⁰ = 1)
+      list.push({
+        type: 'DIV',
+        m1: { coeff: 18, vars: { x: 5, y: 2 } },
+        m2: { coeff: 6, vars: { x: 2, y: 2 } },
+        ansCoeff: 3,
+        ansVars: { x: 3, y: 0 },
+        varList: ['x', 'y'],
+        hasZeroExp: true
+      });
+
+      list.push({
+        type: 'DIV',
+        m1: { coeff: 24, vars: { x: 3, y: 4 } },
+        m2: { coeff: 4, vars: { x: 3, y: 1 } },
+        ansCoeff: 6,
+        ansVars: { x: 0, y: 3 },
+        varList: ['x', 'y'],
+        hasZeroExp: true
+      });
+
+      return list;
+    }
+
+    // LEVEL 5: DESAFÍO FINAL - 12 Mixed Operations & Rule-Confusion Traps
+    function generateLevel5Exercises() {
+      return [
+        // 1 & 2: Classic trap pair from Scene 6 of prompt: x² + x² vs (x²)(x²)
+        {
+          op: 'ADD',
+          m1: { coeff: 1, vars: { x: 2 } },
+          m2: { coeff: 1, vars: { x: 2 } },
+          correctRule: 'ADD_SUB',
+          ansCoeff: 2,
+          ansVars: { x: 2 },
+          varList: ['x'],
+          trapNote: '¡Cuidado! Al sumar x² + x², sumamos sus coeficientes invisibles (1 + 1 = 2) y CONSERVAMOS el exponente 2. ¡No es x⁴!'
+        },
+        {
+          op: 'MUL',
+          m1: { coeff: 1, vars: { x: 2 } },
+          m2: { coeff: 1, vars: { x: 2 } },
+          correctRule: 'MUL',
+          ansCoeff: 1,
+          ansVars: { x: 4 },
+          varList: ['x'],
+          trapNote: 'Al multiplicar (x²)(x²), multiplicamos coeficientes (1 × 1 = 1) y SUMAMOS los exponentes (2 + 2 = 4).'
+        },
+        // 3: Subtraction resulting in positive
+        {
+          op: 'SUB',
+          m1: { coeff: 11, vars: { x: 3 } },
+          m2: { coeff: 4, vars: { x: 3 } },
+          correctRule: 'ADD_SUB',
+          ansCoeff: 7,
+          ansVars: { x: 3 },
+          varList: ['x'],
+          trapNote: 'En la resta de términos semejantes, restamos coeficientes (11 − 4 = 7) y conservamos x³.'
+        },
+        // 4: Multiplication
+        {
+          op: 'MUL',
+          m1: { coeff: 4, vars: { x: 3 } },
+          m2: { coeff: 5, vars: { x: 2 } },
+          correctRule: 'MUL',
+          ansCoeff: 20,
+          ansVars: { x: 5 },
+          varList: ['x'],
+          trapNote: 'Multiplicamos coeficientes (4 × 5 = 20) y sumamos exponentes (3 + 2 = 5).'
+        },
+        // 5: Division
+        {
+          op: 'DIV',
+          m1: { coeff: 28, vars: { x: 7 } },
+          m2: { coeff: 7, vars: { x: 3 } },
+          correctRule: 'DIV',
+          ansCoeff: 4,
+          ansVars: { x: 4 },
+          varList: ['x'],
+          trapNote: 'Dividimos coeficientes (28 ÷ 7 = 4) y restamos exponentes (7 − 3 = 4).'
+        },
+        // 6: Non-like terms trap in addition
+        {
+          op: 'ADD',
+          m1: { coeff: 6, vars: { x: 2 } },
+          m2: { coeff: 4, vars: { x: 5 } },
+          correctRule: 'UNLIKE',
+          ansCoeff: null,
+          ansVars: null,
+          varList: ['x'],
+          trapNote: '6x² y 4x⁵ tienen diferentes exponentes. ¡No son términos semejantes y no se pueden sumar!'
+        },
+        // 7: Subtraction with negative result
+        {
+          op: 'SUB',
+          m1: { coeff: 5, vars: { x: 4 } },
+          m2: { coeff: 9, vars: { x: 4 } },
+          correctRule: 'ADD_SUB',
+          ansCoeff: -4,
+          ansVars: { x: 4 },
+          varList: ['x'],
+          trapNote: 'Restamos coeficientes (5 − 9 = −4) y conservamos la parte literal x⁴.'
+        },
+        // 8: Multiplication with invisible exponent 1
+        {
+          op: 'MUL',
+          m1: { coeff: 3, vars: { x: 1, y: 2 } },
+          m2: { coeff: 4, vars: { x: 3, y: 1 } },
+          correctRule: 'MUL',
+          ansCoeff: 12,
+          ansVars: { x: 4, y: 3 },
+          varList: ['x', 'y'],
+          trapNote: 'Recuerda que <span class="math-var">x</span> = <span class="math-var">x</span><sup>1</sup> y <span class="math-var">y</span> = <span class="math-var">y</span><sup>1</sup>. Coeficientes: 3 × 4 = 12. Exponentes: <span class="math-var">x</span><sup>1+3</sup> = <span class="math-var">x</span><sup>4</sup>, <span class="math-var">y</span><sup>2+1</sup> = <span class="math-var">y</span><sup>3</sup>.'
+        },
+        // 9: Addition with two variables
+        {
+          op: 'ADD',
+          m1: { coeff: 7, vars: { x: 2, y: 3 } },
+          m2: { coeff: 8, vars: { x: 2, y: 3 } },
+          correctRule: 'ADD_SUB',
+          ansCoeff: 15,
+          ansVars: { x: 2, y: 3 },
+          varList: ['x', 'y'],
+          trapNote: 'Ambos tienen parte literal <span class="math-var">x</span><sup>2</sup><span class="math-var">y</span><sup>3</sup>. Sumamos 7 + 8 = 15 y conservamos <span class="math-var">x</span><sup>2</sup><span class="math-var">y</span><sup>3</sup>.'
+        },
+        // 10: Division with zero exponent
+        {
+          op: 'DIV',
+          m1: { coeff: 30, vars: { x: 4, y: 3 } },
+          m2: { coeff: 6, vars: { x: 1, y: 3 } },
+          correctRule: 'DIV',
+          ansCoeff: 5,
+          ansVars: { x: 3, y: 0 },
+          varList: ['x', 'y'],
+          trapNote: '30 ÷ 6 = 5. En <span class="math-var">x</span>: 4 − 1 = 3. En <span class="math-var">y</span>: 3 − 3 = 0 (<span class="math-var">y</span><sup>0</sup> = 1). Resultado: 5<span class="math-var">x</span><sup>3</sup>.'
+        },
+        // 11: Another classic confusion: 5x³ + 5x³ vs (5x³)(5x³)
+        {
+          op: 'ADD',
+          m1: { coeff: 5, vars: { x: 3 } },
+          m2: { coeff: 5, vars: { x: 3 } },
+          correctRule: 'ADD_SUB',
+          ansCoeff: 10,
+          ansVars: { x: 3 },
+          varList: ['x'],
+          trapNote: 'Es una SUMA: 5 + 5 = 10 y conservamos <span class="math-var">x</span><sup>3</sup>. Resultado: 10<span class="math-var">x</span><sup>3</sup>.'
+        },
+        // 12: Final Boss Reactor Operation
+        {
+          op: 'MUL',
+          m1: { coeff: 5, vars: { x: 3, y: 2 } },
+          m2: { coeff: 5, vars: { x: 3, y: 4 } },
+          correctRule: 'MUL',
+          ansCoeff: 25,
+          ansVars: { x: 6, y: 6 },
+          varList: ['x', 'y'],
+          trapNote: 'Es una MULTIPLICACIÓN: 5 × 5 = 25, y sumamos exponentes: <span class="math-var">x</span><sup>3+3</sup> = <span class="math-var">x</span><sup>6</sup>, <span class="math-var">y</span><sup>2+4</sup> = <span class="math-var">y</span><sup>6</sup>.'
+        }
+      ];
+    }
+
+    /**************************************************************
+     * 5. NAVIGATION & SCREEN SWITCHING
+     **************************************************************/
+    function hideAllScreens() {
+      document.getElementById('screenStart').classList.add('hidden');
+      document.getElementById('screenMap').classList.add('hidden');
+      document.getElementById('screenMachine').classList.add('hidden');
+      document.getElementById('screenCertificate').classList.add('hidden');
+    }
+
+    function startGameFromWelcome() {
+      const input = document.getElementById('inputStudentName');
+      const nameVal = input.value.trim();
+      if (!nameVal) {
+        document.getElementById('nameErrorMsg').classList.remove('hidden');
+        input.classList.add('shake-anim');
+        setTimeout(() => input.classList.remove('shake-anim'), 500);
+        sfxError();
+        return;
+      }
+      document.getElementById('nameErrorMsg').classList.add('hidden');
+      gameState.studentName = nameVal;
+      saveProgress();
+      sfxStepSuccess();
+      startBackgroundMusic();
+      showMapScreen();
+    }
+
+    function showMapScreen() {
+      sfxClick();
+      hideAllScreens();
+      document.getElementById('gameHud').classList.remove('hidden');
+      document.getElementById('hudProgressContainer').classList.add('hidden');
+      document.getElementById('btnRestartLevel').classList.add('hidden');
+      document.getElementById('screenMap').classList.remove('hidden');
+      updateHudDisplay();
+      renderLevelMap();
+    }
+
+    function renderLevelMap() {
+      const grid = document.getElementById('levelsGrid');
+      grid.innerHTML = '';
+
+      LEVELS_METADATA.forEach(lvl => {
+        const isUnlocked = lvl.id <= gameState.unlockedLevel;
+        const stars = gameState.starsPerLevel[lvl.id] || 0;
+        const starIcons = [1, 2, 3].map(s => s <= stars ? '⭐' : '☆').join(' ');
+
+        const colorMap = {
+          cyan: 'border-cyan-500/60 from-slate-900 to-cyan-950/40',
+          amber: 'border-amber-500/60 from-slate-900 to-amber-950/40',
+          purple: 'border-purple-500/60 from-slate-900 to-purple-950/40',
+          emerald: 'border-emerald-500/60 from-slate-900 to-emerald-950/40',
+          rose: 'border-rose-500/60 from-slate-900 to-rose-950/40'
+        };
+
+        const card = document.createElement('div');
+        card.className = `bg-gradient-to-b ${colorMap[lvl.color]} border-2 rounded-3xl p-5 flex flex-col justify-between shadow-xl relative transition ${isUnlocked ? 'hover:-translate-y-1' : 'opacity-65'}`;
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-3xl bg-slate-800/90 border border-slate-600 w-12 h-12 rounded-2xl flex items-center justify-center shadow">${lvl.icon}</span>
+              <div class="flex flex-col items-end">
+                <span class="text-lg font-black tracking-widest ${stars > 0 ? 'text-yellow-300' : 'text-slate-500'}">${starIcons}</span>
+                ${stars > 0 ? `<span class="text-[10px] font-bold text-emerald-400">✔ Completado</span>` : ''}
+              </div>
+            </div>
+            <h3 class="font-title text-xl text-white mb-1">${lvl.name}</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">${lvl.desc}</p>
+          </div>
+          <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs font-extrabold text-slate-400">${lvl.totalExercises} Ejercicios</span>
+            <div class="flex items-center gap-1.5">
+              ${
+                stars > 0
+                  ? `<button onclick="openLevelDiplomaModal(${lvl.id}, ${stars})" class="btn-factory bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/50 font-extrabold px-2.5 py-2 rounded-xl text-xs" title="Ver Diploma de Participación de este nivel">
+                      🎓 Ver Diploma
+                     </button>`
+                  : ''
+              }
+              ${
+                isUnlocked
+                  ? `<button onclick="startLevel(${lvl.id})" class="btn-factory bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 border-blue-800 font-black px-3.5 py-2 rounded-xl text-xs sm:text-sm">
+                      ▶️ Operar Máquina
+                     </button>`
+                  : `<span class="bg-slate-800 text-slate-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1">
+                      🔒 Bloqueado
+                     </span>`
+              }
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      // Show Certificate button if Level 5 has at least 1 star or unlockedLevel > 5
+      const certBtn = document.getElementById('btnViewCertificate');
+      if ((gameState.starsPerLevel[5] || 0) > 0) {
+        certBtn.classList.remove('hidden');
+      } else {
+        certBtn.classList.add('hidden');
+      }
+    }
+
+    function updateHudDisplay() {
+      document.getElementById('hudPlayerName').textContent = gameState.studentName || 'Estudiante';
+      document.getElementById('hudScore').textContent = gameState.score;
+
+      const totalStars = Object.values(gameState.starsPerLevel).reduce((a, b) => a + b, 0);
+      document.getElementById('hudStars').textContent = `${totalStars} / 15`;
+
+      const heartsEl = document.getElementById('hudHearts');
+      let heartsHTML = '';
+      for (let i = 1; i <= 3; i++) {
+        heartsHTML += i <= currentSession.hearts ? '<span>❤️</span>' : '<span class="opacity-25">🖤</span>';
+      }
+      heartsEl.innerHTML = heartsHTML;
+    }
+
+    /**************************************************************
+     * 6. LEVEL INITIALIZATION & EXERCISE RENDERING
+     **************************************************************/
+    function startLevel(levelId) {
+      sfxStepSuccess();
+      currentSession.levelId = levelId;
+      currentSession.currentIndex = 0;
+      currentSession.hearts = 3;
+      currentSession.activeInputId = null;
+
+      if (levelId === 1) currentSession.exercises = generateLevel1Exercises();
+      else if (levelId === 2) currentSession.exercises = generateLevel2Exercises();
+      else if (levelId === 3) currentSession.exercises = generateLevel3Exercises();
+      else if (levelId === 4) currentSession.exercises = generateLevel4Exercises();
+      else currentSession.exercises = generateLevel5Exercises();
+
+      hideAllScreens();
+      document.getElementById('gameHud').classList.remove('hidden');
+      document.getElementById('hudProgressContainer').classList.remove('hidden');
+      document.getElementById('btnRestartLevel').classList.remove('hidden');
+      document.getElementById('screenMachine').classList.remove('hidden');
+
+      const meta = LEVELS_METADATA.find(m => m.id === levelId);
+      document.getElementById('machineIconBadge').textContent = meta.icon;
+      document.getElementById('machineTitle').textContent = meta.name;
+      document.getElementById('machineSubtitle').textContent = meta.desc;
+      document.getElementById('quickRuleText').textContent = meta.ruleReminder;
+
+      const stage = document.getElementById('machineStage');
+      if (levelId === 5) {
+        stage.classList.add('emergency-chamber');
+      } else {
+        stage.classList.remove('emergency-chamber');
+      }
+
+      loadCurrentExercise();
+    }
+
+    function restartCurrentLevel() {
+      sfxClick();
+      startLevel(currentSession.levelId);
+    }
+
+    function loadCurrentExercise() {
+      const lvl = currentSession.levelId;
+      const idx = currentSession.currentIndex;
+      const total = currentSession.exercises.length;
+      const ex = currentSession.exercises[idx];
+
+      // Update HUD progress bar
+      document.getElementById('hudLevelTitle').textContent = `NIVEL ${lvl}`;
+      document.getElementById('hudProgressText').textContent = `${idx + 1} / ${total}`;
+      document.getElementById('hudProgressBar').style.width = `${Math.round(((idx + 1) / total) * 100)}%`;
+      updateHudDisplay();
+
+      // Reset step state for the current exercise
+      currentSession.stepState = {
+        scannerPassed: false,
+        blocksRemovedCount: 0,
+        step1Done: false,
+        step2Done: false,
+        factorsCanceled: false,
+        selectedLiteralKey: null,
+        selectedProtocol: null,
+        showExplicitOne: false
+      };
+
+      // Render top conveyor belt monomials & bottom interactive mechanism
+      if (lvl === 1) renderLevel1Exercise(ex);
+      else if (lvl === 2) renderLevel2Exercise(ex);
+      else if (lvl === 3) renderLevel3Exercise(ex);
+      else if (lvl === 4) renderLevel4Exercise(ex);
+      else renderLevel5Exercise(ex);
+    }
+
+    // Helper to render the two monomial bots on the conveyor belt
+    function renderConveyorMonomials(m1, m2, opSymbol, resultHTML = '?', showExplicitOne = false) {
+      const area = document.getElementById('operationDisplayArea');
+      area.innerHTML = `
+        <div class="monomial-bot bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-cyan-400 rounded-2xl px-4 py-2.5 shadow-lg text-center min-w-[95px]">
+          <div class="text-[10px] text-cyan-300 uppercase font-bold">Monomio A</div>
+          <div class="text-2xl sm:text-4xl font-black text-white mt-0.5">${formatMonomialHTML(m1.coeff, m1.vars, showExplicitOne)}</div>
+        </div>
+
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-2xl sm:text-3xl font-black text-amber-300 shadow">
+          ${opSymbol}
+        </div>
+
+        <div class="monomial-bot bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-purple-400 rounded-2xl px-4 py-2.5 shadow-lg text-center min-w-[95px]" style="animation-delay: 0.3s">
+          <div class="text-[10px] text-purple-300 uppercase font-bold">Monomio B</div>
+          <div class="text-2xl sm:text-4xl font-black text-white mt-0.5">${formatMonomialHTML(m2.coeff, m2.vars, showExplicitOne)}</div>
+        </div>
+
+        <div class="text-2xl sm:text-3xl font-black text-slate-400">=</div>
+
+        <div id="conveyorResultBox" class="bg-slate-950 border-2 border-dashed border-emerald-400/70 rounded-2xl px-5 py-2.5 text-center min-w-[105px]">
+          <div class="text-[10px] text-emerald-300 uppercase font-bold">Salida</div>
+          <div id="conveyorResultValue" class="text-2xl sm:text-4xl font-black text-emerald-300 mt-0.5">${resultHTML}</div>
+        </div>
+      `;
+    }
+
+    /**************************************************************
+     * 7. LEVEL 1 MECHANICS: MÁQUINA DE ADICIÓN
+     **************************************************************/
+    function renderLevel1Exercise(ex) {
+      document.getElementById('stageStatusBadge').textContent = '📡 ESCÁNER DE TÉRMINOS SEMEJANTES';
+      document.getElementById('invisibleExpHint').classList.add('hidden');
+      renderConveyorMonomials(ex.m1, ex.m2, '+');
+
+      setProfessorMessage(
+        '¡Nuevos monomios en la cinta! <strong>Paso 1:</strong> Revisa si tienen exactamente las mismas letras con los mismos exponentes.',
+        '👨‍🔬'
+      );
+
+      const mech = document.getElementById('interactiveMechanismArea');
+      mech.innerHTML = `
+        <div id="lvl1Step1" class="text-center space-y-4">
+          <div class="inline-block bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 px-3 py-1 rounded-full text-xs font-extrabold uppercase">
+            PASO 1 DE 2: CONTROL DE SEMEJANZA
+          </div>
+          <h3 class="text-base sm:text-lg font-extrabold text-white">
+            ¿Los monomios ${formatMonomialHTML(ex.m1.coeff, ex.m1.vars)} y ${formatMonomialHTML(ex.m2.coeff, ex.m2.vars)} son términos semejantes?
+          </h3>
+          <div class="flex flex-col sm:flex-row justify-center gap-3 max-w-xl mx-auto">
+            <button onclick="handleLvl1Scanner(true)" class="btn-factory flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 border-emerald-700 font-black py-3 px-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2">
+              <span>✅</span> ¡SÍ son semejantes! (Enviar a Fusión)
+            </button>
+            <button onclick="handleLvl1Scanner(false)" class="btn-factory flex-1 bg-rose-600 hover:bg-rose-500 text-white border-rose-900 font-black py-3 px-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2">
+              <span>🚫</span> NO son semejantes (Rechazar)
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleLvl1Scanner(playerSaysLike) {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      if (playerSaysLike === ex.areLike) {
+        if (!ex.areLike) {
+          // Correctly rejected non-like terms!
+          sfxRejectGate();
+          document.getElementById('conveyorResultValue').innerHTML = `<span class="text-sm font-extrabold text-amber-300">No reducible</span>`;
+          setProfessorMessage(
+            `¡Excelente ojo científico! ${ex.rejectReason}`,
+            '🤩'
+          );
+          completeCurrentExercise(
+            `¡Correcto! ${formatMonomialHTML(ex.m1.coeff, ex.m1.vars)} + ${formatMonomialHTML(ex.m2.coeff, ex.m2.vars)} <strong>no se pueden reducir</strong> porque sus partes literales no son idénticas.`
+          );
+        } else {
+          // Correctly identified like terms -> Open Fusion Chamber (Step 2)
+          sfxStepSuccess();
+          setProfessorMessage(
+            '¡Son términos semejantes! Ahora en la <strong>Cámara de Fusión</strong> suma únicamente sus coeficientes y conserva intacta su parte literal.',
+            '⚡'
+          );
+          renderLvl1FusionChamber(ex);
+        }
+      } else {
+        // Error in Step 1
+        if (ex.areLike) {
+          registerMistake(
+            `¡Observa con cuidado! ${formatMonomialHTML(ex.m1.coeff, ex.m1.vars)} y ${formatMonomialHTML(ex.m2.coeff, ex.m2.vars)} <strong>SÍ son términos semejantes</strong> porque tienen exactamente la misma parte literal (${formatLiteralHTML(ex.ansVars)}).`
+          );
+        } else {
+          registerMistake(
+            `¡Alto ahí! ${formatMonomialHTML(ex.m1.coeff, ex.m1.vars)} y ${formatMonomialHTML(ex.m2.coeff, ex.m2.vars)} <strong>NO son términos semejantes</strong>. ${ex.rejectReason}`
+          );
+        }
+      }
+    }
+
+    function renderLvl1FusionChamber(ex) {
+      const mech = document.getElementById('interactiveMechanismArea');
+      // Build literal part options (correct + distractors shuffled)
+      const options = [ex.ansVars, ...ex.distractorLiterals];
+      const uniqueOptions = [];
+      const seen = new Set();
+      options.forEach(o => {
+        const k = literalKey(o);
+        if (!seen.has(k)) {
+          seen.add(k);
+          uniqueOptions.push({ key: k, vars: o });
+        }
+      });
+      // Shuffle options
+      uniqueOptions.sort(() => Math.random() - 0.5);
+
+      mech.innerHTML = `
+        <div class="space-y-4 pop-in">
+          <div class="text-center">
+            <span class="inline-block bg-emerald-500/20 border border-emerald-400 text-emerald-300 px-3 py-1 rounded-full text-xs font-extrabold uppercase">
+              PASO 2 DE 2: CÁMARA DE FUSIÓN ADITIVA
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Sub-chamber A: Sum of Coefficients -->
+            <div class="bg-slate-900 border border-cyan-500/50 rounded-2xl p-4 text-center">
+              <div class="text-xs font-extrabold uppercase text-cyan-300 mb-1">1° Sumador de Coeficientes</div>
+              <div class="text-xl sm:text-2xl font-black text-white my-2 flex items-center justify-center gap-2">
+                <span>${ex.m1.coeff} + ${ex.m2.coeff} =</span>
+                <input
+                  id="inputLvl1Coeff"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="?"
+                  onfocus="setActiveInput('inputLvl1Coeff')"
+                  class="w-20 bg-slate-950 border-2 border-cyan-400 focus:border-amber-400 rounded-xl py-1.5 text-center text-2xl font-black text-amber-300 outline-none"
+                />
+              </div>
+              <div class="text-[11px] text-slate-400">Suma únicamente los números grandes (coeficientes).</div>
+            </div>
+
+            <!-- Sub-chamber B: Conserve Literal Part -->
+            <div class="bg-slate-900 border border-purple-500/50 rounded-2xl p-4 text-center">
+              <div class="text-xs font-extrabold uppercase text-purple-300 mb-1">2° Conservador de Parte Literal</div>
+              <div class="text-[11px] text-slate-300 mb-2">Selecciona la parte literal que se conserva:</div>
+              <div class="grid grid-cols-2 gap-2" id="literalButtonsContainer">
+                ${uniqueOptions.map(opt => `
+                  <button
+                    type="button"
+                    onclick="selectLiteralOption('${opt.key}')"
+                    data-litkey="${opt.key}"
+                    class="lit-opt-btn btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2 px-3 rounded-xl text-lg font-black"
+                  >
+                    ${formatLiteralHTML(opt.vars)}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center pt-1">
+            <button onclick="verifyLvl1Fusion()" class="btn-factory bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 border-emerald-800 font-title text-lg py-3 px-8 rounded-2xl font-bold shadow-lg">
+              ⚡ ¡ENSAMBLAR MONOMIO!
+            </button>
+          </div>
+        </div>
+      `;
+
+      setActiveInput('inputLvl1Coeff');
+    }
+
+    function selectLiteralOption(key) {
+      sfxClick();
+      currentSession.stepState.selectedLiteralKey = key;
+      document.querySelectorAll('.lit-opt-btn').forEach(btn => {
+        if (btn.getAttribute('data-litkey') === key) {
+          btn.className = 'lit-opt-btn btn-factory bg-purple-600 text-white border-purple-900 ring-2 ring-amber-300 py-2 px-3 rounded-xl text-lg font-black';
+        } else {
+          btn.className = 'lit-opt-btn btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2 px-3 rounded-xl text-lg font-black';
+        }
+      });
+    }
+
+    function verifyLvl1Fusion() {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      const coeffInput = document.getElementById('inputLvl1Coeff');
+      const userCoeff = parseInt(coeffInput.value.trim(), 10);
+      const userLitKey = currentSession.stepState.selectedLiteralKey;
+      const expectedLitKey = literalKey(ex.ansVars);
+
+      if (isNaN(userCoeff)) {
+        sfxError();
+        setProfessorMessage('⚠️ Primero escribe la suma de los coeficientes en la casilla numérica.', '👨‍🔬');
+        coeffInput.focus();
+        return;
+      }
+      if (!userLitKey) {
+        sfxError();
+        setProfessorMessage('⚠️ Selecciona cuál es la parte literal que se conserva en el panel derecho.', '👨‍🔬');
+        return;
+      }
+
+      if (userCoeff === ex.ansCoeff && userLitKey === expectedLitKey) {
+        const finalHTML = formatMonomialHTML(ex.ansCoeff, ex.ansVars);
+        document.getElementById('conveyorResultValue').innerHTML = finalHTML;
+        completeCurrentExercise(
+          `¡Fusión perfecta! Sumamos los coeficientes (${ex.m1.coeff} + ${ex.m2.coeff} = ${ex.ansCoeff}) y conservamos intacta la parte literal ${formatLiteralHTML(ex.ansVars)} para obtener <strong>${finalHTML}</strong>.`
+        );
+      } else if (userCoeff !== ex.ansCoeff) {
+        registerMistake(
+          `Revisa la suma de los coeficientes: <strong>${ex.m1.coeff} + ${ex.m2.coeff} = ${ex.ansCoeff}</strong> (escribiste ${userCoeff}).`
+        );
+      } else {
+        registerMistake(
+          `¡Cuidado con los exponentes! Al sumar términos semejantes <strong>conservamos exactamente la misma parte literal (${formatLiteralHTML(ex.ansVars)})</strong>. ¡No sumes ni cambies los exponentes en la adición!`
+        );
+      }
+    }
+
+    /**************************************************************
+     * 8. LEVEL 2 MECHANICS: MÁQUINA DE SUSTRACCIÓN (BLOCKS)
+     **************************************************************/
+    function renderLevel2Exercise(ex) {
+      document.getElementById('stageStatusBadge').textContent = '🦾 CÁMARA EXTRACTORA DE BLOQUES';
+      document.getElementById('invisibleExpHint').classList.add('hidden');
+      renderConveyorMonomials(ex.m1, ex.m2, '−');
+
+      setProfessorMessage(
+        '¡Máquina de Sustracción lista! Primero verifica si son términos semejantes para activar la cámara de bloques.',
+        '👨‍🔬'
+      );
+
+      const mech = document.getElementById('interactiveMechanismArea');
+      mech.innerHTML = `
+        <div class="text-center space-y-4">
+          <div class="inline-block bg-amber-500/15 border border-amber-400/40 text-amber-300 px-3 py-1 rounded-full text-xs font-extrabold uppercase">
+            PASO 1: VERIFICADOR DE SEMEJANZA
+          </div>
+          <h3 class="text-base sm:text-lg font-extrabold text-white">
+            ¿Podemos restar ${formatMonomialHTML(ex.m1.coeff, ex.m1.vars)} − ${formatMonomialHTML(ex.m2.coeff, ex.m2.vars)}?
+          </h3>
+          <div class="flex flex-col sm:flex-row justify-center gap-3 max-w-xl mx-auto">
+            <button onclick="handleLvl2Scanner(true)" class="btn-factory flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 border-emerald-700 font-black py-3 px-4 rounded-2xl text-sm sm:text-base">
+              ✅ ¡SÍ son semejantes! (Abrir Cámara de Bloques)
+            </button>
+            <button onclick="handleLvl2Scanner(false)" class="btn-factory flex-1 bg-rose-600 hover:bg-rose-500 text-white border-rose-900 font-black py-3 px-4 rounded-2xl text-sm sm:text-base">
+              🚫 NO son semejantes (Rechazar)
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleLvl2Scanner(playerSaysLike) {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      if (playerSaysLike === ex.areLike) {
+        if (!ex.areLike) {
+          sfxRejectGate();
+          document.getElementById('conveyorResultValue').innerHTML = `<span class="text-sm font-extrabold text-amber-300">No reducible</span>`;
+          completeCurrentExercise(`¡Muy bien! ${ex.rejectReason}`);
+        } else {
+          sfxStepSuccess();
+          renderLvl2BlockChamber(ex);
+        }
+      } else {
+        if (ex.areLike) {
+          registerMistake(`Ambos monomios tienen parte literal ${formatLiteralHTML(ex.ansVars)}. ¡Sí son términos semejantes!`);
+        } else {
+          registerMistake(ex.rejectReason);
+        }
+      }
+    }
+
+    function renderLvl2BlockChamber(ex) {
+      const mech = document.getElementById('interactiveMechanismArea');
+      const isPositiveResult = ex.m1.coeff >= ex.m2.coeff;
+      const litHTML = formatLiteralHTML(ex.ansVars);
+
+      // Build literal options
+      const options = [ex.ansVars, ...ex.distractorLiterals];
+      const uniqueOptions = [];
+      const seen = new Set();
+      options.forEach(o => {
+        const k = literalKey(o);
+        if (!seen.has(k)) {
+          seen.add(k);
+          uniqueOptions.push({ key: k, vars: o });
+        }
+      });
+      uniqueOptions.sort(() => Math.random() - 0.5);
+
+      let blocksVisualHTML = '';
+      if (isPositiveResult) {
+        // Interactive blocks where student can tap blocks or click "Extraer" button to remove m2.coeff blocks!
+        let blocksItems = '';
+        for (let i = 0; i < ex.m1.coeff; i++) {
+          blocksItems += `
+            <div
+              id="algBlock_${i}"
+              onclick="toggleAlgBlock(${i}, ${ex.m2.coeff})"
+              class="alg-block bg-gradient-to-b from-amber-400 to-amber-600 text-slate-950 border-2 border-amber-200 rounded-xl px-3 py-2 font-black text-base sm:text-lg shadow flex items-center justify-center"
+              title="Toca para retirar/devolver este bloque"
+            >
+              ${litHTML}
+            </div>
+          `;
+        }
+        blocksVisualHTML = `
+          <div class="bg-slate-900/90 border border-amber-500/40 rounded-2xl p-3.5 text-center">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-extrabold text-amber-300 uppercase">
+                🧱 Cámara de Bloques: Tienes ${ex.m1.coeff} bloques de ${litHTML}, retira ${ex.m2.coeff}
+              </span>
+              <button onclick="autoRemoveBlocks(${ex.m2.coeff})" class="btn-factory bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-700 px-3 py-1 rounded-lg text-xs font-black">
+                🦾 Activar Garra (−${ex.m2.coeff} bloques)
+              </button>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2 my-2">
+              ${blocksItems}
+            </div>
+            <div id="blockCounterStatus" class="text-xs text-cyan-300 font-bold mt-1">
+              Bloques retirados: 0 de ${ex.m2.coeff} (Quedan: ${ex.m1.coeff})
+            </div>
+          </div>
+        `;
+      } else {
+        // Negative result visualization (e.g. 3x² - 7x² = -4x²)
+        blocksVisualHTML = `
+          <div class="bg-slate-900/90 border border-rose-500/40 rounded-2xl p-3.5 text-center">
+            <div class="text-xs font-extrabold text-rose-300 uppercase mb-1">
+              ⚡ Medidor de Balance Algebraico (Resultado Negativo)
+            </div>
+            <p class="text-xs text-slate-300 mb-2">
+              Tenemos <strong>+${ex.m1.coeff}</strong> bloques de ${litHTML} y restamos <strong>${ex.m2.coeff}</strong>. Como restamos una cantidad mayor, ¡el resultado tendrá coeficiente <strong>negativo (−)</strong>!
+            </p>
+            <div class="flex flex-wrap justify-center items-center gap-1.5 text-xs font-black">
+              <span class="bg-emerald-500/20 border border-emerald-400 text-emerald-300 px-2.5 py-1 rounded-lg">+${ex.m1.coeff}${litHTML}</span>
+              <span>−</span>
+              <span class="bg-rose-500/20 border border-rose-400 text-rose-300 px-2.5 py-1 rounded-lg">${ex.m2.coeff}${litHTML}</span>
+              <span>=</span>
+              <span class="bg-amber-500/20 border border-amber-400 text-amber-300 px-2.5 py-1 rounded-lg">(${ex.m1.coeff} − ${ex.m2.coeff})${litHTML}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      mech.innerHTML = `
+        <div class="space-y-4 pop-in">
+          ${blocksVisualHTML}
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Coefficient Subtraction Input -->
+            <div class="bg-slate-900 border border-cyan-500/50 rounded-2xl p-4 text-center">
+              <div class="text-xs font-extrabold uppercase text-cyan-300 mb-1">1° Resta de Coeficientes</div>
+              <div class="text-xl sm:text-2xl font-black text-white my-2 flex items-center justify-center gap-2">
+                <span>${ex.m1.coeff} − ${ex.m2.coeff} =</span>
+                <input
+                  id="inputLvl2Coeff"
+                  type="text"
+                  placeholder="?"
+                  onfocus="setActiveInput('inputLvl2Coeff')"
+                  class="w-24 bg-slate-950 border-2 border-cyan-400 focus:border-amber-400 rounded-xl py-1.5 text-center text-2xl font-black text-amber-300 outline-none"
+                />
+              </div>
+              <div class="text-[11px] text-slate-400">Usa el botón <strong>−</strong> del panel si el resultado es negativo.</div>
+            </div>
+
+            <!-- Conserve Literal Part -->
+            <div class="bg-slate-900 border border-purple-500/50 rounded-2xl p-4 text-center">
+              <div class="text-xs font-extrabold uppercase text-purple-300 mb-1">2° Conservador de Parte Literal</div>
+              <div class="text-[11px] text-slate-300 mb-2">Selecciona la parte literal que se conserva:</div>
+              <div class="grid grid-cols-2 gap-2">
+                ${uniqueOptions.map(opt => `
+                  <button
+                    type="button"
+                    onclick="selectLiteralOption('${opt.key}')"
+                    data-litkey="${opt.key}"
+                    class="lit-opt-btn btn-factory bg-slate-800 hover:bg-slate-700 text-white border-slate-950 py-2 px-3 rounded-xl text-lg font-black"
+                  >
+                    ${formatLiteralHTML(opt.vars)}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button onclick="verifyLvl2Subtraction()" class="btn-factory bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 border-emerald-800 font-title text-lg py-3 px-8 rounded-2xl font-bold shadow-lg">
+              🦾 ¡CONFIRMAR RESTA!
+            </button>
+          </div>
+        </div>
+      `;
+
+      setActiveInput('inputLvl2Coeff');
+    }
+
+    function toggleAlgBlock(index, targetRemove) {
+      sfxClick();
+      const el = document.getElementById(`algBlock_${index}`);
+      if (!el) return;
+      el.classList.toggle('removed');
+      updateBlockCounterStatus(targetRemove);
+    }
+
+    function autoRemoveBlocks(targetRemove) {
+      sfxLaserCancel();
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      for (let i = 0; i < ex.m1.coeff; i++) {
+        const el = document.getElementById(`algBlock_${i}`);
+        if (el) {
+          if (i >= ex.m1.coeff - targetRemove) el.classList.add('removed');
+          else el.classList.remove('removed');
+        }
+      }
+      updateBlockCounterStatus(targetRemove);
+    }
+
+    function updateBlockCounterStatus(targetRemove) {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      const removed = document.querySelectorAll('.alg-block.removed').length;
+      const remaining = ex.m1.coeff - removed;
+      const status = document.getElementById('blockCounterStatus');
+      if (status) {
+        status.innerHTML = `Bloques retirados: <strong>${removed}</strong> de ${targetRemove} → Quedan: <strong class="text-emerald-300">${remaining} bloques</strong>`;
+      }
+    }
+
+    function verifyLvl2Subtraction() {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      const coeffInput = document.getElementById('inputLvl2Coeff');
+      const userCoeff = parseInt(coeffInput.value.trim(), 10);
+      const userLitKey = currentSession.stepState.selectedLiteralKey;
+      const expectedLitKey = literalKey(ex.ansVars);
+
+      if (isNaN(userCoeff)) {
+        sfxError();
+        setProfessorMessage('⚠️ Escribe el resultado de restar los coeficientes.', '👨‍🔬');
+        coeffInput.focus();
+        return;
+      }
+      if (!userLitKey) {
+        sfxError();
+        setProfessorMessage('⚠️ Selecciona la parte literal que se conserva.', '👨‍🔬');
+        return;
+      }
+
+      if (userCoeff === ex.ansCoeff && userLitKey === expectedLitKey) {
+        const finalHTML = formatMonomialHTML(ex.ansCoeff, ex.ansVars);
+        document.getElementById('conveyorResultValue').innerHTML = finalHTML;
+        completeCurrentExercise(
+          `¡Excelente extracción! Restamos los coeficientes (${ex.m1.coeff} − ${ex.m2.coeff} = ${ex.ansCoeff}) y conservamos la parte literal ${formatLiteralHTML(ex.ansVars)} para obtener <strong>${finalHTML}</strong>.`
+        );
+      } else if (userCoeff !== ex.ansCoeff) {
+        registerMistake(
+          `Revisa la resta de coeficientes: <strong>${ex.m1.coeff} − ${ex.m2.coeff} = ${ex.ansCoeff}</strong>.`
+        );
+      } else {
+        registerMistake(
+          `¡Recuerda! En la sustracción de términos semejantes <strong>conservamos intacta la parte literal (${formatLiteralHTML(ex.ansVars)})</strong>.`
+        );
+      }
+    }
+
+    /**************************************************************
+     * 9. LEVEL 3 MECHANICS: MÁQUINA DE MULTIPLICACIÓN (2 CHAMBERS)
+     **************************************************************/
+    function renderLevel3Exercise(ex) {
+      document.getElementById('stageStatusBadge').textContent = '⚙️ DOBLE CÁMARA MULTIPLICADORA';
+      const hintEl = document.getElementById('invisibleExpHint');
+      if (ex.hasInvisibleOne) hintEl.classList.remove('hidden');
+      else hintEl.classList.add('hidden');
+
+      renderConveyorMonomials(ex.m1, ex.m2, '×', '?', currentSession.stepState.showExplicitOne);
+
+      setProfessorMessage(
+        '¡En la multiplicación operamos en <strong>2 cámaras obligatorias</strong>! Paso 1: Multiplica los coeficientes. Paso 2: Suma los exponentes de igual base.',
+        '⚡'
+      );
+
+      const mech = document.getElementById('interactiveMechanismArea');
+      mech.innerHTML = `
+        <div class="space-y-4">
+          ${ex.hasInvisibleOne ? `
+            <div class="flex items-center justify-between bg-amber-500/15 border border-amber-400/50 rounded-xl px-3.5 py-2 text-xs">
+              <span class="text-amber-200 font-bold">🔍 ¿Ves alguna variable sin exponente escrito? Recuerda que su exponente es <strong>1</strong>.</span>
+              <button onclick="toggleExplicitOneLvl3()" class="btn-factory bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-700 px-3 py-1 rounded-lg font-black shrink-0">
+                👁️ Mostrar/Ocultar Exponente 1
+              </button>
+            </div>
+          ` : ''}
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- CHAMBER 1: MULTIPLY COEFFICIENTS -->
+            <div id="lvl3Chamber1" class="bg-slate-900 border-2 border-cyan-400 rounded-2xl p-4 text-center relative">
+              <div class="text-xs font-extrabold uppercase text-cyan-300 mb-1">
+                ⚙️ PASO 1: CÁMARA DE COEFICIENTES
+              </div>
+              <p class="text-[11px] text-slate-300 mb-2">Multiplica los coeficientes de ambos monomios:</p>
+              <div class="text-2xl font-black text-white my-3 flex items-center justify-center gap-2">
+                <span>${ex.m1.coeff} × ${ex.m2.coeff} =</span>
+                <input
+                  id="inputLvl3Coeff"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="?"
+                  onfocus="setActiveInput('inputLvl3Coeff')"
+                  class="w-20 bg-slate-950 border-2 border-cyan-400 focus:border-amber-400 rounded-xl py-1.5 text-center text-2xl font-black text-amber-300 outline-none"
+                />
+              </div>
+              <button id="btnVerifyLvl3Step1" onclick="verifyLvl3Step1()" class="btn-factory bg-cyan-500 hover:bg-cyan-400 text-slate-950 border-cyan-700 font-black px-5 py-2 rounded-xl text-xs sm:text-sm">
+                ⚙️ Activar Engranaje de Coeficientes
+              </button>
+            </div>
+
+            <!-- CHAMBER 2: SUM EXPONENTS OF LIKE BASES -->
+            <div id="lvl3Chamber2" class="bg-slate-900/60 border-2 border-slate-700 rounded-2xl p-4 text-center opacity-50 pointer-events-none transition">
+              <div class="text-xs font-extrabold uppercase text-purple-300 mb-1">
+                🔋 PASO 2: CÁMARA DE EXPONENTES
+              </div>
+              <p class="text-[11px] text-slate-300 mb-2">Suma los exponentes de cada base igual:</p>
+              <div class="space-y-2.5 my-2">
+                ${ex.varList.map(v => {
+                  const e1 = ex.m1.vars[v] || 0;
+                  const e2 = ex.m2.vars[v] || 0;
+                  return `
+                    <div class="bg-slate-950 border border-purple-500/40 rounded-xl p-2 flex items-center justify-center gap-2 text-lg font-black">
+                      <span class="text-purple-300">Base <span class="math-var text-white">${v}</span>:</span>
+                      <span class="text-slate-300 text-base">(${e1} + ${e2}) =</span>
+                      <input
+                        id="inputLvl3Exp_${v}"
+                        type="text"
+                        inputmode="numeric"
+                        placeholder="exp"
+                        onfocus="setActiveInput('inputLvl3Exp_${v}')"
+                        class="w-16 bg-slate-900 border-2 border-purple-400 focus:border-amber-400 rounded-lg py-1 text-center text-xl font-black text-amber-300 outline-none"
+                      />
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+              <button onclick="verifyLvl3Step2()" class="btn-factory bg-purple-500 hover:bg-purple-400 text-white border-purple-800 font-black px-5 py-2 rounded-xl text-xs sm:text-sm mt-1">
+                🚀 Sumar Exponentes y Ensamblar
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      setActiveInput('inputLvl3Coeff');
+    }
+
+    function toggleExplicitOneLvl3() {
+      sfxClick();
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      currentSession.stepState.showExplicitOne = !currentSession.stepState.showExplicitOne;
+      renderConveyorMonomials(ex.m1, ex.m2, '×', '?', currentSession.stepState.showExplicitOne);
+    }
+
+    function verifyLvl3Step1() {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      const input = document.getElementById('inputLvl3Coeff');
+      const val = parseInt(input.value.trim(), 10);
+
+      if (isNaN(val)) {
+        sfxError();
+        input.focus();
+        return;
+      }
+
+      if (val === ex.ansCoeff) {
+        sfxStepSuccess();
+        currentSession.stepState.step1Done = true;
+        input.disabled = true;
+        document.getElementById('btnVerifyLvl3Step1').innerHTML = '✅ Coeficiente Listo';
+        document.getElementById('btnVerifyLvl3Step1').disabled = true;
+
+        // Show partial coefficient on conveyor output
+        document.getElementById('conveyorResultValue').innerHTML = `<span class="text-cyan-300">${ex.ansCoeff}</span><span class="text-slate-500">...</span>`;
+
+        // Unlock Chamber 2
+        const ch2 = document.getElementById('lvl3Chamber2');
+        ch2.classList.remove('opacity-50', 'pointer-events-none', 'border-slate-700');
+        ch2.classList.add('border-purple-400');
+
+        setProfessorMessage(
+          `¡Paso 1 completado (${ex.m1.coeff} × ${ex.m2.coeff} = ${ex.ansCoeff})! Ahora en la <strong>Cámara 2</strong> suma los exponentes de las letras iguales.`,
+          '🤩'
+        );
+
+        setActiveInput(`inputLvl3Exp_${ex.varList[0]}`);
+      } else {
+        registerMistake(
+          `En el Paso 1 debemos <strong>multiplicar</strong> los coeficientes: <strong>${ex.m1.coeff} × ${ex.m2.coeff} = ${ex.ansCoeff}</strong> (no sumarlos).`
+        );
+      }
+    }
+
+    function verifyLvl3Step2() {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      for (const v of ex.varList) {
+        const inp = document.getElementById(`inputLvl3Exp_${v}`);
+        const val = parseInt(inp.value.trim(), 10);
+        const expected = ex.ansVars[v];
+        const e1 = ex.m1.vars[v] || 0;
+        const e2 = ex.m2.vars[v] || 0;
+
+        if (isNaN(val)) {
+          sfxError();
+          inp.focus();
+          return;
+        }
+        if (val !== expected) {
+          registerMistake(
+            `Para la base <strong>${v}</strong>, debemos <strong>sumar</strong> sus exponentes: <strong>${e1} + ${e2} = ${expected}</strong>.`
+          );
+          return;
+        }
+      }
+
+      // All exponents match!
+      const finalHTML = formatMonomialHTML(ex.ansCoeff, ex.ansVars);
+      document.getElementById('conveyorResultValue').innerHTML = finalHTML;
+
+      const expExplanation = ex.varList.map(v => `${v}<sup>${ex.m1.vars[v]}+${ex.m2.vars[v]}</sup> = ${v}<sup>${ex.ansVars[v]}</sup>`).join(' y ');
+      completeCurrentExercise(
+        `¡Multiplicación perfecta! Multiplicamos coeficientes (${ex.m1.coeff} × ${ex.m2.coeff} = ${ex.ansCoeff}) y sumamos exponentes (${expExplanation}) para construir <strong>${finalHTML}</strong>.`
+      );
+    }
+
+    /**************************************************************
+     * 10. LEVEL 4 MECHANICS: MÁQUINA DE DIVISIÓN (FACTOR CANCEL)
+     **************************************************************/
+    function renderLevel4Exercise(ex) {
+      document.getElementById('stageStatusBadge').textContent = '🔬 TORRE DIVISORA Y CANCELACIÓN DE FACTORES';
+      document.getElementById('invisibleExpHint').classList.add('hidden');
+      renderConveyorMonomials(ex.m1, ex.m2, '÷');
+
+      setProfessorMessage(
+        '¡Observa el holograma de factores! Cancela los pares iguales arriba y abajo, divide los coeficientes y resta los exponentes.',
+        '👨‍🔬'
+      );
+
+      // Build expanded factor pills for numerator and denominator
+      let numFactorsHTML = '';
+      let denFactorsHTML = '';
+      ex.varList.forEach(v => {
+        const countNum = ex.m1.vars[v] || 0;
+        const countDen = ex.m2.vars[v] || 0;
+        const minCancel = Math.min(countNum, countDen);
+        for (let i = 0; i < countNum; i++) {
+          const canCancel = i < minCancel;
+          numFactorsHTML += `<span data-cancel="${canCancel ? '1' : '0'}" class="factor-pill bg-cyan-500/20 border border-cyan-400 text-cyan-200 px-2 py-0.5 rounded-lg math-var text-base">${v}</span>`;
+        }
+        for (let i = 0; i < countDen; i++) {
+          const canCancel = i < minCancel;
+          denFactorsHTML += `<span data-cancel="${canCancel ? '1' : '0'}" class="factor-pill bg-purple-500/20 border border-purple-400 text-purple-200 px-2 py-0.5 rounded-lg math-var text-base">${v}</span>`;
+        }
+      });
+
+      const mech = document.getElementById('interactiveMechanismArea');
+      mech.innerHTML = `
+        <div class="space-y-4">
+          <!-- HOLOGRAM OF EXPANDED FACTORS -->
+          <div class="bg-slate-900/90 border border-emerald-500/50 rounded-2xl p-3.5 text-center">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-extrabold uppercase text-emerald-300">
+                🔬 Holograma de Cancelación de Factores Iguales
+              </span>
+              <button id="btnCancelFactors" onclick="animateFactorCancellation()" class="btn-factory bg-emerald-500 hover:bg-emerald-400 text-slate-950 border-emerald-700 px-3 py-1 rounded-lg text-xs font-black">
+                ⚡ Cancelar Pares Iguales (Arriba y Abajo)
+              </button>
+            </div>
+
+            <div class="inline-flex flex-col items-center bg-slate-950 border border-slate-800 rounded-xl px-5 py-2.5 my-1">
+              <!-- Numerator -->
+              <div class="flex flex-wrap items-center justify-center gap-1.5 pb-1.5">
+                <span class="font-black text-amber-300 text-lg mr-1">${ex.m1.coeff}</span>
+                ${numFactorsHTML}
+              </div>
+              <!-- Fraction Bar -->
+              <div class="w-full h-0.5 bg-slate-500 my-1"></div>
+              <!-- Denominator -->
+              <div class="flex flex-wrap items-center justify-center gap-1.5 pt-1.5">
+                <span class="font-black text-amber-300 text-lg mr-1">${ex.m2.coeff}</span>
+                ${denFactorsHTML}
+              </div>
+            </div>
+
+            ${ex.hasZeroExp ? `
+              <div class="text-xs text-amber-300 font-bold mt-2 bg-amber-500/10 border border-amber-400/30 rounded-lg py-1 px-3 inline-block">
+                💡 ¡Nota Importante! Cuando todos los factores de una letra se cancelan, el exponente queda <strong>0</strong>. Como <strong>x⁰ = 1</strong>, esa letra se convierte en 1 y ya no se escribe en el resultado final.
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- 2 MANDATORY STEPS -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- STEP 1: DIVIDE COEFFICIENTS -->
+            <div id="lvl4Chamber1" class="bg-slate-900 border-2 border-cyan-400 rounded-2xl p-4 text-center">
+              <div class="text-xs font-extrabold uppercase text-cyan-300 mb-1">
+                ➗ PASO 1: DIVIDIR COEFICIENTES
+              </div>
+              <div class="text-2xl font-black text-white my-3 flex items-center justify-center gap-2">
+                <span>${ex.m1.coeff} ÷ ${ex.m2.coeff} =</span>
+                <input
+                  id="inputLvl4Coeff"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="?"
+                  onfocus="setActiveInput('inputLvl4Coeff')"
+                  class="w-20 bg-slate-950 border-2 border-cyan-400 focus:border-amber-400 rounded-xl py-1.5 text-center text-2xl font-black text-amber-300 outline-none"
+                />
+              </div>
+              <button id="btnVerifyLvl4Step1" onclick="verifyLvl4Step1()" class="btn-factory bg-cyan-500 hover:bg-cyan-400 text-slate-950 border-cyan-700 font-black px-5 py-2 rounded-xl text-xs sm:text-sm">
+                ➗ Confirmar Coeficiente
+              </button>
+            </div>
+
+            <!-- STEP 2: SUBTRACT EXPONENTS -->
+            <div id="lvl4Chamber2" class="bg-slate-900/60 border-2 border-slate-700 rounded-2xl p-4 text-center opacity-50 pointer-events-none transition">
+              <div class="text-xs font-extrabold uppercase text-emerald-300 mb-1">
+                📉 PASO 2: RESTAR EXPONENTES
+              </div>
+              <div class="space-y-2.5 my-2">
+                ${ex.varList.map(v => {
+                  const e1 = ex.m1.vars[v] || 0;
+                  const e2 = ex.m2.vars[v] || 0;
+                  return `
+                    <div class="bg-slate-950 border border-emerald-500/40 rounded-xl p-2 flex items-center justify-center gap-2 text-lg font-black">
+                      <span class="text-emerald-300">Base <span class="math-var text-white">${v}</span>:</span>
+                      <span class="text-slate-300 text-base">(${e1} − ${e2}) =</span>
+                      <input
+                        id="inputLvl4Exp_${v}"
+                        type="text"
+                        inputmode="numeric"
+                        placeholder="exp"
+                        onfocus="setActiveInput('inputLvl4Exp_${v}')"
+                        class="w-16 bg-slate-900 border-2 border-emerald-400 focus:border-amber-400 rounded-lg py-1 text-center text-xl font-black text-amber-300 outline-none"
+                      />
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+              <button onclick="verifyLvl4Step2()" class="btn-factory bg-emerald-500 hover:bg-emerald-400 text-slate-950 border-emerald-800 font-black px-5 py-2 rounded-xl text-xs sm:text-sm mt-1">
+                ⚡ Restar Exponentes y Ensamblar
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      setActiveInput('inputLvl4Coeff');
+    }
+
+    function animateFactorCancellation() {
+      sfxLaserCancel();
+      const cancelables = document.querySelectorAll('.factor-pill[data-cancel="1"]');
+      cancelables.forEach((el, idx) => {
+        setTimeout(() => {
+          el.classList.add('canceled');
+        }, idx * 60);
+      });
+      setProfessorMessage(
+        '¡Mira cómo cada factor de abajo cancela a uno de arriba! Los factores que quedan sin tachar arriba corresponden exactamente a la resta de los exponentes.',
+        '🤩'
+      );
+    }
+
+    function verifyLvl4Step1() {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      const input = document.getElementById('inputLvl4Coeff');
+      const val = parseInt(input.value.trim(), 10);
+
+      if (isNaN(val)) {
+        sfxError();
+        input.focus();
+        return;
+      }
+
+      if (val === ex.ansCoeff) {
+        sfxStepSuccess();
+        input.disabled = true;
+        document.getElementById('btnVerifyLvl4Step1').innerHTML = '✅ Coeficiente Listo';
+        document.getElementById('btnVerifyLvl4Step1').disabled = true;
+
+        // Also trigger factor cancellation animation if not clicked yet
+        animateFactorCancellation();
+
+        // Unlock Step 2
+        const ch2 = document.getElementById('lvl4Chamber2');
+        ch2.classList.remove('opacity-50', 'pointer-events-none', 'border-slate-700');
+        ch2.classList.add('border-emerald-400');
+
+        setActiveInput(`inputLvl4Exp_${ex.varList[0]}`);
+      } else {
+        registerMistake(
+          `En el Paso 1 debemos <strong>dividir</strong> los coeficientes: <strong>${ex.m1.coeff} ÷ ${ex.m2.coeff} = ${ex.ansCoeff}</strong>.`
+        );
+      }
+    }
+
+    function verifyLvl4Step2() {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      for (const v of ex.varList) {
+        const inp = document.getElementById(`inputLvl4Exp_${v}`);
+        const val = parseInt(inp.value.trim(), 10);
+        const expected = ex.ansVars[v];
+        const e1 = ex.m1.vars[v] || 0;
+        const e2 = ex.m2.vars[v] || 0;
+
+        if (isNaN(val)) {
+          sfxError();
+          inp.focus();
+          return;
+        }
+        if (val !== expected) {
+          registerMistake(
+            `Para la base <strong>${v}</strong>, al dividir potencias de igual base <strong>restamos</strong> los exponentes: <strong>${e1} − ${e2} = ${expected}</strong>.`
+          );
+          return;
+        }
+      }
+
+      const finalHTML = formatMonomialHTML(ex.ansCoeff, ex.ansVars);
+      document.getElementById('conveyorResultValue').innerHTML = finalHTML;
+
+      let zeroNote = ex.hasZeroExp
+        ? ' Además, donde la resta dio exponente 0, aplicamos que <strong><span class="math-var">x</span><sup>0</sup> = 1</strong>, por lo que esa variable se simplificó por completo.'
+        : '';
+
+      completeCurrentExercise(
+        `¡División exacta! Dividimos coeficientes (${ex.m1.coeff} ÷ ${ex.m2.coeff} = ${ex.ansCoeff}) y restamos exponentes para obtener <strong>${finalHTML}</strong>.${zeroNote}`
+      );
+    }
+
+    /**************************************************************
+     * 11. LEVEL 5 MECHANICS: DESAFÍO FINAL (12 MIXED OPERATIONS)
+     **************************************************************/
+    function renderLevel5Exercise(ex) {
+      document.getElementById('stageStatusBadge').textContent = `🚨 EMERGENCIA: REACTOR ${currentSession.currentIndex + 1} DE 12`;
+      document.getElementById('invisibleExpHint').classList.add('hidden');
+
+      const opMap = { ADD: '+', SUB: '−', MUL: '×', DIV: '÷' };
+      renderConveyorMonomials(ex.m1, ex.m2, opMap[ex.op]);
+
+      setProfessorMessage(
+        '¡Las 4 máquinas están mezcladas! Primero identifica qué regla se debe aplicar a esta operación y luego construye el resultado.',
+        '🚨'
+      );
+
+      const mech = document.getElementById('interactiveMechanismArea');
+      mech.innerHTML = `
+        <div class="space-y-4">
+          <!-- STEP 1: IDENTIFY THE RULE PROTOCOL -->
+          <div id="lvl5Step1Box" class="bg-slate-900 border-2 border-rose-500/60 rounded-2xl p-4 text-center">
+            <div class="text-xs font-extrabold uppercase text-rose-300 mb-2">
+              🧭 PASO 1: SELECCIONA EL PROTOCOLO CORRECTO PARA ESTA OPERACIÓN (${opMap[ex.op]})
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-2xl mx-auto">
+              <button onclick="selectLvl5Protocol('ADD_SUB')" class="btn-factory bg-cyan-600 hover:bg-cyan-500 text-white border-cyan-900 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-left flex items-center gap-2">
+                <span class="text-xl">➕➖</span>
+                <span>Sumar/Restar coeficientes y <strong>CONSERVAR exponentes</strong></span>
+              </button>
+              <button onclick="selectLvl5Protocol('MUL')" class="btn-factory bg-purple-600 hover:bg-purple-500 text-white border-purple-900 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-left flex items-center gap-2">
+                <span class="text-xl">✖️</span>
+                <span>Multiplicar coeficientes y <strong>SUMAR exponentes</strong></span>
+              </button>
+              <button onclick="selectLvl5Protocol('DIV')" class="btn-factory bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-900 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-left flex items-center gap-2">
+                <span class="text-xl">➗</span>
+                <span>Dividir coeficientes y <strong>RESTAR exponentes</strong></span>
+              </button>
+              <button onclick="selectLvl5Protocol('UNLIKE')" class="btn-factory bg-amber-600 hover:bg-amber-500 text-slate-950 border-amber-900 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black text-left flex items-center gap-2">
+                <span class="text-xl">🚫</span>
+                <span>No son términos semejantes (<strong>No se pueden reducir</strong>)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: BUILD RESULTING MONOMIAL -->
+          <div id="lvl5BuilderBox" class="hidden bg-slate-900 border-2 border-emerald-400 rounded-2xl p-4 text-center pop-in">
+            <div class="text-xs font-extrabold uppercase text-emerald-300 mb-2">
+              🛠️ PASO 2: CONSTRUYE EL MONOMIO RESULTANTE
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-4 my-3">
+              <!-- Coefficient Input -->
+              <div class="bg-slate-950 border border-cyan-500/50 rounded-xl p-3">
+                <label class="block text-[10px] uppercase text-cyan-300 font-bold mb-1">Coeficiente Final</label>
+                <input
+                  id="inputLvl5Coeff"
+                  type="text"
+                  placeholder="Coef"
+                  onfocus="setActiveInput('inputLvl5Coeff')"
+                  class="w-24 bg-slate-900 border-2 border-cyan-400 focus:border-amber-400 rounded-lg py-1.5 text-center text-2xl font-black text-amber-300 outline-none"
+                />
+              </div>
+
+              <!-- Exponents for each variable -->
+              ${ex.varList.map(v => `
+                <div class="bg-slate-950 border border-purple-500/50 rounded-xl p-3">
+                  <label class="block text-[10px] uppercase text-purple-300 font-bold mb-1">Exponente de <span class="math-var text-white text-sm">${v}</span></label>
+                  <div class="flex items-center justify-center gap-1">
+                    <span class="math-var text-2xl text-white">${v}</span>
+                    <input
+                      id="inputLvl5Exp_${v}"
+                      type="text"
+                      inputmode="numeric"
+                      placeholder="exp"
+                      onfocus="setActiveInput('inputLvl5Exp_${v}')"
+                      class="w-16 bg-slate-900 border-2 border-purple-400 focus:border-amber-400 rounded-lg py-1 text-center text-xl font-black text-amber-300 outline-none -mt-3"
+                    />
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <p class="text-[11px] text-slate-400 mb-3">
+              💡 Si una letra desaparece porque su exponente es <strong>0</strong> (<strong><span class="math-var">x</span><sup>0</sup> = 1</strong>), escribe <strong>0</strong> en su exponente.
+            </p>
+            <button onclick="verifyLvl5Builder()" class="btn-factory bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 border-emerald-800 font-title text-lg py-2.5 px-8 rounded-2xl font-bold">
+              ⚡ ¡REPARAR REACTOR!
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectLvl5Protocol(chosenProtocol) {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      if (chosenProtocol === ex.correctRule) {
+        if (chosenProtocol === 'UNLIKE') {
+          sfxRejectGate();
+          document.getElementById('conveyorResultValue').innerHTML = `<span class="text-sm font-extrabold text-amber-300">No reducible</span>`;
+          completeCurrentExercise(`¡Reactor estabilizado! ${ex.trapNote}`);
+        } else {
+          sfxStepSuccess();
+          document.getElementById('lvl5BuilderBox').classList.remove('hidden');
+          setProfessorMessage(`¡Protocolo correcto! ${ex.trapNote}`, '⚡');
+          setActiveInput('inputLvl5Coeff');
+        }
+      } else {
+        registerMistake(`¡Cortocircuito de regla! Observa el signo de la operación: ${ex.trapNote}`);
+      }
+    }
+
+    function verifyLvl5Builder() {
+      const ex = currentSession.exercises[currentSession.currentIndex];
+      const coeffInp = document.getElementById('inputLvl5Coeff');
+      const userCoeff = parseInt(coeffInp.value.trim(), 10);
+
+      if (isNaN(userCoeff)) {
+        sfxError();
+        coeffInp.focus();
+        return;
+      }
+
+      if (userCoeff !== ex.ansCoeff) {
+        registerMistake(`El coeficiente no es correcto. ${ex.trapNote}`);
+        return;
+      }
+
+      for (const v of ex.varList) {
+        const expInp = document.getElementById(`inputLvl5Exp_${v}`);
+        const userExp = parseInt(expInp.value.trim(), 10);
+        const expectedExp = ex.ansVars[v];
+        if (isNaN(userExp)) {
+          sfxError();
+          expInp.focus();
+          return;
+        }
+        if (userExp !== expectedExp) {
+          registerMistake(`El exponente de la variable <strong>${v}</strong> no es correcto (pusiste ${userExp}, debe ser ${expectedExp}). ${ex.trapNote}`);
+          return;
+        }
+      }
+
+      const finalHTML = formatMonomialHTML(ex.ansCoeff, ex.ansVars);
+      document.getElementById('conveyorResultValue').innerHTML = finalHTML;
+      completeCurrentExercise(`¡Reactor reparado con éxito! El resultado correcto es <strong>${finalHTML}</strong>. ${ex.trapNote}`);
+    }
+
+    /**************************************************************
+     * 12. ON-SCREEN KEYPAD & PROFESSOR FEEDBACK HELPERS
+     **************************************************************/
+    function setActiveInput(inputId) {
+      currentSession.activeInputId = inputId;
+      const badge = document.getElementById('activeInputBadge');
+      if (badge) {
+        badge.textContent = 'Casilla Activa';
+      }
+    }
+
+    function keypadPress(key) {
+      sfxClick();
+      let target = currentSession.activeInputId ? document.getElementById(currentSession.activeInputId) : null;
+      if (!target || target.disabled) {
+        // Find first visible enabled text input inside interactiveMechanismArea
+        const inputs = document.querySelectorAll('#interactiveMechanismArea input:not(:disabled)');
+        if (inputs.length > 0) {
+          target = inputs[0];
+          currentSession.activeInputId = target.id;
+        }
+      }
+      if (!target) return;
+
+      if (key === 'DEL') {
+        target.value = target.value.slice(0, -1);
+      } else if (key === '-') {
+        if (target.value.startsWith('-')) {
+          target.value = target.value.slice(1);
+        } else {
+          target.value = '-' + target.value;
+        }
+      } else {
+        if (target.value.length < 5) {
+          target.value += key;
+        }
+      }
+      target.focus();
+    }
+
+    function setProfessorMessage(htmlText, avatarEmoji = '👨‍🔬') {
+      document.getElementById('profMessage').innerHTML = htmlText;
+      document.getElementById('profAvatar').textContent = avatarEmoji;
+    }
+
+    /**************************************************************
+     * 13. EXERCISE COMPLETION, MISTAKES, HEARTS & LEVEL VICTORY
+     **************************************************************/
+    function registerMistake(explanationHTML) {
+      sfxError();
+      currentSession.hearts = Math.max(0, currentSession.hearts - 1);
+      updateHudDisplay();
+
+      const stage = document.getElementById('machineStage');
+      stage.classList.add('shake-anim');
+      setTimeout(() => stage.classList.remove('shake-anim'), 500);
+
+      setProfessorMessage(`<span class="text-rose-300 font-bold">⚠️ ¡Alerta en la máquina!</span> ${explanationHTML}`, '🧐');
+
+      if (currentSession.hearts <= 0) {
+        // Out of hearts -> Show Level Retry Modal
+        openDialogModal({
+          emoji: '🛠️',
+          title: '¡SOBRECARGA EN LA MÁQUINA!',
+          bodyHTML: `
+            <p class="mb-2">${explanationHTML}</p>
+            <div class="bg-rose-950/60 border border-rose-500/50 rounded-xl p-3 text-xs text-rose-200">
+              Se agotaron los 3 corazones de energía de este nivel. ¡No te preocupes! Todo gran ingeniero aprende de los intentos.
+            </div>
+          `,
+          buttons: [
+            {
+              label: '🔄 Reiniciar Nivel',
+              className: 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 border-emerald-700 font-black px-5 py-2.5 rounded-xl',
+              onClick: () => { closeDialogModal(); restartCurrentLevel(); }
+            },
+            {
+              label: '📘 Ver Ejemplos',
+              className: 'bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-700 font-black px-4 py-2.5 rounded-xl',
+              onClick: () => { closeDialogModal(); openHelpModal(); }
+            },
+            {
+              label: '🏭 Mapa',
+              className: 'bg-slate-700 hover:bg-slate-600 text-white border-slate-900 font-bold px-4 py-2.5 rounded-xl',
+              onClick: () => { closeDialogModal(); showMapScreen(); }
+            }
+          ]
+        });
+      } else {
+        // Show clear pedagogical explanation dialog so student understands the mistake immediately
+        openDialogModal({
+          emoji: '💡',
+          title: 'REVISEMOS LA REGLA PASO A PASO',
+          bodyHTML: `
+            <div class="bg-slate-800 border border-amber-400/50 rounded-2xl p-4 text-left text-sm leading-relaxed">
+              ${explanationHTML}
+            </div>
+            <p class="text-xs text-slate-400 mt-2">Te quedan <strong>${currentSession.hearts} ❤️</strong> en este nivel. ¡Inténtalo de nuevo!</p>
+          `,
+          buttons: [
+            {
+              label: '👍 ¡Entendido, continuar!',
+              className: 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 border-cyan-700 font-black px-6 py-2.5 rounded-xl',
+              onClick: () => closeDialogModal()
+            }
+          ]
+        });
+      }
+    }
+
+    function completeCurrentExercise(successExplanationHTML) {
+      sfxCorrectAnswer();
+      gameState.score += 10;
+      saveProgress();
+
+      const isLastExercise = currentSession.currentIndex >= currentSession.exercises.length - 1;
+
+      if (!isLastExercise) {
+        openDialogModal({
+          emoji: '✅',
+          title: '¡OPERACIÓN CORRECTA! (+10 PTS)',
+          bodyHTML: `
+            <div class="bg-emerald-950/50 border border-emerald-500/40 rounded-2xl p-4 text-sm text-emerald-100">
+              ${successExplanationHTML}
+            </div>
+          `,
+          buttons: [
+            {
+              label: '➡️ Siguiente Monomio',
+              className: 'bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 border-emerald-800 font-black px-6 py-2.5 rounded-xl',
+              onClick: () => {
+                closeDialogModal();
+                currentSession.currentIndex++;
+                loadCurrentExercise();
+              }
+            }
+          ]
+        });
+      } else {
+        // Level Completed!
+        handleLevelVictory(successExplanationHTML);
+      }
+    }
+
+    function handleLevelVictory(lastExplanationHTML) {
+      sfxLevelWin();
+      fireCelebrationConfetti();
+
+      const lvl = currentSession.levelId;
+      const earnedStars = currentSession.hearts; // 3 hearts = 3 stars, 2 = 2 stars, 1 = 1 star
+      if (earnedStars > (gameState.starsPerLevel[lvl] || 0)) {
+        gameState.starsPerLevel[lvl] = earnedStars;
+      }
+      if (lvl >= gameState.unlockedLevel && lvl < 5) {
+        gameState.unlockedLevel = lvl + 1;
+      }
+      saveProgress();
+
+      // Open the personalized Level Participation Diploma automatically
+      openLevelDiplomaModal(lvl, earnedStars);
+    }
+
+    function openLevelDiplomaModal(levelId, starsCount) {
+      sfxClick();
+      const meta = LEVELS_METADATA.find(m => m.id === levelId);
+      const stars = starsCount || gameState.starsPerLevel[levelId] || 3;
+      const starIcons = [1, 2, 3].map(s => s <= stars ? '⭐' : '☆').join('');
+      const mistakesMade = Math.max(0, 3 - stars);
+      const totalEx = meta.totalExercises;
+      const accuracy = Math.round((totalEx / (totalEx + mistakesMade)) * 100);
+
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      document.getElementById('lvlDipSubtitle').textContent = `Módulo Completado: Nivel ${meta.id} — ${meta.shortName}`;
+      document.getElementById('lvlDipStudentName').textContent = gameState.studentName || 'Estudiante';
+      document.getElementById('lvlDipSkillDesc').textContent = meta.skillCert;
+      document.getElementById('lvlDipStars').textContent = starIcons;
+      document.getElementById('lvlDipScore').textContent = `${gameState.score} pts`;
+      document.getElementById('lvlDipAccuracy').textContent = `${accuracy}%`;
+      document.getElementById('lvlDipDate').textContent = dateStr;
+      document.getElementById('lvlDipSealIcon').textContent = meta.icon;
+      document.getElementById('lvlDipSealName').textContent = meta.shortName;
+
+      const btnContainer = document.getElementById('lvlDipButtons');
+      btnContainer.innerHTML = '';
+
+      // Button 1: Print / Save Diploma
+      const btnPrint = document.createElement('button');
+      btnPrint.className = 'btn-factory bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-700 font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm';
+      btnPrint.innerHTML = '🖨️ Imprimir / Guardar Diploma del Nivel';
+      btnPrint.onclick = () => window.print();
+      btnContainer.appendChild(btnPrint);
+
+      // Button 2: Next Level or Grand Final Diploma
+      if (levelId < 5) {
+        const btnNext = document.createElement('button');
+        btnNext.className = 'btn-factory bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 border-emerald-800 font-black px-5 py-2.5 rounded-xl text-xs sm:text-sm';
+        btnNext.innerHTML = `▶️ Ir al Nivel ${levelId + 1}`;
+        btnNext.onclick = () => {
+          closeLevelDiplomaModal();
+          startLevel(levelId + 1);
+        };
+        btnContainer.appendChild(btnNext);
+      } else {
+        const btnGrand = document.createElement('button');
+        btnGrand.className = 'btn-factory bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 border-amber-700 font-black px-5 py-2.5 rounded-xl text-xs sm:text-sm';
+        btnGrand.innerHTML = '🏆 Ver Gran Diploma Final';
+        btnGrand.onclick = () => {
+          closeLevelDiplomaModal();
+          showCertificateScreen();
+        };
+        btnContainer.appendChild(btnGrand);
+      }
+
+      // Button 3: Repeat Level
+      const btnRepeat = document.createElement('button');
+      btnRepeat.className = 'btn-factory bg-slate-800 hover:bg-slate-700 text-cyan-300 border-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm';
+      btnRepeat.innerHTML = '🔄 Repetir Nivel';
+      btnRepeat.onclick = () => {
+        closeLevelDiplomaModal();
+        startLevel(levelId);
+      };
+      btnContainer.appendChild(btnRepeat);
+
+      // Button 4: Map of Levels
+      const btnMap = document.createElement('button');
+      btnMap.className = 'btn-factory bg-slate-700 hover:bg-slate-600 text-white border-slate-900 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm';
+      btnMap.innerHTML = '🗺️ Mapa de Niveles';
+      btnMap.onclick = () => {
+        closeLevelDiplomaModal();
+        showMapScreen();
+      };
+      btnContainer.appendChild(btnMap);
+
+      document.getElementById('modalLevelDiploma').classList.remove('hidden');
+    }
+
+    function closeLevelDiplomaModal() {
+      sfxClick();
+      document.getElementById('modalLevelDiploma').classList.add('hidden');
+    }
+
+    function showCertificateScreen() {
+      sfxLevelWin();
+      fireCelebrationConfetti();
+      hideAllScreens();
+      document.getElementById('hudProgressContainer').classList.add('hidden');
+      document.getElementById('btnRestartLevel').classList.add('hidden');
+      document.getElementById('screenCertificate').classList.remove('hidden');
+
+      document.getElementById('certStudentName').textContent = gameState.studentName || 'Estudiante';
+      document.getElementById('certTotalScore').textContent = `${gameState.score} pts`;
+      const totalStars = Object.values(gameState.starsPerLevel).reduce((a, b) => a + b, 0);
+      document.getElementById('certTotalStars').textContent = `${totalStars} / 15 ⭐`;
+    }
+
+    /**************************************************************
+     * 14. MODALS & TEACHER / RESET CONTROLS
+     **************************************************************/
+    function openHelpModal() {
+      sfxClick();
+      document.getElementById('modalHelp').classList.remove('hidden');
+    }
+
+    function closeHelpModal() {
+      sfxClick();
+      document.getElementById('modalHelp').classList.add('hidden');
+    }
+
+    function openDialogModal({ emoji, title, bodyHTML, buttons }) {
+      document.getElementById('dialogEmoji').textContent = emoji || '🤖';
+      document.getElementById('dialogTitle').textContent = title || '';
+      document.getElementById('dialogBody').innerHTML = bodyHTML || '';
+
+      const btnContainer = document.getElementById('dialogButtons');
+      btnContainer.innerHTML = '';
+      (buttons || []).forEach(b => {
+        const btn = document.createElement('button');
+        btn.className = `btn-factory ${b.className}`;
+        btn.innerHTML = b.label;
+        btn.onclick = b.onClick;
+        btnContainer.appendChild(btn);
+      });
+
+      document.getElementById('modalDialog').classList.remove('hidden');
+    }
+
+    function closeDialogModal() {
+      sfxClick();
+      document.getElementById('modalDialog').classList.add('hidden');
+    }
+
+    function unlockAllLevelsTeacher() {
+      sfxStepSuccess();
+      gameState.unlockedLevel = 5;
+      saveProgress();
+      renderLevelMap();
+    }
+
+    function confirmResetProgress() {
+      openDialogModal({
+        emoji: '⚠️',
+        title: '¿BORRAR TODO EL PROGRESO?',
+        bodyHTML: '<p class="text-sm text-slate-300">Se reiniciarán tus puntos, estrellas y máquinas desbloqueadas a cero.</p>',
+        buttons: [
+          {
+            label: '🗑️ Sí, reiniciar todo',
+            className: 'bg-rose-600 hover:bg-rose-500 text-white border-rose-900 font-black px-5 py-2 rounded-xl',
+            onClick: () => {
+              localStorage.removeItem(STORAGE_KEY);
+              gameState = {
+                studentName: '',
+                score: 0,
+                unlockedLevel: 1,
+                starsPerLevel: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+                soundEnabled: true
+              };
+              closeDialogModal();
+              document.getElementById('gameHud').classList.add('hidden');
+              hideAllScreens();
+              document.getElementById('screenStart').classList.remove('hidden');
+              document.getElementById('inputStudentName').value = '';
+            }
+          },
+          {
+            label: 'Cancelar',
+            className: 'bg-slate-700 hover:bg-slate-600 text-white border-slate-900 font-bold px-5 py-2 rounded-xl',
+            onClick: () => closeDialogModal()
+          }
+        ]
+      });
+    }
+
+    /**************************************************************
+     * 15. PARTICLE CONFETTI CELEBRATION ENGINE
+     **************************************************************/
+    function fireCelebrationConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#00f2fe', '#fbbf24', '#10b981', '#f43f5e', '#a855f7', '#fde047'];
+      const particles = Array.from({ length: 95 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        w: randInt(7, 13),
+        h: randInt(7, 13),
+        color: pickRandom(colors),
+        vy: randInt(3, 7),
+        vx: (Math.random() - 0.5) * 4,
+        angle: Math.random() * Math.PI * 2,
+        vAngle: (Math.random() - 0.5) * 0.15
+      }));
+
+      let frames = 0;
+      function renderFrame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.angle += p.vAngle;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.angle);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frames++;
+        if (frames < 170) {
+          requestAnimationFrame(renderFrame);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      requestAnimationFrame(renderFrame);
+    }
+
+    /**************************************************************
+     * 16. INITIALIZE ON WINDOW LOAD
+     **************************************************************/
+    window.onload = function () {
+      loadProgress();
+      updateAudioButtonUI();
+      if (gameState.studentName) {
+        document.getElementById('inputStudentName').value = gameState.studentName;
+      }
+    };
+  </script>
+</body>
+</html>
