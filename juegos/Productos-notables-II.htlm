@@ -1,0 +1,2961 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Productos Notables: Academia Algebraica - Prof. Jhon Dewis</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #070b19;
+    --bg-panel: rgba(15, 23, 42, 0.92);
+    --primary: #38bdf8;
+    --secondary: #818cf8;
+    --accent: #f472b6;
+    --success: #10b981;
+    --warning: #fbbf24;
+    --danger: #f43f5e;
+    --coef-color: #38bdf8;
+    --var-color: #34d399;
+    --exp-color: #fbbf24;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Fondo dinámico por escenarios */
+  #bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .app-wrapper {
+    position: relative;
+    z-index: 2;
+    max-width: 1020px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 12px 14px 60px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Barra Superior */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(15, 23, 42, 0.88);
+    border: 2px solid rgba(56, 189, 248, 0.35);
+    border-radius: 18px;
+    padding: 10px 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+    margin-bottom: 14px;
+  }
+
+  .brand-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.15rem;
+    color: #fff;
+  }
+
+  .stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .stat-pill {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1.5px solid rgba(148, 163, 184, 0.3);
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .stat-pill.gold { border-color: var(--warning); color: var(--warning); }
+  .stat-pill.cyan { border-color: var(--primary); color: var(--primary); }
+  .stat-pill.pink { border-color: var(--accent); color: #fbcfe8; }
+
+  .top-Controls {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .icon-btn {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1.5px solid rgba(56, 189, 248, 0.4);
+    color: #fff;
+    padding: 6px 11px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .icon-btn:hover {
+    background: rgba(56, 189, 248, 0.25);
+    transform: translateY(-2px);
+  }
+
+  .icon-btn.off {
+    opacity: 0.55;
+    border-color: #475569;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Tarjetas y contenedores */
+  .panel-card {
+    background: var(--bg-panel);
+    border: 2px solid rgba(99, 102, 241, 0.45);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(12px);
+    margin-bottom: 16px;
+    animation: fadeIn 0.35s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h1.main-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    text-align: center;
+    background: linear-gradient(90deg, #38bdf8, #a855f7, #f472b6, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 18px;
+    font-weight: 700;
+  }
+
+  /* Mascota Algebrix */
+  .mascot-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+    border: 2px solid rgba(56, 189, 248, 0.45);
+    border-radius: 20px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+  }
+
+  .mascot-svg {
+    width: 78px;
+    height: 78px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.4));
+  }
+
+  .mascot-speech {
+    flex: 1;
+    font-size: 0.98rem;
+    line-height: 1.45;
+    color: #e2e8f0;
+    font-weight: 700;
+  }
+
+  .mascot-speech strong {
+    color: var(--warning);
+  }
+
+  /* Registro de estudiante */
+  .welcome-box {
+    max-width: 520px;
+    margin: 20px auto;
+    text-align: center;
+  }
+
+  .input-fancy {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 1.1rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    border-radius: 14px;
+    border: 2px solid var(--primary);
+    background: rgba(9, 13, 28, 0.9);
+    color: #fff;
+    outline: none;
+    text-align: center;
+    margin: 12px 0 16px;
+  }
+
+  .input-fancy:focus {
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
+  }
+
+  /* Mapa de 8 Niveles */
+  .levels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+    gap: 14px;
+    margin-top: 10px;
+  }
+
+  .level-card {
+    background: linear-gradient(160deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.95));
+    border: 2.5px solid rgba(99, 102, 241, 0.4);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .level-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);
+  }
+
+  .level-card.completed {
+    border-color: var(--success);
+  }
+
+  .level-badge {
+    display: inline-block;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 50px;
+    background: rgba(56, 189, 248, 0.2);
+    color: var(--primary);
+    margin-bottom: 8px;
+    width: fit-content;
+  }
+
+  .level-icon {
+    font-size: 2.3rem;
+    margin-bottom: 6px;
+  }
+
+  .level-card h3 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.18rem;
+    margin-bottom: 5px;
+    color: #fff;
+  }
+
+  .level-card p {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    line-height: 1.35;
+  }
+
+  .level-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed rgba(148, 163, 184, 0.25);
+    padding-top: 8px;
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+
+  /* Botones generales */
+  .btn {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn:active { transform: scale(0.96); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #38bdf8, #6366f1);
+    color: #fff;
+    box-shadow: 0 5px 0 #4338ca, 0 8px 20px rgba(56, 189, 248, 0.35);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    box-shadow: 0 5px 0 #047857;
+  }
+
+  .btn-warning {
+    background: linear-gradient(135deg, #fbbf24, #d97706);
+    color: #0f172a;
+    box-shadow: 0 5px 0 #92400e;
+  }
+
+  .btn-purple {
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    color: #fff;
+    box-shadow: 0 5px 0 #7e22ce;
+  }
+
+  .btn-secondary {
+    background: #1e293b;
+    color: #e2e8f0;
+    border: 2px solid #475569;
+  }
+
+  /* Colores pedagógicos para expresiones algebraicas */
+  .math-expr {
+    font-family: 'Fredoka', sans-serif;
+    letter-spacing: 0.5px;
+    display: inline-block;
+  }
+  .math-expr sup, sup {
+    font-size: 0.68em;
+    vertical-align: super;
+    line-height: 0;
+    color: var(--exp-color);
+    font-weight: 900;
+    margin-left: 1px;
+  }
+  .c-coef { color: var(--coef-color); font-weight: 800; }
+  .c-var  { color: var(--var-color); font-weight: 800; }
+  .c-exp  { color: var(--exp-color); font-weight: 900; }
+  .c-sign { color: #f472b6; font-weight: 900; padding: 0 3px; }
+
+  /* Área de juego paso a paso */
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .progress-container {
+    flex: 1;
+    min-width: 200px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1.5px solid rgba(56, 189, 248, 0.35);
+    height: 18px;
+    border-radius: 50px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #10b981);
+    width: 0%;
+    transition: width 0.35s ease;
+  }
+
+  /* Panel visual de Fórmulas en Nivel 1 */
+  .formula-lab-panel {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.92));
+    border: 2px solid var(--warning);
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .formula-lab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .formula-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 0.88rem;
+  }
+
+  /* Caja de la Expresión Principal */
+  .expression-stage {
+    background: radial-gradient(circle at center, rgba(30, 41, 59, 0.98) 0%, rgba(9, 13, 28, 0.98) 100%);
+    border: 2.5px solid var(--primary);
+    border-radius: 22px;
+    padding: 18px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+    position: relative;
+  }
+
+  .stage-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary);
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .main-equation {
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+    color: #ffffff;
+    margin: 6px 0;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.45);
+  }
+
+  /* Pizarra de Pasos Completados */
+  .steps-trail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .trail-chip {
+    background: rgba(16, 185, 129, 0.16);
+    border: 1.5px solid var(--success);
+    color: #a7f3d0;
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    animation: popIn 0.25s ease;
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Tarjeta del Paso Actual */
+  .step-workspace {
+    background: rgba(15, 23, 42, 0.95);
+    border: 2px solid rgba(129, 140, 248, 0.5);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .step-indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .step-pill {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    padding: 4px 14px;
+    border-radius: 50px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.88rem;
+  }
+
+  .step-question {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 14px;
+    color: #f1f5f9;
+    line-height: 1.4;
+  }
+
+  /* Opciones de selección y construcción */
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+  }
+
+  .opt-btn {
+    background: rgba(30, 41, 59, 0.95);
+    border: 2px solid rgba(148, 163, 184, 0.35);
+    border-radius: 16px;
+    padding: 14px 16px;
+    color: #fff;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: rgba(56, 189, 248, 0.15);
+    transform: translateY(-3px);
+  }
+
+  .opt-btn.correct {
+    background: rgba(16, 185, 129, 0.25) !important;
+    border-color: var(--success) !important;
+    color: #6ee7b7;
+  }
+
+  .opt-btn.wrong {
+    background: rgba(244, 63, 94, 0.25) !important;
+    border-color: var(--danger) !important;
+    color: #fda4af;
+  }
+
+  /* Constructor Interactivo de Coeficientes y Exponentes */
+  .builder-Area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    background: rgba(9, 13, 28, 0.75);
+    border: 1.5px dashed rgba(56, 189, 248, 0.45);
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .builder-preview {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 2rem;
+    background: rgba(30, 41, 59, 0.95);
+    padding: 10px 26px;
+    border-radius: 16px;
+    border: 2px solid var(--primary);
+    min-width: 180px;
+    text-align: center;
+  }
+
+  .builder-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+  }
+
+  .slot-group {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 14px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+
+  .slot-group label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 800;
+  }
+
+  .chip-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .num-chip {
+    background: #0f172a;
+    border: 1.5px solid #475569;
+    color: #fff;
+    min-width: 42px;
+    height: 40px;
+    padding: 0 10px;
+    border-radius: 10px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .num-chip.active {
+    background: var(--primary);
+    color: #050814;
+    border-color: #fff;
+    font-weight: 800;
+    transform: scale(1.06);
+  }
+
+  /* Constructor de Términos Ordenados */
+  .term-assembly-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    min-height: 54px;
+    padding: 10px;
+    background: rgba(9, 13, 28, 0.85);
+    border: 2px dashed rgba(56, 189, 248, 0.5);
+    border-radius: 14px;
+    width: 100%;
+  }
+
+  .assembled-piece {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.15rem;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #1e3a8a;
+  }
+
+  .bank-pieces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 6px;
+  }
+
+  .piece-btn {
+    background: rgba(30, 41, 59, 0.95);
+    border: 2px solid var(--secondary);
+    color: #fff;
+    padding: 9px 15px;
+    border-radius: 12px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.12rem;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .piece-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    border-color: var(--warning);
+  }
+
+  .piece-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  /* Panel Inteligente de Retroalimentación y Pistas */
+  .diagnostic-box {
+    margin-top: 14px;
+    padding: 15px 18px;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    animation: fadeIn 0.25s ease;
+  }
+
+  .diagnostic-box.error-diag {
+    background: rgba(244, 63, 94, 0.14);
+    border: 2px solid var(--danger);
+    color: #ffe4e6;
+  }
+
+  .diagnostic-box.hint-diag {
+    background: rgba(251, 191, 36, 0.14);
+    border: 2px solid var(--warning);
+    color: #fef3c7;
+  }
+
+  .diagnostic-box.success-diag {
+    background: rgba(16, 185, 129, 0.16);
+    border: 2px solid var(--success);
+    color: #d1fae5;
+  }
+
+  /* Jefe Final en Nivel 8 */
+  .boss-arena {
+    background: linear-gradient(135deg, rgba(69, 10, 10, 0.9), rgba(30, 10, 45, 0.95));
+    border: 2.5px solid #f43f5e;
+    border-radius: 20px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 0 25px rgba(244, 63, 94, 0.35);
+  }
+
+  .boss-avatar {
+    width: 82px;
+    height: 82px;
+    flex-shrink: 0;
+    transition: transform 0.25s;
+  }
+
+  .boss-avatar.hit {
+    animation: bossShake 0.45s ease;
+  }
+
+  @keyframes bossShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px) rotate(-8deg); filter: brightness(2); }
+    75% { transform: translateX(10px) rotate(8deg); }
+  }
+
+  .boss-hp-bar {
+    width: 100%;
+    height: 20px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 2px solid #f43f5e;
+    border-radius: 50px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+
+  .boss-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f43f5e, #fb923c);
+    width: 100%;
+    transition: width 0.4s ease;
+  }
+
+  /* Diploma Canvas y Celebración */
+  .diploma-wrapper {
+    text-align: center;
+  }
+
+  #diploma-canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    border: 3px solid var(--warning);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+    margin: 12px auto;
+    display: block;
+  }
+
+  /* Modal de Refuerzo y de Instrucciones */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 7, 17, 0.85);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .modal-content {
+    background: #0f172a;
+    border: 2.5px solid var(--primary);
+    border-radius: 24px;
+    max-width: 560px;
+    width: 100%;
+    padding: 22px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Firma elegante fija al pie */
+  footer.prof-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(7, 11, 25, 0.88);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 6px 12px;
+    text-align: center;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  .prof-signature-text {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.55rem;
+    font-weight: 700;
+    background: linear-gradient(270deg, #ffd700, #38bdf8, #a855f7, #2dd4bf, #ffd700);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: signatureFlow 6s ease infinite;
+    padding: 0 4px;
+  }
+
+  @keyframes signatureFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @media (max-width: 640px) {
+    .mascot-banner { flex-direction: column; text-align: center; }
+    .topbar { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="app-wrapper">
+  <!-- BARRA SUPERIOR DE NAVEGACIÓN Y SONIDO -->
+  <header class="topbar">
+    <div class="brand-mini">
+      <span>🏛️</span>
+      <span>Academia Algebraica</span>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-pill cyan" title="Estudiante activo">👩‍🎓 <span id="ui-student-name">Invitado</span></div>
+      <div class="stat-pill gold" title="Estrellas ganadas">⭐ <span id="ui-stars">0</span></div>
+      <div class="stat-pill pink" title="Monedas algebraicas">🪙 <span id="ui-coins">0</span></div>
+      <div class="stat-pill" title="Puntos de experiencia">🏆 <span id="ui-score">0</span> pts</div>
+    </div>
+
+    <div class="top-Controls">
+      <button class="icon-btn" id="btn-music" onclick="toggleMusic()">🎵 Música: ON</button>
+      <button class="icon-btn" id="btn-sfx" onclick="toggleSfx()">🔊 Efectos: ON</button>
+      <button class="icon-btn" onclick="openInstructionsModal()">📖 Instrucciones</button>
+      <button class="icon-btn hidden" id="btn-back-menu" onclick="showMainMenu()">🏠 Menú</button>
+    </div>
+  </header>
+
+  <!-- PANTALLA 1: BIENVENIDA Y REGISTRO DE NOMBRE -->
+  <section id="screen-welcome" class="panel-card welcome-box">
+    <h1 class="main-title">Productos Notables: Academia Algebraica</h1>
+    <p class="subtitle">Aprende paso a paso el arte del álgebra junto a nuestro guardián Algebrix</p>
+
+    <div style="display:flex; justify-content:center; margin: 14px 0;">
+      <svg class="mascot-svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="52" r="38" fill="#1e293b" stroke="#38bdf8" stroke-width="4"/>
+        <polygon points="22,28 35,10 44,24" fill="#818cf8"/>
+        <polygon points="78,28 65,10 56,24" fill="#818cf8"/>
+        <circle cx="37" cy="48" r="10" fill="#0f172a" stroke="#fbbf24" stroke-width="2.5"/>
+        <circle cx="63" cy="48" r="10" fill="#0f172a" stroke="#fbbf24" stroke-width="2.5"/>
+        <circle cx="37" cy="48" r="4.5" fill="#38bdf8"/>
+        <circle cx="63" cy="48" r="4.5" fill="#38bdf8"/>
+        <polygon points="46,56 54,56 50,64" fill="#fbbf24"/>
+        <path d="M36,72 Q50,82 64,72" stroke="#34d399" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <p style="font-size:0.96rem; color:#cbd5e1; margin-bottom:6px;">
+      Escribe tu <strong>Nombre y Apellido</strong> para personalizar tus diplomas de cada nivel:
+    </p>
+    <input type="text" id="input-student-name" class="input-fancy" placeholder="Ej. Valentina Quispe" maxlength="32" autocomplete="off">
+
+    <button class="btn btn-primary" style="width:100%; font-size:1.15rem;" onclick="registerStudent()">
+      🚀 ¡Ingresar a la Academia Algebraica!
+    </button>
+  </section>
+
+  <!-- PANTALLA 2: MAPA DE LOS 8 NIVELES -->
+  <section id="screen-menu" class="panel-card hidden">
+    <h1 class="main-title">Mapa de Misiones Algebraicas</h1>
+    <p class="subtitle">Selecciona cualquiera de los 8 niveles para entrenar paso a paso y ganar tu diploma</p>
+
+    <div class="mascot-banner">
+      <svg class="mascot-svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="52" r="38" fill="#1e293b" stroke="#38bdf8" stroke-width="4"/>
+        <polygon points="22,28 35,10 44,24" fill="#818cf8"/>
+        <polygon points="78,28 65,10 56,24" fill="#818cf8"/>
+        <circle cx="37" cy="48" r="10" fill="#0f172a" stroke="#fbbf24" stroke-width="2.5"/>
+        <circle cx="63" cy="48" r="10" fill="#0f172a" stroke="#fbbf24" stroke-width="2.5"/>
+        <circle cx="37" cy="48" r="4.5" fill="#38bdf8"/>
+        <circle cx="63" cy="48" r="4.5" fill="#38bdf8"/>
+        <polygon points="46,56 54,56 50,64" fill="#fbbf24"/>
+        <path d="M36,72 Q50,82 64,72" stroke="#34d399" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="mascot-speech" id="menu-mascot-text">
+        ¡Bienvenido(a)! Cada nivel cuenta con un banco de <strong>30 ejercicios únicos</strong>. En cada partida resolverás <strong>9 ejercicios seleccionados al azar</strong> paso a paso. ¡Si te equivocas, te explicaré el porqué!
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <button class="icon-btn" onclick="changeStudentName()">✏️ Cambiar Alumno</button>
+        <button class="icon-btn" onclick="resetAllProgress()">🔄 Reiniciar Progreso</button>
+      </div>
+    </div>
+
+    <div class="levels-grid" id="levels-grid"></div>
+  </section>
+
+  <!-- PANTALLA 3: LABORATORIO DE JUEGO INTERACTIVO -->
+  <section id="screen-game" class="panel-card hidden">
+    <div class="game-header">
+      <div>
+        <span class="level-badge" id="game-level-badge">NIVEL 1</span>
+        <h2 id="game-level-title" style="font-family:'Fredoka',sans-serif; font-size:1.35rem;">Laboratorio de Potencias</h2>
+      </div>
+      <div class="progress-container">
+        <div class="progress-fill" id="game-progress-fill"></div>
+      </div>
+      <div style="font-weight:800; font-size:0.95rem; color:var(--primary);">
+        Ejercicio <span id="game-q-index">1</span> / 9
+      </div>
+    </div>
+
+    <!-- Arena del Jefe Final (Exclusivo Nivel 8) -->
+    <div id="boss-arena" class="boss-arena hidden">
+      <svg class="boss-avatar" id="boss-svg" viewBox="0 0 100 100">
+        <polygon points="50,6 90,28 82,78 50,94 18,78 10,28" fill="#450a0a" stroke="#f43f5e" stroke-width="4"/>
+        <polygon points="26,38 45,46 30,54" fill="#fbbf24"/>
+        <polygon points="74,38 55,46 70,54" fill="#fbbf24"/>
+        <path d="M32,72 L42,64 L50,72 L58,64 L68,72" stroke="#f43f5e" stroke-width="4" fill="none"/>
+      </svg>
+      <div style="flex:1;">
+        <div style="display:flex; justify-content:space-between; font-family:'Fredoka',sans-serif;">
+          <span style="color:#fda4af;">👾 JEFE FINAL: TITÁN DEL CAOS ALGEBRAICO</span>
+          <span id="boss-hp-text" style="color:var(--warning);">Energía: 100%</span>
+        </div>
+        <div class="boss-hp-bar">
+          <div class="boss-hp-fill" id="boss-hp-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel Visual de Fórmulas y Reglas (Visible en Nivel 1) -->
+    <div id="level1-formula-panel" class="formula-lab-panel hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <strong style="color:var(--warning); font-family:'Fredoka',sans-serif; font-size:1rem;">
+          🔬 Reglas Visuales del Laboratorio de Potencias:
+        </strong>
+        <span style="font-size:0.8rem; color:#cbd5e1;">
+          Colores: <span class="c-coef">■ Coeficiente</span> | <span class="c-var">■ Variable</span> | <span class="c-exp">■ Exponente</span>
+        </span>
+      </div>
+      <div class="formula-lab-grid">
+        <div class="formula-item">
+          <strong>1. Potencia de un producto:</strong><br>
+          <span class="math-expr">(<span class="c-coef">a</span> · <span class="c-var">x</span>)<sup>n</sup> = <span class="c-coef">a</span><sup>n</sup> · <span class="c-var">x</span><sup>n</sup></span><br>
+          <small style="color:#94a3b8;">El exponente afecta tanto al número como a cada letra. Ej: (3x)<sup>3</sup> = 3<sup>3</sup>·x<sup>3</sup> = 27x<sup>3</sup>.</small>
+        </div>
+        <div class="formula-item">
+          <strong>2. Potencia de una potencia:</strong><br>
+          <span class="math-expr">(<span class="c-var">x</span><sup>m</sup>)<sup>n</sup> = <span class="c-var">x</span><sup>m · n</sup></span><br>
+          <small style="color:#94a3b8;">Los exponentes se <b>multiplican</b>, ¡no se suman! Ej: (2x<sup>2</sup>)<sup>3</sup> = 2<sup>3</sup>·x<sup>2·3</sup> = 8x<sup>6</sup>.</small>
+        </div>
+        <div class="formula-item">
+          <strong>3. Varias variables:</strong><br>
+          <span class="math-expr">(3a<sup>2</sup>b)<sup>2</sup> = 3<sup>2</sup> · a<sup>2·2</sup> · b<sup>1·2</sup> = 9a<sup>4</sup>b<sup>2</sup></span><br>
+          <small style="color:#94a3b8;">Recuerda que una letra sin exponente visible tiene exponente <b>1</b>.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mascota Guía en Juego -->
+    <div class="mascot-banner" style="padding: 10px 14px; margin-bottom: 12px;">
+      <svg class="mascot-svg" id="game-mascot-svg" style="width:58px; height:58px;" viewBox="0 0 100 100">
+        <circle cx="50" cy="52" r="38" fill="#1e293b" stroke="#38bdf8" stroke-width="4"/>
+        <polygon points="22,28 35,10 44,24" fill="#818cf8"/>
+        <polygon points="78,28 65,10 56,24" fill="#818cf8"/>
+        <circle cx="37" cy="48" r="10" fill="#0f172a" stroke="#fbbf24" stroke-width="2.5"/>
+        <circle cx="63" cy="48" r="10" fill="#0f172a" stroke="#fbbf24" stroke-width="2.5"/>
+        <circle cx="37" cy="48" r="4.5" fill="#38bdf8"/>
+        <circle cx="63" cy="48" r="4.5" fill="#38bdf8"/>
+        <polygon points="46,56 54,56 50,64" fill="#fbbf24"/>
+        <path id="mascot-mouth" d="M36,72 Q50,82 64,72" stroke="#34d399" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="mascot-speech" id="game-mascot-speech">
+        ¡Resolvamos este ejercicio paso a paso!
+      </div>
+      <button class="btn btn-warning" style="padding:8px 14px; font-size:0.9rem;" onclick="requestSmartHint()">
+        💡 Necesito una pista
+      </button>
+    </div>
+
+    <!-- Escenario de la Expresión Algebraica -->
+    <div class="expression-stage">
+      <div class="stage-label" id="stage-mission-type">DESAFÍO ALGEBRAICO PASO A PASO</div>
+      <div class="main-equation math-expr" id="game-main-expr">(3x)<sup>3</sup></div>
+      <div class="steps-trail" id="steps-trail"></div>
+    </div>
+
+    <!-- Área Interactiva del Paso Actual -->
+    <div class="step-workspace">
+      <div class="step-indicator">
+        <span class="step-pill" id="step-pill-label">PASO 1 DE 3</span>
+        <span style="font-size:0.82rem; color:var(--text-muted);">
+          Código: <span class="c-coef">Coeficiente</span> · <span class="c-var">Variable</span><sup class="c-exp">Exponente</sup>
+        </span>
+      </div>
+
+      <div class="step-question" id="step-question-text"></div>
+
+      <!-- Contenedor Dinámico de Interacción (Alternativas, Teclado de Coef/Exp o Constructor de Términos) -->
+      <div id="step-interaction-area"></div>
+
+      <!-- Panel de Diagnóstico Inteligente / Explicación Visual -->
+      <div id="diagnostic-panel" class="diagnostic-box hidden"></div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+        <button class="btn btn-success hidden" id="btn-next-step" onclick="advanceStepOrExercise()">
+          Continuar ➔
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANTALLA 4: CELEBRACIÓN Y DIPLOMA PERSONALIZADO -->
+  <section id="screen-diploma" class="panel-card diploma-wrapper hidden">
+    <h1 class="main-title">🎉 ¡Nivel Completado con Éxito! 🎉</h1>
+    <p class="subtitle" id="diploma-subtitle">Has demostrado constancia y dominio desarrollando productos notables paso a paso</p>
+
+    <canvas id="diploma-canvas" width="900" height="600"></canvas>
+
+    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:16px;">
+      <button class="btn btn-success" onclick="downloadDiplomaPNG()">📥 Descargar Diploma (PNG)</button>
+      <button class="btn btn-warning" onclick="printDiploma()">🖨️ Imprimir Diploma</button>
+      <button class="btn btn-purple" onclick="replayCurrentLevel()">🔄 Practicar con Nuevas Preguntas</button>
+      <button class="btn btn-primary" onclick="showMainMenu()">🗺️ Ir al Mapa de Niveles</button>
+    </div>
+  </section>
+</div>
+
+<!-- MODAL DE PREGUNTA DE REFUERZO (CUANDO FALLA 3 VECES EN UN MISMO PASO) -->
+<div id="modal-reinforce" class="modal-backdrop hidden">
+  <div class="modal-content">
+    <h2 style="font-family:'Fredoka',sans-serif; color:var(--warning); margin-bottom:8px;">
+      🛡️ Mini-Reto de Refuerzo Guiado
+    </h2>
+    <p id="reinforce-explanation" style="font-size:0.95rem; color:#e2e8f0; margin-bottom:14px; line-height:1.45;"></p>
+    <div style="background:rgba(30,41,59,0.9); border:1.5px solid var(--primary); border-radius:14px; padding:14px; margin-bottom:14px;">
+      <div id="reinforce-question" style="font-weight:800; font-size:1.08rem; margin-bottom:10px;"></div>
+      <div id="reinforce-options" class="options-grid"></div>
+    </div>
+    <div id="reinforce-feedback" class="diagnostic-box hidden"></div>
+    <div style="text-align:right; margin-top:12px;">
+      <button class="btn btn-success hidden" id="btn-close-reinforce" onclick="completeReinforcement()">
+        ¡Aprendido! Continuar ➔
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE INSTRUCCIONES -->
+<div id="modal-instructions" class="modal-backdrop hidden">
+  <div class="modal-content">
+    <h2 style="font-family:'Fredoka',sans-serif; color:var(--primary); margin-bottom:10px;">
+      📖 Cómo jugar en la Academia Algebraica
+    </h2>
+    <ul style="line-height:1.65; font-size:0.95rem; color:#e2e8f0; padding-left:20px; margin-bottom:16px;">
+      <li><strong>Aprende paso a paso:</strong> Aquí no memorizamos fórmulas sin sentido.Cada ejercicio se resuelve en <strong>3 o 4 etapas interactivas</strong>.</li>
+      <li><strong>Colores pedagógicos:</strong> Los <span class="c-coef">coeficientes (números grandes)</span> brillan en azul, las <span class="c-var">variables (letras)</span> en verde y los <span class="c-exp">exponentes</span> en dorado.</li>
+      <li><strong>Aprende de tus errores:</strong> Si te equivocas, el guardián <strong>Algebrix</strong> detectará exactamente qué ocurrió (signos, potencias o términos semejantes) y te dará un ejemplo claro.</li>
+      <li><strong>Botón «💡 Necesito una pista»:</strong> Toca una vez para recibir una orientación razonada y una segunda vez si necesitas ver la estructura algebraica.</li>
+      <li><strong>Diplomas y Medallas:</strong> Al completar los 9 ejercicios de cualquier nivel recibirás tu <strong>Diploma Personalizado</strong> descargable en imagen PNG.</li>
+    </ul>
+    <div style="text-align:center;">
+      <button class="btn btn-primary" onclick="closeInstructionsModal()">¡Entendido, a jugar!</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIE DE PÁGINA CON FIRMA ELEGANTE -->
+<footer class="prof-footer">
+  <span class="footer-label">Creado con dedicación pedagógica por</span>
+  <span class="prof-signature-text">Prof. Jhon Dewis</span>
+</footer>
+
+<script>
+/* =========================================================================
+   1. SISTEMA DE SONIDO SINTETIZADO (WEB AUDIO API - SIN ARCHIVOS EXTERNOS)
+   ========================================================================= */
+const AudioEngine = (function() {
+  let ctx = null;
+  let musicEnabled = true;
+  let sfxEnabled = true;
+  let musicInterval = null;
+  let noteStep = 0;
+
+  // Melodía instrumental alegre en Do Mayor / La menor pentatónica
+  const melodyNotes = [
+    523.25, 659.25, 783.99, 659.25, 880.00, 783.99, 659.25, 587.33,
+    523.25, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25, 440.00,
+    392.00, 523.25, 659.25, 783.99, 880.00, 783.99, 659.25, 523.25
+  ];
+
+  function initContext() {
+    if (!ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) ctx = new AudioCtx();
+    }
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+  }
+
+  function playTone(freq, duration, type = 'sine', vol = 0.08, delay = 0) {
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    gain.gain.setValueAtTime(0.001, ctx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(vol, ctx.currentTime + delay + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + duration + 0.02);
+  }
+
+  function startMusic() {
+    initContext();
+    if (musicInterval) clearInterval(musicInterval);
+    musicInterval = setInterval(() => {
+      if (!musicEnabled || !ctx || document.hidden) return;
+      const freq = melodyNotes[noteStep % melodyNotes.length];
+      playTone(freq, 0.32, 'triangle', 0.025, 0);
+      if (noteStep % 4 === 0) {
+        playTone(freq / 2, 0.55, 'sine', 0.02, 0);
+      }
+      noteStep++;
+    }, 380);
+  }
+
+  return {
+    unlock: function() {
+      initContext();
+      if (!musicInterval) startMusic();
+    },
+    sfxCorrect: function() {
+      if (!sfxEnabled) return;
+      initContext();
+      playTone(523.25, 0.12, 'triangle', 0.11, 0);
+      playTone(659.25, 0.12, 'triangle', 0.11, 0.09);
+      playTone(783.99, 0.25, 'triangle', 0.12, 0.18);
+    },
+    sfxWrong: function() {
+      if (!sfxEnabled) return;
+      initContext();
+      playTone(260, 0.18, 'sawtooth', 0.07, 0);
+      playTone(210, 0.28, 'sawtooth', 0.07, 0.15);
+    },
+    sfxHint: function() {
+      if (!sfxEnabled) return;
+      initContext();
+      playTone(587.33, 0.14, 'sine', 0.09, 0);
+      playTone(880.00, 0.22, 'sine', 0.09, 0.1);
+    },
+    sfxVictory: function() {
+      if (!sfxEnabled) return;
+      initContext();
+      [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
+        playTone(f, 0.24, 'triangle', 0.13, idx * 0.12);
+      });
+    },
+    toggleMusic: function() {
+      musicEnabled = !musicEnabled;
+      return musicEnabled;
+    },
+    toggleSfx: function() {
+      sfxEnabled = !sfxEnabled;
+      return sfxEnabled;
+    }
+  };
+})();
+
+function toggleMusic() {
+  const on = AudioEngine.toggleMusic();
+  const btn = document.getElementById('btn-music');
+  btn.textContent = on ? '🎵 Música: ON' : '🎵 Música: OFF';
+  btn.classList.toggle('off', !on);
+}
+
+function toggleSfx() {
+  const on = AudioEngine.toggleSfx();
+  const btn = document.getElementById('btn-sfx');
+  btn.textContent = on ? '🔊 Efectos: ON' : '🔊 Efectos: OFF';
+  btn.classList.toggle('off', !on);
+}
+
+/* =========================================================================
+   2. FORMATO PEDAGÓGICO DE EXPRESIONES MATEMÁTICAS CON COLORES Y SUPERÍNDICES
+   ========================================================================= */
+function fmtMonomial(coef, v1, e1, v2 = '', e2 = 0, colored = true) {
+  let cStr = '';
+  if (coef === -1 && (v1 || v2)) cStr = '−';
+  else if (coef === 1 && (v1 || v2)) cStr = '';
+  else if (coef < 0) cStr = '−' + Math.abs(coef);
+  else cStr = String(coef);
+
+  let html = '';
+  if (cStr !== '') {
+    html += colored ? `<span class="c-coef">${cStr}</span>` : cStr;
+  }
+  if (v1 && e1 > 0) {
+    html += colored ? `<span class="c-var">${v1}</span>` : v1;
+    if (e1 > 1) html += `<sup>${e1}</sup>`;
+  }
+  if (v2 && e2 > 0) {
+    html += colored ? `<span class="c-var">${v2}</span>` : v2;
+    if (e2 > 1) html += `<sup>${e2}</sup>`;
+  }
+  return html || '1';
+}
+
+/* =========================================================================
+   3. GENERADOR DE BANCOS DE 30 EJERCICIOS ÚNICOS POR CADA UNO DE LOS 8 NIVELES
+   (240 ejercicios matemáticamente verificados en total)
+   ========================================================================= */
+const LEVEL_DEFINITIONS = [
+  {
+    id: 1,
+    title: "Laboratorio de Potencias",
+    icon: "🔬",
+    themeBg: ["#061224", "#0c2d48"],
+    desc: "Domina cómo afectan los exponentes a los números y variables dentro de un paréntesis."
+  },
+  {
+    id: 2,
+    title: "El Poder de los Opuestos",
+    icon: "⚡",
+    themeBg: ["#1a0b2e", "#311042"],
+    desc: "Producto de una suma por su diferencia: (a + b)(a − b) = a² − b²."
+  },
+  {
+    id: 3,
+    title: "Binomios Aliados",
+    icon: "🤝",
+    themeBg: ["#072227", "#134e4a"],
+    desc: "Multiplicación de dos binomios con un término común positivo: (x + a)(x + b)."
+  },
+  {
+    id: 4,
+    title: "Binomios Avanzados",
+    icon: "🚀",
+    themeBg: ["#1e1b4b", "#312e81"],
+    desc: "Binomios con término común con coeficientes, signos negativos y exponentes."
+  },
+  {
+    id: 5,
+    title: "El Cubo de la Suma",
+    icon: "🧊",
+    themeBg: ["#27120b", "#451a03"],
+    desc: "Desarrollo paso a paso del binomio al cubo con suma: (a + b)³."
+  },
+  {
+    id: 6,
+    title: "El Cubo de la Diferencia",
+    icon: "❄️",
+    themeBg: ["#082f49", "#1e3a8a"],
+    desc: "Desarrollo de (a − b)³ dominando la secuencia alternada de signos (+, −, +, −)."
+  },
+  {
+    id: 7,
+    title: "El Desafío del Trinomio",
+    icon: "🏛️",
+    themeBg: ["#1f1235", "#3b0764"],
+    desc: "Producto de un binomio por un trinomio especial para obtener suma o diferencia de cubos."
+  },
+  {
+    id: 8,
+    title: "La Batalla Final Algebraica",
+    icon: "🐉",
+    themeBg: ["#2a0813", "#4c0519"],
+    desc: "Combina los 4 productos notables y potencias para derrotar al Titán del Caos."
+  }
+];
+
+// NIVEL 1: 30 ejercicios únicos de Potencia de un Monomio (incluyendo todos los ejemplos del prompt)
+function buildLevel1Bank() {
+  const tuples = [
+    // [coef, v1, e1, v2, e2, pow]
+    [3, 'x', 1, '', 0, 3],   // (3x)³ = 27x³
+    [2, 'a', 1, '', 0, 3],   // (2a)³ = 8a³
+    [4, 'x', 1, '', 0, 2],   // (4x)² = 16x²
+    [2, 'x', 2, '', 0, 3],   // (2x²)³ = 8x⁶
+    [3, 'a', 2, 'b', 1, 2],  // (3a²b)² = 9a⁴b²
+    [5, 'y', 1, '', 0, 2],
+    [2, 'm', 3, '', 0, 2],
+    [3, 'y', 2, '', 0, 3],
+    [4, 'a', 2, '', 0, 2],
+    [5, 'x', 2, '', 0, 3],
+    [6, 'm', 1, '', 0, 2],
+    [7, 'b', 1, '', 0, 2],
+    [2, 'a', 3, '', 0, 3],
+    [3, 'x', 3, '', 0, 2],
+    [4, 'm', 2, 'n', 1, 2],
+    [2, 'x', 2, 'y', 3, 2],
+    [5, 'a', 2, 'b', 1, 2],
+    [3, 'm', 2, '', 0, 2],
+    [8, 'x', 1, '', 0, 2],
+    [9, 'a', 1, '', 0, 2],
+    [2, 'p', 4, '', 0, 2],
+    [3, 'n', 1, '', 0, 3],
+    [4, 'y', 3, '', 0, 2],
+    [6, 'a', 2, '', 0, 2],
+    [2, 'x', 1, 'y', 2, 3],
+    [5, 'm', 3, '', 0, 2],
+    [7, 'x', 2, '', 0, 2],
+    [4, 'a', 1, '', 0, 3],
+    [3, 'p', 2, 'q', 2, 2],
+    [10, 'x', 2, '', 0, 2]
+  ];
+
+  return tuples.map((t, idx) => {
+    const [c, v1, e1, v2, e2, p] = t;
+    const cAns = Math.pow(c, p);
+    const e1Ans = e1 * p;
+    const e2Ans = e2 * p;
+    const insideHTML = fmtMonomial(c, v1, e1, v2, e2, true);
+    const exprHTML = `(${insideHTML})<sup>${p}</sup>`;
+    const finalHTML = fmtMonomial(cAns, v1, e1Ans, v2, e2Ans, true);
+    const wrongNoVarExp = fmtMonomial(cAns, v1, e1, v2, e2, false);
+    const wrongAddExp = fmtMonomial(cAns, v1, e1 + p, v2, e2 > 0 ? e2 + p : 0, false);
+    const wrongMultCoef = fmtMonomial(c * p, v1, e1Ans, v2, e2Ans, false);
+
+    return {
+      id: `L1_${idx}`,
+      exprHTML,
+      hint1: `Recuerda: el exponente ${p} fuera del paréntesis afecta tanto al número ${c} como a la variable ${v1}.`,
+      hint2: `Regla: (a · x<sup>m</sup>)<sup>n</sup> = a<sup>n</sup> · x<sup>m · n</sup>. Primero calcula ${c}<sup>${p}</sup> y luego multiplica el exponente de ${v1} por ${p}.`,
+      steps: [
+        {
+          type: 'choice',
+          prompt: `Paso 1: Eleva el coeficiente numérico a la potencia indicada. ¿Cuánto es <span class="math-expr"><span class="c-coef">${c}</span><sup>${p}</sup></span>?`,
+          trailText: `${c}<sup>${p}</sup> = ${cAns}`,
+          options: [
+            { text: `${cAns}`, correct: true, feedback: `¡Correcto! ${Array(p).fill(c).join(' × ')} = ${cAns}.` },
+            { text: `${c * p}`, correct: false, errorType: 'Confusión entre potenciación y multiplicación', explain: `Multiplicaste ${c} × ${p} = ${c * p}. Recuerda que el exponente ${p} indica multiplicar el ${c} por sí mismo ${p} veces: ${Array(p).fill(c).join(' × ')} = ${cAns}.` },
+            { text: `${c}`, correct: false, errorType: 'Olvidar elevar el coeficiente', explain: `Dejaste el coeficiente igual (${c}). Todo número dentro del paréntesis también debe elevarse al exponente ${p}.` },
+            { text: `${cAns + c}`, correct: false, errorType: 'Cálculo de potencia inexacto', explain: `Multiplica paso a paso: ${Array(p).fill(c).join(' × ')} = ${cAns}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: v2
+            ? `Paso 2: Ahora eleva las variables <span class="math-expr">(${ fmtMonomial(1, v1, e1, v2, e2, true) })<sup>${p}</sup></span> multiplicando sus exponentes por ${p}. ¿Qué parte literal resulta?`
+            : `Paso 2: Ahora eleva la variable <span class="math-expr">(${ fmtMonomial(1, v1, e1, '', 0, true) })<sup>${p}</sup></span>. ¿Qué resultado se obtiene al multiplicar su exponente por ${p}?`,
+          trailText: fmtMonomial(1, v1, e1Ans, v2, e2Ans, false),
+          options: [
+            { text: fmtMonomial(1, v1, e1Ans, v2, e2Ans, false), correct: true, feedback: `¡Muy bien! Al elevar una potencia a otra potencia, multiplicamos los exponentes.` },
+            { text: fmtMonomial(1, v1, e1 + p, v2, e2 > 0 ? e2 + p : 0, false), correct: false, errorType: 'Sumar exponentes en lugar de multiplicarlos', explain: e1 === 1 ? `Sumaste 1 + ${p} = ${1 + p}. Cuando una variable tiene exponente 1, multiplicamos 1 × ${p} = ${p}.` : `¡Cuidado! Sumaste ${e1} + ${p} = ${e1 + p}. En potencia de una potencia (${v1}<sup>${e1}</sup>)<sup>${p}</sup> los exponentes se MULTIPLICAN: ${e1} × ${p} = ${e1Ans}.` },
+            { text: fmtMonomial(1, v1, e1, v2, e2, false), correct: false, errorType: 'Olvidar elevar la variable al exponente', explain: `Dejaste la variable sin elevar. El exponente ${p} fuera del paréntesis también multiplica al exponente de la letra.` },
+            { text: `${v1}`, correct: false, errorType: 'Omitir el nuevo exponente', explain: `La variable ${v1} queda elevada al exponente ${e1} × ${p} = ${e1Ans}.` }
+          ]
+        },
+        {
+          type: 'builder',
+          prompt: `Paso 3: Une el coeficiente y la parte literal para formar el resultado final de <span class="math-expr">${exprHTML}</span>:`,
+          trailText: `Resultado = ${fmtMonomial(cAns, v1, e1Ans, v2, e2Ans, false)}`,
+          targetCoef: cAns,
+          coefChoices: Array.from(new Set([cAns, c * p, c, cAns + 2])).sort((a,b) => a - b),
+          varLabel: v2 ? `${v1}<sup>${e1Ans}</sup>${v2}` : v1,
+          targetExp: v2 ? e2Ans : e1Ans,
+          expChoices: Array.from(new Set([v2 ? e2Ans : e1Ans, 1, e1 + p, (v2 ? e2Ans : e1Ans) + 1])).sort((a,b) => a - b),
+          visualSuccess: `¡Excelente! Visualiza por qué: ${exprHTML} = ${c}<sup>${p}</sup> · ${fmtMonomial(1, v1, e1Ans, v2, e2Ans, false)} = <b>${fmtMonomial(cAns, v1, e1Ans, v2, e2Ans, false)}</b>. (Escribir ${wrongNoVarExp} sería olvidar elevar la variable, y ${wrongMultCoef} sería multiplicar en vez de potenciar).`
+        }
+      ],
+      reinforce: {
+        explain: `Recuerda siempre los dos pasos: 1) Eleva el número (${c}<sup>${p}</sup> = ${cAns}) y 2) Multiplica el exponente de la letra por ${p} (${e1} × ${p} = ${e1Ans}).`,
+        q: `¿Cuál es el desarrollo correcto de (${c}${v1}${e1 > 1 ? `<sup>${e1}</sup>` : ''})<sup>${p}</sup>?`,
+        ans: fmtMonomial(cAns, v1, e1Ans, '', 0, false),
+        wrongs: [
+          fmtMonomial(c * p, v1, e1Ans, '', 0, false),
+          fmtMonomial(cAns, v1, e1, '', 0, false)
+        ]
+      }
+    };
+  });
+}
+
+// NIVEL 2: 30 ejercicios únicos de Suma por su Diferencia (a + b)(a - b) = a² - b²
+function buildLevel2Bank() {
+  const tuples = [
+    // [c1, v1, e1, c2, v2, e2]
+    [1, 'x', 1, 5, '', 0],    // (x + 5)(x - 5)
+    [3, 'a', 1, 4, 'b', 1],   // (3a + 4b)(3a - 4b)
+    [5, 'x', 1, 7, 'y', 1],   // (5x + 7y)(5x - 7y)
+    [1, 'y', 1, 6, '', 0],
+    [1, 'm', 1, 8, '', 0],
+    [2, 'x', 1, 3, '', 0],
+    [4, 'a', 1, 5, '', 0],
+    [2, 'm', 1, 7, 'n', 1],
+    [3, 'x', 1, 5, 'y', 1],
+    [6, 'a', 1, 1, 'b', 1],
+    [7, 'x', 1, 2, 'y', 1],
+    [1, 'a', 2, 4, '', 0],
+    [2, 'x', 2, 5, '', 0],
+    [3, 'm', 2, 2, 'n', 1],
+    [4, 'x', 1, 9, 'y', 1],
+    [5, 'a', 2, 3, 'b', 2],
+    [8, 'x', 1, 3, '', 0],
+    [9, 'm', 1, 4, 'n', 1],
+    [2, 'y', 3, 5, '', 0],
+    [6, 'x', 2, 7, 'y', 1],
+    [1, 'p', 1, 10, '', 0],
+    [3, 'a', 3, 4, '', 0],
+    [5, 'm', 1, 6, 'n', 1],
+    [7, 'a', 2, 3, 'b', 1],
+    [4, 'x', 2, 3, 'y', 2],
+    [2, 'a', 1, 9, 'b', 1],
+    [10, 'x', 1, 3, 'y', 1],
+    [8, 'm', 2, 5, 'n', 2],
+    [6, 'p', 1, 5, 'q', 1],
+    [9, 'x', 2, 2, 'y', 1]
+  ];
+
+  return tuples.map((t, idx) => {
+    const [c1, v1, e1, c2, v2, e2] = t;
+    const termA = fmtMonomial(c1, v1, e1, '', 0, true);
+    const termB = fmtMonomial(c2, v2, e2, '', 0, true);
+    const exprHTML = `(${termA} + ${termB})(${termA} − ${termB})`;
+
+    const c1Sq = c1 * c1;
+    const e1Sq = e1 * 2;
+    const c2Sq = c2 * c2;
+    const e2Sq = e2 * 2;
+
+    const aSqPlain = fmtMonomial(c1Sq, v1, e1Sq, '', 0, false);
+    const bSqPlain = fmtMonomial(c2Sq, v2, e2Sq, '', 0, false);
+    const finalPlain = `${aSqPlain} − ${bSqPlain}`;
+
+    const wrongA_noVarSq = fmtMonomial(c1Sq, v1, e1, '', 0, false);
+    const wrongA_mult2 = fmtMonomial(c1 * 2, v1, e1Sq, '', 0, false);
+    const wrongB_mult2 = fmtMonomial(c2 * 2, v2, e2Sq, '', 0, false);
+
+    return {
+      id: `L2_${idx}`,
+      exprHTML,
+      hint1: `Observa que tienes los mismos términos sumándose y restándose. Los productos cruzados se cancelan entre sí.`,
+      hint2: `Suma por su diferencia: (A + B)(A − B) = A<sup>2</sup> − B<sup>2</sup>. Eleva cada término al cuadrado y colócalos restando.`,
+      steps: [
+        {
+          type: 'choice',
+          prompt: `Paso 1: Eleva al cuadrado el primer término: <span class="math-expr">(${termA})<sup>2</sup></span>`,
+          trailText: `1.er término² = ${aSqPlain}`,
+          options: [
+            { text: aSqPlain, correct: true, feedback: `¡Exacto! El cuadrado del primer término es ${aSqPlain}.` },
+            { text: wrongA_noVarSq, correct: false, errorType: 'Olvidar elevar la variable al cuadrado', explain: `Elevaste el número pero olvidaste elevar la letra ${v1} al cuadrado. Recuerda que (${fmtMonomial(c1,v1,e1,'',0,false)})<sup>2</sup> = ${aSqPlain}.` },
+            { text: c1 > 1 ? wrongA_mult2 : `${2}${v1}<sup>${e1Sq}</sup>`, correct: false, errorType: 'Confundir elevar al cuadrado con multiplicar por 2', explain: c1 > 1 ? `Hiciste ${c1} × 2 en lugar de ${c1}<sup>2</sup> = ${c1} × ${c1} = ${c1Sq}.` : `Agregaste un 2 adelante en vez de elevar solo la base al cuadrado.` },
+            { text: fmtMonomial(c1, v1, e1Sq, '', 0, false), correct: false, errorType: 'Olvidar elevar el coeficiente al cuadrado', explain: `Debes elevar también el coeficiente ${c1} al cuadrado: ${c1}<sup>2</sup> = ${c1Sq}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 2: Eleva al cuadrado el segundo término: <span class="math-expr">(${termB})<sup>2</sup></span>`,
+          trailText: `2.º término² = ${bSqPlain}`,
+          options: [
+            { text: bSqPlain, correct: true, feedback: `¡Muy bien! El cuadrado del segundo término es ${bSqPlain}.` },
+            { text: wrongB_mult2, correct: false, errorType: 'Multiplicar por 2 en vez de elevar al cuadrado', explain: `Multiplicaste ${c2} × 2 = ${c2 * 2}. Elevar al cuadrado significa multiplicar por sí mismo: ${c2} × ${c2} = ${c2Sq}.` },
+            { text: v2 ? fmtMonomial(c2Sq, v2, e2, '', 0, false) : `${c2}`, correct: false, errorType: 'Olvidar elevar al cuadrado', explain: v2 ? `Olvidaste elevar la variable ${v2} al cuadrado.` : `Dejaste el número ${c2} sin elevar al cuadrado (${c2}<sup>2</sup> = ${c2Sq}).` },
+            { text: fmtMonomial(c2Sq + 2, v2, e2Sq, '', 0, false), correct: false, errorType: 'Error de cálculo en el cuadrado', explain: `Multiplica con cuidado: ${c2} × ${c2} = ${c2Sq}.` }
+          ]
+        },
+        {
+          type: 'assembly',
+          prompt: `Paso 3: Construye el resultado final tocando las piezas en orden (recuerda qué signo va entre ambos cuadrados):`,
+          trailText: `Resultado = ${finalPlain}`,
+          targetPieces: [aSqPlain, '−', bSqPlain],
+          bankPieces: [aSqPlain, '−', '+', bSqPlain, wrongA_noVarSq],
+          errorDiagnosis: {
+            '+': `¡Atención con el signo! En una suma por su diferencia (A + B)(A − B), como (+B)(−B) = −B<sup>2</sup>, los cuadrados SIEMPRE se restan (${aSqPlain} − ${bSqPlain}), nunca se suman.`
+          },
+          visualSuccess: `¡Brillante! Al multiplicar términos conjugados, los términos centrales se anulan y queda la diferencia de cuadrados: <b>${finalPlain}</b>.`
+        }
+      ],
+      reinforce: {
+        explain: `En (A + B)(A − B), elevamos el primero al cuadrado (${aSqPlain}), ponemos el signo MENOS (−) y elevamos el segundo al cuadrado (${bSqPlain}).`,
+        q: `¿Cuál es el resultado de ${exprHTML}?`,
+        ans: finalPlain,
+        wrongs: [
+          `${aSqPlain} + ${bSqPlain}`,
+          `${wrongA_noVarSq} − ${bSqPlain}`
+        ]
+      }
+    };
+  });
+}
+
+// NIVEL 3: 30 ejercicios de Binomios con Término Común Simple (x + a)(x + b)
+function buildLevel3Bank() {
+  const tuples = [
+    // [v, a, b]
+    ['x', 7, 5],   // (x + 7)(x + 5)
+    ['y', 9, 8],   // (y + 9)(y + 8)
+    ['a', 3, 6],   // (a + 3)(a + 6)
+    ['x', 4, 3],
+    ['m', 5, 2],
+    ['y', 6, 4],
+    ['a', 8, 3],
+    ['x', 9, 2],
+    ['n', 7, 4],
+    ['p', 5, 6],
+    ['x', 8, 5],
+    ['y', 7, 3],
+    ['m', 9, 4],
+    ['a', 6, 7],
+    ['x', 10, 3],
+    ['y', 4, 8],
+    ['b', 5, 9],
+    ['x', 6, 6],
+    ['m', 7, 8],
+    ['a', 2, 11],
+    ['x', 3, 9],
+    ['y', 5, 4],
+    ['n', 8, 6],
+    ['p', 10, 5],
+    ['x', 11, 3],
+    ['a', 4, 7],
+    ['m', 6, 9],
+    ['y', 8, 8],
+    ['x', 12, 2],
+    ['b', 7, 9]
+  ];
+
+  return tuples.map((t, idx) => {
+    const [v, a, b] = t;
+    const sum = a + b;
+    const prod = a * b;
+    const exprHTML = `(<span class="c-var">${v}</span> + <span class="c-coef">${a}</span>)(<span class="c-var">${v}</span> + <span class="c-coef">${b}</span>)`;
+    const finalPlain = `${v}<sup>2</sup> + ${sum}${v} + ${prod}`;
+
+    return {
+      id: `L3_${idx}`,
+      exprHTML,
+      hint1: `Identifica el término común (${v}) y los dos números no comunes (+${a} y +${b}).`,
+      hint2: `Regla de Steven: (${v} + a)(${v} + b) = ${v}<sup>2</sup> + (a + b)${v} + (a · b). Suma ${a} + ${b} para el término central y multiplica ${a} × ${b} para el término final.`,
+      steps: [
+        {
+          type: 'choice',
+          prompt: `Paso 1: Eleva al cuadrado el término común <span class="math-expr"><span class="c-var">${v}</span></span>:`,
+          trailText: `Común² = ${v}<sup>2</sup>`,
+          options: [
+            { text: `${v}<sup>2</sup>`, correct: true, feedback: `¡Correcto! ${v} · ${v} = ${v}<sup>2</sup>.` },
+            { text: `2${v}`, correct: false, errorType: 'Confundir cuadrado con el doble', explain: `Al multiplicar ${v} por ${v} sumamos sus exponentes (1 + 1 = 2), obteniendo ${v}<sup>2</sup>, no 2${v}.` },
+            { text: `${v}`, correct: false, errorType: 'Olvidar elevar al cuadrado el término común', explain: `Como multiplicamos ${v} por ${v}, el exponente debe ser 2: ${v}<sup>2</sup>.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 2: Suma los términos no comunes <span class="math-expr">(${a} + ${b})</span> y multiplícalos por el término común <span class="math-expr">${v}</span>:`,
+          trailText: `Centro = +${sum}${v}`,
+          options: [
+            { text: `${sum}${v}`, correct: true, feedback: `¡Muy bien! (${a} + ${b})${v} = ${sum}${v}.` },
+            { text: `${prod}${v}`, correct: false, errorType: 'Multiplicar en lugar de sumar en el término central', explain: `Multiplicaste ${a} × ${b} = ${prod}. Para el término central debemos SUMAR los no comunes: ${a} + ${b} = ${sum}${v}.` },
+            { text: `${sum}`, correct: false, errorType: 'Olvidar acompañar con el término común', explain: `Sumaste bien ${a} + ${b} = ${sum}, pero recuerda que el término central lleva la variable común: ${sum}${v}.` },
+            { text: `${Math.abs(a - b)}${v}`, correct: false, errorType: 'Restar en lugar de sumar signos iguales', explain: `Ambos números son positivos (+${a} y +${b}), por lo tanto se suman: ${a} + ${b} = ${sum}${v}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 3: Ahora multiplica los términos no comunes <span class="math-expr">(${a} × ${b})</span> para obtener el último término:`,
+          trailText: `Producto = +${prod}`,
+          options: [
+            { text: `${prod}`, correct: true, feedback: `¡Exacto! ${a} × ${b} = ${prod}.` },
+            { text: `${sum}`, correct: false, errorType: 'Olvidar multiplicar los términos no comunes', explain: `Pusiste ${sum} (la suma). El último término se obtiene MULTIPLICANDO los no comunes: ${a} × ${b} = ${prod}.` },
+            { text: `${prod}${v}`, correct: false, errorType: 'Agregar variable al término independiente', explain: `Como multiplicas solo los números ${a} × ${b}, el resultado ${prod} no lleva la letra ${v}.` },
+            { text: `${prod + a}`, correct: false, errorType: 'Error en la tabla de multiplicar', explain: `Revisa tu multiplicación: ${a} × ${b} = ${prod}.` }
+          ]
+        },
+        {
+          type: 'assembly',
+          prompt: `Paso 4: Construye el trinomio final seleccionando los 3 términos en orden:`,
+          trailText: `Resultado = ${finalPlain}`,
+          targetPieces: [`${v}<sup>2</sup>`, `+ ${sum}${v}`, `+ ${prod}`],
+          bankPieces: [`${v}<sup>2</sup>`, `+ ${sum}${v}`, `+ ${prod}`, `+ ${prod}${v}`, `+ ${sum}`],
+          errorDiagnosis: {
+            [`+ ${prod}${v}`]: `Recuerda que en el centro va la suma (+ ${sum}${v}) y al final el producto sin variable (+ ${prod}).`,
+            [`+ ${sum}`]: `Al final debe ir la multiplicación de los no comunes (+ ${prod}), no la suma.`
+          },
+          visualSuccess: `¡Excelente trabajo! El desarrollo completo es <b>${finalPlain}</b>.`
+        }
+      ],
+      reinforce: {
+        explain: `En (${v} + ${a})(${v} + ${b}): primero va ${v}<sup>2</sup>, luego la suma (${a}+${b})${v} = ${sum}${v}, y al final el producto (${a}×${b}) = ${prod}.`,
+        q: `¿Cuál es el desarrollo correcto de (${v} + ${a})(${v} + ${b})?`,
+        ans: finalPlain,
+        wrongs: [
+          `${v}<sup>2</sup> + ${prod}${v} + ${sum}`,
+          `${v}<sup>2</sup> + ${sum}`
+        ]
+      }
+    };
+  });
+}
+
+// NIVEL 4: 30 ejercicios de Binomios Avanzados (coeficientes, signos negativos y exponentes)
+function buildLevel4Bank() {
+  const tuples = [
+    // [c, v, e, a, b]  -> (c*v^e + a)(c*v^e + b)
+    [4, 'x', 1, 3, 5],    // (4x + 3)(4x + 5)
+    [1, 'x', 1, 4, -6],   // (x + 4)(x - 6)
+    [3, 'y', 1, -2, 7],   // (3y - 2)(3y + 7)
+    [1, 'm', 2, 4, -6],   // (m² + 4)(m² - 6)
+    [2, 'x', 1, 5, -3],
+    [3, 'a', 1, -4, -5],
+    [2, 'y', 2, 3, -7],
+    [5, 'x', 1, -2, 6],
+    [1, 'a', 2, -8, 3],
+    [4, 'm', 1, -3, -2],
+    [2, 'x', 1, -5, 9],
+    [3, 'p', 2, 4, -2],
+    [5, 'y', 1, 3, 4],
+    [1, 'x', 3, -7, 2],
+    [2, 'a', 2, -6, 4],
+    [6, 'x', 1, -1, 3],
+    [3, 'm', 1, -5, 2],
+    [4, 'y', 2, -3, 5],
+    [2, 'n', 1, -7, -3],
+    [5, 'a', 2, -4, 2],
+    [1, 'y', 2, -9, 4],
+    [3, 'x', 2, 5, -2],
+    [4, 'a', 1, -6, 3],
+    [2, 'm', 3, 5, -3],
+    [7, 'x', 1, -2, 4],
+    [3, 'b', 2, -4, -3],
+    [5, 'x', 2, 2, -5],
+    [2, 'y', 1, 8, -3],
+    [6, 'a', 1, -2, -3],
+    [4, 'x', 2, -5, 2]
+  ];
+
+  return tuples.map((t, idx) => {
+    const [c, v, e, a, b] = t;
+    const commonHTML = fmtMonomial(c, v, e, '', 0, true);
+    const commonPlain = fmtMonomial(c, v, e, '', 0, false);
+    const aStr = a >= 0 ? `+ ${a}` : `− ${Math.abs(a)}`;
+    const bStr = b >= 0 ? `+ ${b}` : `− ${Math.abs(b)}`;
+    const exprHTML = `(${commonHTML} ${aStr})(${commonHTML} ${bStr})`;
+
+    const cSq = c * c;
+    const eSq = e * 2;
+    const firstTermPlain = fmtMonomial(cSq, v, eSq, '', 0, false);
+
+    const sumAB = a + b;
+    const midCoef = sumAB * c;
+    const midSign = midCoef >= 0 ? '+' : '−';
+    const midAbsPlain = fmtMonomial(Math.abs(midCoef), v, e, '', 0, false);
+    const midFullPlain = `${midSign} ${midAbsPlain}`;
+
+    const prodAB = a * b;
+    const lastSign = prodAB >= 0 ? '+' : '−';
+    const lastFullPlain = `${lastSign} ${Math.abs(prodAB)}`;
+
+    const finalPlain = `${firstTermPlain} ${midFullPlain} ${lastFullPlain}`;
+
+    return {
+      id: `L4_${idx}`,
+      exprHTML,
+      hint1: `Cuidado con los signos: opera (${a >= 0 ? '+'+a : a}) y (${b >= 0 ? '+'+b : b}). No olvides multiplicar su suma por el término común (${commonPlain}).`,
+      hint2: `1) Eleva (${commonPlain})<sup>2</sup> = ${firstTermPlain}. 2) Suma (${a}) + (${b}) = ${sumAB} y multiplícalo por ${commonPlain} → ${midFullPlain}. 3) Multiplica (${a}) × (${b}) = ${lastFullPlain}.`,
+      steps: [
+        {
+          type: 'choice',
+          prompt: `Paso 1: Eleva al cuadrado el término común <span class="math-expr">(${commonHTML})<sup>2</sup></span>:`,
+          trailText: `1.er término = ${firstTermPlain}`,
+          options: [
+            { text: firstTermPlain, correct: true, feedback: `¡Correcto! (${commonPlain})<sup>2</sup> = ${firstTermPlain}.` },
+            { text: fmtMonomial(c, v, eSq, '', 0, false), correct: false, errorType: 'Olvidar elevar el coeficiente al cuadrado', explain: c > 1 ? `Olvidaste elevar el coeficiente ${c} al cuadrado (${c}<sup>2</sup> = ${cSq}).` : `Revisa el exponente.` },
+            { text: fmtMonomial(cSq, v, e, '', 0, false), correct: false, errorType: 'Olvidar multiplicar el exponente de la variable', explain: `Recuerda que (${v}${e>1?`<sup>${e}</sup>`:''})<sup>2</sup> = ${v}<sup>${eSq}</sup>.` },
+            { text: fmtMonomial(c * 2, v, e + 2, '', 0, false), correct: false, errorType: 'Sumar en lugar de potenciar', explain: `Eleva el número al cuadrado (${c}<sup>2</sup> = ${cSq}) y multiplica el exponente por 2.` }
+          ].slice(0, c === 1 ? 3 : 4)
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 2: Realiza la suma algebraica de los no comunes <span class="math-expr">(${a >= 0 ? '+'+a : a}) + (${b >= 0 ? '+'+b : b})</span> y multiplícala por el término común <span class="math-expr">${commonHTML}</span>:`,
+          trailText: `Centro = ${midFullPlain}`,
+          options: [
+            { text: midFullPlain, correct: true, feedback: `¡Muy bien! (${a} + ${b}) = ${sumAB}, y multiplicado por ${commonPlain} da ${midFullPlain}.` },
+            { text: `${midCoef >= 0 ? '−' : '+'} ${midAbsPlain}`, correct: false, errorType: 'Error con la ley de signos en la suma algebraica', explain: `Revisa el signo: al operar ${a} y ${b}, prevalece el signo del número con mayor valor absoluto (${sumAB >= 0 ? '+' : '−'}).` },
+            { text: c > 1 ? `${sumAB >= 0 ? '+' : '−'} ${fmtMonomial(Math.abs(sumAB), v, e, '', 0, false)}` : `${ '+ ' + fmtMonomial(Math.abs(a) + Math.abs(b), v, e, '', 0, false) }`, correct: false, errorType: 'Olvidar multiplicar la suma por el coeficiente del término común', explain: c > 1 ? `Sumaste bien (${a}) + (${b}) = ${sumAB}, pero olvidaste multiplicarlo por el coeficiente ${c} del término común (${sumAB} × ${c} = ${midCoef}).` : `Como tienen signos distintos, debes restar sus valores absolutos.` },
+            { text: `${lastSign} ${fmtMonomial(Math.abs(prodAB), v, e, '', 0, false)}`, correct: false, errorType: 'Multiplicar en lugar de sumar los no comunes', explain: `En el término central primero se SUMAN algebraicamente (${a}) y (${b}), dando ${sumAB}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 3: Multiplica los términos no comunes <span class="math-expr">(${a >= 0 ? '+'+a : a}) × (${b >= 0 ? '+'+b : b})</span> aplicando la ley de signos:`,
+          trailText: `Final = ${lastFullPlain}`,
+          options: [
+            { text: lastFullPlain, correct: true, feedback: `¡Exacto! (${a}) × (${b}) = ${lastFullPlain}.` },
+            { text: `${prodAB >= 0 ? '−' : '+'} ${Math.abs(prodAB)}`, correct: false, errorType: 'Error en la ley de signos de la multiplicación', explain: `Recuerda la ley de signos al multiplicar: signos iguales dan POSITIVO (+) y signos diferentes dan NEGATIVO (−). Por eso (${a}) × (${b}) = ${lastFullPlain}.` },
+            { text: `${sumAB >= 0 ? '+' : '−'} ${Math.abs(sumAB)}`, correct: false, errorType: 'Sumar en vez de multiplicar al final', explain: `El último término es el PRODUCTO (multiplicación) de (${a}) por (${b}), que es ${lastFullPlain}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 4: Selecciona la expresión algebraica reducida completa de <span class="math-expr">${exprHTML}</span>:`,
+          trailText: `Resultado = ${finalPlain}`,
+          options: [
+            { text: finalPlain, correct: true, feedback: `¡Excelente dominio de signos y coeficientes!` },
+            { text: `${firstTermPlain} ${midCoef >= 0 ? '−' : '+'} ${midAbsPlain} ${lastFullPlain}`, correct: false, errorType: 'Signo central invertido', explain: `El término central calculado en el Paso 2 fue ${midFullPlain}.` },
+            { text: `${firstTermPlain} ${midFullPlain} ${prodAB >= 0 ? '−' : '+'} ${Math.abs(prodAB)}`, correct: false, errorType: 'Signo final invertido', explain: `El producto final calculado en el Paso 3 fue ${lastFullPlain}.` }
+          ]
+        }
+      ],
+      reinforce: {
+        explain: `En ${exprHTML}: 1) (${commonPlain})<sup>2</sup> = ${firstTermPlain}. 2) (${a} + (${b}))·${commonPlain} = ${midFullPlain}. 3) (${a})·(${b}) = ${lastFullPlain}.`,
+        q: `¿Cuál es el desarrollo correcto de ${exprHTML}?`,
+        ans: finalPlain,
+        wrongs: [
+          `${firstTermPlain} ${midCoef >= 0 ? '−' : '+'} ${midAbsPlain} ${lastFullPlain}`,
+          `${firstTermPlain} ${midFullPlain} ${prodAB >= 0 ? '−' : '+'} ${Math.abs(prodAB)}`
+        ]
+      }
+    };
+  });
+}
+
+// NIVEL 5: 30 ejercicios de El Cubo de la Suma (A + B)³ = A³ + 3A²B + 3AB² + B³
+function buildLevel5Bank() {
+  const tuples = [
+    // [c1, v1, c2, v2]
+    [1, 'a', 1, 'b'],   // (a + b)³
+    [1, 'x', 2, ''],    // (x + 2)³
+    [2, 'x', 3, ''],    // (2x + 3)³
+    [3, 'a', 5, 'b'],   // (3a + 5b)³
+    [1, 'y', 3, ''],
+    [1, 'm', 4, ''],
+    [1, 'a', 5, ''],
+    [2, 'a', 1, ''],
+    [3, 'x', 1, ''],
+    [2, 'y', 5, ''],
+    [3, 'm', 2, ''],
+    [4, 'x', 1, ''],
+    [2, 'a', 3, 'b'],
+    [3, 'x', 2, 'y'],
+    [1, 'x', 6, ''],
+    [4, 'a', 3, ''],
+    [2, 'm', 1, 'n'],
+    [5, 'x', 1, ''],
+    [3, 'y', 4, ''],
+    [2, 'a', 5, 'b'],
+    [4, 'm', 1, 'n'],
+    [1, 'p', 7, ''],
+    [5, 'a', 2, ''],
+    [3, 'x', 4, 'y'],
+    [2, 'p', 3, 'q'],
+    [4, 'x', 3, 'y'],
+    [6, 'a', 1, ''],
+    [5, 'm', 2, 'n'],
+    [1, 'x', 8, ''],
+    [2, 'a', 7, '']
+  ];
+
+  return tuples.map((t, idx) => {
+    const [c1, v1, c2, v2] = t;
+    const A_html = fmtMonomial(c1, v1, 1, '', 0, true);
+    const B_html = fmtMonomial(c2, v2, v2 ? 1 : 0, '', 0, true);
+    const exprHTML = `(${A_html} + ${B_html})<sup>3</sup>`;
+
+    const t1Coef = Math.pow(c1, 3);
+    const t2Coef = 3 * (c1 * c1) * c2;
+    const t3Coef = 3 * c1 * (c2 * c2);
+    const t4Coef = Math.pow(c2, 3);
+
+    const t1Plain = fmtMonomial(t1Coef, v1, 3, '', 0, false);
+    const t2Plain = fmtMonomial(t2Coef, v1, 2, v2, v2 ? 1 : 0, false);
+    const t3Plain = fmtMonomial(t3Coef, v1, 1, v2, v2 ? 2 : 0, false);
+    const t4Plain = fmtMonomial(t4Coef, v2, v2 ? 3 : 0, '', 0, false);
+
+    const finalPlain = `${t1Plain} + ${t2Plain} + ${t3Plain} + ${t4Plain}`;
+    const wrongNoSquareA = fmtMonomial(3 * c1 * c2, v1, 2, v2, v2 ? 1 : 0, false);
+    const wrongNo3 = fmtMonomial((c1 * c1) * c2, v1, 2, v2, v2 ? 1 : 0, false);
+
+    return {
+      id: `L5_${idx}`,
+      exprHTML,
+      hint1: `¡Cuidado! (${fmtMonomial(c1,v1,1,'',0,false)} + ${fmtMonomial(c2,v2,v2?1:0,'',0,false)})<sup>3</sup> TIENE 4 TÉRMINOS, nunca es solo ${t1Plain} + ${t4Plain}.`,
+      hint2: `Fórmula del Cubo de la Suma: A<sup>3</sup> + 3·A<sup>2</sup>·B + 3·A·B<sup>2</sup> + B<sup>3</sup>. Primero eleva al cuadrado y luego multiplica por 3.`,
+      steps: [
+        {
+          type: 'choice',
+          prompt: `Paso 1: Calcula el cubo del primer término <span class="math-expr">(${A_html})<sup>3</sup></span> y el cubo del segundo término <span class="math-expr">(${B_html})<sup>3</sup></span>:`,
+          trailText: `Extremos: ${t1Plain} ... + ${t4Plain}`,
+          options: [
+            { text: `${t1Plain}  y  ${t4Plain}`, correct: true, feedback: `¡Correcto! Esos son los extremos de nuestro desarrollo, pero ahora faltan los dos términos centrales.` },
+            { text: `${fmtMonomial(c1*3, v1, 3, '', 0, false)}  y  ${fmtMonomial(c2*3, v2, v2?3:0, '', 0, false)}`, correct: false, errorType: 'Multiplicar por 3 en lugar de elevar al cubo', explain: `Recuerda que elevar al cubo es multiplicar la base 3 veces por sí misma (${c1}<sup>3</sup> = ${t1Coef} y ${c2}<sup>3</sup> = ${t4Coef}).` },
+            { text: `${fmtMonomial(t1Coef, v1, 1, '', 0, false)}  y  ${t4Plain}`, correct: false, errorType: 'Olvidar elevar la variable al cubo', explain: `La variable ${v1} también queda elevada al exponente 3: ${t1Plain}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 2: Calcula el primer término central: <b>el triple del cuadrado del primero por el segundo</b> <span class="math-expr">3 · (${A_html})<sup>2</sup> · (${B_html})</span>:`,
+          trailText: `2.º término = +${t2Plain}`,
+          options: [
+            { text: t2Plain, correct: true, feedback: `¡Excelente! 3 × (${c1}<sup>2</sup>) × ${c2} = 3 × ${c1*c1} × ${c2} = ${t2Coef}, acompañado de ${v1}<sup>2</sup>${v2}.` },
+            { text: c1 > 1 ? wrongNoSquareA : fmtMonomial(t2Coef, v1, 1, v2, v2 ? 1 : 0, false), correct: false, errorType: 'Olvidar elevar al cuadrado el primer término', explain: c1 > 1 ? `Multiplicaste 3 × ${c1} × ${c2} olvidando elevar primero (${c1})<sup>2</sup> = ${c1*c1}. El cálculo correcto es 3 × ${c1*c1} × ${c2} = ${t2Coef}.` : `Olvidaste poner el exponente 2 en ${v1}<sup>2</sup>.` },
+            { text: wrongNo3, correct: false, errorType: 'Olvidar multiplicar por el triple (3)', explain: `Olvidaste multiplicar por el 3 de la regla (3 · A<sup>2</sup> · B).` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 3: Calcula el segundo término central: <b>el triple del primero por el cuadrado del segundo</b> <span class="math-expr">3 · (${A_html}) · (${B_html})<sup>2</sup></span>:`,
+          trailText: `3.er término = +${t3Plain}`,
+          options: [
+            { text: t3Plain, correct: true, feedback: `¡Muy bien! 3 × ${c1} × (${c2}<sup>2</sup>) = 3 × ${c1} × ${c2*c2} = ${t3Coef}, con exponente 1 en ${v1}.` },
+            { text: c2 > 1 ? fmtMonomial(3 * c1 * c2, v1, 1, v2, v2 ? 2 : 0, false) : fmtMonomial(t3Coef, v1, 2, v2, 1, false), correct: false, errorType: 'Error al elevar al cuadrado el segundo término', explain: c2 > 1 ? `Olvidaste elevar al cuadrado el segundo número (${c2}<sup>2</sup> = ${c2*c2}). Debe ser 3 × ${c1} × ${c2*c2} = ${t3Coef}.` : `En este tercer término, la primera letra tiene exponente 1 y la segunda tiene exponente 2.` },
+            { text: fmtMonomial(c1 * c2 * c2, v1, 1, v2, v2 ? 2 : 0, false), correct: false, errorType: 'Olvidar multiplicar por el triple (3)', explain: `Recuerda multiplicar por 3: 3 × ${c1} × ${c2*c2} = ${t3Coef}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 4: Une los 4 términos hallados para formar el desarrollo completo de <span class="math-expr">${exprHTML}</span>:`,
+          trailText: `Resultado = ${finalPlain}`,
+          options: [
+            { text: finalPlain, correct: true, feedback: `¡Extraordinario! Has desarrollado los 4 términos del cubo de un binomio sin olvidar los términos centrales.` },
+            { text: `${t1Plain} + ${t4Plain}`, correct: false, errorType: 'Olvidar los términos centrales en un binomio al cubo', explain: `¡Error clásico detectado! (${fmtMonomial(c1,v1,1,'',0,false)} + ${fmtMonomial(c2,v2,v2?1:0,'',0,false)})<sup>3</sup> NUNCA es igual a ${t1Plain} + ${t4Plain}. Siempre incluye los dos términos centrales triples: + ${t2Plain} + ${t3Plain}.` },
+            { text: `${t1Plain} + ${t3Plain} + ${t2Plain} + ${t4Plain}`, correct: false, errorType: 'Orden invertido de los términos centrales', explain: `Observa que los exponentes de ${v1} deben ir bajando en orden (de ${v1}<sup>3</sup> a ${v1}<sup>2</sup> y luego ${v1}).` }
+          ]
+        }
+      ],
+      reinforce: {
+        explain: `El cubo de una suma SIEMPRE tiene 4 términos: A<sup>3</sup> + 3A<sup>2</sup>B + 3AB<sup>2</sup> + B<sup>3</sup>.`,
+        q: `¿Cuál es el desarrollo completo de ${exprHTML}?`,
+        ans: finalPlain,
+        wrongs: [
+          `${t1Plain} + ${t4Plain}`,
+          `${t1Plain} + ${wrongNo3} + ${t3Plain} + ${t4Plain}`
+        ]
+      }
+    };
+  });
+}
+
+// NIVEL 6: 30 ejercicios de El Cubo de la Diferencia (A - B)³ = A³ - 3A²B + 3AB² - B³
+function buildLevel6Bank() {
+  const tuples = [
+    // [c1, v1, c2, v2]
+    [1, 'x', 3, ''],    // (x - 3)³
+    [2, 'a', 1, 'b'],   // (2a - b)³
+    [3, 'x', 2, 'y'],   // (3x - 2y)³
+    [1, 'a', 1, 'b'],
+    [1, 'y', 2, ''],
+    [1, 'm', 4, ''],
+    [2, 'x', 1, ''],
+    [3, 'a', 1, ''],
+    [2, 'x', 3, ''],
+    [1, 'a', 5, ''],
+    [4, 'x', 1, ''],
+    [2, 'm', 3, 'n'],
+    [3, 'a', 2, ''],
+    [2, 'y', 5, ''],
+    [5, 'x', 1, ''],
+    [3, 'm', 4, 'n'],
+    [4, 'a', 3, 'b'],
+    [1, 'x', 6, ''],
+    [2, 'a', 5, ''],
+    [3, 'y', 1, 'z'],
+    [5, 'a', 2, 'b'],
+    [4, 'x', 3, ''],
+    [2, 'p', 3, 'q'],
+    [1, 'm', 7, ''],
+    [3, 'x', 5, 'y'],
+    [6, 'a', 1, 'b'],
+    [2, 'x', 7, ''],
+    [4, 'm', 5, 'n'],
+    [5, 'x', 3, 'y'],
+    [1, 'a', 10, '']
+  ];
+
+  return tuples.map((t, idx) => {
+    const [c1, v1, c2, v2] = t;
+    const A_html = fmtMonomial(c1, v1, 1, '', 0, true);
+    const B_html = fmtMonomial(c2, v2, v2 ? 1 : 0, '', 0, true);
+    const exprHTML = `(${A_html} − ${B_html})<sup>3</sup>`;
+
+    const t1Coef = Math.pow(c1, 3);
+    const t2Coef = 3 * (c1 * c1) * c2;
+    const t3Coef = 3 * c1 * (c2 * c2);
+    const t4Coef = Math.pow(c2, 3);
+
+    const t1Plain = fmtMonomial(t1Coef, v1, 3, '', 0, false);
+    const t2Plain = fmtMonomial(t2Coef, v1, 2, v2, v2 ? 1 : 0, false);
+    const t3Plain = fmtMonomial(t3Coef, v1, 1, v2, v2 ? 2 : 0, false);
+    const t4Plain = fmtMonomial(t4Coef, v2, v2 ? 3 : 0, '', 0, false);
+
+    const finalPlain = `${t1Plain} − ${t2Plain} + ${t3Plain} − ${t4Plain}`;
+
+    return {
+      id: `L6_${idx}`,
+      exprHTML,
+      hint1: `En un binomio con resta al cubo, los signos se alternan: Positivo (+), Negativo (−), Positivo (+), Negativo (−).`,
+      hint2: `(A − B)<sup>3</sup> = +A<sup>3</sup> − 3A<sup>2</sup>B + 3AB<sup>2</sup> − B<sup>3</sup>. El 3.er término es POSITIVO porque (−B)<sup>2</sup> = +B<sup>2</sup>, y el 4.º es NEGATIVO porque (−B)<sup>3</sup> = −B<sup>3</sup>.`,
+      steps: [
+        {
+          type: 'choice',
+          prompt: `Paso 1: Calcula el primer término <span class="math-expr">(${A_html})<sup>3</sup></span> y el segundo término <span class="math-expr">− 3 · (${A_html})<sup>2</sup> · (${B_html})</span>:`,
+          trailText: `${t1Plain} − ${t2Plain}`,
+          options: [
+            { text: `${t1Plain} − ${t2Plain}`, correct: true, feedback: `¡Correcto! El primer término es positivo y el segundo es negativo.` },
+            { text: `${t1Plain} + ${t2Plain}`, correct: false, errorType: 'Error con el signo negativo en el segundo término', explain: `Como el segundo término multiplica por (−${fmtMonomial(c2,v2,v2?1:0,'',0,false)}), su signo debe ser NEGATIVO: − ${t2Plain}.` },
+            { text: `${t1Plain} − ${fmtMonomial(3*c1*c2, v1, 2, v2, v2?1:0, false)}`, correct: false, errorType: 'Olvidar elevar al cuadrado el coeficiente del primer término', explain: `Recuerda elevar (${c1})<sup>2</sup> = ${c1*c1} antes de multiplicar por 3 y por ${c2}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 2: Calcula el tercer término <span class="math-expr">+ 3 · (${A_html}) · (−${B_html})<sup>2</sup></span>. ¿Qué signo y valor tiene sabiendo que todo negativo al cuadrado se vuelve positivo?`,
+          trailText: `+ ${t3Plain}`,
+          options: [
+            { text: `+ ${t3Plain}`, correct: true, feedback: `¡Así se hace! Como (−${fmtMonomial(c2,v2,v2?1:0,'',0,false)})<sup>2</sup> es POSITIVO, este tercer término lleva signo MÁS (+).` },
+            { text: `− ${t3Plain}`, correct: false, errorType: 'Poner signo negativo al cuadrado de un término negativo', explain: `¡Ojo! Al elevar (−${fmtMonomial(c2,v2,v2?1:0,'',0,false)}) al cuadrado, (−) × (−) = (+). Por eso el tercer término SIEMPRE es positivo: + ${t3Plain}.` },
+            { text: `+ ${fmtMonomial(3*c1*c2, v1, 1, v2, v2?2:0, false)}`, correct: false, errorType: 'Olvidar elevar al cuadrado el segundo número', explain: `Eleva ${c2}<sup>2</sup> = ${c2*c2} y multiplícalo por 3 × ${c1} = ${t3Coef}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 3: Calcula el cuarto término <span class="math-expr">(−${B_html})<sup>3</sup></span>. ¿Qué resultado se obtiene al elevar un término negativo al cubo?`,
+          trailText: `− ${t4Plain}`,
+          options: [
+            { text: `− ${t4Plain}`, correct: true, feedback: `¡Exacto! Porque (−) × (−) × (−) = (−). Un negativo elevado al cubo siempre resulta negativo.` },
+            { text: `+ ${t4Plain}`, correct: false, errorType: 'Poner signo positivo al cubo de un negativo', explain: `Al multiplicar tres veces el signo menos: (−) × (−) da (+), y (+) × (−) da (−). Por eso termina en − ${t4Plain}.` },
+            { text: `− ${fmtMonomial(c2*3, v2, v2?3:0, '', 0, false)}`, correct: false, errorType: 'Multiplicar por 3 en lugar de elevar al cubo', explain: `Calcula ${c2}<sup>3</sup> = ${c2} × ${c2} × ${c2} = ${t4Coef}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 4: Selecciona el desarrollo final verificando la secuencia de signos <b>(+ , − , + , −)</b> para <span class="math-expr">${exprHTML}</span>:`,
+          trailText: `Resultado = ${finalPlain}`,
+          options: [
+            { text: finalPlain, correct: true, feedback: `¡Dominio total! Respetaste la secuencia de signos (+, −, +, −) a la perfección.` },
+            { text: `${t1Plain} − ${t2Plain} − ${t3Plain} − ${t4Plain}`, correct: false, errorType: 'Poner todos los signos negativos', explain: `Recuerda que en el cubo de la diferencia no todos son negativos: los signos se alternan (+ , − , + , −).` },
+            { text: `${t1Plain} − ${t4Plain}`, correct: false, errorType: 'Omitir los términos centrales', explain: `No olvides incluir los dos términos centrales: − ${t2Plain} + ${t3Plain}.` }
+          ]
+        }
+      ],
+      reinforce: {
+        explain: `En (A − B)<sup>3</sup> la secuencia de signos es siempre (+ , − , + , −): ${finalPlain}.`,
+        q: `¿Cuál es el desarrollo correcto de ${exprHTML}?`,
+        ans: finalPlain,
+        wrongs: [
+          `${t1Plain} − ${t2Plain} − ${t3Plain} − ${t4Plain}`,
+          `${t1Plain} − ${t4Plain}`
+        ]
+      }
+    };
+  });
+}
+
+// NIVEL 7: 30 ejercicios de Producto de Binomio por Trinomio (Suma y Diferencia de Cubos)
+function buildLevel7Bank() {
+  const tuples = [
+    // [c1, v1, signBin ('+' o '-'), c2, v2]
+    [1, 'a', '+', 1, 'b'],   // (a + b)(a² - ab + b²)
+    [1, 'a', '-', 1, 'b'],   // (a - b)(a² + ab + b²)
+    [1, 'm', '+', 5, ''],    // (m + 5)(m² - 5m + 25)
+    [1, 'y', '-', 7, ''],    // (y - 7)(y² + 7y + 49)
+    [1, 'x', '+', 2, ''],
+    [1, 'x', '-', 3, ''],
+    [1, 'a', '+', 4, ''],
+    [1, 'm', '-', 6, ''],
+    [2, 'x', '+', 1, ''],
+    [2, 'a', '-', 3, ''],
+    [3, 'x', '+', 2, ''],
+    [3, 'y', '-', 1, ''],
+    [1, 'x', '+', 8, ''],
+    [1, 'a', '-', 9, ''],
+    [2, 'm', '+', 5, ''],
+    [4, 'x', '-', 1, ''],
+    [3, 'a', '+', 4, 'b'],
+    [2, 'x', '-', 3, 'y'],
+    [5, 'm', '+', 2, 'n'],
+    [4, 'a', '-', 3, 'b'],
+    [1, 'p', '+', 10, ''],
+    [2, 'y', '-', 5, ''],
+    [3, 'm', '+', 1, ''],
+    [5, 'x', '-', 3, ''],
+    [2, 'a', '+', 7, ''],
+    [4, 'y', '-', 5, 'z'],
+    [6, 'x', '+', 1, ''],
+    [3, 'p', '-', 4, 'q'],
+    [5, 'a', '+', 4, 'b'],
+    [2, 'x', '-', 9, '']
+  ];
+
+  return tuples.map((t, idx) => {
+    const [c1, v1, sign, c2, v2] = t;
+    const isPlus = sign === '+';
+    const oppSign = isPlus ? '−' : '+';
+
+    const A_html = fmtMonomial(c1, v1, 1, '', 0, true);
+    const B_html = fmtMonomial(c2, v2, v2 ? 1 : 0, '', 0, true);
+
+    const trinom1 = fmtMonomial(c1 * c1, v1, 2, '', 0, true);
+    const trinom2 = fmtMonomial(c1 * c2, v1, 1, v2, v2 ? 1 : 0, true);
+    const trinom3 = fmtMonomial(c2 * c2, v2, v2 ? 2 : 0, '', 0, true);
+
+    const exprHTML = `(${A_html} ${isPlus ? '+' : '−'} ${B_html})(${trinom1} ${oppSign} ${trinom2} + ${trinom3})`;
+
+    const aCubePlain = fmtMonomial(Math.pow(c1, 3), v1, 3, '', 0, false);
+    const bCubePlain = fmtMonomial(Math.pow(c2, 3), v2, v2 ? 3 : 0, '', 0, false);
+    const finalSign = isPlus ? '+' : '−';
+    const finalPlain = `${aCubePlain} ${finalSign} ${bCubePlain}`;
+    const wrongSignPlain = `${aCubePlain} ${isPlus ? '−' : '+'} ${bCubePlain}`;
+    const wrongSqPlain = `${fmtMonomial(c1*c1, v1, 2, '', 0, false)} ${finalSign} ${fmtMonomial(c2*c2, v2, v2?2:0, '', 0, false)}`;
+
+    return {
+      id: `L7_${idx}`,
+      exprHTML,
+      hint1: `Al multiplicar este binomio por su trinomio especial, todos los términos intermedios se cancelan en parejas opuestas.`,
+      hint2: `El signo del resultado final lo manda el BINOMIO inicial: si el binomio tiene (${isPlus ? '+' : '−'}), el resultado es ${aCubePlain} ${finalSign} ${bCubePlain}.`,
+      steps: [
+        {
+          type: 'choice',
+          prompt: `Paso 1: Al multiplicar término a término, aparecen parejas opuestas como <span class="math-expr">${oppSign}${fmtMonomial(c1*c1*c2, v1, 2, v2, v2?1:0, false)} ${isPlus ? '+' : '−'} ${fmtMonomial(c1*c1*c2, v1, 2, v2, v2?1:0, false)}</span>. ¿Qué ocurre con esos términos centrales?`,
+          trailText: `Términos centrales = 0 (se cancelan)`,
+          options: [
+            { text: `Se cancelan entre sí (suman 0) y desaparecen`, correct: true, feedback: `¡Exacto! Por tener signos opuestos y la misma parte literal, se anulan por completo.` },
+            { text: `Se duplican y quedan en el centro`, correct: false, errorType: 'No reducir términos semejantes opuestos', explain: `Como uno es positivo (+) y el otro es exactamente igual pero negativo (−), al sumarlos dan 0 y se cancelan.` },
+            { text: `Se multiplican entre sí`, correct: false, errorType: 'Confundir reducción de términos semejantes con multiplicación', explain: `Al reducir términos semejantes de signos opuestos, simplemente se restan y dan 0.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 2: Calcula los cubos de los dos términos del binomio: <span class="math-expr">(${A_html})<sup>3</sup></span> y <span class="math-expr">(${B_html})<sup>3</sup></span>:`,
+          trailText: `Cubos: ${aCubePlain} y ${bCubePlain}`,
+          options: [
+            { text: `${aCubePlain}  y  ${bCubePlain}`, correct: true, feedback: `¡Muy bien! ${c1}<sup>3</sup> = ${Math.pow(c1,3)} y ${c2}<sup>3</sup> = ${Math.pow(c2,3)}.` },
+            { text: `${fmtMonomial(c1*c1, v1, 2, '', 0, false)}  y  ${fmtMonomial(c2*c2, v2, v2?2:0, '', 0, false)}`, correct: false, errorType: 'Elevar al cuadrado en vez de al cubo', explain: `Multiplicar grado 1 del binomio por grado 2 del trinomio produce grado 3 (cubos): ${aCubePlain} y ${bCubePlain}.` },
+            { text: `${fmtMonomial(c1*3, v1, 3, '', 0, false)}  y  ${fmtMonomial(c2*3, v2, v2?3:0, '', 0, false)}`, correct: false, errorType: 'Multiplicar por 3 en vez de elevar al cubo', explain: `Eleva al cubo multiplicando 3 veces la base: ${c1}<sup>3</sup> = ${Math.pow(c1,3)} y ${c2}<sup>3</sup> = ${Math.pow(c2,3)}.` }
+          ]
+        },
+        {
+          type: 'choice',
+          prompt: `Paso 3: Observando que el binomio inicial tiene signo <b>(${isPlus ? '+' : '−'})</b>, selecciona el resultado final de <span class="math-expr">${exprHTML}</span>:`,
+          trailText: `Resultado = ${finalPlain}`,
+          options: [
+            { text: finalPlain, correct: true, feedback: `¡Excelente! Cuando el binomio tiene (${isPlus ? '+' : '−'}), obtenemos ${isPlus ? 'una suma de cubos' : 'una diferencia de cubos'}: ${finalPlain}.` },
+            { text: wrongSignPlain, correct: false, errorType: 'Confundir el signo de la suma o diferencia de cubos', explain: `¡Fíjate en el primer paréntesis! Como el binomio es (${fmtMonomial(c1,v1,1,'',0,false)} ${finalSign} ${fmtMonomial(c2,v2,v2?1:0,'',0,false)}), el resultado conserva ese mismo signo: ${finalPlain}.` },
+            { text: wrongSqPlain, correct: false, errorType: 'Confundir con diferencia de cuadrados', explain: `Al multiplicar un binomio por este trinomio se obtienen CUBOS (exponente 3), no cuadrados.` }
+          ]
+        }
+      ],
+      reinforce: {
+        explain: `Recuerda: (A + B)(A<sup>2</sup> − AB + B<sup>2</sup>) = A<sup>3</sup> + B<sup>3</sup>, y (A − B)(A<sup>2</sup> + AB + B<sup>2</sup>) = A<sup>3</sup> − B<sup>3</sup>.`,
+        q: `¿Cuál es el resultado reducido de ${exprHTML}?`,
+        ans: finalPlain,
+        wrongs: [wrongSignPlain, wrongSqPlain]
+      }
+    };
+  });
+}
+
+// NIVEL 8: Batalla Final Algebraica (30 ejercicios combinados de todos los niveles)
+function buildLevel8Bank() {
+  const b1 = buildLevel1Bank();
+  const b2 = buildLevel2Bank();
+  const b3 = buildLevel3Bank();
+  const b4 = buildLevel4Bank();
+  const b5 = buildLevel5Bank();
+  const b6 = buildLevel6Bank();
+  const b7 = buildLevel7Bank();
+
+  const combined = [
+    b1[3], b1[4], b1[14], b1[24],
+    b2[1], b2[2], b2[12], b2[15], b2[24],
+    b3[0], b3[1], b3[14], b3[18],
+    b4[0], b4[1], b4[2], b4[3], b4[11],
+    b5[1], b5[2], b5[3], b5[12],
+    b6[0], b6[1], b6[2], b6[11],
+    b7[0], b7[2], b7[3], b7[16]
+  ];
+  return combined.map((item, i) => ({
+    ...item,
+    id: `L8_${i}`
+  }));
+}
+
+const ALL_BANKS = {
+  1: buildLevel1Bank(),
+  2: buildLevel2Bank(),
+  3: buildLevel3Bank(),
+  4: buildLevel4Bank(),
+  5: buildLevel5Bank(),
+  6: buildLevel6Bank(),
+  7: buildLevel7Bank(),
+  8: buildLevel8Bank()
+};
+
+/* =========================================================================
+   4. ESTADO DEL ESTUDIANTE Y GESTIÓN DE PARTIDAS (LOCALSTORAGE)
+   ========================================================================= */
+const STORAGE_KEY = 'academia_algebraica_dewis_v1';
+
+let appState = {
+  studentName: '',
+  stars: 0,
+  coins: 0,
+  score: 0,
+  completedLevels: {} // { 1: { medal: 'ORO', accuracy: 95 }, ... }
+};
+
+let currentSession = {
+  levelId: 1,
+  questions: [],     // 9 ejercicios aleatorios sin repetir
+  qIndex: 0,
+  stepIndex: 0,
+  stepMistakes: 0,   // fallos en el paso actual (para escalar ayudas 1, 2, 3)
+  hintStage: 0,      // 0: sin pista, 1: orientación, 2: fórmula visual
+  totalStepsAttempted: 0,
+  firstTrySuccessSteps: 0,
+  assembledIndices: [],
+  selectedCoef: null,
+  selectedExp: null
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      appState = { ...appState, ...parsed };
+    }
+  } catch (e) {}
+  updateTopBarUI();
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  } catch (e) {}
+  updateTopBarUI();
+}
+
+function updateTopBarUI() {
+  document.getElementById('ui-student-name').textContent = appState.studentName || 'Invitado';
+  document.getElementById('ui-stars').textContent = appState.stars;
+  document.getElementById('ui-coins').textContent = appState.coins;
+  document.getElementById('ui-score').textContent = appState.score;
+}
+
+function shuffleArray(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+/* =========================================================================
+   5. NAVEGACIÓN ENTRE PANTALLAS Y MAPA DE NIVELES
+   ========================================================================= */
+function registerStudent() {
+  AudioEngine.unlock();
+  const input = document.getElementById('input-student-name');
+  const name = input.value.trim();
+  if (!name) {
+    input.style.borderColor = '#f43f5e';
+    input.focus();
+    return;
+  }
+  appState.studentName = name;
+  saveState();
+  showMainMenu();
+}
+
+function changeStudentName() {
+  document.getElementById('screen-menu').classList.add('hidden');
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.add('hidden');
+  document.getElementById('screen-welcome').classList.remove('hidden');
+  document.getElementById('input-student-name').value = appState.studentName;
+}
+
+function resetAllProgress() {
+  if (confirm('¿Deseas reiniciar tus medallas y puntuaciones para empezar de cero?')) {
+    appState.stars = 0;
+    appState.coins = 0;
+    appState.score = 0;
+    appState.completedLevels = {};
+    saveState();
+    renderLevelsGrid();
+  }
+}
+
+function showMainMenu() {
+  document.getElementById('screen-welcome').classList.add('hidden');
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.add('hidden');
+  document.getElementById('btn-back-menu').classList.add('hidden');
+  document.getElementById('screen-menu').classList.remove('hidden');
+  setScenarioTheme(0);
+  renderLevelsGrid();
+}
+
+function renderLevelsGrid() {
+  const grid = document.getElementById('levels-grid');
+  grid.innerHTML = '';
+
+  LEVEL_DEFINITIONS.forEach(lvl => {
+    const record = appState.completedLevels[lvl.id];
+    const card = document.createElement('div');
+    card.className = 'level-card' + (record ? ' completed' : '');
+    const medalIcon = record
+      ? (record.medal === 'ORO' ? '🥇 Oro' : record.medal === 'PLATA' ? '🥈 Plata' : '🥉 Bronce')
+      : '🎯 9 Retos';
+
+    card.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="level-badge">NIVEL ${lvl.id}</span>
+          <span style="font-size:0.8rem; color:var(--warning); font-weight:800;">Banco: 30 ej.</span>
+        </div>
+        <div class="level-icon">${lvl.icon}</div>
+        <h3>${lvl.title}</h3>
+        <p>${lvl.desc}</p>
+      </div>
+      <div class="level-footer">
+        <span style="color:${record ? 'var(--success)' : 'var(--primary)'};">
+          ${record ? `✅ ${medalIcon} (${record.accuracy}%)` : '▶ ¡Jugar Ahora!'}
+        </span>
+        ${record ? `<button class="icon-btn" style="padding:3px 8px; font-size:0.75rem;" onclick="event.stopPropagation(); viewSavedDiploma(${lvl.id})">🎓 Diploma</button>` : ''}
+      </div>
+    `;
+    card.onclick = () => startLevel(lvl.id);
+    grid.appendChild(card);
+  });
+}
+
+/* =========================================================================
+   6. MOTOR INTERACTIVO DE JUEGO PASO A PASO Y SISTEMA PEDAGÓGICO
+   ========================================================================= */
+function startLevel(levelId) {
+  AudioEngine.unlock();
+  const bank = ALL_BANKS[levelId];
+  const selected9 = shuffleArray(bank).slice(0, 9);
+
+  currentSession = {
+    levelId,
+    questions: selected9,
+    qIndex: 0,
+    stepIndex: 0,
+    stepMistakes: 0,
+    hintStage: 0,
+    totalStepsAttempted: 0,
+    firstTrySuccessSteps: 0,
+    assembledIndices: [],
+    selectedCoef: null,
+    selectedExp: null
+  };
+
+  const lvlDef = LEVEL_DEFINITIONS.find(l => l.id === levelId);
+  document.getElementById('game-level-badge').textContent = `NIVEL ${levelId} DE 8`;
+  document.getElementById('game-level-title').textContent = `${lvlDef.icon} ${lvlDef.title}`;
+
+  // Mostrar el panel de fórmulas únicamente en el Nivel 1
+  document.getElementById('level1-formula-panel').classList.toggle('hidden', levelId !== 1);
+
+  // Mostrar el Jefe Final en el Nivel 8
+  const bossArena = document.getElementById('boss-arena');
+  bossArena.classList.toggle('hidden', levelId !== 8);
+  updateBossHP();
+
+  setScenarioTheme(levelId);
+
+  document.getElementById('screen-menu').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  document.getElementById('btn-back-menu').classList.remove('hidden');
+
+  loadCurrentExercise();
+}
+
+function replayCurrentLevel() {
+  startLevel(currentSession.levelId);
+}
+
+function updateBossHP() {
+  if (currentSession.levelId !== 8) return;
+  const pct = Math.max(0, Math.round(((9 - currentSession.qIndex) / 9) * 100));
+  document.getElementById('boss-hp-fill').style.width = `${pct}%`;
+  document.getElementById('boss-hp-text').textContent = `Energía: ${pct}%`;
+}
+
+function loadCurrentExercise() {
+  currentSession.stepIndex = 0;
+  const q = currentSession.questions[currentSession.qIndex];
+
+  document.getElementById('game-q-index').textContent = currentSession.qIndex + 1;
+  const pct = Math.round((currentSession.qIndex / 9) * 100);
+  document.getElementById('game-progress-fill').style.width = `${pct}%`;
+
+  document.getElementById('game-main-expr').innerHTML = q.exprHTML;
+  document.getElementById('steps-trail').innerHTML = '';
+
+  setMascotMood('normal', `Ejercicio ${currentSession.qIndex + 1} de 9: Completa cada paso para desarrollar la expresión.`);
+  loadCurrentStep();
+}
+
+function loadCurrentStep() {
+  const q = currentSession.questions[currentSession.qIndex];
+  const step = q.steps[currentSession.stepIndex];
+
+  currentSession.stepMistakes = 0;
+  currentSession.hintStage = 0;
+  currentSession.assembledIndices = [];
+  currentSession.selectedCoef = null;
+  currentSession.selectedExp = null;
+
+  document.getElementById('step-pill-label').textContent = `PASO ${currentSession.stepIndex + 1} DE ${q.steps.length}`;
+  document.getElementById('step-question-text').innerHTML = step.prompt;
+  document.getElementById('diagnostic-panel').classList.add('hidden');
+  document.getElementById('btn-next-step').classList.add('hidden');
+
+  const area = document.getElementById('step-interaction-area');
+  area.innerHTML = '';
+
+  if (step.type === 'choice') {
+    const grid = document.createElement('div');
+    grid.className = 'options-grid';
+    const shuffledOpts = shuffleArray(step.options);
+
+    shuffledOpts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn math-expr';
+      btn.innerHTML = opt.text;
+      btn.onclick = () => evaluateChoiceStep(opt, btn, grid, step);
+      grid.appendChild(btn);
+    });
+    area.appendChild(grid);
+
+  } else if (step.type === 'builder') {
+    // Constructor interactivo de Coeficiente y Exponente
+    const wrap = document.createElement('div');
+    wrap.className = 'builder-Area';
+
+    wrap.innerHTML = `
+      <div class="builder-preview math-expr" id="builder-live-preview">
+        <span class="c-coef" id="prev-coef">?</span><span class="c-var">${step.varLabel}</span><sup class="c-exp" id="prev-exp">?</sup>
+      </div>
+      <div class="builder-controls">
+        <div class="slot-group">
+          <label style="color:var(--coef-color);">1. Elige el Coeficiente:</label>
+          <div class="chip-row" id="coef-chips"></div>
+        </div>
+        <div class="slot-group">
+          <label style="color:var(--exp-color);">2. Elige el Exponente:</label>
+          <div class="chip-row" id="exp-chips"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="btn-check-builder" onclick="evaluateBuilderStep()">
+        ✨ Comprobar Construcción
+      </button>
+    `;
+    area.appendChild(wrap);
+
+    const coefRow = document.getElementById('coef-chips');
+    step.coefChoices.forEach(val => {
+      const b = document.createElement('button');
+      b.className = 'num-chip';
+      b.textContent = val;
+      b.onclick = () => {
+        currentSession.selectedCoef = val;
+        coefRow.querySelectorAll('.num-chip').forEach(c => c.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById('prev-coef').textContent = val;
+      };
+      coefRow.appendChild(b);
+    });
+
+    const expRow = document.getElementById('exp-chips');
+    step.expChoices.forEach(val => {
+      const b = document.createElement('button');
+      b.className = 'num-chip';
+      b.textContent = val;
+      b.onclick = () => {
+        currentSession.selectedExp = val;
+        expRow.querySelectorAll('.num-chip').forEach(c => c.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById('prev-exp').textContent = val === 1 ? '1' : val;
+      };
+      expRow.appendChild(b);
+    });
+
+  } else if (step.type === 'assembly') {
+    // Constructor de expresiones tocando términos en orden
+    const wrap = document.createElement('div');
+    wrap.className = 'builder-Area';
+    wrap.innerHTML = `
+      <div style="font-size:0.85rem; color:#cbd5e1;">Toca los bloques de abajo para armar la expresión (toca un bloque puesto si deseas quitarlo):</div>
+      <div class="term-assembly-slots math-expr" id="assembly-slots"></div>
+      <div class="bank-pieces" id="assembly-bank"></div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" style="padding:8px 14px; font-size:0.9rem;" onclick="clearAssembly()">🗑️ Limpiar</button>
+        <button class="btn btn-primary" id="btn-check-assembly" onclick="evaluateAssemblyStep()">✨ Verificar Expresión</button>
+      </div>
+    `;
+    area.appendChild(wrap);
+
+    step._shuffledBank = shuffleArray(step.bankPieces);
+    renderAssemblyUI(step);
+  }
+}
+
+function renderAssemblyUI(step) {
+  const slotsEl = document.getElementById('assembly-slots');
+  const bankEl = document.getElementById('assembly-bank');
+  if (!slotsEl || !bankEl) return;
+
+  slotsEl.innerHTML = '';
+  if (currentSession.assembledIndices.length === 0) {
+    slotsEl.innerHTML = `<span style="color:#64748b; font-size:0.95rem;">[ Selecciona los términos aquí ]</span>`;
+  } else {
+    currentSession.assembledIndices.forEach((bankIdx, pos) => {
+      const chip = document.createElement('span');
+      chip.className = 'assembled-piece math-expr';
+      chip.innerHTML = step._shuffledBank[bankIdx];
+      chip.onclick = () => {
+        currentSession.assembledIndices.splice(pos, 1);
+        renderAssemblyUI(step);
+      };
+      slotsEl.appendChild(chip);
+    });
+  }
+
+  bankEl.innerHTML = '';
+  step._shuffledBank.forEach((pieceHTML, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'piece-btn math-expr';
+    btn.innerHTML = pieceHTML;
+    btn.disabled = currentSession.assembledIndices.includes(idx);
+    btn.onclick = () => {
+      if (currentSession.assembledIndices.length < step.targetPieces.length) {
+        currentSession.assembledIndices.push(idx);
+        renderAssemblyUI(step);
+      }
+    };
+    bankEl.appendChild(btn);
+  });
+}
+
+function clearAssembly() {
+  const q = currentSession.questions[currentSession.qIndex];
+  const step = q.steps[currentSession.stepIndex];
+  currentSession.assembledIndices = [];
+  renderAssemblyUI(step);
+}
+
+// Evaluación de Pasos de Selección con Diagnóstico Inteligente
+function evaluateChoiceStep(opt, clickedBtn, grid, step) {
+  const q = currentSession.questions[currentSession.qIndex];
+
+  if (opt.correct) {
+    AudioEngine.sfxCorrect();
+    grid.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    clickedBtn.classList.add('correct');
+
+    recordStepSuccess(step, opt.feedback);
+  } else {
+    AudioEngine.sfxWrong();
+    clickedBtn.classList.add('wrong');
+    clickedBtn.disabled = true;
+    handleStepError(opt.errorType, opt.explain, q);
+  }
+}
+
+// Evaluación del Constructor de Coeficientes y Exponentes
+function evaluateBuilderStep() {
+  const q = currentSession.questions[currentSession.qIndex];
+  const step = q.steps[currentSession.stepIndex];
+
+  if (currentSession.selectedCoef === null || currentSession.selectedExp === null) {
+    showDiagnostic('hint-diag', '⚠️ Selecciona tanto el <b>Coeficiente</b> como el <b>Exponente</b> antes de comprobar.');
+    return;
+  }
+
+  if (currentSession.selectedCoef === step.targetCoef && currentSession.selectedExp === step.targetExp) {
+    AudioEngine.sfxCorrect();
+    document.getElementById('btn-check-builder').disabled = true;
+    recordStepSuccess(step, step.visualSuccess);
+  } else {
+    AudioEngine.sfxWrong();
+    let errType = 'Error al construir el monomio';
+    let explain = '';
+    if (currentSession.selectedCoef !== step.targetCoef && currentSession.selectedExp === step.targetExp) {
+      errType = 'Coeficiente incorrecto';
+      explain = `El exponente <b>${step.targetExp}</b> es correcto, pero el coeficiente debe ser <b>${step.targetCoef}</b> (recuerda el Paso 1).`;
+    } else if (currentSession.selectedCoef === step.targetCoef && currentSession.selectedExp !== step.targetExp) {
+      errType = 'Exponente de la variable incorrecto';
+      explain = `El coeficiente <b>${step.targetCoef}</b> es correcto, pero la variable debe llevar exponente <b>${step.targetExp}</b> (recuerda multiplicar los exponentes, no dejarlo en 1 ni sumarlos).`;
+    } else {
+      explain = `Revisa los pasos anteriores: el coeficiente elevado es <b>${step.targetCoef}</b> y el exponente multiplicado es <b>${step.targetExp}</b>.`;
+    }
+    handleStepError(errType, explain, q);
+  }
+}
+
+// Evaluación del Ensamblador de Expresiones
+function evaluateAssemblyStep() {
+  const q = currentSession.questions[currentSession.qIndex];
+  const step = q.steps[currentSession.stepIndex];
+  const chosenPieces = currentSession.assembledIndices.map(i => step._shuffledBank[i]);
+
+  if (chosenPieces.length < step.targetPieces.length) {
+    showDiagnostic('hint-diag', `⚠️ Aún faltan piezas por colocar. Debes seleccionar ${step.targetPieces.length} bloques.`);
+    return;
+  }
+
+  const isExact = chosenPieces.every((val, idx) => val === step.targetPieces[idx]);
+  if (isExact) {
+    AudioEngine.sfxCorrect();
+    document.getElementById('btn-check-assembly').disabled = true;
+    recordStepSuccess(step, step.visualSuccess);
+  } else {
+    AudioEngine.sfxWrong();
+    let customExplain = `Observa el orden correcto: primero va <b>${step.targetPieces[0]}</b>, luego <b>${step.targetPieces[1]}</b> y finalmente <b>${step.targetPieces[2]}</b>.`;
+    for (const p of chosenPieces) {
+      if (step.errorDiagnosis && step.errorDiagnosis[p]) {
+        customExplain = step.errorDiagnosis[p];
+        break;
+      }
+    }
+    handleStepError('Construcción algebraica inexacta', customExplain, q);
+  }
+}
+
+function recordStepSuccess(step, feedbackMsg) {
+  currentSession.totalStepsAttempted++;
+  if (currentSession.stepMistakes === 0) {
+    currentSession.firstTrySuccessSteps++;
+    appState.score += 15;
+    appState.coins += 3;
+  } else {
+    appState.score += 8;
+    appState.coins += 1;
+  }
+  saveState();
+
+  // Agregar paso a la pizarra de progreso
+  const trail = document.getElementById('steps-trail');
+  const chip = document.createElement('span');
+  chip.className = 'trail-chip math-expr';
+  chip.innerHTML = `✓ ${step.trailText}`;
+  trail.appendChild(chip);
+
+  setMascotMood('happy', '¡Paso completado correctamente! Mira la explicación y avanza.');
+  showDiagnostic('success-diag', `✅ <strong>¡Muy bien!</strong> ${feedbackMsg}`);
+  document.getElementById('btn-next-step').classList.remove('hidden');
+}
+
+// Sistema escalonado ante errores (1.er fallo: explicación; 2.º fallo: pista guiada; 3.er fallo: solución + refuerzo)
+function handleStepError(errorType, explainText, questionObj) {
+  currentSession.stepMistakes++;
+  setMascotMood('thinking', `¡No pasa nada! Analicemos juntos este detalle para dominarlo.`);
+
+  if (currentSession.stepMistakes === 1) {
+    showDiagnostic(
+      'error-diag',
+      `🔍 <strong>Concepto por reforzar (${errorType}):</strong><br>${explainText}<br><em>¡Inténtalo de nuevo!</em>`
+    );
+  } else if (currentSession.stepMistakes === 2) {
+    showDiagnostic(
+      'hint-diag',
+      `💡 <strong>Pista Guiada Paso a Paso (2.º intento):</strong><br>${explainText}<br>📌 <b>Orientación:</b> ${questionObj.hint2}`
+    );
+  } else {
+    // 3.er fallo: Mostrar desarrollo correcto y lanzar pregunta de refuerzo
+    openReinforcementModal(questionObj, explainText);
+  }
+}
+
+function showDiagnostic(typeClass, htmlContent) {
+  const box = document.getElementById('diagnostic-panel');
+  box.className = `diagnostic-box ${typeClass}`;
+  box.innerHTML = htmlContent;
+  box.classList.remove('hidden');
+}
+
+function requestSmartHint() {
+  AudioEngine.sfxHint();
+  const q = currentSession.questions[currentSession.qIndex];
+  currentSession.hintStage++;
+
+  if (currentSession.hintStage === 1) {
+    setMascotMood('thinking', 'Aquí tienes una orientación para razonar este paso:');
+    showDiagnostic('hint-diag', `💡 <strong>Orientación Razonada:</strong> ${q.hint1}<br><small>(Toca otra vez "Necesito una pista" si deseas ver la estructura de la fórmula).</small>`);
+  } else {
+    setMascotMood('happy', '¡Observa la estructura algebraica aplicada a este ejercicio!');
+    showDiagnostic('hint-diag', `📐 <strong>Estructura y Fórmula de Apoyo:</strong><br>${q.hint2}`);
+  }
+}
+
+function advanceStepOrExercise() {
+  const q = currentSession.questions[currentSession.qIndex];
+  currentSession.stepIndex++;
+
+  if (currentSession.stepIndex < q.steps.length) {
+    loadCurrentStep();
+  } else {
+    // Ejercicio completado
+    if (currentSession.levelId === 8) {
+      const bossSvg = document.getElementById('boss-svg');
+      bossSvg.classList.add('hit');
+      setTimeout(() => bossSvg.classList.remove('hit'), 500);
+    }
+
+    currentSession.qIndex++;
+    updateBossHP();
+
+    if (currentSession.qIndex < currentSession.questions.length) {
+      loadCurrentExercise();
+    } else {
+      finishLevelAndShowDiploma();
+    }
+  }
+}
+
+/* =========================================================================
+   7. SISTEMA DE PREGUNTA DE REFUERZO (TRAS 3 FALLOS EN UN MISMO PASO)
+   ========================================================================= */
+function openReinforcementModal(questionObj, lastExplain) {
+  const modal = document.getElementById('modal-reinforce');
+  const r = questionObj.reinforce;
+
+  document.getElementById('reinforce-explanation').innerHTML =
+    `Observa primero la explicación: ${lastExplain}<br><br>🎯 <strong>Desarrollo clave:</strong> ${r.explain}`;
+  document.getElementById('reinforce-question').innerHTML = r.q;
+
+  const optsContainer = document.getElementById('reinforce-options');
+  optsContainer.innerHTML = '';
+  document.getElementById('reinforce-feedback').classList.add('hidden');
+  document.getElementById('btn-close-reinforce').classList.add('hidden');
+
+  const allOpts = shuffleArray([
+    { text: r.ans, correct: true },
+    ...r.wrongs.map(w => ({ text: w, correct: false }))
+  ]);
+
+  allOpts.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn math-expr';
+    btn.innerHTML = o.text;
+    btn.onclick = () => {
+      const fb = document.getElementById('reinforce-feedback');
+      if (o.correct) {
+        AudioEngine.sfxCorrect();
+        btn.classList.add('correct');
+        optsContainer.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+        fb.className = 'diagnostic-box success-diag';
+        fb.innerHTML = `✅ <strong>¡Excelente!</strong> Ya dominaste el concepto. Ahora puedes continuar con seguridad.`;
+        fb.classList.remove('hidden');
+        document.getElementById('btn-close-reinforce').classList.remove('hidden');
+      } else {
+        AudioEngine.sfxWrong();
+        btn.classList.add('wrong');
+        btn.disabled = true;
+        fb.className = 'diagnostic-box error-diag';
+        fb.innerHTML = `Observa el desarrollo clave de arriba: la respuesta correcta es <b>${r.ans}</b>. ¡Selecciónala para avanzar!`;
+        fb.classList.remove('hidden');
+      }
+    };
+    optsContainer.appendChild(btn);
+  });
+
+  modal.classList.remove('hidden');
+}
+
+function completeReinforcement() {
+  document.getElementById('modal-reinforce').classList.add('hidden');
+  currentSession.stepMistakes = 1; // permite completar el paso actual
+}
+
+/* =========================================================================
+   8. GENERADOR DE DIPLOMAS PERSONALIZADOS EN CANVAS (DESCARGA PNG E IMPRESIÓN)
+   ========================================================================= */
+function finishLevelAndShowDiploma() {
+  AudioEngine.sfxVictory();
+  const accuracy = currentSession.totalStepsAttempted > 0
+    ? Math.round((currentSession.firstTrySuccessSteps / currentSession.totalStepsAttempted) * 100)
+    : 100;
+
+  let medal = 'BRONCE';
+  if (accuracy >= 85) medal = 'ORO';
+  else if (accuracy >= 65) medal = 'PLATA';
+
+  appState.stars += medal === 'ORO' ? 3 : medal === 'PLATA' ? 2 : 1;
+  appState.coins += 25;
+  appState.completedLevels[currentSession.levelId] = {
+    medal,
+    accuracy,
+    date: new Date().toLocaleDateString('es-PE')
+  };
+  saveState();
+
+  showDiplomaScreen(currentSession.levelId, accuracy, medal);
+}
+
+function viewSavedDiploma(levelId) {
+  const rec = appState.completedLevels[levelId];
+  if (!rec) return;
+  currentSession.levelId = levelId;
+  showDiplomaScreen(levelId, rec.accuracy, rec.medal);
+}
+
+function showDiplomaScreen(levelId, accuracy, medal) {
+  document.getElementById('screen-menu').classList.add('hidden');
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.remove('hidden');
+  document.getElementById('btn-back-menu').classList.remove('hidden');
+
+  const lvlDef = LEVEL_DEFINITIONS.find(l => l.id === levelId);
+  drawDiplomaCanvas(appState.studentName || 'Estudiante Destacado', lvlDef, accuracy, medal);
+}
+
+function drawDiplomaCanvas(studentName, lvlDef, accuracy, medal) {
+  const canvas = document.getElementById('diploma-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Fondo elegante de pergamino espacial
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, '#0b132b');
+  grad.addColorStop(0.5, '#1c2541');
+  grad.addColorStop(1, '#0f172a');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Marco doble dorado
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(22, 22, W - 44, H - 44);
+
+  ctx.strokeStyle = '#38bdf8';
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(34, 34, W - 68, H - 68);
+
+  // Encabezado
+  ctx.fillStyle = '#38bdf8';
+  ctx.font = 'bold 22px Nunito, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('ACADEMIA ALGEBRAICA DE PRODUCTOS NOTABLES — 6.º DE PRIMARIA', W / 2, 85);
+
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 42px Fredoka, sans-serif';
+  ctx.fillText('DIPLOMA DE HONOR ALGEBRAICO', W / 2, 138);
+
+  ctx.fillStyle = '#cbd5e1';
+  ctx.font = '20px Nunito, sans-serif';
+  ctx.fillText('Otorgado con orgullo a:', W / 2, 182);
+
+  // Nombre del estudiante
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 40px Fredoka, sans-serif';
+  ctx.fillText(studentName, W / 2, 232);
+
+  // Línea decorativa bajo el nombre
+  ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(200, 248);
+  ctx.lineTo(W - 200, 248);
+  ctx.stroke();
+
+  // Nivel completado
+  ctx.fillStyle = '#34d399';
+  ctx.font = 'bold 26px Fredoka, sans-serif';
+  ctx.fillText(`Por completar el NIVEL ${lvlDef.id}: ${lvlDef.title.toUpperCase()}`, W / 2, 295);
+
+  // Mensaje motivador
+  const msg = accuracy >= 85
+    ? '«Por su brillante razonamiento paso a paso y dominio sobresaliente de los productos notables.»'
+    : '«Por su perseverancia, esfuerzo constante y superación aprendiendo paso a paso cada operación.»';
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = 'italic 19px Nunito, sans-serif';
+  ctx.fillText(msg, W / 2, 338);
+
+  // Estadísticas y Medalla
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+  ctx.strokeStyle = '#6366f1';
+  ctx.lineWidth = 2;
+  ctx.fillRect(130, 368, W - 260, 88);
+  ctx.strokeRect(130, 368, W - 260, 88);
+
+  const medalColor = medal === 'ORO' ? '#fbbf24' : medal === 'PLATA' ? '#e2e8f0' : '#f97316';
+  ctx.fillStyle = medalColor;
+  ctx.font = 'bold 24px Fredoka, sans-serif';
+  ctx.fillText(`🏅 MEDALLA DE ${medal}`, 270, 408);
+
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillText(`✅ Ejercicios Resueltos: 9 / 9`, 270, 440);
+
+  ctx.fillStyle = '#a7f3d0';
+  ctx.fillText(`🎯 Precisión: ${accuracy}%`, 630, 424);
+
+  // Firma elegante: Prof. Jhon Dewis
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 38px "Dancing Script", cursive';
+  ctx.fillText('Prof. Jhon Dewis', W / 2, 520);
+
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(W / 2 - 130, 532);
+  ctx.lineTo(W / 2 + 130, 532);
+  ctx.stroke();
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = 'bold 15px Nunito, sans-serif';
+  ctx.fillText('DOCENTE MENTOR — ACADEMIA ALGEBRAICA', W / 2, 554);
+}
+
+function downloadDiplomaPNG() {
+  const canvas = document.getElementById('diploma-canvas');
+  const link = document.createElement('a');
+  const cleanName = (appState.studentName || 'Estudiante').replace(/\s+/g, '_');
+  link.download = `Diploma_Nivel_${currentSession.levelId}_${cleanName}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function printDiploma() {
+  const canvas = document.getElementById('diploma-canvas');
+  const dataUrl = canvas.toDataURL('image/png');
+  const win = window.open('', '_blank');
+  if (!win) {
+    alert('Permite las ventanas emergentes para imprimir o usa el botón Descargar PNG.');
+    return;
+  }
+  win.document.write(`
+    <html><head><title>Imprimir Diploma - Prof. Jhon Dewis</title></head>
+    <body style="margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#fff;">
+      <img src="${dataUrl}" style="max-width:95%; max-height:95%;" onload="window.print();"/>
+    </body></html>
+  `);
+  win.document.close();
+}
+
+/* =========================================================================
+   9. EXPRESIONES DE LA MASCOTA, MODALES Y FONDO ANIMADO DE PARTÍCULAS
+   ========================================================================= */
+function setMascotMood(mood, text) {
+  document.getElementById('game-mascot-speech').innerHTML = text;
+  const mouth = document.getElementById('mascot-mouth');
+  if (!mouth) return;
+  if (mood === 'happy') {
+    mouth.setAttribute('d', 'M34,70 Q50,86 66,70');
+    mouth.setAttribute('stroke', '#34d399');
+  } else if (mood === 'thinking') {
+    mouth.setAttribute('d', 'M38,75 Q50,68 62,75');
+    mouth.setAttribute('stroke', '#fbbf24');
+  } else {
+    mouth.setAttribute('d', 'M36,72 Q50,80 64,72');
+    mouth.setAttribute('stroke', '#38bdf8');
+  }
+}
+
+function openInstructionsModal() {
+  document.getElementById('modal-instructions').classList.remove('hidden');
+}
+
+function closeInstructionsModal() {
+  document.getElementById('modal-instructions').classList.add('hidden');
+}
+
+// Fondo animado con partículas algebraicas y colores por nivel
+let bgColors = ["#070b19", "#1e1b4b"];
+function setScenarioTheme(levelId) {
+  const lvl = LEVEL_DEFINITIONS.find(l => l.id === levelId);
+  bgColors = lvl ? lvl.themeBg : ["#070b19", "#1e1b4b"];
+}
+
+(function initBackgroundCanvas() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  const symbols = ['x²', 'a³', '(a+b)', '27x³', '−', '+', 'b²', 'x⁶'];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  for (let i = 0; i < 36; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vy: -(0.2 + Math.random() * 0.45),
+      size: 11 + Math.random() * 8,
+      alpha: 0.08 + Math.random() * 0.16,
+      sym: symbols[i % symbols.length]
+    });
+  }
+
+  function animateBg() {
+    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    g.addColorStop(0, bgColors[0]);
+    g.addColorStop(1, bgColors[1]);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font = 'bold 14px Fredoka, sans-serif';
+    particles.forEach(p => {
+      p.y += p.vy;
+      if (p.y < -20) {
+        p.y = canvas.height + 20;
+        p.x = Math.random() * canvas.width;
+      }
+      ctx.fillStyle = `rgba(148, 163, 184, ${p.alpha})`;
+      ctx.fillText(p.sym, p.x, p.y);
+    });
+    requestAnimationFrame(animateBg);
+  }
+  animateBg();
+})();
+
+// Inicialización al cargar la página
+loadState();
+if (appState.studentName) {
+  showMainMenu();
+}
+</script>
+</body>
+</html>
