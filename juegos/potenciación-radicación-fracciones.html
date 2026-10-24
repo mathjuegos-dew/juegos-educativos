@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>La Torre de las Potencias y Raíces - Prof. Jhon Dewis</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #080c1d;
+    --panel-bg: rgba(15, 23, 42, 0.94);
+    --primary: #38bdf8;
+    --secondary: #818cf8;
+    --gold: #fbbf24;
+    --emerald: #10b981;
+    --rose: #f43f5e;
+    --violet: #c084fc;
+    --text-light: #f8fafc;
+    --text-dim: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--bg-deep);
+    color: var(--text-light);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    position: relative;
+  }
+  #ambient-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .app-shell {
+    position: relative; z-index: 2; max-width: 1020px; width: 100%;
+    margin: 0 auto; padding: 10px 12px 62px; flex: 1; display: flex; flex-direction: column;
+  }
+  .hidden { display: none !important; }
+
+  /* Barra Superior */
+  .hud-bar {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    background: rgba(15, 23, 42, 0.92); border: 2px solid rgba(56, 189, 248, 0.35);
+    border-radius: 16px; padding: 8px 14px; backdrop-filter: blur(10px); margin-bottom: 10px;
+  }
+  .brand-title { font-family: 'Fredoka', sans-serif; font-size: 1.08rem; display: flex; align-items: center; gap: 6px; }
+  .hud-metrics, .hud-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .metric-badge {
+    background: rgba(30, 41, 59, 0.95); border: 1.5px solid rgba(148, 163, 184, 0.3);
+    padding: 4px 10px; border-radius: 50px; font-weight: 800; font-size: 0.84rem;
+  }
+  .metric-badge.gold { border-color: var(--gold); color: var(--gold); }
+  .metric-badge.cyan { border-color: var(--primary); color: var(--primary); }
+  .metric-badge.violet { border-color: var(--violet); color: #e9d5ff; }
+  .mini-btn {
+    background: rgba(30, 41, 59, 0.95); border: 1.5px solid rgba(56, 189, 248, 0.4);
+    color: #fff; padding: 5px 10px; border-radius: 10px; font-family: 'Fredoka', sans-serif;
+    font-size: 0.8rem; cursor: pointer; transition: 0.18s;
+  }
+  .mini-btn:hover { background: rgba(56, 189, 248, 0.22); }
+  .mini-btn.muted { opacity: 0.5; border-color: #475569; }
+
+  /* Paneles */
+  .card-panel {
+    background: var(--panel-bg); border: 2px solid rgba(129, 140, 248, 0.4);
+    border-radius: 22px; padding: 18px; box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    backdrop-filter: blur(12px); animation: fadeUp 0.28s ease;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .hero-heading {
+    font-family: 'Fredoka', sans-serif; font-size: clamp(1.5rem, 3.8vw, 2.2rem); text-align: center;
+    background: linear-gradient(90deg, #fbbf24, #38bdf8, #c084fc, #34d399);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px;
+  }
+  .hero-sub { text-align: center; color: var(--text-dim); font-size: 0.92rem; font-weight: 700; margin-bottom: 14px; }
+
+  /* Botones */
+  .btn {
+    padding: 10px 18px; border: none; border-radius: 13px; font-family: 'Fredoka', sans-serif;
+    font-size: 0.98rem; font-weight: 600; cursor: pointer; transition: transform 0.12s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary { background: linear-gradient(135deg, #38bdf8, #6366f1); color: #fff; box-shadow: 0 4px 0 #3730a3; }
+  .btn-gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: #0f172a; box-shadow: 0 4px 0 #92400e; }
+  .btn-emerald { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 4px 0 #065f46; }
+  .btn-violet { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; box-shadow: 0 4px 0 #7e22ce; }
+  .btn-dark { background: #1e293b; color: #e2e8f0; border: 1.5px solid #475569; }
+
+  /* Mapa de 9 Pisos */
+  .tower-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 11px; margin-top: 8px; }
+  .floor-card {
+    background: linear-gradient(160deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.96));
+    border: 2px solid rgba(99, 102, 241, 0.45); border-radius: 16px; padding: 13px;
+    cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .floor-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+  .floor-card.cleared { border-color: var(--emerald); }
+  .floor-tag {
+    font-family: 'Fredoka', sans-serif; font-size: 0.74rem; padding: 2px 9px;
+    border-radius: 50px; background: rgba(56, 189, 248, 0.18); color: var(--primary);
+  }
+  .floor-card h3 { font-family: 'Fredoka', sans-serif; font-size: 1.06rem; margin: 5px 0 3px; color: #fff; }
+  .floor-card p { font-size: 0.8rem; color: var(--text-dim); line-height: 1.32; margin-bottom: 8px; }
+
+  /* Escenario de Aventura */
+  .adventure-stage-box {
+    background: #060913; border: 2px solid var(--primary); border-radius: 18px;
+    overflow: hidden; margin-bottom: 10px; box-shadow: 0 0 20px rgba(56, 189, 248, 0.18);
+  }
+  #tower-stage-canvas { display: block; width: 100%; height: 165px; }
+  .stage-controls-bar {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;
+    background: rgba(15, 23, 42, 0.96); padding: 7px 10px; border-top: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  .pad-btn {
+    background: #1e293b; border: 1.5px solid var(--primary); color: #fff; padding: 5px 11px;
+    border-radius: 9px; font-family: 'Fredoka', sans-serif; font-size: 0.85rem; cursor: pointer;
+  }
+  .pad-btn:active { background: var(--primary); color: #050814; }
+
+  /* Representación Matemática: Fracciones Verticales y Radicales */
+  .math-box { font-family: 'Fredoka', sans-serif; display: inline-flex; align-items: center; vertical-align: middle; gap: 3px; }
+  .vf { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; font-weight: 700; }
+  .vf .vn { border-bottom: 2px solid currentColor; padding: 0 5px 1px; line-height: 1.1; color: #38bdf8; }
+  .vf .vd { padding: 1px 5px 0; line-height: 1.1; color: #34d399; }
+  .vf-parens { display: inline-flex; align-items: center; vertical-align: middle; }
+  .vf-parens .big-p { font-size: 1.4em; color: #cbd5e1; line-height: 1; }
+  .vf-parens .big-b { font-size: 1.55em; color: #f472b6; line-height: 1; }
+  .v-sup { font-size: 0.7em; color: var(--gold); font-weight: 900; align-self: flex-start; margin-top: -4px; margin-left: 1px; }
+  .rad-group { display: inline-flex; align-items: center; vertical-align: middle; margin: 0 3px; }
+  .rad-idx { font-size: 0.65em; color: var(--gold); font-weight: 900; align-self: flex-start; margin-right: -2px; margin-top: -2px; }
+  .rad-sign { font-size: 1.5em; color: var(--violet); font-weight: 700; line-height: 1; margin-right: -1px; }
+  .rad-content { border-top: 2px solid var(--violet); padding: 2px 5px 1px; display: inline-flex; align-items: center; }
+
+  /* Pizarra y Pasos */
+  .problem-banner {
+    background: radial-gradient(circle, rgba(30, 41, 59, 0.98), rgba(9, 13, 28, 0.98));
+    border: 2px solid var(--secondary); border-radius: 18px; padding: 12px 14px; text-align: center; margin-bottom: 10px;
+  }
+  .problem-main-expr {
+    font-size: clamp(1.3rem, 3.6vw, 1.85rem); margin: 6px 0; color: #fff;
+    display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 6px;
+  }
+  .trail-bar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 4px; }
+  .trail-pill {
+    background: rgba(16, 185, 129, 0.16); border: 1.5px solid var(--emerald); color: #a7f3d0;
+    padding: 3px 10px; border-radius: 10px; font-size: 0.84rem; font-weight: 800; display: inline-flex; align-items: center;
+  }
+  .step-card { background: rgba(15, 23, 42, 0.96); border: 2px solid rgba(56, 189, 248, 0.45); border-radius: 18px; padding: 15px; }
+  .step-badge { background: linear-gradient(90deg, #0284c7, #6366f1); padding: 3px 12px; border-radius: 50px; font-family: 'Fredoka', sans-serif; font-size: 0.82rem; }
+  .step-prompt { font-size: 1.04rem; font-weight: 800; color: #f1f5f9; margin: 10px 0 12px; line-height: 1.4; }
+
+  .choices-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 9px; }
+  .choice-btn {
+    background: rgba(30, 41, 59, 0.95); border: 2px solid rgba(148, 163, 184, 0.35);
+    border-radius: 14px; padding: 10px 12px; color: #fff; font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem; cursor: pointer; transition: 0.15s; display: flex; justify-content: center; align-items: center; min-height: 62px;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(56, 189, 248, 0.14); }
+  .choice-btn.correct { background: rgba(16, 185, 129, 0.25) !important; border-color: var(--emerald) !important; }
+  .choice-btn.wrong { background: rgba(244, 63, 94, 0.25) !important; border-color: var(--rose) !important; }
+
+  /* Constructor de Fracciones (Arrastrar / Tocar / Completar) */
+  .frac-builder-box {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    background: rgba(9, 13, 28, 0.85); border: 1.5px dashed var(--primary); border-radius: 14px; padding: 14px;
+  }
+  .interactive-vf {
+    display: inline-flex; flex-direction: column; align-items: center;
+    background: rgba(30, 41, 59, 0.95); padding: 8px 18px; border-radius: 14px; border: 2px solid var(--gold);
+  }
+  .frac-input-slot {
+    width: 88px; height: 42px; text-align: center; font-family: 'Fredoka', sans-serif;
+    font-size: 1.28rem; font-weight: 700; border-radius: 9px; border: 2px solid #475569; background: #090d1e; color: #fff; outline: none;
+  }
+  .frac-input-slot.active-slot { border-color: var(--primary); box-shadow: 0 0 10px rgba(56, 189, 248, 0.45); }
+  .frac-divider-line { width: 100%; height: 3px; background: #fff; margin: 6px 0; }
+  .tiles-bank { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
+  .num-tile {
+    background: #1e293b; border: 2px solid var(--secondary); color: #fff; padding: 6px 14px;
+    border-radius: 9px; font-family: 'Fredoka', sans-serif; font-size: 1.05rem; cursor: pointer;
+  }
+  .num-tile:hover { border-color: var(--gold); transform: scale(1.05); }
+  .order-slots {
+    display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; align-items: center;
+    min-height: 52px; padding: 8px; background: #090d1e; border: 2px dashed var(--secondary); border-radius: 12px; width: 100%;
+  }
+
+  /* Retroalimentación */
+  .feedback-panel { margin-top: 10px; padding: 12px 14px; border-radius: 12px; font-size: 0.92rem; line-height: 1.45; }
+  .feedback-panel.err { background: rgba(244, 63, 94, 0.15); border: 2px solid var(--rose); color: #ffe4e6; }
+  .feedback-panel.hint { background: rgba(251, 191, 36, 0.15); border: 2px solid var(--gold); color: #fef3c7; }
+  .feedback-panel.ok { background: rgba(16, 185, 129, 0.16); border: 2px solid var(--emerald); color: #d1fae5; }
+
+  /* Modales y Diploma */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(4, 7, 18, 0.86); backdrop-filter: blur(6px);
+    z-index: 100; display: flex; justify-content: center; align-items: center; padding: 14px;
+  }
+  .modal-box {
+    background: #0f172a; border: 2.5px solid var(--primary); border-radius: 22px;
+    max-width: 580px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto;
+  }
+  .anim-demo-stage { background: rgba(9, 13, 28, 0.95); border: 2px solid var(--gold); border-radius: 14px; padding: 14px; text-align: center; margin: 10px 0; }
+  @keyframes flipAnim { 0%, 100% { transform: rotateX(0deg); } 50% { transform: rotateX(180deg) scale(1.08); } }
+  .flip-fraction { display: inline-block; animation: flipAnim 2.8s infinite ease-in-out; }
+  #diploma-canvas { max-width: 100%; height: auto; border-radius: 14px; border: 3px solid var(--gold); margin: 10px auto; display: block; }
+
+  /* Firma permanente del Profesor */
+  footer.permanent-signature {
+    position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(7, 10, 22, 0.92);
+    backdrop-filter: blur(8px); border-top: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 4px 12px; text-align: center; z-index: 60; display: flex; justify-content: center; align-items: center; gap: 8px;
+  }
+  .sig-caption { font-size: 0.76rem; color: #94a3b8; font-weight: 700; }
+  .sig-author {
+    font-family: 'Dancing Script', cursive; font-size: 1.5rem; font-weight: 700;
+    background: linear-gradient(270deg, #ffd700, #38bdf8, #2dd4bf, #a855f7, #ffd700);
+    background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: glowFlow 6s ease infinite; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.35));
+  }
+  @keyframes glowFlow { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+</style>
+</head>
+<body>
+
+<canvas id="ambient-canvas"></canvas>
+
+<div class="app-shell">
+  <!-- BARRA SUPERIOR -->
+  <header class="hud-bar">
+    <div class="brand-title"><span>🏰</span><span>La Torre de las Potencias y Raíces</span></div>
+    <div class="hud-metrics">
+      <div class="metric-badge cyan">🧙‍♂️ <span id="hud-player">Explorador</span></div>
+      <div class="metric-badge violet">💎 <span id="hud-crystals">0</span>/9</div>
+      <div class="metric-badge gold">⭐ <span id="hud-stars">0</span></div>
+      <div class="metric-badge">🪙 <span id="hud-coins">0</span></div>
+    </div>
+    <div class="hud-actions">
+      <button class="mini-btn" id="btn-music" onclick="toggleMusic()">🎵 Música: ON</button>
+      <button class="mini-btn" id="btn-sfx" onclick="toggleSfx()">🔊 Sonidos: ON</button>
+      <button class="mini-btn hidden" id="btn-floor-theory" onclick="openFloorLessonModal()">📜 Propiedad</button>
+      <button class="mini-btn hidden" id="btn-map" onclick="showTowerMap()">🏰 Mapa</button>
+    </div>
+  </header>
+
+  <!-- PANTALLA 1: BIENVENIDA Y REGISTRO -->
+  <section id="screen-login" class="card-panel" style="max-width:520px; margin:16px auto; text-align:center;">
+    <h1 class="hero-heading">La Torre de las Potencias y Raíces</h1>
+    <p class="hero-sub">Aventura de Potenciación y Radicación de Fracciones — 6.º de Primaria</p>
+    <p style="font-size:0.92rem; color:#cbd5e1; margin-bottom:12px;">
+      Sube los <strong>9 pisos mágicos</strong>, abre las puertas resolviendo operaciones paso a paso y recupera los <strong>Cristales del Conocimiento</strong>. Escribe tu nombre para tus diplomas:
+    </p>
+    <input type="text" id="input-player-name" placeholder="Ej. Santiago Morales" maxlength="32" autocomplete="off"
+      style="width:100%; padding:12px 15px; border-radius:12px; border:2px solid var(--primary); background:#060913; color:#fff; font-size:1.05rem; font-weight:800; text-align:center; margin-bottom:12px; outline:none;">
+    <button class="btn btn-primary" style="width:100%; font-size:1.08rem;" onclick="startAdventureLogin()">
+      ⚔️ ¡Comenzar Aventura en la Torre!
+    </button>
+  </section>
+
+  <!-- PANTALLA 2: MAPA DE LOS 9 PISOS -->
+  <section id="screen-map" class="card-panel hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+      <div>
+        <h1 class="hero-heading" style="text-align:left; margin-bottom:2px;">Mapa de los 9 Pisos Mágicos</h1>
+        <p style="color:var(--text-dim); font-size:0.86rem; font-weight:700;">
+          Banco de 30 ejercicios por piso (9 seleccionados al azar en cada partida).
+        </p>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="mini-btn" onclick="changeExplorerName()">✏️ Cambiar Alumno</button>
+        <button class="mini-btn" onclick="resetTowerProgress()">🔄 Reiniciar</button>
+      </div>
+    </div>
+    <div class="tower-grid" id="tower-floors-grid"></div>
+  </section>
+
+  <!-- PANTALLA 3: ESCENARIO DE JUEGO DEL PISO -->
+  <section id="screen-floor" class="card-panel hidden">
+    <div class="adventure-stage-box">
+      <canvas id="tower-stage-canvas" width="960" height="165"></canvas>
+      <div class="stage-controls-bar">
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="pad-btn" id="btn-move-left">◀</button>
+          <button class="pad-btn" id="btn-move-right">▶</button>
+          <button class="pad-btn" id="btn-jump">⬆️ Saltar</button>
+          <button class="pad-btn" style="border-color:var(--gold); color:var(--gold);" onclick="walkToNextGate()">
+            ⚡ Ir a Puerta <span id="ui-gate-num">1</span>/9
+          </button>
+        </div>
+        <div style="font-size:0.82rem; font-weight:800; color:#cbd5e1;">
+          <span id="ui-floor-name">Piso 1</span> — Puerta <span id="ui-q-num" style="color:var(--primary);">1</span>/9
+        </div>
+      </div>
+    </div>
+
+    <!-- Fórmulas permanentes en el Nivel 1 -->
+    <div id="floor1-formula-banner" class="hidden" style="background:rgba(30,27,75,0.9); border:1.5px solid var(--gold); border-radius:14px; padding:8px 12px; margin-bottom:10px; font-size:0.84rem;">
+      <strong style="color:var(--gold); font-family:'Fredoka',sans-serif;">📐 Fórmulas Básicas (Nivel 1):</strong>
+      Base = fracción | Exponente = veces que se multiplica |
+      <span class="math-box"><span class="vf-parens"><span class="big-p">(</span><span class="vf"><span class="vn">a</span><span class="vd">b</span></span><span class="big-p">)</span><span class="v-sup">n</span></span> = <span class="vf"><span class="vn">a<sup>n</sup></span><span class="vd">b<sup>n</sup></span></span></span>
+      (Eleva tanto el numerador como el denominador).
+    </div>
+
+    <div class="problem-banner">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+        <span style="font-size:0.75rem; text-transform:uppercase; color:var(--primary); font-weight:900;">
+          MECANISMO MATEMÁTICO PASO A PASO
+        </span>
+        <button class="btn btn-gold" style="padding:5px 12px; font-size:0.82rem;" onclick="triggerGradualHint()">
+          💡 Necesito una pista
+        </button>
+      </div>
+      <div class="problem-main-expr" id="ui-main-math"></div>
+      <div class="trail-bar" id="ui-steps-trail"></div>
+    </div>
+
+    <div class="step-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="step-badge" id="ui-step-badge">PASO 1 DE 2</span>
+        <span style="font-size:0.78rem; color:var(--text-dim);">Completa el paso para abrir el cerrojo</span>
+      </div>
+      <div class="step-prompt" id="ui-step-prompt"></div>
+      <div id="ui-interaction-zone"></div>
+      <div id="ui-feedback-box" class="feedback-panel hidden"></div>
+      <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+        <button class="btn btn-emerald hidden" id="btn-continue-step" onclick="nextStepOrGate()">Continuar ➔</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANTALLA 4: DIPLOMA PERSONALIZADO -->
+  <section id="screen-diploma" class="card-panel hidden" style="text-align:center;">
+    <h1 class="hero-heading">💎 ¡Cristal Recuperado y Diploma Desbloqueado! 💎</h1>
+    <p class="hero-sub">Has completado los 9 retos del piso con éxito</p>
+    <canvas id="diploma-canvas" width="900" height="600"></canvas>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:12px;">
+      <button class="btn btn-emerald" onclick="downloadTowerDiploma()">📥 Descargar PNG</button>
+      <button class="btn btn-gold" onclick="printTowerDiploma()">🖨️ Imprimir</button>
+      <button class="btn btn-violet" onclick="replayActiveFloor()">🔄 Jugar con Nuevas Preguntas</button>
+      <button class="btn btn-primary" onclick="showTowerMap()">🏰 Mapa de la Torre</button>
+    </div>
+  </section>
+</div>
+
+<!-- MODAL DE EXPLICACIÓN ANIMADA AL INICIAR CADA PISO -->
+<div id="modal-lesson" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 id="lesson-title" style="font-family:'Fredoka',sans-serif; color:var(--gold); margin-bottom:6px;"></h2>
+    <p id="lesson-desc" style="font-size:0.92rem; color:#e2e8f0; line-height:1.42;"></p>
+    <div class="anim-demo-stage" id="lesson-anim-stage"></div>
+    <div id="lesson-tip" style="font-size:0.85rem; color:#a7f3d0; background:rgba(16,185,129,0.12); border:1px solid var(--emerald); padding:9px; border-radius:10px; margin-bottom:12px;"></div>
+    <div style="text-align:center;">
+      <button class="btn btn-primary" onclick="closeFloorLessonModal()">✨ ¡Entendido, a resolver!</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIRMA PERMANENTE EN LA PARTE INFERIOR -->
+<footer class="permanent-signature">
+  <span class="sig-caption">Videojuego educativo creado por</span>
+  <span class="sig-author">Prof. Jhon Dewis</span>
+</footer>
+
+<script>
+/* 1. FUNCIONES MATEMÁTICAS Y FRACCIONES VERTICALES */
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { let t = b; b = a % b; a = t; } return a || 1; }
+function simp(n, d) { const g = gcd(n, d); return [n / g, d / g]; }
+function vf(n, d) { return `<span class="vf"><span class="vn">${n}</span><span class="vd">${d}</span></span>`; }
+function vfPow(n, d, e) { return `<span class="vf-parens"><span class="big-p">(</span>${vf(n, d)}<span class="big-p">)</span><span class="v-sup">${e}</span></span>`; }
+function bracketPow(inner, e) { return `<span class="vf-parens"><span class="big-b">[</span>${inner}<span class="big-b">]</span><span class="v-sup">${e}</span></span>`; }
+function vRad(idx, inner) {
+  const iHtml = (idx && idx !== 2) ? `<span class="rad-idx">${idx}</span>` : '';
+  return `<span class="rad-group">${iHtml}<span class="rad-sign">√</span><span class="rad-content">${inner}</span></span>`;
+}
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/* 2. MÚSICA Y EFECTOS DE SONIDO (WEB AUDIO API) */
+const SoundSystem = (function() {
+  let ctx = null, musicOn = true, sfxOn = true, timer = null, noteIdx = 0;
+  const notes = [440, 523.25, 659.25, 587.33, 523.25, 659.25, 783.99, 659.25, 392, 493.88, 587.33, 659.25, 523.25, 659.25, 783.99, 880];
+  function ensure() {
+    if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) ctx = new AC(); }
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+  }
+  function tone(f, d, t = 'triangle', v = 0.08, del = 0) {
+    if (!ctx) return;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = t; o.frequency.setValueAtTime(f, ctx.currentTime + del);
+    g.gain.setValueAtTime(0.001, ctx.currentTime + del);
+    g.gain.exponentialRampToValueAtTime(v, ctx.currentTime + del + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + del + d);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(ctx.currentTime + del); o.stop(ctx.currentTime + del + d + 0.02);
+  }
+  function startLoop() {
+    ensure();
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => {
+      if (!musicOn || !ctx || document.hidden) return;
+      const f = notes[noteIdx % notes.length];
+      tone(f, 0.28, 'triangle', 0.024, 0);
+      if (noteIdx % 4 === 0) tone(f / 2, 0.5, 'sine', 0.018, 0);
+      noteIdx++;
+    }, 360);
+  }
+  return {
+    unlock: () => { ensure(); if (!timer) startLoop(); },
+    ok: () => { if (sfxOn) { ensure(); tone(523.25, 0.1, 'triangle', 0.1, 0); tone(659.25, 0.1, 'triangle', 0.1, 0.08); tone(783.99, 0.22, 'triangle', 0.11, 0.16); } },
+    err: () => { if (sfxOn) { ensure(); tone(235, 0.15, 'sawtooth', 0.07, 0); tone(190, 0.22, 'sawtooth', 0.07, 0.13); } },
+    gateOpen: () => { if (sfxOn) { ensure(); [440, 554.37, 659.25, 880].forEach((f, i) => tone(f, 0.16, 'sine', 0.09, i * 0.07)); } },
+    win: () => { if (sfxOn) { ensure(); [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, 0.24, 'triangle', 0.11, i * 0.11)); } },
+    toggleMusic: () => { musicOn = !musicOn; return musicOn; },
+    toggleSfx: () => { sfxOn = !sfxOn; return sfxOn; }
+  };
+})();
+
+function toggleMusic() {
+  const on = SoundSystem.toggleMusic();
+  const b = document.getElementById('btn-music');
+  b.textContent = on ? '🎵 Música: ON' : '🎵 Música: OFF';
+  b.classList.toggle('muted', !on);
+}
+function toggleSfx() {
+  const on = SoundSystem.toggleSfx();
+  const b = document.getElementById('btn-sfx');
+  b.textContent = on ? '🔊 Sonidos: ON' : '🔊 Sonidos: OFF';
+  b.classList.toggle('muted', !on);
+}
+
+/* 3. DEFINICIÓN DE LOS 9 PISOS DE LA TORRE */
+const FLOORS_INFO = [
+  { id: 1, name: "El Despertar de las Potencias", icon: "🔥", sky: ["#0b132b", "#1c2541"],
+    desc: "Comprende base, exponente y potencia en fracciones: (2/3)² = 4/9, (3/5)³ = 27/125, (2/5)⁴ = 16/625.",
+    demoHTML: `<div class="math-box" style="font-size:1.35rem; justify-content:center;">${vfPow(2, 3, 2)} = ${vf(2, 3)} × ${vf(2, 3)} = ${vf('2²', '3²')} = ${vf(4, 9)}</div>`,
+    tip: "El exponente eleva tanto al numerador como al denominador. ¡Nunca multipliques la base por el exponente!" },
+  { id: 2, name: "El Puente de los Productos", icon: "🌉", sky: ["#1a103c", "#2e1065"],
+    desc: "Potencia de un producto de fracciones: [(1/2) × (3/4)]² = (1/2)² × (3/4)² = 9/64.",
+    demoHTML: `<div class="math-box" style="font-size:1.3rem; justify-content:center; flex-wrap:wrap;">${bracketPow(`${vf(1, 2)} × ${vf(3, 4)}`, 2)} = ${vfPow(1, 2, 2)} × ${vfPow(3, 4, 2)} = ${vf(1, 4)} × ${vf(9, 16)} = ${vf(9, 64)}</div>`,
+    tip: "Eleva cada fracción al exponente indicado y multiplica numeradores entre sí y denominadores entre sí." },
+  { id: 3, name: "Las Puertas del Cociente", icon: "🚪", sky: ["#072227", "#115e59"],
+    desc: "Potencia de un cociente: [(3/4) ÷ (2/5)]² = (3/4)² ÷ (2/5)² = 225/64.",
+    demoHTML: `<div class="math-box" style="font-size:1.3rem; justify-content:center; flex-wrap:wrap;">${bracketPow(`${vf(3, 4)} ÷ ${vf(2, 5)}`, 2)} = ${vfPow(3, 4, 2)} ÷ ${vfPow(2, 5, 2)} = ${vf(9, 16)} ÷ ${vf(4, 25)} = ${vf(225, 64)}</div>`,
+    tip: "Para dividir fracciones, multiplica la primera fracción por la segunda invertida (o multiplica en aspa)." },
+  { id: 4, name: "La Cámara de los Exponentes", icon: "⚡", sky: ["#1e1b4b", "#312e81"],
+    desc: "Potencia de potencia: [(3/2)²]² = (3/2)⁴ = 81/16. Los exponentes se multiplican.",
+    demoHTML: `<div class="math-box" style="font-size:1.35rem; justify-content:center;">${bracketPow(vfPow(3, 2, 2), 2)} = ${vfPow(3, 2, '2×2')} = ${vfPow(3, 2, 4)} = ${vf(81, 16)}</div>`,
+    tip: "Cuando elevas una potencia a otra potencia, MULTIPLICA los exponentes, no los sumes." },
+  { id: 5, name: "El Reino Invertido", icon: "🔄", sky: ["#2e1065", "#4c1d95"],
+    desc: "Exponentes negativos: (4/7)⁻³ = (7/4)³ = 343/64. Se invierte la fracción y el exponente pasa a positivo.",
+    demoHTML: `<div class="math-box" style="font-size:1.35rem; justify-content:center;">${vfPow(4, 7, '−3')} = <span class="flip-fraction">${vfPow(7, 4, 3)}</span> = ${vf(343, 64)}</div>`,
+    tip: "El exponente negativo no cambia el signo de la fracción: simplemente da vuelta numerador y denominador." },
+  { id: 6, name: "El Bosque de las Raíces", icon: "🌳", sky: ["#062c1e", "#064e3b"],
+    desc: "Radicación de fracciones y raíz de un producto: √(25/36) = 5/6, ∛(8/27) = 2/3, ∜(16/81) = 2/3.",
+    demoHTML: `<div class="math-box" style="font-size:1.32rem; justify-content:center;">${vRad(2, vf(25, 36))} = ${vf(vRad(2, 25), vRad(2, 36))} = ${vf(5, 6)} &nbsp;|&nbsp; ${vRad(3, vf(8, 27))} = ${vf(2, 3)}</div>`,
+    tip: "Extrae la raíz del numerador y la raíz del denominador. ¡Sacar raíz cuadrada no es dividir entre 2!" },
+  { id: 7, name: "El Templo de los Radicales", icon: "🏛️", sky: ["#271509", "#451a03"],
+    desc: "Raíz de un cociente y raíz de una potencia: √[(25/4) ÷ (16/9)] = 15/8 y √[(2/5)⁶] = (2/5)³ = 8/125.",
+    demoHTML: `<div class="math-box" style="font-size:1.25rem; justify-content:center; flex-wrap:wrap;">${vRad(2, `${vf(25, 4)} ÷ ${vf(16, 9)}`)} = ${vf(15, 8)} &nbsp;|&nbsp; ${vRad(2, vfPow(2, 5, 6))} = ${vfPow(2, 5, '6÷2')} = ${vf(8, 125)}</div>`,
+    tip: "En la raíz de una potencia, divide el exponente entre el índice de la raíz." },
+  { id: 8, name: "El Portal de las Raíces Múltiples", icon: "🌀", sky: ["#0f172a", "#1e3a8a"],
+    desc: "Raíz de raíz y exponente fraccionario: ∛[√(729/64)] = 3/2, (36/49)^(1/2) = 6/7, (16/81)^(3/4) = 8/27.",
+    demoHTML: `<div class="math-box" style="font-size:1.25rem; justify-content:center; flex-wrap:wrap;">${vRad(3, vRad(2, vf(729, 64)))} = ${vRad(6, vf(729, 64))} = ${vf(3, 2)} &nbsp;|&nbsp; ${vfPow(16, 81, '3/4')} = ${vf(8, 27)}</div>`,
+    tip: "Los índices de raíces sucesivas se multiplican, y el denominador del exponente fraccionario es el índice de la raíz." },
+  { id: 9, name: "El Guardián de la Torre", icon: "🐉", sky: ["#2a0813", "#4c0519"],
+    desc: "Batalla final combinando todas las propiedades para derrotar al Guardián y recuperar el Cristal Maestro.",
+    demoHTML: `<div style="font-family:'Fredoka',sans-serif; color:#fda4af; font-size:1.1rem;">⚔️ Cada ejercicio resuelto resta energía al Guardián de la Torre.</div>`,
+    tip: "Aplica con calma cada propiedad aprendida. ¡Evita confundir la raíz de una suma con la suma de las raíces!" }
+];
+
+/* 4. GENERADOR DE LOS 270 EJERCICIOS (30 POR CADA UNO DE LOS 9 NIVELES) */
+function genF1() {
+  const data = [
+    [2,3,2],[3,5,3],[2,5,4],[1,2,3],[3,4,2],[4,5,2],[2,7,2],[5,6,2],[1,3,4],[3,7,2],
+    [2,3,3],[4,7,2],[5,8,2],[3,8,2],[1,4,3],[2,5,3],[3,4,3],[5,9,2],[4,9,2],[7,10,2],
+    [3,10,3],[2,9,2],[6,7,2],[1,5,3],[2,3,4],[7,8,2],[8,9,2],[5,7,2],[9,10,2],[4,5,3]
+  ];
+  return data.map(([a, b, n], i) => {
+    const na = Math.pow(a, n), da = Math.pow(b, n), exprHTML = vfPow(a, b, n);
+    const chain = Array(n).fill(vf(a, b)).join(' × ');
+    return {
+      id: `F1_${i}`, exprHTML,
+      hint1: `La base es ${a}/${b} y el exponente es ${n}. Multiplica ${a}/${b} por sí misma ${n} veces.`,
+      hint2: `Eleva numerador y denominador: ${a}<sup>${n}</sup> = ${na} y ${b}<sup>${n}</sup> = ${da}.`,
+      steps: [
+        { type: 'choice', prompt: `Paso 1: ¿Cómo se expresa <span class="math-box">${exprHTML}</span> como multiplicación repetida?`, trailHTML: chain,
+          options: [
+            { html: chain, ok: true, msg: `¡Exacto! Se multiplica la fracción ${n} veces por sí misma.` },
+            { html: vf(`${a} × ${n}`, `${b} × ${n}`), ok: false, err: `Confundiste potenciación con multiplicación por ${n}.` },
+            { html: vf(`${a}<sup>${n}</sup>`, `${b}`), ok: false, err: `Olvidaste elevar el denominador ${b} al exponente ${n}.` },
+            { html: vf(`${a} + ${n}`, `${b} + ${n}`), ok: false, err: `El exponente indica multiplicación repetida, no suma.` }
+          ]
+        },
+        { type: 'frac_builder', prompt: `Paso 2: Construye la fracción resultante de <span class="math-box">${vf(`${a}<sup>${n}</sup>`, `${b}<sup>${n}</sup>`)}</span>:`,
+          trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+          tiles: shuffle(Array.from(new Set([na, da, a * n, b * n, b, na + 2]))),
+          commonErrors: {
+            [`${na}/${b}`]: `Elevaste el numerador (${na}), pero olvidaste elevar el denominador (${b}<sup>${n}</sup> = ${da}).`,
+            [`${a*n}/${b*n}`]: `Multiplicaste por ${n} en lugar de calcular la potencia.`
+          },
+          successMsg: `¡Muy bien! (${a}/${b})<sup>${n}</sup> = ${na}/${da}.`
+        }
+      ]
+    };
+  });
+}
+
+function genF2() {
+  const data = [
+    [1,2,3,4,2],[1,3,2,5,2],[2,3,1,5,2],[1,2,2,3,3],[3,5,1,2,2],[2,5,3,4,2],[1,4,3,2,2],[1,2,1,3,3],[2,3,4,5,2],[3,4,1,3,2],
+    [1,5,2,3,2],[3,7,1,2,2],[2,5,1,3,2],[1,2,5,6,2],[3,4,2,3,3],[2,7,3,2,2],[4,5,1,3,2],[1,3,4,5,2],[2,3,3,5,2],[1,4,1,2,3],
+    [3,5,2,3,2],[5,6,1,2,2],[2,3,5,7,2],[1,2,3,5,3],[3,8,1,2,2],[4,7,1,2,2],[2,5,5,3,2],[1,3,2,7,2],[3,4,5,2,2],[2,3,1,4,2]
+  ];
+  return data.map(([a, b, c, d, n], i) => {
+    const exprHTML = bracketPow(`${vf(a, b)} × ${vf(c, d)}`, n);
+    const [sn, sd] = simp(a * c, b * d);
+    const na = Math.pow(sn, n), da = Math.pow(sd, n);
+    return {
+      id: `F2_${i}`, exprHTML,
+      hint1: `Distribuye el exponente ${n} a cada fracción del producto: (${a}/${b})<sup>${n}</sup> × (${c}/${d})<sup>${n}</sup>.`,
+      hint2: `Eleva y multiplica numeradores y denominadores (simplificando si corresponde): ${na}/${da}.`,
+      steps: [
+        { type: 'choice', prompt: `Paso 1: Aplica la propiedad de potencia de un producto a <span class="math-box">${exprHTML}</span>:`,
+          trailHTML: `${vfPow(a, b, n)} × ${vfPow(c, d, n)}`,
+          options: [
+            { html: `${vfPow(a, b, n)} × ${vfPow(c, d, n)}`, ok: true, msg: `¡Correcto! El exponente ${n} afecta a ambas fracciones.` },
+            { html: `${vfPow(a, b, n)} × ${vf(c, d)}`, ok: false, err: `Olvidaste elevar la segunda fracción al exponente ${n}.` },
+            { html: `${vfPow(a + c, b + d, n)}`, ok: false, err: `En multiplicación de fracciones se multiplica directo, no se suma.` },
+            { html: `${vf(a * c * n, b * d * n)}`, ok: false, err: `Multiplicaste por ${n} en lugar de potenciar.` }
+          ]
+        },
+        { type: 'frac_builder', prompt: `Paso 2: Calcula las potencias, multiplica y escribe la fracción simplificada:`,
+          trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+          tiles: shuffle(Array.from(new Set([na, da, Math.pow(a*c, n), Math.pow(b*d, n), sn * n, sd * n]))),
+          commonErrors: {}, successMsg: `¡Puente cruzado! El resultado es ${na}/${da}.`
+        }
+      ]
+    };
+  });
+}
+
+function genF3() {
+  const data = [
+    [3,4,2,5,2],[1,2,1,3,2],[2,3,1,2,2],[1,3,2,5,2],[2,5,1,3,2],[3,5,1,2,2],[1,2,2,3,3],[3,4,1,2,2],[2,3,4,5,2],[1,4,1,3,2],
+    [4,5,2,3,2],[1,3,1,2,3],[3,7,2,7,2],[2,5,3,5,2],[5,6,1,2,2],[1,2,3,4,2],[2,3,5,6,2],[3,5,2,3,2],[4,7,2,3,2],[1,5,1,2,2],
+    [2,3,3,4,2],[5,8,1,4,2],[3,4,3,5,2],[1,2,2,5,3],[2,7,1,3,2],[3,5,4,5,2],[1,3,3,4,2],[4,9,2,3,2],[2,5,1,2,3],[5,7,2,3,2]
+  ];
+  return data.map(([a, b, c, d, n], i) => {
+    const exprHTML = bracketPow(`${vf(a, b)} ÷ ${vf(c, d)}`, n);
+    const [qn, qd] = simp(a * d, b * c);
+    const na = Math.pow(qn, n), da = Math.pow(qd, n);
+    return {
+      id: `F3_${i}`, exprHTML,
+      hint1: `Divide primero (${a}/${b}) ÷ (${c}/${d}) multiplicando en aspa: (${a}×${d}) arriba y (${b}×${c}) abajo.`,
+      hint2: `El cociente simplificado es ${qn}/${qd}. Al elevarlo al exponente ${n} da ${na}/${da}.`,
+      steps: [
+        { type: 'choice', prompt: `Paso 1: Efectúa la división de fracciones dentro del corchete <span class="math-box">${vf(a, b)} ÷ ${vf(c, d)}</span>:`,
+          trailHTML: `${vfPow(qn, qd, n)}`,
+          options: [
+            { html: vf(qn, qd), ok: true, msg: `¡Muy bien! Invirtiendo la segunda fracción y multiplicando obtenemos ${qn}/${qd}.` },
+            { html: vf(simp(a*c, b*d)[0], simp(a*c, b*d)[1]), ok: false, err: `Multiplicaste directo olvidando invertir la segunda fracción en la división.` },
+            { html: vf(qd, qn), ok: false, err: `Invertiste el resultado al revés. Debe ser ${qn}/${qd}.` },
+            { html: vf(a + d, b + c), ok: false, err: `Para dividir fracciones se multiplica en cruz, no se suma.` }
+          ]
+        },
+        { type: 'frac_builder', prompt: `Paso 2: Eleva <span class="math-box">${vfPow(qn, qd, n)}</span> y construye la fracción:`,
+          trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+          tiles: shuffle(Array.from(new Set([na, da, qn * n, qd * n, da + 2, qn]))),
+          commonErrors: {}, successMsg: `¡Puerta del cociente abierta! Resultado: ${na}/${da}.`
+        }
+      ]
+    };
+  });
+}
+
+function genF4() {
+  const data = [
+    [3,2,2,2],[1,2,2,2],[2,3,2,2],[1,3,2,2],[1,2,2,3],[1,2,3,2],[2,3,1,3],[3,4,1,2],[2,5,2,2],[1,4,2,2],
+    [3,5,1,3],[4,3,2,2],[1,5,2,2],[2,3,3,1],[5,2,2,2],[1,3,3,2],[3,4,2,2],[2,7,1,2],[1,2,4,1],[5,3,1,2],
+    [2,5,1,3],[3,2,1,3],[4,5,1,2],[1,6,1,2],[2,3,2,3],[1,10,2,2],[3,5,2,2],[5,4,1,2],[2,9,1,2],[7,2,1,2]
+  ];
+  return data.map(([a, b, m, n], i) => {
+    const exprHTML = bracketPow(vfPow(a, b, m), n), pe = m * n, se = m + n;
+    const na = Math.pow(a, pe), da = Math.pow(b, pe);
+    return {
+      id: `F4_${i}`, exprHTML,
+      hint1: `En potencia de potencia, conserva la base (${a}/${b}) y MULTIPLICA los exponentes (${m} × ${n}).`,
+      hint2: `(${a}/${b})<sup>${m}×${n}</sup> = (${a}/${b})<sup>${pe}</sup> = ${na}/${da}.`,
+      steps: [
+        { type: 'choice', prompt: `Paso 1: Multiplica los exponentes en <span class="math-box">${exprHTML}</span>:`,
+          trailHTML: `${vfPow(a, b, pe)}`,
+          options: [
+            { html: vfPow(a, b, pe), ok: true, msg: `¡Exacto! ${m} × ${n} = ${pe}.` },
+            { html: vfPow(a, b, se !== pe ? se : pe + 1), ok: false, err: `¡Cuidado! En potencia de potencia los exponentes se MULTIPLICAN (${m} × ${n} = ${pe}), no se suman.` },
+            { html: vfPow(a * m, b * n, pe), ok: false, err: `La base ${a}/${b} no se multiplica por los exponentes.` },
+            { html: vfPow(a, b, Math.abs(m - n) || 1), ok: false, err: `Debes multiplicar los exponentes: ${m} × ${n} = ${pe}.` }
+          ]
+        },
+        { type: 'frac_builder', prompt: `Paso 2: Calcula el valor de <span class="math-box">${vfPow(a, b, pe)}</span>:`,
+          trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+          tiles: shuffle(Array.from(new Set([na, da, a * pe, b * pe, Math.pow(a, se), b]))),
+          commonErrors: {}, successMsg: `¡Cámara superada! (${a}/${b})<sup>${pe}</sup> = ${na}/${da}.`
+        }
+      ]
+    };
+  });
+}
+
+function genF5() {
+  const data = [
+    [4,7,3],[2,3,2],[3,5,2],[1,2,3],[2,5,3],[3,4,3],[5,6,2],[1,3,4],[2,7,2],[4,5,2],
+    [1,4,3],[3,8,2],[5,2,3],[7,3,2],[2,9,2],[1,5,3],[3,7,2],[5,8,2],[4,9,2],[6,5,2],
+    [3,2,4],[1,6,2],[7,10,2],[2,3,3],[5,4,3],[8,9,2],[3,10,2],[9,4,2],[1,7,2],[4,3,3]
+  ];
+  return data.map(([a, b, n], i) => {
+    const exprHTML = vfPow(a, b, `−${n}`), na = Math.pow(b, n), da = Math.pow(a, n);
+    return {
+      id: `F5_${i}`, exprHTML,
+      hint1: `Para que el exponente (−${n}) pase a ser positivo (+${n}), invierte la fracción a (${b}/${a}).`,
+      hint2: `(${a}/${b})<sup>−${n}</sup> = (${b}/${a})<sup>${n}</sup> = ${na}/${da}.`,
+      steps: [
+        { type: 'choice', prompt: `Paso 1: Invierte la fracción en <span class="math-box">${exprHTML}</span> para volver positivo al exponente:`,
+          trailHTML: `${vfPow(b, a, n)}`,
+          options: [
+            { html: vfPow(b, a, n), ok: true, msg: `¡Correcto! Invertimos a (${b}/${a}) y el exponente cambia a +${n}.` },
+            { html: vfPow(a, b, n), ok: false, err: `Cambiaste el exponente a positivo pero olvidaste invertir la fracción (${b}/${a}).` },
+            { html: `− ${vfPow(a, b, n)}`, ok: false, err: `El exponente negativo no vuelve negativa a la fracción; la invierte.` },
+            { html: vfPow(b, a, `−${n}`), ok: false, err: `Al invertir la fracción, el exponente ya queda positivo (+${n}).` }
+          ]
+        },
+        { type: 'frac_builder', prompt: `Paso 2: Calcula <span class="math-box">${vfPow(b, a, n)}</span>:`,
+          trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+          tiles: shuffle(Array.from(new Set([na, da, b * n, a * n, na + 2]))),
+          commonErrors: { [`${da}/${na}`]: `Olvidaste que ahora ${b} está en el numerador (${b}<sup>${n}</sup> = ${na}).` },
+          successMsg: `¡Reino Invertido dominado! Resultado: ${na}/${da}.`
+        }
+      ]
+    };
+  });
+}
+
+function genF6() {
+  const data = [
+    [2,25,36,false],[3,8,27,false],[4,16,81,false],[2,9,16,false],[2,49,64,false],
+    [2,81,100,false],[3,27,64,false],[3,1,125,false],[3,64,125,false],[2,16,49,false],
+    [2,36,121,false],[2,64,81,false],[2,100,144,false],[3,8,125,false],[3,27,1000,false],
+    [4,1,16,false],[4,81,256,false],[5,32,243,false],[2,4,81,false],[2,121,169,false],
+    [2,0,0,true,4,9,25,16],[2,0,0,true,9,25,16,49],[2,0,0,true,1,4,9,25],[2,0,0,true,25,36,9,49],[3,0,0,true,8,27,1,64],
+    [2,0,0,true,16,81,9,25],[2,0,0,true,49,100,25,64],[3,0,0,true,27,8,1,125],[2,0,0,true,36,49,81,100],[2,0,0,true,64,121,9,16]
+  ];
+  return data.map((it, i) => {
+    const [r, n, d, isP, pA, pB, pC, pD] = it;
+    if (!isP) {
+      const rn = Math.round(Math.pow(n, 1/r)), rd = Math.round(Math.pow(d, 1/r));
+      const [na, da] = simp(rn, rd), exprHTML = vRad(r, vf(n, d));
+      return {
+        id: `F6_${i}`, exprHTML,
+        hint1: `Extrae la raíz de índice ${r} tanto del numerador (${n}) como del denominador (${d}).`,
+        hint2: `Raíz ${r} de ${n} es ${rn}, y raíz ${r} de ${d} es ${rd}.`,
+        steps: [
+          { type: 'choice', prompt: `Paso 1: Distribuye el radical al numerador y denominador en <span class="math-box">${exprHTML}</span>:`,
+            trailHTML: `${vf(vRad(r, n), vRad(r, d))}`,
+            options: [
+              { html: vf(vRad(r, n), vRad(r, d)), ok: true, msg: `¡Correcto! Aplicamos la raíz arriba y abajo.` },
+              { html: vf(vRad(r, n), d), ok: false, err: `Olvidaste aplicar la raíz al denominador ${d}.` },
+              { html: vf(`${n}÷${r}`, `${d}÷${r}`), ok: false, err: `Sacar raíz NO es dividir entre ${r}.` },
+              { html: vf(n, vRad(r, d)), ok: false, err: `Olvidaste aplicar la raíz al numerador ${n}.` }
+            ]
+          },
+          { type: 'frac_builder', prompt: `Paso 2: Halla ambas raíces y construye la fracción:`,
+            trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+            tiles: shuffle(Array.from(new Set([na, da, rn, rd, Math.floor(n/r), d]))),
+            commonErrors: {}, successMsg: `¡Raíz exacta! Resultado: ${na}/${da}.`
+          }
+        ]
+      };
+    } else {
+      const rA = Math.round(Math.pow(pA, 1/r)), rB = Math.round(Math.pow(pB, 1/r));
+      const rC = Math.round(Math.pow(pC, 1/r)), rD = Math.round(Math.pow(pD, 1/r));
+      const [na, da] = simp(rA * rC, rB * rD), exprHTML = vRad(r, `${vf(pA, pB)} × ${vf(pC, pD)}`);
+      return {
+        id: `F6_${i}`, exprHTML,
+        hint1: `Saca la raíz de cada fracción factor por separado y luego multiplícalas.`,
+        hint2: `(${rA}/${rB}) × (${rC}/${rD}) simplificado es ${na}/${da}.`,
+        steps: [
+          { type: 'choice', prompt: `Paso 1: Halla la raíz de cada fracción en <span class="math-box">${exprHTML}</span>:`,
+            trailHTML: `${vf(rA, rB)} × ${vf(rC, rD)}`,
+            options: [
+              { html: `${vf(rA, rB)} × ${vf(rC, rD)}`, ok: true, msg: `¡Muy bien! Ahora multiplícalas.` },
+              { html: `${vf(rA, pB)} × ${vf(rC, pD)}`, ok: false, err: `Olvidaste sacar la raíz de los denominadores.` },
+              { html: `${vf(rA + rC, rB + rD)}`, ok: false, err: `Es una multiplicación de raíces, no una suma.` }
+            ]
+          },
+          { type: 'frac_builder', prompt: `Paso 2: Multiplica y escribe la fracción simplificada:`,
+            trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+            tiles: shuffle(Array.from(new Set([na, da, rA*rC, rB*rD, rA+rC, rB+rD]))),
+            commonErrors: {}, successMsg: `¡Bosque de las Raíces superado! Resultado: ${na}/${da}.`
+          }
+        ]
+      };
+    }
+  });
+}
+
+function genF7() {
+  const data = [
+    {t:'q',r:2,a:25,b:4,c:16,d:9},{t:'p',r:2,a:2,b:5,m:6},{t:'q',r:2,a:9,b:16,c:25,d:49},{t:'p',r:3,a:3,b:4,m:6},{t:'q',r:2,a:36,b:25,c:9,d:16},
+    {t:'p',r:2,a:3,b:2,m:4},{t:'q',r:3,a:8,b:27,c:1,d:64},{t:'p',r:3,a:2,b:3,m:9},{t:'q',r:2,a:49,b:9,c:64,d:25},{t:'p',r:4,a:2,b:5,m:8},
+    {t:'q',r:2,a:16,b:81,c:4,d:9},{t:'p',r:2,a:4,b:3,m:4},{t:'q',r:2,a:100,b:49,c:25,d:9},{t:'p',r:3,a:1,b:2,m:12},{t:'q',r:3,a:27,b:8,c:125,d:64},
+    {t:'p',r:2,a:5,b:6,m:4},{t:'q',r:2,a:81,b:16,c:9,d:4},{t:'p',r:4,a:3,b:2,m:12},{t:'q',r:2,a:64,b:25,c:16,d:81},{t:'p',r:5,a:2,b:3,m:10},
+    {t:'q',r:2,a:1,b:9,c:4,d:25},{t:'p',r:2,a:3,b:5,m:4},{t:'q',r:3,a:64,b:27,c:8,d:125},{t:'p',r:3,a:4,b:5,m:6},{t:'q',r:2,a:121,b:36,c:49,d:9},
+    {t:'p',r:2,a:1,b:3,m:6},{t:'q',r:2,a:9,b:64,c:81,d:100},{t:'p',r:3,a:5,b:2,m:6},{t:'q',r:2,a:25,b:81,c:100,d:9},{t:'p',r:4,a:1,b:2,m:12}
+  ];
+  return data.map((it, i) => {
+    if (it.t === 'q') {
+      const { r, a, b, c, d } = it;
+      const rA = Math.round(Math.pow(a, 1/r)), rB = Math.round(Math.pow(b, 1/r));
+      const rC = Math.round(Math.pow(c, 1/r)), rD = Math.round(Math.pow(d, 1/r));
+      const [na, da] = simp(rA * rD, rB * rC), exprHTML = vRad(r, `${vf(a, b)} ÷ ${vf(c, d)}`);
+      return {
+        id: `F7_${i}`, exprHTML,
+        hint1: `Extrae la raíz de cada fracción y luego divide multiplicando en aspa.`,
+        hint2: `(${rA}/${rB}) ÷ (${rC}/${rD}) = ${na}/${da}.`,
+        steps: [
+          { type: 'choice', prompt: `Paso 1: Extrae la raíz de cada término del cociente en <span class="math-box">${exprHTML}</span>:`,
+            trailHTML: `${vf(rA, rB)} ÷ ${vf(rC, rD)}`,
+            options: [
+              { html: `${vf(rA, rB)} ÷ ${vf(rC, rD)}`, ok: true, msg: `¡Correcto! Ahora realiza la división.` },
+              { html: `${vf(rA, rB)} × ${vf(rC, rD)}`, ok: false, err: `No puedes cambiar ÷ por × sin invertir la segunda fracción.` },
+              { html: `${vf(a, rB)} ÷ ${vf(c, rD)}`, ok: false, err: `Olvidaste sacar la raíz de los numeradores.` }
+            ]
+          },
+          { type: 'frac_builder', prompt: `Paso 2: Divide <span class="math-box">${vf(rA, rB)} ÷ ${vf(rC, rD)}</span> y simplifica:`,
+            trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+            tiles: shuffle(Array.from(new Set([na, da, rA*rD, rB*rC, rA*rC, rB*rD]))),
+            commonErrors: {}, successMsg: `¡Excelente! Resultado: ${na}/${da}.`
+          }
+        ]
+      };
+    } else {
+      const { r, a, b, m } = it, ne = m / r, na = Math.pow(a, ne), da = Math.pow(b, ne);
+      const exprHTML = vRad(r, vfPow(a, b, m));
+      return {
+        id: `F7_${i}`, exprHTML,
+        hint1: `Divide el exponente (${m}) entre el índice de la raíz (${r}).`,
+        hint2: `(${a}/${b})<sup>${m}÷${r}</sup> = (${a}/${b})<sup>${ne}</sup> = ${na}/${da}.`,
+        steps: [
+          { type: 'choice', prompt: `Paso 1: Simplifica el exponente y el índice del radical en <span class="math-box">${exprHTML}</span>:`,
+            trailHTML: `${vfPow(a, b, ne)}`,
+            options: [
+              { html: vfPow(a, b, ne), ok: true, msg: `¡Exacto! ${m} ÷ ${r} = ${ne}.` },
+              { html: vfPow(a, b, m * r), ok: false, err: `Multiplicaste ${m} × ${r} en vez de dividir ${m} ÷ ${r} = ${ne}.` },
+              { html: vfPow(a, b, Math.abs(m - r)), ok: false, err: `Debes dividir el exponente entre el índice: ${m} ÷ ${r} = ${ne}.` }
+            ]
+          },
+          { type: 'frac_builder', prompt: `Paso 2: Calcula <span class="math-box">${vfPow(a, b, ne)}</span>:`,
+            trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+            tiles: shuffle(Array.from(new Set([na, da, a*ne, b*ne, b, na+2]))),
+            commonErrors: {}, successMsg: `¡Templo de los Radicales dominado! Resultado: ${na}/${da}.`
+          }
+        ]
+      };
+    }
+  });
+}
+
+function genF8() {
+  const data = [
+    {t:'rr',r1:3,r2:2,num:729,den:64},{t:'fe',a:36,b:49,en:1,ed:2},{t:'fe',a:16,b:81,en:3,ed:4},{t:'rr',r1:2,r2:2,num:16,den:81},{t:'fe',a:8,b:27,en:2,ed:3},
+    {t:'rr',r1:2,r2:2,num:81,den:256},{t:'fe',a:25,b:36,en:1,ed:2},{t:'fe',a:9,b:16,en:3,ed:2},{t:'rr',r1:2,r2:3,num:64,den:729},{t:'fe',a:27,b:64,en:2,ed:3},
+    {t:'fe',a:4,b:9,en:3,ed:2},{t:'rr',r1:2,r2:2,num:1,den:16},{t:'fe',a:64,b:81,en:1,ed:2},{t:'fe',a:8,b:125,en:2,ed:3},{t:'rr',r1:3,r2:2,num:1,den:64},
+    {t:'fe',a:49,b:100,en:1,ed:2},{t:'fe',a:16,b:25,en:3,ed:2},{t:'rr',r1:2,r2:2,num:256,den:625},{t:'fe',a:1,b:8,en:2,ed:3},{t:'fe',a:81,b:16,en:3,ed:4},
+    {t:'fe',a:100,b:121,en:1,ed:2},{t:'fe',a:27,b:125,en:1,ed:3},{t:'fe',a:4,b:25,en:3,ed:2},{t:'fe',a:64,b:27,en:2,ed:3},{t:'fe',a:1,b:32,en:2,ed:5},
+    {t:'fe',a:121,b:144,en:1,ed:2},{t:'fe',a:9,b:25,en:3,ed:2},{t:'fe',a:125,b:64,en:2,ed:3},{t:'fe',a:81,b:100,en:1,ed:2},{t:'fe',a:32,b:243,en:2,ed:5}
+  ];
+  return data.map((it, i) => {
+    if (it.t === 'rr') {
+      const { r1, r2, num, den } = it, pi = r1 * r2, si = r1 + r2;
+      const na = Math.round(Math.pow(num, 1/pi)), da = Math.round(Math.pow(den, 1/pi));
+      const exprHTML = vRad(r1, vRad(r2, vf(num, den)));
+      return {
+        id: `F8_${i}`, exprHTML,
+        hint1: `Multiplica los índices de las raíces sucesivas (${r1} × ${r2} = ${pi}).`,
+        hint2: `Queda raíz de índice ${pi} de (${num}/${den}) = ${na}/${da}.`,
+        steps: [
+          { type: 'choice', prompt: `Paso 1: Reduce a una sola raíz multiplicando los índices en <span class="math-box">${exprHTML}</span>:`,
+            trailHTML: `${vRad(pi, vf(num, den))}`,
+            options: [
+              { html: vRad(pi, vf(num, den)), ok: true, msg: `¡Exacto! ${r1} × ${r2} = ${pi}.` },
+              { html: vRad(si !== pi ? si : pi + 1, vf(num, den)), ok: false, err: `Sumaste los índices. En raíz de raíz los índices se MULTIPLICAN (${r1} × ${r2} = ${pi}).` },
+              { html: vRad(r1, vf(num, den)), ok: false, err: `Olvidaste multiplicar por el índice de la raíz interior (${r2}).` }
+            ]
+          },
+          { type: 'frac_builder', prompt: `Paso 2: Halla la raíz <span class="math-box">${vRad(pi, vf(num, den))}</span>:`,
+            trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+            tiles: shuffle(Array.from(new Set([na, da, na*2, da*2, na+1, da+3]))),
+            commonErrors: {}, successMsg: `¡Portal superado! Resultado: ${na}/${da}.`
+          }
+        ]
+      };
+    } else {
+      const { a, b, en, ed } = it;
+      const ra = Math.round(Math.pow(a, 1/ed)), rb = Math.round(Math.pow(b, 1/ed));
+      const na = Math.pow(ra, en), da = Math.pow(rb, en), exprHTML = vfPow(a, b, `${en}/${ed}`);
+      return {
+        id: `F8_${i}`, exprHTML,
+        hint1: `El denominador del exponente (${ed}) es el índice de la raíz, y el numerador (${en}) es la potencia.`,
+        hint2: `Raíz ${ed} de (${a}/${b}) es ${ra}/${rb}, y elevado a la ${en} da ${na}/${da}.`,
+        steps: [
+          { type: 'choice', prompt: `Paso 1: Expresa <span class="math-box">${exprHTML}</span> como radical:`,
+            trailHTML: en === 1 ? `${vRad(ed, vf(a, b))}` : `${bracketPow(vRad(ed, vf(a, b)), en)}`,
+            options: [
+              { html: en === 1 ? vRad(ed, vf(a, b)) : bracketPow(vRad(ed, vf(a, b)), en), ok: true, msg: `¡Muy bien! El denominador ${ed} es el índice del radical.` },
+              { html: bracketPow(vRad(en === 1 ? 3 : en, vf(a, b)), ed), ok: false, err: `Recuerda que el DENOMINADOR (${ed}) siempre indica el índice de la raíz.` },
+              { html: vf(a * en, b * ed), ok: false, err: `Un exponente fraccionario indica radicación y potenciación, no multiplicación.` }
+            ]
+          },
+          { type: 'frac_builder', prompt: `Paso 2: Calcula el valor final de la expresión:`,
+            trailHTML: `= ${vf(na, da)}`, targetNum: na, targetDen: da,
+            tiles: shuffle(Array.from(new Set([na, da, ra, rb, ra*en, rb*en]))),
+            commonErrors: {}, successMsg: `¡Excelente! Resultado: ${na}/${da}.`
+          }
+        ]
+      };
+    }
+  });
+}
+
+function genF9() {
+  const b1 = genF1(), b2 = genF2(), b3 = genF3(), b4 = genF4(), b5 = genF5(), b6 = genF6(), b7 = genF7(), b8 = genF8();
+  const specials = [
+    {
+      id: 'F9_ERR', exprHTML: vRad(2, `${vf(9, 25)} + ${vf(16, 25)}`),
+      hint1: `Dentro de una raíz con suma, primero debes sumar las fracciones antes de extraer la raíz.`,
+      hint2: `9/25 + 16/25 = 25/25 = 1, y √1 = 1.`,
+      steps: [
+        { type: 'choice', prompt: `🔍 <b>Detecta y corrige el error:</b> Alguien afirmó que <span class="math-box">${vRad(2, `${vf(9, 25)} + ${vf(16, 25)}`)} = ${vf(3, 5)} + ${vf(4, 5)} = ${vf(7, 5)}</span>. ¿Qué error cometió?`,
+          trailHTML: `Suma interna = ${vf(25, 25)}`,
+          options: [
+            { html: `Confundió la raíz de una suma con la suma de las raíces`, ok: true, msg: `¡Exacto! Primero se suma dentro del radical: 9/25 + 16/25 = 25/25.` },
+            { html: `Sumó mal 3/5 + 4/5`, ok: false, err: `El error está en separar la raíz en una suma.` },
+            { html: `Todo el procedimiento era correcto`, ok: false, err: `En una suma jamás se reparte el radical.` }
+          ]
+        },
+        { type: 'choice', prompt: `Paso 2: ¿Cuál es el resultado verdadero de <span class="math-box">${vRad(2, vf(25, 25))}</span>?`,
+          trailHTML: `= 1`,
+          options: [
+            { html: `1 (porque ${vf(5, 5)} = 1)`, ok: true, msg: `¡Golpe directo al Guardián!` },
+            { html: vf(7, 5), ok: false, err: `7/5 era el resultado erróneo.` },
+            { html: vf(25, 5), ok: false, err: `La raíz cuadrada de 25 es 5, dando 5/5 = 1.` }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'F9_ORD', exprHTML: bracketPow(vfPow(2, 3, '−1'), 3),
+      hint1: `Multiplica primero los exponentes (−1 × 3 = −3), luego invierte la fracción y eleva al cubo.`,
+      hint2: `[(2/3)<sup>−1</sup>]<sup>3</sup> = (2/3)<sup>−3</sup> = (3/2)<sup>3</sup> = 27/8.`,
+      steps: [
+        { type: 'order_steps', prompt: `🧩 <b>Ordena los pasos:</b> Toca en orden correcto los 3 pasos para resolver <span class="math-box">${bracketPow(vfPow(2, 3, '−1'), 3)}</span>:`,
+          trailHTML: `= ${vf(27, 8)}`,
+          targetSteps: [
+            `1.º Multiplicar exponentes: ${vfPow(2, 3, '−3')}`,
+            `2.º Invertir la fracción: ${vfPow(3, 2, 3)}`,
+            `3.º Elevar al cubo: ${vf(27, 8)}`
+          ]
+        }
+      ]
+    }
+  ];
+  const pool = [
+    ...specials,
+    b1[0], b1[1], b1[2], b2[0], b2[3], b2[8], b3[0], b3[1], b3[6], b4[0], b4[4], b4[8],
+    b5[0], b5[1], b5[3], b5[5], b6[0], b6[1], b6[2], b6[20], b6[23], b7[0], b7[1], b7[3], b7[5], b8[0], b8[1], b8[2]
+  ];
+  return pool.map((q, idx) => ({ ...q, id: `F9_${idx}` }));
+}
+
+const TOWER_BANKS = { 1: genF1(), 2: genF2(), 3: genF3(), 4: genF4(), 5: genF5(), 6: genF6(), 7: genF7(), 8: genF8(), 9: genF9() };
+
+/* 5. GESTIÓN DE PROGRESO Y NAVEGACIÓN */
+const SAVE_KEY = 'torre_potencias_raices_dewis_v1';
+let playerState = { name: '', stars: 0, coins: 0, floorsCleared: {} };
+let activeSession = { floorId: 1, questions: [], qIdx: 0, stepIdx: 0, mistakesInStep: 0, hintLevel: 0, attemptsTotal: 0, firstTryHits: 0, activeSlot: 'num', orderedSelection: [] };
+
+function loadProgress() {
+  try { const r = localStorage.getItem(SAVE_KEY); if (r) playerState = { ...playerState, ...JSON.parse(r) }; } catch (e) {}
+  refreshTopHUD();
+}
+function saveProgress() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(playerState)); } catch (e) {}
+  refreshTopHUD();
+}
+function refreshTopHUD() {
+  document.getElementById('hud-player').textContent = playerState.name || 'Explorador';
+  document.getElementById('hud-crystals').textContent = Object.keys(playerState.floorsCleared).length;
+  document.getElementById('hud-stars').textContent = playerState.stars;
+  document.getElementById('hud-coins').textContent = playerState.coins;
+}
+
+function startAdventureLogin() {
+  SoundSystem.unlock();
+  const inp = document.getElementById('input-player-name');
+  if (!inp.value.trim()) { inp.style.borderColor = '#f43f5e'; inp.focus(); return; }
+  playerState.name = inp.value.trim();
+  saveProgress();
+  showTowerMap();
+}
+function changeExplorerName() {
+  document.getElementById('screen-map').classList.add('hidden');
+  document.getElementById('screen-floor').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.add('hidden');
+  document.getElementById('screen-login').classList.remove('hidden');
+  document.getElementById('input-player-name').value = playerState.name;
+}
+function resetTowerProgress() {
+  if (confirm('¿Deseas reiniciar los cristales y medallas?')) {
+    playerState.stars = 0; playerState.coins = 0; playerState.floorsCleared = {};
+    saveProgress(); renderTowerMap();
+  }
+}
+function showTowerMap() {
+  document.getElementById('screen-login').classList.add('hidden');
+  document.getElementById('screen-floor').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.add('hidden');
+  document.getElementById('btn-floor-theory').classList.add('hidden');
+  document.getElementById('btn-map').classList.add('hidden');
+  document.getElementById('screen-map').classList.remove('hidden');
+  renderTowerMap();
+}
+function renderTowerMap() {
+  const grid = document.getElementById('tower-floors-grid');
+  grid.innerHTML = '';
+  FLOORS_INFO.forEach(fl => {
+    const rec = playerState.floorsCleared[fl.id];
+    const card = document.createElement('div');
+    card.className = 'floor-card' + (rec ? ' cleared' : '');
+    const medalTxt = rec ? (rec.medal === 'ORO' ? '🥇 Oro' : rec.medal === 'PLATA' ? '🥈 Plata' : '🥉 Bronce') : '🔒 9 Puertas';
+    card.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="floor-tag">PISO ${fl.id}</span>
+          <span style="font-size:1.25rem;">${rec ? '💎' : fl.icon}</span>
+        </div>
+        <h3>${fl.name}</h3>
+        <p>${fl.desc}</p>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(148,163,184,0.25); padding-top:7px; font-size:0.8rem; font-weight:800;">
+        <span style="color:${rec ? 'var(--emerald)' : 'var(--primary)'};">${rec ? `✅ ${medalTxt} (${rec.accuracy}%)` : '▶ Entrar al Piso'}</span>
+        ${rec ? `<button class="mini-btn" style="padding:2px 7px; font-size:0.72rem;" onclick="event.stopPropagation(); openSavedDiploma(${fl.id})">🎓 Diploma</button>` : ''}
+      </div>
+    `;
+    card.onclick = () => enterFloor(fl.id);
+    grid.appendChild(card);
+  });
+}
+
+/* 6. MOTOR GRÁFICO 2D DEL ESCENARIO DE LA TORRE */
+const StageEngine = (function() {
+  const canvas = document.getElementById('tower-stage-canvas');
+  const ctx = canvas.getContext('2d');
+  let avatar = { x: 60, y: 120, vy: 0, targetX: 60, moveL: false, moveR: false, grounded: true, frame: 0 };
+  let particles = [], beams = [];
+  function gateX(idx) { return 90 + idx * 88; }
+  function spark(x, y, col) {
+    for (let i = 0; i < 16; i++) {
+      const a = Math.random() * Math.PI * 2, s = 1 + Math.random() * 3;
+      particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, col });
+    }
+  }
+  function update() {
+    avatar.frame += 0.14;
+    if (avatar.moveL) { avatar.x -= 3.4; avatar.targetX = avatar.x; }
+    else if (avatar.moveR) { avatar.x += 3.4; avatar.targetX = avatar.x; }
+    else if (Math.abs(avatar.targetX - avatar.x) > 2) avatar.x += Math.sign(avatar.targetX - avatar.x) * 3.8;
+    avatar.x = Math.max(26, Math.min(gateX(activeSession.qIdx), avatar.x));
+    avatar.y += avatar.vy;
+    if (avatar.y < 120) { avatar.vy += 0.48; avatar.grounded = false; }
+    else { avatar.y = 120; avatar.vy = 0; avatar.grounded = true; }
+    for (let i = particles.length - 1; i >= 0; i--) {
+      particles[i].x += particles[i].vx; particles[i].y += particles[i].vy; particles[i].life -= 0.04;
+      if (particles[i].life <= 0) particles.splice(i, 1);
+    }
+    for (let i = beams.length - 1; i >= 0; i--) {
+      beams[i].alpha -= 0.06; if (beams[i].alpha <= 0) beams.splice(i, 1);
+    }
+  }
+  function draw() {
+    const fl = FLOORS_INFO.find(f => f.id === activeSession.floorId) || FLOORS_INFO[0];
+    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    g.addColorStop(0, fl.sky[0]); g.addColorStop(1, fl.sky[1]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 138, canvas.width, 27);
+    ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, 138); ctx.lineTo(canvas.width, 138); ctx.stroke();
+
+    for (let i = 0; i < 9; i++) {
+      const gx = gateX(i), open = i < activeSession.qIdx, cur = i === activeSession.qIdx;
+      ctx.save(); ctx.translate(gx, 138);
+      ctx.fillStyle = open ? 'rgba(16,185,129,0.28)' : (cur ? 'rgba(251,191,36,0.28)' : 'rgba(15,23,42,0.85)');
+      ctx.strokeStyle = open ? '#10b981' : (cur ? '#fbbf24' : '#475569');
+      ctx.lineWidth = cur ? 3 : 2;
+      ctx.beginPath(); ctx.roundRect(-19, -54, 38, 54, [16, 16, 0, 0]); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Fredoka, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(open ? '✓' : (cur ? '🔑' : `${i + 1}`), 0, -24);
+      ctx.restore();
+    }
+
+    if (activeSession.floorId === 9) {
+      const hp = Math.max(0, (9 - activeSession.qIdx) / 9);
+      ctx.save(); ctx.translate(895, 90 + Math.sin(avatar.frame) * 4);
+      ctx.fillStyle = '#881337'; ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🐉', 0, 7);
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(-28, -38, 56, 7);
+      ctx.fillStyle = '#f43f5e'; ctx.fillRect(-28, -38, 56 * hp, 7);
+      ctx.restore();
+    } else {
+      ctx.save(); ctx.translate(900, 98 + Math.sin(avatar.frame) * 4);
+      ctx.fillStyle = '#38bdf8'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(14, 0); ctx.lineTo(0, 20); ctx.lineTo(-14, 0); ctx.closePath();
+      ctx.fill(); ctx.stroke(); ctx.restore();
+    }
+
+    beams.forEach(b => {
+      ctx.save(); ctx.globalAlpha = Math.max(0, b.alpha); ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke(); ctx.restore();
+    });
+
+    ctx.save(); ctx.translate(avatar.x, avatar.y);
+    ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.moveTo(-11, 18); ctx.lineTo(11, 18); ctx.lineTo(7, -7); ctx.lineTo(-7, -7); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fde68a'; ctx.beginPath(); ctx.arc(0, -15, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#7c3aed'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(-13, -21); ctx.lineTo(13, -21); ctx.lineTo(0, -39); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+
+    particles.forEach(p => {
+      ctx.save(); ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.col;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    });
+  }
+  (function loop() { update(); draw(); requestAnimationFrame(loop); })();
+
+  window.addEventListener('keydown', e => {
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+    if (e.key === 'ArrowLeft') avatar.moveL = true;
+    if (e.key === 'ArrowRight') avatar.moveR = true;
+    if ((e.key === 'ArrowUp' || e.key === ' ') && avatar.grounded) avatar.vy = -7.5;
+  });
+  window.addEventListener('keyup', e => {
+    if (e.key === 'ArrowLeft') avatar.moveL = false;
+    if (e.key === 'ArrowRight') avatar.moveR = false;
+  });
+  const bL = document.getElementById('btn-move-left'), bR = document.getElementById('btn-move-right'), bJ = document.getElementById('btn-jump');
+  bL.addEventListener('pointerdown', () => avatar.moveL = true); bL.addEventListener('pointerup', () => avatar.moveL = false); bL.addEventListener('pointerleave', () => avatar.moveL = false);
+  bR.addEventListener('pointerdown', () => avatar.moveR = true); bR.addEventListener('pointerup', () => avatar.moveR = false); bR.addEventListener('pointerleave', () => avatar.moveR = false);
+  bJ.addEventListener('pointerdown', () => { if (avatar.grounded) avatar.vy = -7.5; });
+
+  return {
+    resetToGate: idx => { avatar.targetX = gateX(idx); spark(gateX(idx), 110, '#38bdf8'); },
+    celebrateGate: (idx, isBoss) => {
+      spark(gateX(idx), 105, '#10b981');
+      if (isBoss) { beams.push({ x1: avatar.x + 10, y1: avatar.y - 16, x2: 880, y2: 88, alpha: 1 }); spark(880, 88, '#f43f5e'); }
+    }
+  };
+})();
+function walkToNextGate() { StageEngine.resetToGate(activeSession.qIdx); }
+
+/* 7. SISTEMA INTERACTIVO DE PASOS, CONSTRUCTORES Y PISTAS */
+function enterFloor(floorId) {
+  SoundSystem.unlock();
+  activeSession = {
+    floorId, questions: shuffle(TOWER_BANKS[floorId]).slice(0, 9),
+    qIdx: 0, stepIdx: 0, mistakesInStep: 0, hintLevel: 0, attemptsTotal: 0, firstTryHits: 0, activeSlot: 'num', orderedSelection: []
+  };
+  const fl = FLOORS_INFO.find(f => f.id === floorId);
+  document.getElementById('ui-floor-name').textContent = `Piso ${fl.id}: ${fl.name}`;
+  document.getElementById('floor1-formula-banner').classList.toggle('hidden', floorId !== 1);
+  document.getElementById('screen-map').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.add('hidden');
+  document.getElementById('screen-floor').classList.remove('hidden');
+  document.getElementById('btn-floor-theory').classList.remove('hidden');
+  document.getElementById('btn-map').classList.remove('hidden');
+  loadFloorQuestion();
+  openFloorLessonModal();
+}
+function replayActiveFloor() { enterFloor(activeSession.floorId); }
+function openFloorLessonModal() {
+  const fl = FLOORS_INFO.find(f => f.id === activeSession.floorId);
+  document.getElementById('lesson-title').textContent = `${fl.icon} Piso ${fl.id}: ${fl.name}`;
+  document.getElementById('lesson-desc').textContent = fl.desc;
+  document.getElementById('lesson-anim-stage').innerHTML = fl.demoHTML;
+  document.getElementById('lesson-tip').innerHTML = `💡 <strong>Recuerda:</strong> ${fl.tip}`;
+  document.getElementById('modal-lesson').classList.remove('hidden');
+}
+function closeFloorLessonModal() { document.getElementById('modal-lesson').classList.add('hidden'); }
+
+function loadFloorQuestion() {
+  activeSession.stepIdx = 0;
+  const q = activeSession.questions[activeSession.qIdx];
+  document.getElementById('ui-q-num').textContent = activeSession.qIdx + 1;
+  document.getElementById('ui-gate-num').textContent = activeSession.qIdx + 1;
+  document.getElementById('ui-main-math').innerHTML = q.exprHTML;
+  document.getElementById('ui-steps-trail').innerHTML = '';
+  StageEngine.resetToGate(activeSession.qIdx);
+  renderActiveStep();
+}
+
+function renderActiveStep() {
+  const q = activeSession.questions[activeSession.qIdx], step = q.steps[activeSession.stepIdx];
+  activeSession.mistakesInStep = 0; activeSession.hintLevel = 0; activeSession.orderedSelection = [];
+  document.getElementById('ui-step-badge').textContent = `PASO ${activeSession.stepIdx + 1} DE ${q.steps.length}`;
+  document.getElementById('ui-step-prompt').innerHTML = step.prompt;
+  document.getElementById('ui-feedback-box').classList.add('hidden');
+  document.getElementById('btn-continue-step').classList.add('hidden');
+
+  const zone = document.getElementById('ui-interaction-zone');
+  zone.innerHTML = '';
+
+  if (step.type === 'choice') {
+    const grid = document.createElement('div');
+    grid.className = 'choices-grid';
+    shuffle(step.options).forEach(o => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn math-box';
+      btn.innerHTML = o.html;
+      btn.onclick = () => {
+        if (o.ok) {
+          SoundSystem.ok();
+          grid.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+          btn.classList.add('correct');
+          completeStepSuccess(step, o.msg);
+        } else {
+          SoundSystem.err();
+          btn.classList.add('wrong'); btn.disabled = true;
+          handlePedagogicalMistake(o.err, q, step);
+        }
+      };
+      grid.appendChild(btn);
+    });
+    zone.appendChild(grid);
+  } else if (step.type === 'frac_builder') {
+    const box = document.createElement('div');
+    box.className = 'frac-builder-box';
+    box.innerHTML = `
+      <div style="font-size:0.84rem; color:#cbd5e1;">Toca las fichas o escribe el numerador y denominador:</div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div class="interactive-vf">
+          <input type="number" id="slot-num-inp" class="frac-input-slot active-slot" placeholder="Num.">
+          <div class="frac-divider-line"></div>
+          <input type="number" id="slot-den-inp" class="frac-input-slot" placeholder="Den.">
+        </div>
+        <button class="btn btn-primary" id="btn-verify-frac" onclick="verifyFractionBuilder()">✨ Comprobar</button>
+      </div>
+      <div class="tiles-bank" id="builder-tiles-bank"></div>
+    `;
+    zone.appendChild(box);
+    const nI = document.getElementById('slot-num-inp'), dI = document.getElementById('slot-den-inp');
+    activeSession.activeSlot = 'num';
+    nI.onfocus = () => { activeSession.activeSlot = 'num'; nI.classList.add('active-slot'); dI.classList.remove('active-slot'); };
+    dI.onfocus = () => { activeSession.activeSlot = 'den'; dI.classList.add('active-slot'); nI.classList.remove('active-slot'); };
+    const bank = document.getElementById('builder-tiles-bank');
+    step.tiles.forEach(v => {
+      const b = document.createElement('button');
+      b.className = 'num-tile'; b.textContent = v;
+      b.onclick = () => {
+        if (activeSession.activeSlot === 'num') { nI.value = v; activeSession.activeSlot = 'den'; nI.classList.remove('active-slot'); dI.classList.add('active-slot'); }
+        else { dI.value = v; activeSession.activeSlot = 'num'; dI.classList.remove('active-slot'); nI.classList.add('active-slot'); }
+      };
+      bank.appendChild(b);
+    });
+  } else if (step.type === 'order_steps') {
+    step._shuffledOrder = shuffle(step.targetSteps);
+    const box = document.createElement('div');
+    box.className = 'frac-builder-box';
+    box.innerHTML = `
+      <div class="order-slots" id="order-slots-area"></div>
+      <div class="tiles-bank" id="order-bank-area"></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-dark" onclick="resetOrderSteps()">🗑️ Limpiar</button>
+        <button class="btn btn-primary" id="btn-check-order" onclick="verifyOrderSteps()">✨ Verificar Orden</button>
+      </div>
+    `;
+    zone.appendChild(box);
+    refreshOrderStepsUI(step);
+  }
+}
+
+function refreshOrderStepsUI(step) {
+  const sA = document.getElementById('order-slots-area'), bA = document.getElementById('order-bank-area');
+  sA.innerHTML = activeSession.orderedSelection.length === 0 ? `<span style="color:#64748b; font-size:0.86rem;">[ Selecciona los pasos en orden ]</span>` : '';
+  activeSession.orderedSelection.forEach(idx => {
+    const sp = document.createElement('span'); sp.className = 'trail-pill math-box'; sp.innerHTML = step._shuffledOrder[idx]; sA.appendChild(sp);
+  });
+  bA.innerHTML = '';
+  step._shuffledOrder.forEach((h, idx) => {
+    const b = document.createElement('button'); b.className = 'num-tile math-box'; b.innerHTML = h;
+    b.disabled = activeSession.orderedSelection.includes(idx);
+    b.onclick = () => { activeSession.orderedSelection.push(idx); refreshOrderStepsUI(step); };
+    bA.appendChild(b);
+  });
+}
+function resetOrderSteps() { activeSession.orderedSelection = []; refreshOrderStepsUI(activeSession.questions[activeSession.qIdx].steps[activeSession.stepIdx]); }
+function verifyOrderSteps() {
+  const q = activeSession.questions[activeSession.qIdx], step = q.steps[activeSession.stepIdx];
+  const ch = activeSession.orderedSelection.map(i => step._shuffledOrder[i]);
+  if (ch.length < step.targetSteps.length) { showFeedback('hint', '⚠️ Selecciona los 3 pasos.'); return; }
+  if (ch.every((v, i) => v === step.targetSteps[i])) {
+    SoundSystem.ok(); document.getElementById('btn-check-order').disabled = true; completeStepSuccess(step, '¡Orden correcto!');
+  } else {
+    SoundSystem.err(); handlePedagogicalMistake('Primero multiplica los exponentes, luego invierte la fracción y finalmente eleva al cubo.', q, step);
+  }
+}
+
+function verifyFractionBuilder() {
+  const q = activeSession.questions[activeSession.qIdx], step = q.steps[activeSession.stepIdx];
+  const nV = parseInt(document.getElementById('slot-num-inp').value, 10), dV = parseInt(document.getElementById('slot-den-inp').value, 10);
+  if (isNaN(nV) || isNaN(dV) || dV === 0) { showFeedback('hint', '⚠️ Completa el numerador y el denominador.'); return; }
+  if (nV === step.targetNum && dV === step.targetDen) {
+    SoundSystem.ok(); document.getElementById('btn-verify-frac').disabled = true; completeStepSuccess(step, step.successMsg); return;
+  }
+  if (nV * step.targetDen === dV * step.targetNum && nV > 0 && dV > 0) {
+    SoundSystem.ok();
+    showFeedback('hint', `✨ <strong>¡Tu fracción ${nV}/${dV} es equivalente!</strong> Simplifícala dividiendo arriba y abajo entre <b>${gcd(nV, dV)}</b>.`);
+    return;
+  }
+  SoundSystem.err();
+  const key = `${nV}/${dV}`;
+  let err = (step.commonErrors && step.commonErrors[key]) ? step.commonErrors[key] : '';
+  if (!err) {
+    if (nV === step.targetNum) err = `El numerador <b>${nV}</b> es correcto, pero el denominador debe ser <b>${step.targetDen}</b>.`;
+    else if (dV === step.targetDen) err = `El denominador <b>${dV}</b> es correcto, pero el numerador debe ser <b>${step.targetNum}</b>.`;
+    else if (nV === step.targetDen && dV === step.targetNum) err = `Pusiste la fracción invertida: el numerador es <b>${step.targetNum}</b> y el denominador es <b>${step.targetDen}</b>.`;
+    else err = `Revisa la operación: el numerador correcto es <b>${step.targetNum}</b> y el denominador es <b>${step.targetDen}</b>.`;
+  }
+  handlePedagogicalMistake(err, q, step);
+}
+
+function completeStepSuccess(step, msg) {
+  activeSession.attemptsTotal++;
+  if (activeSession.mistakesInStep === 0) { activeSession.firstTryHits++; playerState.coins += 4; } else playerState.coins += 2;
+  saveProgress();
+  const pill = document.createElement('span'); pill.className = 'trail-pill math-box'; pill.innerHTML = `✓ ${step.trailHTML}`;
+  document.getElementById('ui-steps-trail').appendChild(pill);
+  showFeedback('ok', `✅ <strong>¡Correcto!</strong> ${msg}`);
+  document.getElementById('btn-continue-step').classList.remove('hidden');
+}
+
+function handlePedagogicalMistake(errText, q, step) {
+  activeSession.mistakesInStep++;
+  if (activeSession.mistakesInStep === 1) showFeedback('err', `🔍 <strong>Observa el detalle:</strong> ${errText} <em>¡Inténtalo de nuevo!</em>`);
+  else if (activeSession.mistakesInStep === 2) showFeedback('hint', `💡 <strong>Pista (2.º intento):</strong> ${errText}<br>📌 <b>Ayuda:</b> ${q.hint1}`);
+  else showFeedback('hint', `📖 <strong>Solución Explicada:</strong> ${q.hint2} Resultado del paso: <span class="math-box">${step.trailHTML}</span>.`);
+}
+
+function triggerGradualHint() {
+  const q = activeSession.questions[activeSession.qIdx];
+  activeSession.hintLevel++;
+  if (activeSession.hintLevel === 1) showFeedback('hint', `💡 <strong>Pista 1:</strong> ${q.hint1}`);
+  else showFeedback('hint', `📐 <strong>Pista 2 (Desarrollo):</strong> ${q.hint2}`);
+}
+function showFeedback(t, h) {
+  const b = document.getElementById('ui-feedback-box'); b.className = `feedback-panel ${t}`; b.innerHTML = h; b.classList.remove('hidden');
+}
+function nextStepOrGate() {
+  const q = activeSession.questions[activeSession.qIdx];
+  activeSession.stepIdx++;
+  if (activeSession.stepIdx < q.steps.length) renderActiveStep();
+  else {
+    SoundSystem.gateOpen(); StageEngine.celebrateGate(activeSession.qIdx, activeSession.floorId === 9);
+    activeSession.qIdx++;
+    if (activeSession.qIdx < activeSession.questions.length) loadFloorQuestion();
+    else completeFloorWithDiploma();
+  }
+}
+
+/* 8. DIPLOMAS DESCARGABLES EN PNG E IMPRIMIBLES */
+function completeFloorWithDiploma() {
+  SoundSystem.win();
+  const acc = activeSession.attemptsTotal > 0 ? Math.round((activeSession.firstTryHits / activeSession.attemptsTotal) * 100) : 100;
+  const medal = acc >= 85 ? 'ORO' : acc >= 65 ? 'PLATA' : 'BRONCE';
+  playerState.stars += medal === 'ORO' ? 3 : medal === 'PLATA' ? 2 : 1;
+  playerState.coins += 25;
+  playerState.floorsCleared[activeSession.floorId] = { medal, accuracy: acc };
+  saveProgress();
+  displayDiplomaScreen(activeSession.floorId, acc, medal);
+}
+function openSavedDiploma(fId) {
+  const rec = playerState.floorsCleared[fId]; if (!rec) return;
+  activeSession.floorId = fId; displayDiplomaScreen(fId, rec.accuracy, rec.medal);
+}
+function displayDiplomaScreen(fId, acc, medal) {
+  document.getElementById('screen-map').classList.add('hidden');
+  document.getElementById('screen-floor').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.remove('hidden');
+  document.getElementById('btn-map').classList.remove('hidden');
+  const fl = FLOORS_INFO.find(f => f.id === fId);
+  const c = document.getElementById('diploma-canvas'), ctx = c.getContext('2d'), W = c.width, H = c.height;
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  g.addColorStop(0, '#090d1e'); g.addColorStop(0.5, '#1e1b4b'); g.addColorStop(1, '#0f172a');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 8; ctx.strokeRect(20, 20, W - 40, H - 40);
+  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.5; ctx.strokeRect(32, 32, W - 64, H - 64);
+  ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 21px Nunito, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('LA TORRE DE LAS POTENCIAS Y RAÍCES — 6.º DE PRIMARIA', W / 2, 82);
+  ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 40px Fredoka, sans-serif';
+  ctx.fillText('DIPLOMA DE SABIDURÍA MATEMÁTICA', W / 2, 134);
+  ctx.fillStyle = '#cbd5e1'; ctx.font = '20px Nunito, sans-serif';
+  ctx.fillText('Otorgado a:', W / 2, 178);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 40px Fredoka, sans-serif';
+  ctx.fillText(playerState.name || 'Explorador Matemático', W / 2, 228);
+  ctx.fillStyle = '#34d399'; ctx.font = 'bold 25px Fredoka, sans-serif';
+  ctx.fillText(`Por completar el PISO ${fl.id}: ${fl.name.toUpperCase()}`, W / 2, 290);
+  ctx.fillStyle = '#e2e8f0'; ctx.font = 'italic 18px Nunito, sans-serif';
+  ctx.fillText('«Por su perseverancia y razonamiento desarrollando potencias y raíces de fracciones.»', W / 2, 332);
+  ctx.fillStyle = 'rgba(15,23,42,0.88)'; ctx.strokeStyle = '#818cf8'; ctx.lineWidth = 2;
+  ctx.fillRect(130, 362, W - 260, 88); ctx.strokeRect(130, 362, W - 260, 88);
+  ctx.fillStyle = medal === 'ORO' ? '#fbbf24' : medal === 'PLATA' ? '#e2e8f0' : '#fb923c';
+  ctx.font = 'bold 24px Fredoka, sans-serif';
+  ctx.fillText(`🏅 MEDALLA DE ${medal}`, 280, 412);
+  ctx.fillStyle = '#a7f3d0'; ctx.fillText(`🎯 Aciertos: ${acc}% (9/9 Puertas)`, 610, 412);
+  ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 38px "Dancing Script", cursive';
+  ctx.fillText('Prof. Jhon Dewis', W / 2, 518);
+  ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 14px Nunito, sans-serif';
+  ctx.fillText('DOCENTE MENTOR — LA TORRE DE LAS POTENCIAS Y RAÍCES', W / 2, 550);
+}
+function downloadTowerDiploma() {
+  const c = document.getElementById('diploma-canvas'), a = document.createElement('a');
+  a.download = `Diploma_Piso_${activeSession.floorId}.png`; a.href = c.toDataURL('image/png'); a.click();
+}
+function printTowerDiploma() {
+  const u = document.getElementById('diploma-canvas').toDataURL('image/png'), w = window.open('', '_blank');
+  if (w) { w.document.write(`<html><body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;"><img src="${u}" style="max-width:95%;max-height:95%;" onload="window.print();"/></body></html>`); w.document.close(); }
+}
+
+/* 9. FONDO AMBIENTAL DE PARTÍCULAS */
+(function() {
+  const c = document.getElementById('ambient-canvas'), ctx = c.getContext('2d');
+  let pts = [];
+  function rs() { c.width = window.innerWidth; c.height = window.innerHeight; }
+  window.addEventListener('resize', rs); rs();
+  for (let i = 0; i < 40; i++) pts.push({ x: Math.random() * c.width, y: Math.random() * c.height, r: Math.random() * 2 + 0.6, vy: -(0.15 + Math.random() * 0.3) });
+  (function anim() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.fillStyle = 'rgba(148, 163, 184, 0.35)';
+    pts.forEach(p => { p.y += p.vy; if (p.y < 0) p.y = c.height; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill(); });
+    requestAnimationFrame(anim);
+  })();
+})();
+
+loadProgress();
+if (playerState.name) showTowerMap();
+</script>
+</body>
+</html>
