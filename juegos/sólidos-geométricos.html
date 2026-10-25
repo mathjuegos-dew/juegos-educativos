@@ -1,0 +1,2378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Poliedrolandia 3D: El Desafío de Euler - Prof. Jhon Dewis</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root {
+    --bg-dark: #060916;
+    --panel-bg: rgba(13, 20, 40, 0.92);
+    --primary: #00e5ff;
+    --secondary: #818cf8;
+    --gold: #fbbf24;
+    --emerald: #10b981;
+    --rose: #f43f5e;
+    --violet: #c084fc;
+    --text-light: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: radial-gradient(circle at top, #152244 0%, #060916 100%);
+    color: var(--text-light);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .hidden { display: none !important; }
+
+  .app-container {
+    max-width: 1120px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px 12px 62px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Barra Superior HUD */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: rgba(13, 20, 40, 0.94);
+    border: 2px solid rgba(0, 229, 255, 0.35);
+    border-radius: 16px;
+    padding: 8px 14px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+  }
+
+  .brand {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.12rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hud-stats {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .stat-pill {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1.5px solid rgba(148, 163, 184, 0.3);
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.83rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .stat-pill.cyan { border-color: var(--primary); color: var(--primary); }
+  .stat-pill.gold { border-color: var(--gold); color: var(--gold); }
+  .stat-pill.violet { border-color: var(--violet); color: #e9d5ff; }
+
+  .top-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .mini-btn {
+    background: #1e293b;
+    border: 1.5px solid rgba(0, 229, 255, 0.4);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.18s;
+  }
+  .mini-btn:hover { background: rgba(0, 229, 255, 0.2); transform: translateY(-1px); }
+  .mini-btn.off { opacity: 0.5; border-color: #475569; }
+
+  /* Tarjetas principales */
+  .panel {
+    background: var(--panel-bg);
+    border: 2px solid rgba(129, 140, 248, 0.4);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.28s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .main-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(1.5rem, 3.8vw, 2.25rem);
+    text-align: center;
+    background: linear-gradient(90deg, #fbbf24, #00e5ff, #c084fc, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.94rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 13px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.98rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary { background: linear-gradient(135deg, #00e5ff, #6366f1); color: #050914; box-shadow: 0 4px 0 #3730a3; }
+  .btn-gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: #050914; box-shadow: 0 4px 0 #92400e; }
+  .btn-emerald { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 4px 0 #065f46; }
+  .btn-violet { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; box-shadow: 0 4px 0 #7e22ce; }
+  .btn-dark { background: #1e293b; color: #e2e8f0; border: 1.5px solid #475569; }
+
+  /* Mapa de 8 Niveles */
+  .levels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .level-card {
+    background: linear-gradient(160deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.96));
+    border: 2px solid rgba(99, 102, 241, 0.45);
+    border-radius: 18px;
+    padding: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .level-card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 10px 24px rgba(0, 229, 255, 0.22); }
+  .level-card.done { border-color: var(--emerald); }
+
+  .level-tag {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.74rem;
+    padding: 2px 9px;
+    border-radius: 50px;
+    background: rgba(0, 229, 255, 0.16);
+    color: var(--primary);
+    width: fit-content;
+  }
+
+  .level-card h3 { font-family: 'Fredoka', sans-serif; font-size: 1.08rem; margin: 6px 0 4px; color: #fff; }
+  .level-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.34; margin-bottom: 10px; }
+
+  /* Distribución del Juego: Visor 3D + Panel de Actividades */
+  .workspace-grid {
+    display: grid;
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: 14px;
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .workspace-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Contenedor del Visor 3D */
+  .viewer-box {
+    background: radial-gradient(circle at center, #111c38 0%, #050812 100%);
+    border: 2.5px solid var(--primary);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 28px rgba(0, 229, 255, 0.22);
+  }
+
+  #three-container {
+    width: 100%;
+    height: 350px;
+    position: relative;
+    cursor: grab;
+    touch-action: none;
+  }
+  #three-container:active { cursor: grabbing; }
+
+  .viewer-overlay-top {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .solid-name-badge {
+    background: rgba(7, 11, 25, 0.85);
+    border: 1.5px solid var(--gold);
+    color: var(--gold);
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.9rem;
+    pointer-events: auto;
+  }
+
+  .counters-bar {
+    display: flex;
+    gap: 6px;
+    pointer-events: auto;
+  }
+
+  .counter-chip {
+    background: rgba(7, 11, 25, 0.88);
+    border: 1.5px solid #475569;
+    padding: 3px 9px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+  .counter-chip.c-face { border-color: #00e5ff; color: #67e8f9; }
+  .counter-chip.c-edge { border-color: #f43f5e; color: #fda4af; }
+  .counter-chip.c-vert { border-color: #10b981; color: #6ee7b7; }
+
+  .element-toast {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.92);
+    border: 1.5px solid var(--primary);
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    pointer-events: none;
+  }
+
+  .viewer-toolbar {
+    background: rgba(11, 17, 34, 0.96);
+    border-top: 1px solid rgba(0, 229, 255, 0.3);
+    padding: 8px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .tool-group {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .tool-btn {
+    background: #1e293b;
+    border: 1.5px solid #38bdf8;
+    color: #f8fafc;
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.76rem;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .tool-btn:hover { background: rgba(56, 189, 248, 0.25); }
+  .tool-btn.active { background: var(--gold); color: #050914; border-color: #fff; font-weight: 700; }
+
+  /* Mini-corredor de exploración del templo */
+  .temple-walker-bar {
+    background: #070b18;
+    border: 1.5px solid rgba(129, 140, 248, 0.35);
+    border-radius: 14px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  #walker-canvas {
+    height: 44px;
+    flex: 1;
+    min-width: 200px;
+    border-radius: 8px;
+    background: #0b132b;
+  }
+
+  /* Tarjeta de Desafío Activo */
+  .challenge-box {
+    background: rgba(15, 23, 42, 0.96);
+    border: 2px solid rgba(129, 140, 248, 0.5);
+    border-radius: 20px;
+    padding: 16px;
+  }
+
+  .challenge-type-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, #0284c7, #6366f1);
+    padding: 3px 12px;
+    border-radius: 50px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.78rem;
+    margin-bottom: 8px;
+  }
+
+  .challenge-prompt {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    line-height: 1.42;
+    margin-bottom: 12px;
+  }
+
+  /* Portales Clasificadores (Nivel 1 y Nivel 4) */
+  .portals-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .portal-dropzone {
+    background: radial-gradient(circle, rgba(30, 41, 59, 0.95), rgba(9, 13, 28, 0.95));
+    border: 2.5px dashed var(--primary);
+    border-radius: 16px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .portal-dropzone:hover {
+    transform: scale(1.02);
+    border-style: solid;
+    box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
+  }
+  .portal-dropzone.violet-portal { border-color: var(--violet); }
+
+  /* Alternativas y Controles Interactivos */
+  .options-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .opt-btn {
+    background: rgba(30, 41, 59, 0.95);
+    border: 2px solid rgba(148, 163, 184, 0.35);
+    border-radius: 13px;
+    padding: 11px 14px;
+    color: #fff;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.98rem;
+    cursor: pointer;
+    text-align: left;
+    transition: 0.15s;
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(0, 229, 255, 0.14); }
+  .opt-btn.correct { background: rgba(16, 185, 129, 0.25) !important; border-color: var(--emerald) !important; }
+  .opt-btn.wrong { background: rgba(244, 63, 94, 0.25) !important; border-color: var(--rose) !important; }
+
+  /* Panel de Diagnóstico Pedagógico */
+  .feedback-box {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 13px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+  .feedback-box.err { background: rgba(244, 63, 94, 0.15); border: 2px solid var(--rose); color: #ffe4e6; }
+  .feedback-box.hint { background: rgba(251, 191, 36, 0.15); border: 2px solid var(--gold); color: #fef3c7; }
+  .feedback-box.ok { background: rgba(16, 185, 129, 0.16); border: 2px solid var(--emerald); color: #d1fae5; }
+
+  /* Barra de Vida del Guardián de Euler (Nivel 8) */
+  .boss-hud {
+    background: linear-gradient(90deg, rgba(69, 10, 10, 0.92), rgba(46, 16, 101, 0.92));
+    border: 2px solid var(--rose);
+    border-radius: 14px;
+    padding: 8px 14px;
+    margin-bottom: 10px;
+  }
+  .boss-hp-track {
+    width: 100%;
+    height: 14px;
+    background: #090d16;
+    border: 1.5px solid var(--rose);
+    border-radius: 50px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .boss-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f43f5e, #fbbf24);
+    width: 100%;
+    transition: width 0.35s ease;
+  }
+
+  /* Diploma Canvas */
+  #diploma-canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 14px;
+    border: 3px solid var(--gold);
+    margin: 10px auto;
+    display: block;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Modal Guía */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 7, 18, 0.86);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 14px;
+  }
+  .modal-card {
+    background: #0f172a;
+    border: 2.5px solid var(--primary);
+    border-radius: 22px;
+    max-width: 580px;
+    width: 100%;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Firma permanente en todas las pantallas */
+  footer.permanent-signature {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(6, 9, 22, 0.92);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(0, 229, 255, 0.25);
+    padding: 4px 12px;
+    text-align: center;
+    z-index: 80;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .sig-label { font-size: 0.76rem; color: #94a3b8; font-weight: 700; }
+  .sig-name {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.52rem;
+    font-weight: 700;
+    background: linear-gradient(270deg, #ffd700, #00e5ff, #2dd4bf, #c084fc, #f472b6, #ffd700);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: flowSignature 6s ease infinite;
+    filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.35));
+  }
+  @keyframes flowSignature {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- BARRA SUPERIOR -->
+  <header class="topbar">
+    <div class="brand">
+      <span>🔮</span>
+      <span>Poliedrolandia 3D: El Desafío de Euler</span>
+    </div>
+
+    <div class="hud-stats">
+      <div class="stat-pill cyan">🧑‍🚀 <span id="hud-name">Explorador</span></div>
+      <div class="stat-pill violet" title="Cristales Platónicos reunidos">💎 <span id="hud-crystals">0</span>/5</div>
+      <div class="stat-pill gold" title="Estrellas">⭐ <span id="hud-stars">0</span></div>
+      <div class="stat-pill" title="Monedas geométricas">🪙 <span id="hud-coins">0</span></div>
+    </div>
+
+    <div class="top-btns">
+      <button class="mini-btn" id="btn-music" onclick="toggleMusic()">🎵 Música: ON</button>
+      <button class="mini-btn" id="btn-sfx" onclick="toggleSfx()">🔊 Sonidos: ON</button>
+      <button class="mini-btn hidden" id="btn-guide" onclick="openLevelGuide()">📘 Teoría del Nivel</button>
+      <button class="mini-btn hidden" id="btn-map" onclick="showWorldMap()">🗺️ Mapa (8 Niveles)</button>
+    </div>
+  </header>
+
+  <!-- PANTALLA 1: INICIO Y REGISTRO DE ESTUDIANTE -->
+  <section id="screen-start" class="panel" style="max-width:540px; margin:18px auto; text-align:center;">
+    <h1 class="main-title">Poliedrolandia 3D</h1>
+    <p class="subtitle">El Desafío de Euler — Videojuego Educativo para 6.º de Primaria</p>
+
+    <p style="font-size:0.93rem; color:#cbd5e1; line-height:1.45; margin-bottom:12px;">
+      ¡Bienvenido(a) a Poliedrolandia! Los poliedros del reino han perdido sus propiedades. Explora figuras en <strong>3D real</strong>, gira sus caras, aristas y vértices, reúne los <strong>5 Cristales Platónicos</strong> y derrota al Guardián de Euler.
+    </p>
+
+    <input type="text" id="input-student" placeholder="Escribe tu Nombre y Apellido..." maxlength="32" autocomplete="off"
+      style="width:100%; padding:12px 15px; border-radius:12px; border:2px solid var(--primary); background:#050812; color:#fff; font-size:1.05rem; font-weight:800; text-align:center; margin-bottom:14px; outline:none;">
+
+    <button class="btn btn-primary" style="width:100%; font-size:1.1rem;" onclick="startGameSession()">
+      🚀 ¡Jugar y Entrar a Poliedrolandia 3D!
+    </button>
+  </section>
+
+  <!-- PANTALLA 2: MAPA DEL REINO (8 NIVELES) -->
+  <section id="screen-map" class="panel hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+      <div>
+        <h1 class="main-title" style="text-align:left; margin-bottom:2px;">Mapa de Poliedrolandia (8 Niveles)</h1>
+        <p style="color:var(--text-muted); font-size:0.86rem; font-weight:700;">
+          Cada nivel tiene un banco de 30 desafíos (9 seleccionados al azar en cada partida).
+        </p>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="mini-btn" onclick="changeStudent()">✏️ Cambiar Nombre</button>
+        <button class="mini-btn" onclick="resetAllData()">🔄 Reiniciar Progreso</button>
+      </div>
+    </div>
+    <div class="levels-grid" id="levels-grid"></div>
+  </section>
+
+  <!-- PANTALLA 3: LABORATORIO 3D Y TEMPLO INTERACTIVO -->
+  <section id="screen-play" class="panel hidden">
+    <!-- Corredor de Exploración del Personaje -->
+    <div class="temple-walker-bar">
+      <div style="display:flex; gap:5px; align-items:center;">
+        <button class="tool-btn" id="btn-walk-l">◀</button>
+        <button class="tool-btn" id="btn-walk-r">▶</button>
+        <span style="font-size:0.8rem; font-weight:800; color:var(--primary);" id="ui-level-header">Nivel 1</span>
+      </div>
+      <canvas id="walker-canvas" width="520" height="44"></canvas>
+      <div style="font-size:0.84rem; font-weight:800; color:var(--gold);">
+        Desafío <span id="ui-q-progress">1</span> / 9
+      </div>
+    </div>
+
+    <!-- Barra de Energía del Guardián de Euler (Solo Nivel 8) -->
+    <div id="boss-hud" class="boss-hud hidden">
+      <div style="display:flex; justify-content:space-between; font-family:'Fredoka',sans-serif; font-size:0.9rem;">
+        <span style="color:#fda4af;">👾 GUARDIÁN GEOMÉTRICO DE EULER</span>
+        <span id="boss-hp-label" style="color:var(--gold);">Energía: 100%</span>
+      </div>
+      <div class="boss-hp-track">
+        <div class="boss-hp-fill" id="boss-hp-fill"></div>
+      </div>
+    </div>
+
+    <!-- Área Principal Dividida: Visor 3D Izquierda + Actividad Derecha -->
+    <div class="workspace-grid">
+      <!-- VISOR 3D INTERACTIVO -->
+      <div class="viewer-box">
+        <div id="three-container">
+          <div class="viewer-overlay-top">
+            <span class="solid-name-badge" id="ui-solid-title">Cubo / Hexaedro</span>
+            <div class="counters-bar">
+              <span class="counter-chip c-face" title="Caras seleccionadas / totales">Caras (C): <b id="count-f">0/6</b></span>
+              <span class="counter-chip c-edge" title="Aristas seleccionadas / totales">Aristas (A): <b id="count-e">0/12</b></span>
+              <span class="counter-chip c-vert" title="Vértices seleccionados / totales">Vértices (V): <b id="count-v">0/8</b></span>
+            </div>
+          </div>
+          <div class="element-toast" id="ui-3d-toast">🔄 Arrastra para girar 360° • Toca caras, aristas o vértices</div>
+        </div>
+
+        <!-- Controles de Cámara, Rayos X, Plegado de Redes y Selección Accesible -->
+        <div class="viewer-toolbar">
+          <div class="tool-group">
+            <button class="tool-btn" onclick="Viewer3D.setCameraView('iso')">📐 Isométrica</button>
+            <button class="tool-btn" onclick="Viewer3D.setCameraView('front')">👁️ Frontal</button>
+            <button class="tool-btn" onclick="Viewer3D.setCameraView('top')">⬆️ Superior</button>
+            <button class="tool-btn" onclick="Viewer3D.zoom(-0.6)">➕</button>
+            <button class="tool-btn" onclick="Viewer3D.zoom(0.6)">➖</button>
+            <button class="tool-btn" id="btn-xray" onclick="Viewer3D.toggleXRay()">🦴 Aristas Ocultas</button>
+          </div>
+          <div class="tool-group">
+            <button class="tool-btn" style="border-color:#00e5ff;" onclick="Viewer3D.markNextElement('face')">+ Cara</button>
+            <button class="tool-btn" style="border-color:#f43f5e;" onclick="Viewer3D.markNextElement('edge')">+ Arista</button>
+            <button class="tool-btn" style="border-color:#10b981;" onclick="Viewer3D.markNextElement('vertex')">+ Vértice</button>
+          </div>
+        </div>
+
+        <!-- Barra de Plegado de Redes 3D (Visible en Nivel 6 o modo Red) -->
+        <div id="net-fold-bar" class="viewer-toolbar hidden" style="background:#131c38;">
+          <span style="font-size:0.8rem; font-weight:800; color:var(--gold);">📦 Plegar Red 3D:</span>
+          <input type="range" id="fold-slider" min="0" max="100" value="0" style="flex:1; accent-color:var(--gold);" oninput="Viewer3D.setFoldProgress(this.value)">
+          <button class="tool-btn active" onclick="Viewer3D.animateFoldToggle()">▶ Animar Plegado</button>
+        </div>
+      </div>
+
+      <!-- PANEL DE ACTIVIDAD Y SISTEMA PEDAGÓGICO -->
+      <div class="challenge-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+          <span class="challenge-type-badge" id="ui-challenge-badge">EXPLORACIÓN 3D</span>
+          <button class="btn btn-gold" style="padding:5px 12px; font-size:0.8rem;" onclick="showProgressiveHint()">
+            💡 Necesito una pista
+          </button>
+        </div>
+
+        <div class="challenge-prompt" id="ui-challenge-prompt"></div>
+
+        <!-- Contenedor Dinámico del Desafío -->
+        <div id="ui-challenge-controls"></div>
+
+        <!-- Retroalimentación Pedagógica -->
+        <div id="ui-feedback" class="feedback-box hidden"></div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:12px;">
+          <button class="btn btn-emerald hidden" id="btn-next-challenge" onclick="advanceChallenge()">
+            Siguiente Desafío ➔
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANTALLA 4: DIPLOMA Y CELEBRACIÓN -->
+  <section id="screen-diploma" class="panel hidden" style="text-align:center;">
+    <h1 class="main-title">🎉 ¡Nivel Completado en Poliedrolandia! 🎉</h1>
+    <p class="subtitle" id="diploma-msg">Has restaurado la armonía geométrica de este templo</p>
+
+    <canvas id="diploma-canvas" width="900" height="600"></canvas>
+
+    <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:12px;">
+      <button class="btn btn-emerald" onclick="downloadDiploma()">📥 Descargar Diploma (PNG)</button>
+      <button class="btn btn-gold" onclick="printDiploma()">🖨️ Imprimir Diploma</button>
+      <button class="btn btn-violet" onclick="replayCurrentLevel()">🔄 Repetir con Nuevos Desafíos</button>
+      <button class="btn btn-primary" onclick="showWorldMap()">🗺️ Volver al Mapa</button>
+    </div>
+  </section>
+</div>
+
+<!-- MODAL DE EXPLICACIÓN Y TEORÍA DEL NIVEL -->
+<div id="modal-guide" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <h2 id="guide-title" style="font-family:'Fredoka',sans-serif; color:var(--gold); margin-bottom:8px;"></h2>
+    <div id="guide-body" style="font-size:0.93rem; color:#e2e8f0; line-height:1.5; margin-bottom:14px;"></div>
+    <div style="text-align:center;">
+      <button class="btn btn-primary" onclick="closeLevelGuide()">✨ ¡Entendido, vamos al Visor 3D!</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIRMA PERMANENTE EN LA PARTE INFERIOR DE TODAS LAS PANTALLAS -->
+<footer class="permanent-signature">
+  <span class="sig-label">Creado por</span>
+  <span class="sig-name">Prof. Jhon Dewis</span>
+</footer>
+
+<script>
+/* =========================================================================
+   1. SISTEMA DE AUDIO SINTETIZADO (EXPLORACIÓN Y BATALLA ÉPICA)
+   ========================================================================= */
+const AudioFX = (function() {
+  let ctx = null, musicOn = true, sfxOn = true, timer = null, step = 0, mode = 'explore';
+  const exploreScale = [440, 523.25, 659.25, 783.99, 659.25, 523.25, 587.33, 493.88];
+  const bossScale = [293.66, 349.23, 440, 466.16, 440, 349.23, 329.63, 261.63];
+
+  function init() {
+    if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) ctx = new AC(); }
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+  }
+  function play(f, d, type = 'triangle', vol = 0.08, delay = 0) {
+    if (!ctx) return;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, ctx.currentTime + delay);
+    g.gain.setValueAtTime(0.001, ctx.currentTime + delay);
+    g.gain.exponentialRampToValueAtTime(vol, ctx.currentTime + delay + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + d);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(ctx.currentTime + delay); o.stop(ctx.currentTime + delay + d + 0.02);
+  }
+  function startLoop() {
+    init();
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => {
+      if (!musicOn || !ctx || document.hidden) return;
+      const scale = mode === 'boss' ? bossScale : exploreScale;
+      const f = scale[step % scale.length];
+      play(f, mode === 'boss' ? 0.22 : 0.3, mode === 'boss' ? 'sawtooth' : 'triangle', 0.022, 0);
+      step++;
+    }, mode === 'boss' ? 260 : 380);
+  }
+  return {
+    unlock: () => { init(); if (!timer) startLoop(); },
+    setMode: m => { mode = m; if (timer) startLoop(); },
+    select3D: () => { if (sfxOn) { init(); play(680, 0.08, 'sine', 0.09, 0); } },
+    ok: () => { if (sfxOn) { init(); play(523.25, 0.1, 'triangle', 0.1, 0); play(659.25, 0.1, 'triangle', 0.1, 0.08); play(783.99, 0.22, 'triangle', 0.11, 0.16); } },
+    err: () => { if (sfxOn) { init(); play(220, 0.16, 'sawtooth', 0.07, 0); play(185, 0.22, 'sawtooth', 0.07, 0.13); } },
+    crystal: () => { if (sfxOn) { init(); [587.33, 783.99, 987.77, 1174.66].forEach((f, i) => play(f, 0.2, 'sine', 0.11, i * 0.08)); } },
+    toggleMusic: () => { musicOn = !musicOn; return musicOn; },
+    toggleSfx: () => { sfxOn = !sfxOn; return sfxOn; }
+  };
+})();
+
+function toggleMusic() {
+  const on = AudioFX.toggleMusic();
+  const b = document.getElementById('btn-music');
+  b.textContent = on ? '🎵 Música: ON' : '🎵 Música: OFF';
+  b.classList.toggle('off', !on);
+}
+function toggleSfx() {
+  const on = AudioFX.toggleSfx();
+  const b = document.getElementById('btn-sfx');
+  b.textContent = on ? '🔊 Sonidos: ON' : '🔊 Sonidos: OFF';
+  b.classList.toggle('off', !on);
+}
+
+/* =========================================================================
+   2. GENERADOR MATEMÁTICO DE POLIEDROS TOPOLÓGICOS EXACTOS PARA THREE.JS
+   (Garantiza el número real de Caras C, Aristas A y Vértices V)
+   ========================================================================= */
+const PolyhedronCatalog = (function() {
+  function makePrism(n, h = 2.0, r = 1.35) {
+    const verts = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      verts.push([r * Math.cos(a), h / 2, r * Math.sin(a)]);
+    }
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      verts.push([r * Math.cos(a), -h / 2, r * Math.sin(a)]);
+    }
+    const faces = [];
+    // Base superior e inferior
+    const topF = [], botF = [];
+    for (let i = 0; i < n; i++) { topF.push(i); botF.push(2 * n - 1 - i); }
+    faces.push({ indices: topF, role: 'base' });
+    faces.push({ indices: botF, role: 'base' });
+    // Caras laterales
+    for (let i = 0; i < n; i++) {
+      const next = (i + 1) % n;
+      faces.push({ indices: [i, next, n + next, n + i], role: 'lateral' });
+    }
+    return { verts, faces, isPolyhedron: true, convex: true, C: n + 2, V: 2 * n, A: 3 * n };
+  }
+
+  function makePyramid(n, h = 2.1, r = 1.45) {
+    const verts = [[0, h / 2, 0]]; // 0 = cúspide
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      verts.push([r * Math.cos(a), -h / 2, r * Math.sin(a)]);
+    }
+    const faces = [];
+    const baseF = [];
+    for (let i = n; i >= 1; i--) baseF.push(i);
+    faces.push({ indices: baseF, role: 'base' });
+    for (let i = 1; i <= n; i++) {
+      const next = (i % n) + 1;
+      faces.push({ indices: [0, i, next], role: 'lateral' });
+    }
+    return { verts, faces, isPolyhedron: true, convex: true, C: n + 1, V: n + 1, A: 2 * n };
+  }
+
+  function makePlatonic(type) {
+    if (type === 'tetraedro') {
+      const s = 1.25;
+      const verts = [[s, s, s], [-s, -s, s], [-s, s, -s], [s, -s, -s]];
+      const faces = [
+        { indices: [0, 2, 1], role: 'regular' },
+        { indices: [0, 1, 3], role: 'regular' },
+        { indices: [0, 3, 2], role: 'regular' },
+        { indices: [1, 2, 3], role: 'regular' }
+      ];
+      return { verts, faces, isPolyhedron: true, convex: true, C: 4, V: 4, A: 6, faceShape: 'Triángulos equiláteros' };
+    }
+    if (type === 'cubo') {
+      const p = makePrism(4, 1.9, 1.35);
+      p.faceShape = 'Cuadrados';
+      return p;
+    }
+    if (type === 'octaedro') {
+      const s = 1.65;
+      const verts = [[0, s, 0], [0, -s, 0], [s, 0, 0], [-s, 0, 0], [0, 0, s], [0, 0, -s]];
+      const faces = [
+        { indices: [0, 4, 2], role: 'regular' }, { indices: [0, 2, 5], role: 'regular' },
+        { indices: [0, 5, 3], role: 'regular' }, { indices: [0, 3, 4], role: 'regular' },
+        { indices: [1, 2, 4], role: 'regular' }, { indices: [1, 5, 2], role: 'regular' },
+        { indices: [1, 3, 5], role: 'regular' }, { indices: [1, 4, 3], role: 'regular' }
+      ];
+      return { verts, faces, isPolyhedron: true, convex: true, C: 8, V: 6, A: 12, faceShape: 'Triángulos equiláteros' };
+    }
+    if (type === 'icosaedro') {
+      const t = (1 + Math.sqrt(5)) / 2;
+      const raw = [
+        [-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0],
+        [0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t],
+        [t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]
+      ].map(v => v.map(c => c * 0.85));
+      const fIdx = [
+        [0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],
+        [1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],
+        [3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],
+        [4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]
+      ];
+      return {
+        verts: raw,
+        faces: fIdx.map(indices => ({ indices, role: 'regular' })),
+        isPolyhedron: true, convex: true, C: 20, V: 12, A: 30, faceShape: 'Triángulos equiláteros'
+      };
+    }
+    if (type === 'dodecaedro') {
+      // Dual del icosaedro: los 20 centros de las caras del icosaedro son los 20 vértices del dodecaedro
+      const ico = makePlatonic('icosaedro');
+      const dVerts = ico.faces.map(f => {
+        const [a, b, c] = f.indices.map(i => ico.verts[i]);
+        return [(a[0]+b[0]+c[0])/2.2, (a[1]+b[1]+c[1])/2.2, (a[2]+b[2]+c[2])/2.2];
+      });
+      const dFaces = [];
+      for (let vIdx = 0; vIdx < 12; vIdx++) {
+        const adj = [];
+        ico.faces.forEach((f, fIdx) => { if (f.indices.includes(vIdx)) adj.push(fIdx); });
+        // Ordenar los 5 vértices del pentágono angularmente alrededor del vértice del icosaedro
+        const center = ico.verts[vIdx];
+        const nVec = new THREE.Vector3(...center).normalize();
+        const ref = Math.abs(nVec.y) < 0.9 ? new THREE.Vector3(0,1,0) : new THREE.Vector3(1,0,0);
+        const u = new THREE.Vector3().crossVectors(nVec, ref).normalize();
+        const v = new THREE.Vector3().crossVectors(nVec, u).normalize();
+        adj.sort((i1, i2) => {
+          const p1 = new THREE.Vector3(...dVerts[i1]);
+          const p2 = new THREE.Vector3(...dVerts[i2]);
+          return Math.atan2(p1.dot(v), p1.dot(u)) - Math.atan2(p2.dot(v), p2.dot(u));
+        });
+        dFaces.push({ indices: adj, role: 'regular' });
+      }
+      return { verts: dVerts, faces: dFaces, isPolyhedron: true, convex: true, C: 12, V: 20, A: 30, faceShape: 'Pentágonos regulares' };
+    }
+  }
+
+  function makeConcaveStarPrism() {
+    // Prisma estrellado cóncavo de 4 puntas (octágono no convexo de base -> 10 caras, 16 vértices, 24 aristas)
+    const n = 8, h = 1.8;
+    const verts = [];
+    for (let i = 0; i < n; i++) {
+      const r = i % 2 === 0 ? 1.55 : 0.62;
+      const a = (i / n) * Math.PI * 2;
+      verts.push([r * Math.cos(a), h / 2, r * Math.sin(a)]);
+    }
+    for (let i = 0; i < n; i++) {
+      const r = i % 2 === 0 ? 1.55 : 0.62;
+      const a = (i / n) * Math.PI * 2;
+      verts.push([r * Math.cos(a), -h / 2, r * Math.sin(a)]);
+    }
+    const faces = [];
+    faces.push({ indices: [0,1,2,3,4,5,6,7], role: 'base', concavePolygon: true });
+    faces.push({ indices: [15,14,13,12,11,10,9,8], role: 'base', concavePolygon: true });
+    for (let i = 0; i < n; i++) {
+      const next = (i + 1) % n;
+      faces.push({ indices: [i, next, n + next, n + i], role: 'lateral' });
+    }
+    return {
+      verts, faces, isPolyhedron: true, convex: false, C: 10, V: 16, A: 24,
+      laserPts: [[1.4, 0, 0], [0, 0, 1.4]] // segmento entre dos puntas que pasa por fuera de la hendidura
+    };
+  }
+
+  function getModel(key) {
+    switch (key) {
+      case 'tetraedro': return { name: 'Tetraedro Regular (4 caras)', ...makePlatonic('tetraedro') };
+      case 'cubo': return { name: 'Cubo o Hexaedro Regular (6 caras)', ...makePlatonic('cubo') };
+      case 'octaedro': return { name: 'Octaedro Regular (8 caras)', ...makePlatonic('octaedro') };
+      case 'dodecaedro': return { name: 'Dodecaedro Regular (12 caras)', ...makePlatonic('dodecaedro') };
+      case 'icosaedro': return { name: 'Icosaedro Regular (20 caras)', ...makePlatonic('icosaedro') };
+      case 'piramide_4': return { name: 'Pirámide Cuadrangular (Pentaedro - 5 caras)', ...makePyramid(4) };
+      case 'piramide_5': return { name: 'Pirámide Pentagonal (Hexaedro - 6 caras)', ...makePyramid(5) };
+      case 'piramide_6': return { name: 'Pirámide Hexagonal (Heptaedro - 7 caras)', ...makePyramid(6) };
+      case 'piramide_7': return { name: 'Pirámide Heptagonal (Octaedro - 8 caras)', ...makePyramid(7) };
+      case 'piramide_8': return { name: 'Pirámide Octagonal (Eneaedro - 9 caras)', ...makePyramid(8) };
+      case 'piramide_9': return { name: 'Pirámide Eneagonal (Decaedro - 10 caras)', ...makePyramid(9) };
+      case 'piramide_10': return { name: 'Pirámide Decagonal (Endecaedro - 11 caras)', ...makePyramid(10) };
+      case 'piramide_12': return { name: 'Pirámide Dodecagonal (Tridecaedro - 13 caras)', ...makePyramid(12) };
+      case 'prisma_3': return { name: 'Prisma Triangular (Pentaedro - 5 caras)', ...makePrism(3) };
+      case 'prisma_5': return { name: 'Prisma Pentagonal (Heptaedro - 7 caras)', ...makePrism(5) };
+      case 'prisma_6': return { name: 'Prisma Hexagonal (Octaedro - 8 caras)', ...makePrism(6) };
+      case 'prisma_7': return { name: 'Prisma Heptagonal (Eneaedro - 9 caras)', ...makePrism(7) };
+      case 'prisma_8': return { name: 'Prisma Octagonal (Decaedro - 10 caras)', ...makePrism(8) };
+      case 'prisma_9': return { name: 'Prisma Eneagonal (Endecaedro - 11 caras)', ...makePrism(9) };
+      case 'prisma_10': return { name: 'Prisma Decagonal (Dodecaedro - 12 caras)', ...makePrism(10) };
+      case 'prisma_11': return { name: 'Prisma Endecagonal (Tridecaedro - 13 caras)', ...makePrism(11) };
+      case 'prisma_12': return { name: 'Prisma Dodecagonal (Tetradecaedro - 14 caras)', ...makePrism(12) };
+      case 'prisma_13': return { name: 'Prisma Tridecagonal (Pentadecaedro - 15 caras)', ...makePrism(13) };
+      case 'concavo_estrella': return { name: 'Poliedro Cóncavo Estrellado (No Convexo)', ...makeConcaveStarPrism() };
+      case 'cilindro': return { name: 'Cilindro (Cuerpo Redondo)', isPolyhedron: false, roundType: 'cylinder' };
+      case 'cono': return { name: 'Cono (Cuerpo Redondo)', isPolyhedron: false, roundType: 'cone' };
+      case 'esfera': return { name: 'Esfera (Cuerpo Redondo)', isPolyhedron: false, roundType: 'sphere' };
+      default: return { name: 'Cubo (6 caras)', ...makePlatonic('cubo') };
+    }
+  }
+
+  return { getModel };
+})();
+
+/* =========================================================================
+   3. VISOR TRIDIMENSIONAL INTERACTIVO CON THREE.JS
+   (Raycasting de Caras, Aristas y Vértices + Redes Plegables 3D + Rayo Convexidad)
+   ========================================================================= */
+const Viewer3D = (function() {
+  let scene, camera, renderer, rootGroup, netGroup;
+  let faceMeshes = [], edgeMeshes = [], vertMeshes = [];
+  let selectedFaces = new Set(), selectedEdges = new Set(), selectedVerts = new Set();
+  let currentModelData = null;
+  let xRayMode = false;
+  let isDragging = false, prevPos = { x: 0, y: 0 }, dragMoved = false;
+  let foldPivots = [], foldAnimTimer = null, isNetMode = false;
+
+  function init() {
+    const container = document.getElementById('three-container');
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.set(3.2, 2.5, 4.2);
+    camera.lookAt(0, 0, 0);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const amb = new THREE.AmbientLight(0xffffff, 0.72);
+    scene.add(amb);
+    const dir1 = new THREE.DirectionalLight(0xffffff, 0.85);
+    dir1.position.set(5, 8, 6);
+    scene.add(dir1);
+    const dir2 = new THREE.DirectionalLight(0x38bdf8, 0.4);
+    dir2.position.set(-5, -4, -4);
+    scene.add(dir2);
+
+    rootGroup = new THREE.Group();
+    scene.add(rootGroup);
+
+    netGroup = new THREE.Group();
+    scene.add(netGroup);
+
+    // Eventos de rotación 360 y Raycasting para seleccionar caras, aristas y vértices
+    const dom = renderer.domElement;
+    dom.addEventListener('pointerdown', e => {
+      isDragging = true;
+      dragMoved = false;
+      prevPos = { x: e.clientX, y: e.clientY };
+    });
+    window.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - prevPos.x;
+      const dy = e.clientY - prevPos.y;
+      if (Math.hypot(dx, dy) > 4) dragMoved = true;
+      const targetGrp = isNetMode ? netGroup : rootGroup;
+      targetGrp.rotation.y += dx * 0.011;
+      targetGrp.rotation.x = Math.max(-1.4, Math.min(1.4, targetGrp.rotation.x + dy * 0.011));
+      prevPos = { x: e.clientX, y: e.clientY };
+    });
+    window.addEventListener('pointerup', e => {
+      if (isDragging && !dragMoved) handlePointerPick(e);
+      isDragging = false;
+    });
+
+    dom.addEventListener('wheel', e => {
+      e.preventDefault();
+      zoom(e.deltaY * 0.003);
+    }, { passive: false });
+
+    window.addEventListener('resize', () => {
+      if (!container.clientWidth) return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    (function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    })();
+  }
+
+  function clearGroups() {
+    while (rootGroup.children.length) rootGroup.remove(rootGroup.children[0]);
+    while (netGroup.children.length) netGroup.remove(netGroup.children[0]);
+    faceMeshes = []; edgeMeshes = []; vertMeshes = [];
+    selectedFaces.clear(); selectedEdges.clear(); selectedVerts.clear();
+    foldPivots = [];
+    if (foldAnimTimer) { clearInterval(foldAnimTimer); foldAnimTimer = null; }
+  }
+
+  function loadSolid(modelKey, options = {}) {
+    clearGroups();
+    isNetMode = false;
+    document.getElementById('net-fold-bar').classList.add('hidden');
+
+    const data = PolyhedronCatalog.getModel(modelKey);
+    currentModelData = data;
+    document.getElementById('ui-solid-title').textContent = data.name;
+
+    rootGroup.rotation.set(0.15, 0.45, 0);
+
+    // Si es un cuerpo redondo (Cilindro, Cono, Esfera)
+    if (!data.isPolyhedron) {
+      let geom;
+      if (data.roundType === 'cylinder') geom = new THREE.CylinderGeometry(1.1, 1.1, 2.1, 40);
+      else if (data.roundType === 'cone') geom = new THREE.ConeGeometry(1.25, 2.2, 40);
+      else geom = new THREE.SphereGeometry(1.35, 36, 36);
+
+      const mat = new THREE.MeshPhongMaterial({ color: 0xa855f7, shininess: 80, transparent: true, opacity: 0.88 });
+      const mesh = new THREE.Mesh(geom, mat);
+      rootGroup.add(mesh);
+      updateCounterHUD();
+      return;
+    }
+
+    // Construir Caras Poligonales Verdaderas
+    const v3 = data.verts.map(v => new THREE.Vector3(...v));
+    const edgeMap = new Map();
+
+    data.faces.forEach((fObj, fIndex) => {
+      const idxs = fObj.indices;
+      const geom = new THREE.BufferGeometry();
+      const positions = [];
+
+      if (fObj.concavePolygon) {
+        // Triangulación desde el centro(0, y, 0) para estrella cóncava
+        const yVal = v3[idxs[0]].y;
+        for (let i = 0; i < idxs.length; i++) {
+          const p1 = v3[idxs[i]], p2 = v3[idxs[(i + 1) % idxs.length]];
+          positions.push(0, yVal, 0, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+        }
+      } else {
+        const p0 = v3[idxs[0]];
+        for (let i = 1; i < idxs.length - 1; i++) {
+          const p1 = v3[idxs[i]], p2 = v3[idxs[i + 1]];
+          positions.push(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+        }
+      }
+
+      geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geom.computeVertexNormals();
+
+      const baseColor = fObj.role === 'base' ? 0x6366f1 : 0x0284c7;
+      const mat = new THREE.MeshPhongMaterial({
+        color: baseColor,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: xRayMode ? 0.22 : 0.82,
+        shininess: 60,
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1
+      });
+
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.userData = { type: 'face', index: fIndex, role: fObj.role, defaultColor: baseColor };
+      rootGroup.add(mesh);
+      faceMeshes.push(mesh);
+
+      // Registrar aristas únicas del polígono
+      for (let i = 0; i < idxs.length; i++) {
+        const a = idxs[i], b = idxs[(i + 1) % idxs.length];
+        const key = a < b ? `${a}_${b}` : `${b}_${a}`;
+        if (!edgeMap.has(key)) edgeMap.set(key, [a, b]);
+      }
+    });
+
+    // Construir Aristas Seleccionables (Cilindros delgados)
+    let eIdx = 0;
+    edgeMap.forEach(([iA, iB]) => {
+      const pA = v3[iA], pB = v3[iB];
+      const dir = new THREE.Vector3().subVectors(pB, pA);
+      const len = dir.length();
+      const cylGeom = new THREE.CylinderGeometry(0.045, 0.045, len, 10);
+      const cylMat = new THREE.MeshPhongMaterial({ color: 0x38bdf8, emissive: 0x072f49 });
+      const edgeMesh = new THREE.Mesh(cylGeom, cylMat);
+
+      const mid = new THREE.Vector3().addVectors(pA, pB).multiplyScalar(0.5);
+      edgeMesh.position.copy(mid);
+      edgeMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+      edgeMesh.userData = { type: 'edge', index: eIdx };
+      rootGroup.add(edgeMesh);
+      edgeMeshes.push(edgeMesh);
+      eIdx++;
+    });
+
+    // Construir Vértices Seleccionables (Esferas)
+    v3.forEach((vec, vIdx) => {
+      const spGeom = new THREE.SphereGeometry(0.11, 14, 14);
+      const spMat = new THREE.MeshPhongMaterial({ color: 0xfbbf24, emissive: 0x451a03 });
+      const spMesh = new THREE.Mesh(spGeom, spMat);
+      spMesh.position.copy(vec);
+      spMesh.userData = { type: 'vertex', index: vIdx };
+      rootGroup.add(spMesh);
+      vertMeshes.push(spMesh);
+    });
+
+    // Si solicita mostrar el rayo láser de prueba de convexidad (Nivel 4)
+    if (options.showConvexityLaser) {
+      const p1 = data.convex ? new THREE.Vector3(-0.85, 0.4, 0.5) : new THREE.Vector3(1.35, 0, 0);
+      const p2 = data.convex ? new THREE.Vector3(0.85, -0.4, -0.5) : new THREE.Vector3(0, 0, 1.35);
+      const laserColor = data.convex ? 0x10b981 : 0xf43f5e;
+
+      const lineDir = new THREE.Vector3().subVectors(p2, p1);
+      const laserGeom = new THREE.CylinderGeometry(0.06, 0.06, lineDir.length(), 12);
+      const laserMat = new THREE.MeshBasicMaterial({ color: laserColor });
+      const laserMesh = new THREE.Mesh(laserGeom, laserMat);
+      laserMesh.position.copy(new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5));
+      laserMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), lineDir.clone().normalize());
+      rootGroup.add(laserMesh);
+
+      [p1, p2].forEach(pt => {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(0.14, 14, 14), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        m.position.copy(pt);
+        rootGroup.add(m);
+      });
+    }
+
+    updateCounterHUD();
+  }
+
+  // Modo Desarrollo Plano Plegable en 3D (Nivel 6)
+  function loadFoldableNet(netType) {
+    clearGroups();
+    isNetMode = true;
+    document.getElementById('net-fold-bar').classList.remove('hidden');
+    document.getElementById('fold-slider').value = 0;
+
+    netGroup.rotation.set(0.65, 0.4, 0);
+    const matBase = new THREE.MeshPhongMaterial({ color: 0x6366f1, side: THREE.DoubleSide, transparent: true, opacity: 0.9 });
+    const matLat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, side: THREE.DoubleSide, transparent: true, opacity: 0.88 });
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff });
+
+    function makeSquareTile(mat) {
+      const g = new THREE.PlaneGeometry(1.1, 1.1);
+      g.rotateX(-Math.PI / 2);
+      const m = new THREE.Mesh(g, mat);
+      m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), edgeMat));
+      return m;
+    }
+
+    if (netType === 'net_cubo') {
+      document.getElementById('ui-solid-title').textContent = 'Red Plegable: Cubo (6 cuadrados)';
+      currentModelData = { C: 6, A: 12, V: 8, isPolyhedron: true };
+      const s = 1.1;
+      const base = makeSquareTile(matBase);
+      netGroup.add(base);
+
+      // 4 caras alrededor + 1 tapa superior
+      const dirs = [
+        { pos: [s/2, 0, 0], childOffset: [s/2, 0, 0], axis: 'z', angle: Math.PI / 2, hasTop: true },
+        { pos: [-s/2, 0, 0], childOffset: [-s/2, 0, 0], axis: 'z', angle: -Math.PI / 2 },
+        { pos: [0, 0, s/2], childOffset: [0, 0, s/2], axis: 'x', angle: -Math.PI / 2 },
+        { pos: [0, 0, -s/2], childOffset: [0, 0, -s/2], axis: 'x', angle: Math.PI / 2 }
+      ];
+
+      dirs.forEach(d => {
+        const pivot = new THREE.Group();
+        pivot.position.set(...d.pos);
+        const face = makeSquareTile(matLat);
+        face.position.set(...d.childOffset);
+        pivot.add(face);
+        base.add(pivot);
+        foldPivots.push({ pivot, axis: d.axis, maxAngle: d.angle });
+
+        if (d.hasTop) {
+          const topPivot = new THREE.Group();
+          topPivot.position.set(s, 0, 0);
+          const topFace = makeSquareTile(matBase);
+          topFace.position.set(s/2, 0, 0);
+          topPivot.add(topFace);
+          pivot.add(topPivot);
+          foldPivots.push({ pivot: topPivot, axis: 'z', maxAngle: Math.PI / 2 });
+        }
+      });
+    } else if (netType === 'net_piramide4') {
+      document.getElementById('ui-solid-title').textContent = 'Red Plegable: Pirámide Cuadrangular (1 cuadrado + 4 triángulos)';
+      currentModelData = { C: 5, A: 8, V: 5, isPolyhedron: true };
+      const s = 1.2;
+      const base = makeSquareTile(matBase);
+      netGroup.add(base);
+
+      const hTri = 1.15;
+      const sides = [
+        { p: [0,0,s/2], rotY: 0 },
+        { p: [0,0,-s/2], rotY: Math.PI },
+        { p: [s/2,0,0], rotY: Math.PI / 2 },
+        { p: [-s/2,0,0], rotY: -Math.PI / 2 }
+      ];
+      sides.forEach(sd => {
+        const wrapper = new THREE.Group();
+        wrapper.position.set(...sd.p);
+        wrapper.rotation.y = sd.rotY;
+        const pivot = new THREE.Group();
+        const triG = new THREE.BufferGeometry();
+        triG.setAttribute('position', new THREE.Float32BufferAttribute([-s/2,0,0, s/2,0,0, 0,0,hTri], 3));
+        triG.computeVertexNormals();
+        const triM = new THREE.Mesh(triG, matLat);
+        triM.add(new THREE.LineSegments(new THREE.EdgesGeometry(triG), edgeMat));
+        pivot.add(triM);
+        wrapper.add(pivot);
+        base.add(wrapper);
+        foldPivots.push({ pivot, axis: 'x', maxAngle: -2.12 });
+      });
+    } else {
+      // Red Tetraedro (4 triángulos equiláteros)
+      document.getElementById('ui-solid-title').textContent = 'Red Plegable: Tetraedro Regular (4 triángulos)';
+      currentModelData = { C: 4, A: 6, V: 4, isPolyhedron: true };
+      const r = 0.85;
+      const pts = [0, 1, 2].map(i => [r * Math.cos((i*2*Math.PI)/3), 0, r * Math.sin((i*2*Math.PI)/3)]);
+      const baseG = new THREE.BufferGeometry();
+      baseG.setAttribute('position', new THREE.Float32BufferAttribute([...pts[0], ...pts[1], ...pts[2]], 3));
+      baseG.computeVertexNormals();
+      const baseM = new THREE.Mesh(baseG, matBase);
+      netGroup.add(baseM);
+
+      for (let i = 0; i < 3; i++) {
+        const pA = new THREE.Vector3(...pts[i]);
+        const pB = new THREE.Vector3(...pts[(i + 1) % 3]);
+        const mid = new THREE.Vector3().addVectors(pA, pB).multiplyScalar(0.5);
+        const outTip = mid.clone().multiplyScalar(3.0);
+
+        const pivot = new THREE.Group();
+        pivot.position.copy(mid);
+        const triG = new THREE.BufferGeometry();
+        const localA = pA.clone().sub(mid), localB = pB.clone().sub(mid), localC = outTip.clone().sub(mid);
+        triG.setAttribute('position', new THREE.Float32BufferAttribute([localA.x,0,localA.z, localB.x,0,localB.z, localC.x,0,localC.z], 3));
+        triG.computeVertexNormals();
+        const triM = new THREE.Mesh(triG, matLat);
+        pivot.add(triM);
+        netGroup.add(pivot);
+        const axisVec = new THREE.Vector3().subVectors(pB, pA).normalize();
+        foldPivots.push({ pivot, customAxis: axisVec, maxAngle: -1.91 });
+      }
+    }
+    updateCounterHUD();
+  }
+
+  function setFoldProgress(pct) {
+    const t = pct / 100;
+    foldPivots.forEach(fp => {
+      if (fp.customAxis) {
+        fp.pivot.setRotationFromAxisAngle(fp.customAxis, fp.maxAngle * t);
+      } else {
+        fp.pivot.rotation[fp.axis] = fp.maxAngle * t;
+      }
+    });
+  }
+
+  function animateFoldToggle() {
+    const slider = document.getElementById('fold-slider');
+    let val = parseInt(slider.value, 10);
+    const dir = val < 50 ? 2 : -2;
+    if (foldAnimTimer) clearInterval(foldAnimTimer);
+    foldAnimTimer = setInterval(() => {
+      val += dir;
+      if (val >= 100 || val <= 0) {
+        val = Math.max(0, Math.min(100, val));
+        clearInterval(foldAnimTimer);
+        foldAnimTimer = null;
+      }
+      slider.value = val;
+      setFoldProgress(val);
+    }, 22);
+  }
+
+  function handlePointerPick(e) {
+    if (!currentModelData || !currentModelData.isPolyhedron || isNetMode) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    const mouse = new THREE.Vector2(
+      ((e.clientX - rect.left) / rect.width) * 2 - 1,
+      -((e.clientY - rect.top) / rect.height) * 2 + 1
+    );
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+
+    // Prioridad: Vértices -> Aristas -> Caras
+    const hitV = raycaster.intersectObjects(vertMeshes);
+    if (hitV.length > 0) {
+      toggleElementSelection('vertex', hitV[0].object);
+      return;
+    }
+    const hitE = raycaster.intersectObjects(edgeMeshes);
+    if (hitE.length > 0) {
+      toggleElementSelection('edge', hitE[0].object);
+      return;
+    }
+    const hitF = raycaster.intersectObjects(faceMeshes);
+    if (hitF.length > 0) {
+      toggleElementSelection('face', hitF[0].object);
+    }
+  }
+
+  function toggleElementSelection(type, mesh) {
+    AudioFX.select3D();
+    const idx = mesh.userData.index;
+    const toast = document.getElementById('ui-3d-toast');
+
+    if (type === 'face') {
+      if (selectedFaces.has(idx)) {
+        selectedFaces.delete(idx);
+        mesh.material.color.setHex(mesh.userData.defaultColor);
+      } else {
+        selectedFaces.add(idx);
+        mesh.material.color.setHex(0xfbbf24);
+      }
+      const roleTxt = mesh.userData.role === 'base' ? 'Cara Base' : (mesh.userData.role === 'lateral' ? 'Cara Lateral' : 'Cara Poligonal');
+      toast.textContent = `✨ Seleccionaste: ${roleTxt} (#${idx + 1}) — Total Caras marcadas: ${selectedFaces.size}`;
+    } else if (type === 'edge') {
+      if (selectedEdges.has(idx)) {
+        selectedEdges.delete(idx);
+        mesh.material.color.setHex(0x38bdf8);
+      } else {
+        selectedEdges.add(idx);
+        mesh.material.color.setHex(0xf43f5e);
+      }
+      toast.textContent = `📏 Seleccionaste: Arista (#${idx + 1}) — Segmento donde se unen 2 caras (${selectedEdges.size} marcadas)`;
+    } else if (type === 'vertex') {
+      if (selectedVerts.has(idx)) {
+        selectedVerts.delete(idx);
+        mesh.material.color.setHex(0xfbbf24);
+        mesh.scale.set(1, 1, 1);
+      } else {
+        selectedVerts.add(idx);
+        mesh.material.color.setHex(0x10b981);
+        mesh.scale.set(1.4, 1.4, 1.4);
+      }
+      toast.textContent = `🟢 Seleccionaste: Vértice (#${idx + 1}) — Punto donde concurren 3 o más aristas (${selectedVerts.size} marcados)`;
+    }
+
+    updateCounterHUD();
+    if (typeof window.on3DElementSelected === 'function') {
+      window.on3DElementSelected(type, mesh.userData.role, selectedFaces.size, selectedEdges.size, selectedVerts.size);
+    }
+  }
+
+  // Botón accesible para marcar elementos sin requerir precisión de puntero
+  function markNextElement(type) {
+    const list = type === 'face' ? faceMeshes : (type === 'edge' ? edgeMeshes : vertMeshes);
+    const set = type === 'face' ? selectedFaces : (type === 'edge' ? selectedEdges : selectedVerts);
+    for (let i = 0; i < list.length; i++) {
+      if (!set.has(list[i].userData.index)) {
+        toggleElementSelection(type, list[i]);
+        return;
+      }
+    }
+  }
+
+  function updateCounterHUD() {
+    if (!currentModelData || !currentModelData.isPolyhedron) {
+      document.getElementById('count-f').textContent = 'Superficie curva';
+      document.getElementById('count-e').textContent = '—';
+      document.getElementById('count-v').textContent = '—';
+      return;
+    }
+    document.getElementById('count-f').textContent = `${selectedFaces.size}/${currentModelData.C}`;
+    document.getElementById('count-e').textContent = `${selectedEdges.size}/${currentModelData.A}`;
+    document.getElementById('count-v').textContent = `${selectedVerts.size}/${currentModelData.V}`;
+  }
+
+  function toggleXRay() {
+    xRayMode = !xRayMode;
+    document.getElementById('btn-xray').classList.toggle('active', xRayMode);
+    faceMeshes.forEach(m => { m.material.opacity = xRayMode ? 0.18 : 0.82; });
+  }
+
+  function setCameraView(v) {
+    const g = isNetMode ? netGroup : rootGroup;
+    if (v === 'front') g.rotation.set(0, 0, 0);
+    else if (v === 'top') g.rotation.set(Math.PI / 2, 0, 0);
+    else g.rotation.set(0.35, 0.6, 0);
+  }
+
+  function zoom(delta) {
+    camera.position.multiplyScalar(delta > 0 ? 1.12 : 0.88);
+    camera.position.clampLength(2.6, 9.5);
+  }
+
+  return {
+    init, loadSolid, loadFoldableNet, setFoldProgress, animateFoldToggle,
+    markNextElement, toggleXRay, setCameraView, zoom,
+    getCounts: () => ({ f: selectedFaces.size, e: selectedEdges.size, v: selectedVerts.size })
+  };
+})();
+
+/* =========================================================================
+   4. BANCOS DE 30 DESAFÍOS POR CADA UNO DE LOS 8 NIVELES (240 EN TOTAL)
+   (70% Manipulativos en 3D y 30% Cuestionarios Razonados)
+   ========================================================================= */
+const LEVELS_META = [
+  { id: 1, title: "El Portal de los Sólidos Geométricos", icon: "🌀",
+    desc: "Diferencia poliedros (caras planas) de cuerpos redondos (superficies curvas) enviándolos a su portal.",
+    theory: "Un <b>Poliedro</b> es un sólido geométrico limitado únicamente por <b>caras planas poligonales</b> (cubos, prismas, pirámides). En cambio, los <b>Cuerpos Redondos</b> (cilindro, cono, esfera) tienen al menos una <b>superficie curva</b> y pueden rodar." },
+  { id: 2, title: "El Laboratorio de los Elementos", icon: "🔬",
+    desc: "Toca e ilumina en 3D las caras, bases, caras laterales, aristas y vértices de prismas y pirámides.",
+    theory: "• <b>Caras (C):</b> Polígonos planos que limitan el poliedro.<br>• <b>Aristas (A):</b> Segmentos donde se unen dos caras.<br>• <b>Vértices (V):</b> Puntos o esquinas donde se encuentran 3 o más aristas." },
+  { id: 3, title: "El Templo de los Cinco Poliedros", icon: "💎",
+    desc: "Explora las 5 salas de los Sólidos Platónicos (Tetraedro, Cubo, Octaedro, Dodecaedro e Icosaedro) y reúne los 5 cristales.",
+    theory: "Solo existen <b>5 Poliedros Regulares (Sólidos Platónicos)</b> cuyas caras son polígonos regulares iguales:<br>1. <b>Tetraedro:</b> 4 triángulos (C=4, V=4, A=6)<br>2. <b>Hexaedro (Cubo):</b> 6 cuadrados (C=6, V=8, A=12)<br>3. <b>Octaedro:</b> 8 triángulos (C=8, V=6, A=12)<br>4. <b>Dodecaedro:</b> 12 pentágonos (C=12, V=20, A=30)<br>5. <b>Icosaedro:</b> 20 triángulos (C=20, V=12, A=30)" },
+  { id: 4, title: "El Bosque de los Convexos y Cóncavos", icon: "🌲",
+    desc: "Observa el rayo láser entre puntos del sólido en 3D para distinguir poliedros convexos de cóncavos.",
+    theory: "Un poliedro es <b>Convexo</b> si cualquier segmento que une dos puntos de su interior queda totalmente dentro del sólido. Si tiene alguna hendidura y el segmento sale fuera del sólido, es <b>Cóncavo (No Convexo)</b>." },
+  { id: 5, title: "La Fábrica de Poliedros", icon: "🏭",
+    desc: "Construye y clasifica poliedros según su número exacto de caras: desde el tetraedro (4) hasta el icosaedro (20).",
+    theory: "Los poliedros se nombran según su cantidad de caras:<br>• 4: Tetraedro | 5: Pentaedro | 6: Hexaedro | 7: Heptaedro | 8: Octaedro | 9: Eneaedro | 10: Decaedro | 11: Endecaedro | 12: Dodecaedro | 13: Tridecaedro | 14: Tetradecaedro | 15: Pentadecaedro | 20: Icosaedro." },
+  { id: 6, title: "Constructores del Reino 3D", icon: "📦",
+    desc: "Pliega desarrollos planos (redes 3D) mediante animaciones para armar cubos, tetraedros, prismas y pirámides.",
+    theory: "Un <b>Desarrollo Plano (o Red)</b> es el conjunto de polígonos unidos por sus lados que, al plegarse en el espacio 3D, cierra perfectamente para formar las caras, aristas y vértices del poliedro." },
+  { id: 7, title: "El Laboratorio de Euler", icon: "⚖️",
+    desc: "Aplica y comprueba en 3D el Teorema de Euler: C + V = A + 2 para hallar caras, vértices o aristas desconocidas.",
+    theory: "<b>Teorema de Euler:</b> En todo poliedro convexo (y en superficies poliédricas con la topología de una esfera) se cumple:<br><b style='color:#fbbf24;font-size:1.15rem;'>C + V = A + 2</b><br>Donde <b>C</b> = Caras, <b>V</b> = Vértices y <b>A</b> = Aristas." },
+  { id: 8, title: "La Batalla del Guardián de Euler", icon: "🐉",
+    desc: "Combina todos tus conocimientos geométricos y el Teorema de Euler para derrotar al Guardián Final.",
+    theory: "¡El Guardián de Euler pondrá a prueba todo tu dominio! Usa el visor 3D, las redes y la relación C + V = A + 2 para reducir su barra de energía a cero." }
+];
+
+function buildAllLevelBanks() {
+  const banks = {};
+
+  // NIVEL 1: 30 desafíos (Portales Poliedros vs Cuerpos Redondos + Cuestionarios)
+  const l1Items = [
+    { m: 'cubo', label: 'Cubo (6 caras cuadradas planas)', isPoly: true },
+    { m: 'cilindro', label: 'Cilindro (2 bases circulares y superficie lateral curva)', isPoly: false },
+    { m: 'piramide_4', label: 'Pirámide Cuadrangular (base cuadrada y 4 triángulos)', isPoly: true },
+    { m: 'cono', label: 'Cono (1 base circular y superficie lateral curva)', isPoly: false },
+    { m: 'esfera', label: 'Esfera (superficie totalmente curva)', isPoly: false },
+    { m: 'prisma_3', label: 'Prisma Triangular (2 triángulos y 3 rectángulos planos)', isPoly: true },
+    { m: 'octaedro', label: 'Octaedro Regular (8 caras triangulares planas)', isPoly: true },
+    { m: 'dodecaedro', label: 'Dodecaedro (12 pentágonos planos)', isPoly: true },
+    { m: 'prisma_6', label: 'Prisma Hexagonal (8 caras poligonales planas)', isPoly: true },
+    { m: 'tetraedro', label: 'Tetraedro (4 caras triangulares planas)', isPoly: true },
+    { m: 'icosaedro', label: 'Icosaedro (20 caras triangulares planas)', isPoly: true },
+    { m: 'piramide_6', label: 'Pirámide Hexagonal (7 caras planas)', isPoly: true },
+    { m: 'prisma_5', label: 'Prisma Pentagonal (7 caras planas)', isPoly: true },
+    { m: 'piramide_5', label: 'Pirámide Pentagonal (6 caras planas)', isPoly: true },
+    { m: 'prisma_8', label: 'Prisma Octagonal (10 caras planas)', isPoly: true }
+  ];
+  banks[1] = [];
+  l1Items.forEach((it, idx) => {
+    banks[1].push({
+      id: `L1_P_${idx}`,
+      type: 'portal_sort',
+      model: it.m,
+      prompt: `Gira la figura 3D y envíala al portal correcto: ¿El <b>${it.label}</b> es un Poliedro o un Cuerpo Redondo?`,
+      portalA: '🔷 Portal: POLIEDROS',
+      portalB: '🟣 Portal: CUERPOS REDONDOS',
+      correctPortal: it.isPoly ? 'A' : 'B',
+      hint: `Observa en el visor 3D si todas sus caras son polígonos planos o si tiene superficies curvas que pueden rodar.`,
+      explain: it.isPoly
+        ? `¡Exacto! Todas sus caras son polígonos planos, por lo tanto es un Poliedro.`
+        : `¡Muy bien! Posee superficie curva, por lo que pertenece a los Cuerpos Redondos.`
+    });
+    banks[1].push({
+      id: `L1_Q_${idx}`,
+      type: 'quiz',
+      model: it.m,
+      prompt: `Observa en el visor 3D el sólido <b>${it.label}</b>. ¿Por qué se clasifica como ${it.isPoly ? 'Poliedro' : 'Cuerpo Redondo'}?`,
+      options: [
+        { text: it.isPoly ? 'Porque está limitado únicamente por caras planas poligonales' : 'Porque tiene al menos una superficie curva y puede rodar', ok: true },
+        { text: it.isPoly ? 'Porque tiene superficies curvas laterales' : 'Porque todas sus caras son polígonos planos', ok: false, err: 'Observa bien la superficie del sólido al girarlo 360° en el visor.' },
+        { text: 'Porque no tiene volumen en el espacio 3D', ok: false, err: 'Todo sólido geométrico ocupa un volumen en las tres dimensiones.' },
+        { text: 'Porque solo tiene dos dimensiones (largo y ancho)', ok: false, err: 'Los sólidos del visor tienen tres dimensiones: largo, ancho y alto.' }
+      ],
+      hint: `Recuerda: Poliedros = solo caras planas; Cuerpos redondos = superficies curvas.`
+    });
+  });
+
+  // NIVEL 2: 30 desafíos (Tocar Caras, Bases, Aristas y Vértices en el modelo 3D + Conteo)
+  const l2Solids = [
+    { m: 'cubo', n: 'Cubo', c: 6, a: 12, v: 8 },
+    { m: 'prisma_3', n: 'Prisma Triangular', c: 5, a: 9, v: 6 },
+    { m: 'piramide_4', n: 'Pirámide Cuadrangular', c: 5, a: 8, v: 5 },
+    { m: 'prisma_5', n: 'Prisma Pentagonal', c: 7, a: 15, v: 10 },
+    { m: 'piramide_5', n: 'Pirámide Pentagonal', c: 6, a: 10, v: 6 },
+    { m: 'prisma_6', n: 'Prisma Hexagonal', c: 8, a: 18, v: 12 },
+    { m: 'piramide_6', n: 'Pirámide Hexagonal', c: 7, a: 12, v: 7 },
+    { m: 'tetraedro', n: 'Tetraedro', c: 4, a: 6, v: 4 },
+    { m: 'octaedro', n: 'Octaedro', c: 8, a: 12, v: 6 },
+    { m: 'prisma_8', n: 'Prisma Octagonal', c: 10, a: 24, v: 16 }
+  ];
+  banks[2] = [];
+  l2Solids.forEach((s, idx) => {
+    banks[2].push({
+      id: `L2_TOUCH_F_${idx}`,
+      type: 'touch_3d',
+      model: s.m,
+      targetElement: 'face',
+      targetCount: Math.min(4, s.c),
+      prompt: `🖐️ <b>Misión Manipulativa 3D:</b> Gira el <b>${s.n}</b> y toca (o usa el botón <i>+ Cara</i>) para iluminar <b>${Math.min(4, s.c)} caras</b> diferentes del sólido.`,
+      hint: `Las caras son los polígonos planos que limitan el sólido. ¡Gíralo o activa "Aristas Ocultas" para ver las de atrás!`,
+      explain: `¡Excelente! El ${s.n} tiene en total ${s.c} caras planas.`
+    });
+    banks[2].push({
+      id: `L2_TOUCH_E_${idx}`,
+      type: 'touch_3d',
+      model: s.m,
+      targetElement: 'edge',
+      targetCount: 4,
+      prompt: `📏 <b>Misión Manipulativa 3D:</b> En el <b>${s.n}</b>, selecciona e ilumina <b>4 aristas</b> (recuerda que las aristas son los segmentos donde se unen dos caras).`,
+      hint: `Toca las barras celestes en el modelo 3D o usa el botón accesible "+ Arista".`,
+      explain: `¡Muy bien! El ${s.n} posee en total ${s.a} aristas.`
+    });
+    banks[2].push({
+      id: `L2_COUNT_${idx}`,
+      type: 'quiz',
+      model: s.m,
+      prompt: `🔍 Activa el botón <b>"🦴 Aristas Ocultas"</b> y gira el <b>${s.n}</b>. ¿Cuántos <b>vértices (V)</b> y <b>aristas (A)</b> tiene en total (contando visibles y ocultos)?`,
+      options: [
+        { text: `${s.v} vértices y ${s.a} aristas`, ok: true },
+        { text: `${s.v - 1} vértices y ${s.a - 2} aristas`, ok: false, err: 'Observa el sólido desde otro ángulo. Puede haber vértices o aristas posteriores que todavía no has contado.' },
+        { text: `${s.c} vértices y ${s.v} aristas`, ok: false, err: 'Recuerda que los vértices son las esquinas (esferas doradas) y las aristas son los segmentos entre caras.' },
+        { text: `${s.a} vértices y ${s.v} aristas`, ok: false, err: 'Invertiste la cantidad de vértices con la cantidad de aristas.' }
+      ],
+      hint: `Usa el contador superior del visor 3D o gira el modelo para contar las esquinas (${s.v}) y los segmentos (${s.a}).`
+    });
+  });
+
+  // NIVEL 3: 30 desafíos (El Templo de los Cinco Poliedros Regulares / Sólidos Platónicos)
+  const platonics = [
+    { m: 'tetraedro', n: 'Tetraedro Regular', c: 4, a: 6, v: 4, shape: 'Triángulos equiláteros' },
+    { m: 'cubo', n: 'Hexaedro Regular (Cubo)', c: 6, a: 12, v: 8, shape: 'Cuadrados' },
+    { m: 'octaedro', n: 'Octaedro Regular', c: 8, a: 12, v: 6, shape: 'Triángulos equiláteros' },
+    { m: 'dodecaedro', n: 'Dodecaedro Regular', c: 12, a: 30, v: 20, shape: 'Pentágonos regulares' },
+    { m: 'icosaedro', n: 'Icosaedro Regular', c: 20, a: 30, v: 12, shape: 'Triángulos equiláteros' }
+  ];
+  banks[3] = [];
+  platonics.forEach((p, idx) => {
+    for (let k = 0; k < 2; k++) {
+      banks[3].push({
+        id: `L3_EXP_${idx}_${k}`,
+        type: 'touch_3d',
+        model: p.m,
+        targetElement: k === 0 ? 'face' : 'vertex',
+        targetCount: 3,
+        prompt: `💎 <b>Sala del ${p.n}:</b> Explora este sólido platónico en 3D e ilumina <b>3 de sus ${k === 0 ? 'caras (' + p.shape + ')' : 'vértices'}</b> para activar su Cristal Geométrico.`,
+        hint: `El ${p.n} tiene ${p.c} caras, ${p.a} aristas y ${p.v} vértices.`,
+        explain: `¡Cristal activado! El ${p.n} está formado por ${p.c} ${p.shape.toLowerCase()}.`
+      });
+      banks[3].push({
+        id: `L3_Q1_${idx}_${k}`,
+        type: 'quiz',
+        model: p.m,
+        prompt: `En la sala del <b>${p.n}</b>: ¿Cuál es la forma exacta de sus caras y cuántos elementos (C, A, V) posee?`,
+        options: [
+          { text: `Caras: ${p.shape} | C = ${p.c}, A = ${p.a}, V = ${p.v}`, ok: true },
+          { text: `Caras: Hexágonos regulares | C = ${p.c}, A = ${p.a}, V = ${p.v}`, ok: false, err: 'Ningún sólido platónico tiene caras hexagonales; observa la forma de cada cara en el visor 3D.' },
+          { text: `Caras: ${p.shape} | C = ${p.v}, A = ${p.c}, V = ${p.a}`, ok: false, err: 'Revisa los contadores C, A y V en la esquina superior del visor 3D.' },
+          { text: `Caras: Rectángulos | C = ${p.c}, A = ${p.a + 2}, V = ${p.v}`, ok: false, err: 'Los sólidos platónicos tienen caras que son polígonos regulares todos congruentes entre sí.' }
+        ],
+        hint: `Observa el polígono de cada cara al girarlo en el visor 3D.`
+      });
+      banks[3].push({
+        id: `L3_Q2_${idx}_${k}`,
+        type: 'quiz',
+        model: p.m,
+        prompt: `Si sumas las caras y vértices del <b>${p.n}</b> (C = ${p.c}, V = ${p.v}), ¿cuánto obtienes y cómo se relaciona con sus ${p.a} aristas?`,
+        options: [
+          { text: `C + V = ${p.c + p.v}, que es exactamente A + 2 (${p.a} + 2)`, ok: true },
+          { text: `C + V = ${p.a}, igual al número de aristas`, ok: false, err: `Suma con cuidado: ${p.c} + ${p.v} = ${p.c + p.v}.` },
+          { text: `C + V = ${p.c * p.v}`, ok: false, err: 'Debes sumar las caras y los vértices, no multiplicarlos.' },
+          { text: `C + V = ${p.a - 2}`, ok: false, err: `Comprueba: ${p.c} + ${p.v} = ${p.c + p.v}, que supera en 2 a las ${p.a} aristas.` }
+        ],
+        hint: `Suma ${p.c} + ${p.v} y compáralo con ${p.a}.`
+      });
+    }
+  });
+
+  // NIVEL 4: 30 desafíos (Bosque de los Convexos y Cóncavos con Láser de Prueba 3D)
+  const l4Models = [
+    { m: 'concavo_estrella', isConvex: false, n: 'Poliedro Estrellado con Hendiduras' },
+    { m: 'dodecaedro', isConvex: true, n: 'Dodecaedro Regular' },
+    { m: 'octaedro', isConvex: true, n: 'Octaedro Regular' },
+    { m: 'prisma_6', isConvex: true, n: 'Prisma Hexagonal' },
+    { m: 'icosaedro', isConvex: true, n: 'Icosaedro Regular' },
+    { m: 'piramide_5', isConvex: true, n: 'Pirámide Pentagonal' },
+    { m: 'cubo', isConvex: true, n: 'Hexaedro Regular' },
+    { m: 'tetraedro', isConvex: true, n: 'Tetraedro Regular' },
+    { m: 'prisma_8', isConvex: true, n: 'Prisma Octagonal' },
+    { m: 'piramide_6', isConvex: true, n: 'Pirámide Hexagonal' }
+  ];
+  banks[4] = [];
+  for (let i = 0; i < 15; i++) {
+    const it = i % 2 === 0 ? l4Models[0] : l4Models[(i % (l4Models.length - 1)) + 1];
+    banks[4].push({
+      id: `L4_P_${i}`,
+      type: 'portal_sort',
+      model: it.m,
+      showConvexityLaser: true,
+      prompt: `🌲 Observa el <b>segmento láser de prueba</b> en el visor 3D para el <b>${it.n}</b>. ¿Es un Poliedro Convexo o Cóncavo (No Convexo)?`,
+      portalA: '🟢 Poliedro CONVEXO',
+      portalB: '🔴 Poliedro CÓNCAVO (No Convexo)',
+      correctPortal: it.isConvex ? 'A' : 'B',
+      hint: `Gira la figura 3D: si el segmento que une dos puntos sale por fuera de una hendidura (láser rojo), es CÓNCAVO. Si queda 100% dentro (láser verde), es CONVEXO.`,
+      explain: it.isConvex
+        ? `¡Correcto! Cualquier segmento entre dos puntos del sólido permanece completamente en su interior.`
+        : `¡Exacto! Al unir dos puntas del sólido, el segmento láser pasa por fuera de la hendidura, demostrando que es Cóncavo.`
+    });
+    banks[4].push({
+      id: `L4_Q_${i}`,
+      type: 'quiz',
+      model: it.m,
+      showConvexityLaser: true,
+      prompt: `Al analizar el <b>${it.n}</b> desde distintos ángulos en el visor 3D, ¿qué propiedad geométrica se comprueba?`,
+      options: [
+        { text: it.isConvex ? 'Todos sus ángulos diedros son menores de 180° y el segmento de prueba queda dentro' : 'Tiene ángulos entrantes (hendiduras) por donde el segmento entre dos puntos sale del sólido', ok: true },
+        { text: it.isConvex ? 'Tiene hendiduras por donde el segmento sale del sólido' : 'Cualquier segmento entre dos puntos queda 100% dentro', ok: false, err: 'Gira el modelo 3D y observa por dónde pasa el rayo entre las dos esferas blancas.' },
+        { text: 'Es un cuerpo redondo sin aristas ni vértices', ok: false, err: 'Todas sus caras son planas, por lo que sí es un poliedro.' },
+        { text: 'Solo tiene 2 caras planas', ok: false, err: 'Un poliedro cerrado en 3D necesita como mínimo 4 caras.' }
+      ],
+      hint: `Observa si la superficie presenta entrantes (cóncavo) o si ningún segmento sale al exterior (convexo).`
+    });
+  }
+
+  // NIVEL 5: 30 desafíos (La Fábrica de Poliedros por Número de Caras: 4 a 20)
+  const factoryOrders = [
+    { faces: 4,  prefix: 'Tetraedro',       m: 'tetraedro',   desc: '4 caras (Tetraedro)' },
+    { faces: 5,  prefix: 'Pentaedro',       m: 'piramide_4',  desc: '5 caras (Pirámide cuadrangular o Prisma triangular)' },
+    { faces: 6,  prefix: 'Hexaedro',        m: 'cubo',        desc: '6 caras (Cubo o Pirámide pentagonal)' },
+    { faces: 7,  prefix: 'Heptaedro',       m: 'prisma_5',    desc: '7 caras (Prisma pentagonal o Pirámide hexagonal)' },
+    { faces: 8,  prefix: 'Octaedro',        m: 'octaedro',    desc: '8 caras (Octaedro regular o Prisma hexagonal)' },
+    { faces: 9,  prefix: 'Eneaedro',        m: 'prisma_7',    desc: '9 caras (Prisma heptagonal o Pirámide octagonal)' },
+    { faces: 10, prefix: 'Decaedro',        m: 'prisma_8',    desc: '10 caras (Prisma octagonal o Pirámide eneagonal)' },
+    { faces: 11, prefix: 'Endecaedro',      m: 'prisma_9',    desc: '11 caras (Prisma eneagonal o Pirámide decagonal)' },
+    { faces: 12, prefix: 'Dodecaedro',      m: 'dodecaedro',  desc: '12 caras (Dodecaedro regular o Prisma decagonal)' },
+    { faces: 13, prefix: 'Tridecaedro',     m: 'prisma_11',   desc: '13 caras (Prisma endecagonal o Pirámide dodecagonal)' },
+    { faces: 14, prefix: 'Tetradecaedro',   m: 'prisma_12',   desc: '14 caras (Prisma dodecagonal)' },
+    { faces: 15, prefix: 'Pentadecaedro',   m: 'prisma_13',   desc: '15 caras (Prisma tridecagonal)' },
+    { faces: 20, prefix: 'Icosaedro',       m: 'icosaedro',   desc: '20 caras (Icosaedro regular)' }
+  ];
+  banks[5] = [];
+  for (let i = 0; i < 30; i++) {
+    const ord = factoryOrders[i % factoryOrders.length];
+    if (i % 2 === 0) {
+      banks[5].push({
+        id: `L5_BUILD_${i}`,
+        type: 'factory_build',
+        model: ord.m,
+        targetFaces: ord.faces,
+        targetName: ord.prefix,
+        prompt: `🏭 <b>Orden de la Fábrica:</b> «Construye en el visor 3D un <b>${ord.prefix.toUpperCase()}</b> (poliedro de exactamente <b>${ord.faces} caras</b>)». Selecciona el molde correcto para fabricarlo:`,
+        choices: [
+          { label: `${ord.prefix} (${ord.faces} caras)`, faces: ord.faces, model: ord.m },
+          { label: `${factoryOrders[(i+2)%factoryOrders.length].prefix} (${factoryOrders[(i+2)%factoryOrders.length].faces} caras)`, faces: factoryOrders[(i+2)%factoryOrders.length].faces, model: factoryOrders[(i+2)%factoryOrders.length].m },
+          { label: `${factoryOrders[(i+5)%factoryOrders.length].prefix} (${factoryOrders[(i+5)%factoryOrders.length].faces} caras)`, faces: factoryOrders[(i+5)%factoryOrders.length].faces, model: factoryOrders[(i+5)%factoryOrders.length].m }
+        ],
+        hint: `El prefijo griego de "${ord.prefix}" indica que el sólido tiene exactamente ${ord.faces} caras planas.`,
+        explain: `¡Pieza fabricada! Has construido un ${ord.prefix} real con ${ord.faces} caras en el visor 3D.`
+      });
+    } else {
+      banks[5].push({
+        id: `L5_NAME_${i}`,
+        type: 'quiz',
+        model: ord.m,
+        prompt: `Observa en el visor 3D este poliedro que tiene exactamente <b>C = ${ord.faces} caras</b>. ¿Cuál es su nombre geométrico según su número de caras?`,
+        options: [
+          { text: `${ord.prefix} (${ord.faces} caras)`, ok: true },
+          { text: `${factoryOrders[(i+1)%factoryOrders.length].prefix} (${factoryOrders[(i+1)%factoryOrders.length].faces} caras)`, ok: false, err: `Ese nombre corresponde a un poliedro de ${factoryOrders[(i+1)%factoryOrders.length].faces} caras, pero el nuestro tiene ${ord.faces}.` },
+          { text: `${factoryOrders[(i+3)%factoryOrders.length].prefix} (${factoryOrders[(i+3)%factoryOrders.length].faces} caras)`, ok: false, err: `Revisa el prefijo numérico para ${ord.faces} caras.` },
+          { text: `${factoryOrders[(i+6)%factoryOrders.length].prefix} (${factoryOrders[(i+6)%factoryOrders.length].faces} caras)`, ok: false, err: `Recuerda relacionar la cantidad C = ${ord.faces} con su prefijo griego correspondiente.` }
+        ],
+        hint: `Relaciona el número de caras (${ord.faces}) con su prefijo griego.`
+      });
+    }
+  }
+
+  // NIVEL 6: 30 desafíos (Constructores del Reino 3D - Redes Plegables y Selección de Caras)
+  const netConfigs = [
+    { net: 'net_cubo', name: 'Cubo (Hexaedro)', facesDesc: '6 cuadrados iguales', c: 6, a: 12, v: 8 },
+    { net: 'net_piramide4', name: 'Pirámide Cuadrangular', facesDesc: '1 base cuadrada y 4 triángulos laterales', c: 5, a: 8, v: 5 },
+    { net: 'net_tetraedro', name: 'Tetraedro Regular', facesDesc: '4 triángulos equiláteros', c: 4, a: 6, v: 4 }
+  ];
+  banks[6] = [];
+  for (let i = 0; i < 30; i++) {
+    const nc = netConfigs[i % netConfigs.length];
+    if (i % 2 === 0) {
+      banks[6].push({
+        id: `L6_FOLD_${i}`,
+        type: 'fold_net',
+        netModel: nc.net,
+        prompt: `📦 <b>Constructor de Redes 3D:</b> Usa el deslizador o el botón <b>"▶ Animar Plegado"</b> bajo el visor 3D para plegar el desarrollo plano del <b>${nc.name}</b> hasta cerrarlo por completo. ¿Qué caras forman su red?`,
+        options: [
+          { text: `${nc.facesDesc} (Al cerrarse forma ${nc.a} aristas y ${nc.v} vértices)`, ok: true },
+          { text: `2 círculos y 1 rectángulo curvo`, ok: false, err: 'Esa es la plantilla de un cilindro, no de un poliedro de caras planas.' },
+          { text: `8 pentágonos regulares`, ok: false, err: 'Observa la forma de los polígonos que se pliegan en el visor 3D.' },
+          { text: `Solo 3 caras planas`, ok: false, err: 'Con 3 caras planas no es posible cerrar un poliedro en 3D.' }
+        ],
+        hint: `Mueve el deslizador de plegado de 0% a 100% para ver cómo se levantan las caras y se unen en las aristas.`
+      });
+    } else {
+      const solidList = [
+        { m: 'prisma_3', n: 'Prisma Triangular', req: '2 bases triangulares y 3 caras laterales rectangulares (5 caras en total)', w1: '1 base triangular y 3 triángulos', w2: '6 cuadrados iguales' },
+        { m: 'prisma_5', n: 'Prisma Pentagonal', req: '2 bases pentagonales y 5 rectángulos laterales (7 caras en total)', w1: '1 base pentagonal y 5 triángulos', w2: '2 hexágonos y 6 rectángulos' },
+        { m: 'piramide_6', n: 'Pirámide Hexagonal', req: '1 base hexagonal y 6 triángulos laterales que se unen en la cúspide (7 caras)', w1: '2 bases hexagonales y 6 rectángulos', w2: '6 cuadrados iguales' },
+        { m: 'octaedro', n: 'Octaedro Regular', req: '8 triángulos equiláteros que al plegarse forman 12 aristas y 6 vértices', w1: '8 cuadrados iguales', w2: '6 triángulos y 2 bases cuadradas' }
+      ];
+      const sl = solidList[i % solidList.length];
+      banks[6].push({
+        id: `L6_PARTS_${i}`,
+        type: 'quiz',
+        model: sl.m,
+        prompt: `🔨 Si queremos armar en el taller el <b>${sl.n}</b> que ves en el visor 3D, ¿qué piezas poligonales necesitamos exactamente en su desarrollo plano?`,
+        options: [
+          { text: sl.req, ok: true },
+          { text: sl.w1, ok: false, err: 'Recuerda diferenciar un prisma (tiene 2 bases y caras laterales rectangulares) de una pirámide (1 base y caras laterales triangulares).' },
+          { text: sl.w2, ok: false, err: 'Cuenta las bases y caras laterales girando el modelo 3D.' },
+          { text: 'Superficies curvas sin aristas', ok: false, err: 'Todo poliedro se construye únicamente con polígonos planos.' }
+        ],
+        hint: `Gira el ${sl.n} en el visor 3D: las bases están pintadas de violeta y las caras laterales de azul.`
+      });
+    }
+  }
+
+  // NIVEL 7: 30 desafíos (El Laboratorio de Euler: C + V = A + 2)
+  const eulerProblems = [
+    { m: 'octaedro',   n: 'Octaedro Convexo',          c: 8,  v: 6,  a: 12, ask: 'V' }, // 8 caras, 12 aristas -> ¿V?
+    { m: 'cubo',       n: 'Hexaedro Convexo',          c: 6,  v: 8,  a: 12, ask: 'A' }, // 6 caras, 8 vértices -> ¿A?
+    { m: 'dodecaedro', n: 'Dodecaedro Convexo',        c: 12, v: 20, a: 30, ask: 'A' }, // 12 caras, 20 vértices -> ¿A?
+    { m: 'icosaedro',  n: 'Icosaedro Convexo',         c: 20, v: 12, a: 30, ask: 'C' },
+    { m: 'tetraedro',  n: 'Tetraedro Convexo',         c: 4,  v: 4,  a: 6,  ask: 'A' },
+    { m: 'prisma_3',   n: 'Prisma Triangular',         c: 5,  v: 6,  a: 9,  ask: 'A' },
+    { m: 'piramide_4', n: 'Pirámide Cuadrangular',     c: 5,  v: 5,  a: 8,  ask: 'V' },
+    { m: 'prisma_5',   n: 'Prisma Pentagonal',         c: 7,  v: 10, a: 15, ask: 'A' },
+    { m: 'piramide_5', n: 'Pirámide Pentagonal',       c: 6,  v: 6,  a: 10, ask: 'C' },
+    { m: 'prisma_6',   n: 'Prisma Hexagonal',          c: 8,  v: 12, a: 18, ask: 'V' },
+    { m: 'piramide_6', n: 'Pirámide Hexagonal',        c: 7,  v: 7,  a: 12, ask: 'A' },
+    { m: 'prisma_7',   n: 'Prisma Heptagonal',         c: 9,  v: 14, a: 21, ask: 'C' },
+    { m: 'piramide_7', n: 'Pirámide Heptagonal',       c: 8,  v: 8,  a: 14, ask: 'V' },
+    { m: 'prisma_8',   n: 'Prisma Octagonal',          c: 10, v: 16, a: 24, ask: 'A' },
+    { m: 'piramide_8', n: 'Pirámide Octagonal',        c: 9,  v: 9,  a: 16, ask: 'A' },
+    { m: 'prisma_9',   n: 'Prisma Eneagonal',          c: 11, v: 18, a: 27, ask: 'V' },
+    { m: 'piramide_9', n: 'Pirámide Eneagonal',        c: 10, v: 10, a: 18, ask: 'C' },
+    { m: 'prisma_10',  n: 'Prisma Decagonal',          c: 12, v: 20, a: 30, ask: 'V' },
+    { m: 'piramide_10',n: 'Pirámide Decagonal',        c: 11, v: 11, a: 20, ask: 'A' },
+    { m: 'prisma_11',  n: 'Prisma Endecagonal',        c: 13, v: 22, a: 33, ask: 'A' },
+    { m: 'prisma_12',  n: 'Prisma Dodecagonal',        c: 14, v: 24, a: 36, ask: 'C' },
+    { m: 'piramide_12',n: 'Pirámide Dodecagonal',      c: 13, v: 13, a: 24, ask: 'V' },
+    { m: 'prisma_13',  n: 'Prisma Tridecagonal',       c: 15, v: 26, a: 39, ask: 'A' },
+    { m: 'cubo',       n: 'Poliedro Convexo (6C, 12A)',c: 6,  v: 8,  a: 12, ask: 'V' },
+    { m: 'dodecaedro', n: 'Poliedro Convexo (20V, 30A)',c:12, v: 20, a: 30, ask: 'C' },
+    { m: 'icosaedro',  n: 'Poliedro Convexo (20C, 30A)',c:20, v: 12, a: 30, ask: 'V' },
+    { m: 'prisma_5',   n: 'Poliedro Convexo (7C, 15A)', c: 7, v: 10, a: 15, ask: 'V' },
+    { m: 'prisma_6',   n: 'Poliedro Convexo (8C, 12V)', c: 8, v: 12, a: 18, ask: 'A' },
+    { m: 'octaedro',   n: 'Poliedro Convexo (6V, 12A)', c: 8, v: 6,  a: 12, ask: 'C' }
+  ];
+  banks[7] = eulerProblems.map((ep, idx) => {
+    let qText = '', targetVal = 0, stepFormula = '';
+    if (ep.ask === 'V') {
+      qText = `⚖️ <b>Laboratorio de Euler:</b> Un poliedro convexo (${ep.n}) tiene <b>C = ${ep.c} caras</b> y <b>A = ${ep.a} aristas</b>. Aplicando el Teorema de Euler (<b>C + V = A + 2</b>), ¿cuántos <b>vértices (V)</b> tiene?`;
+      targetVal = ep.v;
+      stepFormula = `${ep.c} + V = ${ep.a} + 2  ➔  V = ${ep.a + 2} − ${ep.c} = ${ep.v}`;
+    } else if (ep.ask === 'A') {
+      qText = `⚖️ <b>Laboratorio de Euler:</b> Un poliedro convexo (${ep.n}) tiene <b>C = ${ep.c} caras</b> y <b>V = ${ep.v} vértices</b>. Según el Teorema de Euler (<b>C + V = A + 2</b>), ¿cuántas <b>aristas (A)</b> posee?`;
+      targetVal = ep.a;
+      stepFormula = `${ep.c} + ${ep.v} = A + 2  ➔  ${ep.c + ep.v} − 2 = A  ➔  A = ${ep.a}`;
+    } else {
+      qText = `⚖️ <b>Laboratorio de Euler:</b> Un poliedro convexo (${ep.n}) tiene <b>V = ${ep.v} vértices</b> y <b>A = ${ep.a} aristas</b>. Aplicando <b>C + V = A + 2</b>, ¿cuántas <b>caras (C)</b> tiene?`;
+      targetVal = ep.c;
+      stepFormula = `C + ${ep.v} = ${ep.a} + 2  ➔  C = ${ep.a + 2} − ${ep.v} = ${ep.c}`;
+    }
+    return {
+      id: `L7_${idx}`,
+      type: 'euler_calc',
+      model: ep.m,
+      prompt: qText,
+      targetVal,
+      stepFormula,
+      choices: [targetVal, targetVal + 2, targetVal + 4, Math.max(4, targetVal - 2)],
+      hint: `Comprueba tus resultados utilizando el teorema de Euler: C + V = A + 2. Reemplaza los datos conocidos y despeja la incógnita.`,
+      explain: `¡Exacto! ${stepFormula}. Además puedes verificarlo directamente en el visor 3D.`
+    };
+  });
+  // Pregunta conceptual sobre alcance topológico del Teorema de Euler
+  banks[7].push({
+    id: `L7_TOPO_29`,
+    type: 'quiz',
+    model: 'dodecaedro',
+    prompt: `🧐 <b>Pregunta Conceptual de Euler:</b> ¿A qué tipo de sólidos se aplica con certeza la fórmula clásica <b>C + V = A + 2</b>?`,
+    options: [
+      { text: 'A todos los poliedros convexos (y superficies poliédricas con la topología de una esfera, sin agujeros que las atraviesen)', ok: true },
+      { text: 'Únicamente al cubo y al tetraedro', ok: false, err: 'Se cumple en todos los poliedros convexos: prismas, pirámides y los 5 sólidos platónicos.' },
+      { text: 'A cualquier figura incluso si tiene túneles o agujeros que la atraviesan como una rosquilla', ok: false, err: 'Si un poliedro tiene un agujero que lo atraviesa (topología de toro), su característica de Euler cambia a C + V − A = 0.' },
+      { text: 'A los cilindros y esferas sin caras planas', ok: false, err: 'El teorema relaciona caras poligonales (C), vértices (V) y aristas (A).' }
+    ],
+    hint: `Recuerda la explicación del laboratorio: se cumple en poliedros convexos y poliedros topológicamente equivalentes a una esfera.`
+  });
+
+  // NIVEL 8: 30 desafíos combinados para la Batalla del Guardián de Euler
+  banks[8] = [
+    ...banks[1].slice(0, 3),
+    ...banks[2].slice(0, 4),
+    ...banks[3].slice(0, 5),
+    ...banks[4].slice(0, 4),
+    ...banks[5].slice(0, 5),
+    ...banks[6].slice(0, 4),
+    ...banks[7].slice(0, 5)
+  ].map((ch, idx) => ({ ...ch, id: `L8_${idx}` }));
+
+  return banks;
+}
+
+const ALL_LEVEL_BANKS = buildAllLevelBanks();
+
+/* =========================================================================
+   5. ESTADO DEL JUGADOR, CORREDOR 2D Y MOTOR DE PARTIDA
+   ========================================================================= */
+const STORAGE_KEY = 'poliedrolandia_euler_dewis_v1';
+let state = {
+  studentName: '',
+  stars: 0,
+  coins: 0,
+  crystals: 0,
+  completed: {} // { 1: { medal: 'ORO', accuracy: 95 }, ... }
+};
+
+let session = {
+  levelId: 1,
+  challenges: [],
+  qIdx: 0,
+  mistakesInCurrent: 0,
+  firstTryCount: 0,
+  hintCount: 0
+};
+
+function loadSavedState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state = { ...state, ...JSON.parse(raw) };
+  } catch (e) {}
+  updateTopHUD();
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  updateTopHUD();
+}
+
+function updateTopHUD() {
+  document.getElementById('hud-name').textContent = state.studentName || 'Explorador';
+  document.getElementById('hud-crystals').textContent = Math.min(5, state.crystals);
+  document.getElementById('hud-stars').textContent = state.stars;
+  document.getElementById('hud-coins').textContent = state.coins;
+}
+
+function shuffleArray(a) {
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startGameSession() {
+  AudioFX.unlock();
+  const inp = document.getElementById('input-student');
+  if (!inp.value.trim()) {
+    inp.style.borderColor = '#f43f5e';
+    inp.focus();
+    return;
+  }
+  state.studentName = inp.value.trim();
+  saveState();
+  showWorldMap();
+}
+
+function changeStudent() {
+  document.getElementById('screen-map').classList.add('hidden');
+  document.getElementById('screen-play').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.add('hidden');
+  document.getElementById('screen-start').classList.remove('hidden');
+  document.getElementById('input-student').value = state.studentName;
+}
+
+function resetAllData() {
+  if (confirm('¿Deseas reiniciar tus cristales, medallas y progreso?')) {
+    state.stars = 0; state.coins = 0; state.crystals = 0; state.completed = {};
+    saveState();
+    renderLevelsMap();
+  }
+}
+
+function showWorldMap() {
+  AudioFX.setMode('explore');
+  document.getElementById('screen-start').classList.add('hidden');
+  document.getElementById('screen-play').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.add('hidden');
+  document.getElementById('btn-guide').classList.add('hidden');
+  document.getElementById('btn-map').classList.add('hidden');
+  document.getElementById('screen-map').classList.remove('hidden');
+  renderLevelsMap();
+}
+
+function renderLevelsMap() {
+  const grid = document.getElementById('levels-grid');
+  grid.innerHTML = '';
+
+  LEVELS_META.forEach(lv => {
+    const rec = state.completed[lv.id];
+    const card = document.createElement('div');
+    card.className = 'level-card' + (rec ? ' done' : '');
+    const medalStr = rec ? (rec.medal === 'ORO' ? '🥇 Oro' : rec.medal === 'PLATA' ? '🥈 Plata' : '🥉 Bronce') : '🎯 9 Desafíos';
+
+    card.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="level-tag">NIVEL ${lv.id}</span>
+          <span style="font-size:1.3rem;">${lv.icon}</span>
+        </div>
+        <h3>${lv.title}</h3>
+        <p>${lv.desc}</p>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(148,163,184,0.25); padding-top:8px; font-size:0.8rem; font-weight:800;">
+        <span style="color:${rec ? 'var(--emerald)' : 'var(--primary)'};">
+          ${rec ? `✅ ${medalStr} (${rec.accuracy}%)` : '▶ Explorar Templo'}
+        </span>
+        ${rec ? `<button class="mini-btn" style="padding:2px 8px; font-size:0.72rem;" onclick="event.stopPropagation(); viewLevelDiploma(${lv.id})">🎓 Diploma</button>` : ''}
+      </div>
+    `;
+    card.onclick = () => launchLevel(lv.id);
+    grid.appendChild(card);
+  });
+}
+
+// Mini-corredor 2D con Avatar del Explorador avanzando por los 9 altares del templo
+const TempleWalker = (function() {
+  const c = document.getElementById('walker-canvas');
+  const ctx = c.getContext('2d');
+  let x = 30, targetX = 30, moveL = false, moveR = false;
+
+  function portalX(i) { return 38 + i * 55; }
+
+  function draw() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    if (moveL) { x -= 2.5; targetX = x; }
+    else if (moveR) { x += 2.5; targetX = x; }
+    else if (Math.abs(targetX - x) > 1.5) x += Math.sign(targetX - x) * 2.8;
+    x = Math.max(18, Math.min(portalX(session.qIdx), x));
+
+    // Suelo luminoso
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(10, 38); ctx.lineTo(c.width - 10, 38); ctx.stroke();
+
+    for (let i = 0; i < 9; i++) {
+      const px = portalX(i);
+      const done = i < session.qIdx, active = i === session.qIdx;
+      ctx.fillStyle = done ? '#10b981' : (active ? '#fbbf24' : '#334155');
+      ctx.beginPath(); ctx.arc(px, 24, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#050914'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(done ? '✓' : (i + 1), px, 28);
+    }
+
+    // Avatar Explorador
+    ctx.fillStyle = '#00e5ff';
+    ctx.beginPath(); ctx.arc(x, 22, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  const bL = document.getElementById('btn-walk-l'), bR = document.getElementById('btn-walk-r');
+  bL.addEventListener('pointerdown', () => moveL = true); bL.addEventListener('pointerup', () => moveL = false);
+  bR.addEventListener('pointerdown', () => moveR = true); bR.addEventListener('pointerup', () => moveR = false);
+
+  return { advanceTo: idx => { targetX = portalX(idx); } };
+})();
+
+/* =========================================================================
+   6. FLUJO DE DESAFÍOS, ACTIVIDADES 3D Y RETROALIMENTACIÓN PEDAGÓGICA
+   ========================================================================= */
+function launchLevel(levelId) {
+  AudioFX.unlock();
+  AudioFX.setMode(levelId === 8 ? 'boss' : 'explore');
+
+  const bank = ALL_LEVEL_BANKS[levelId];
+  session = {
+    levelId,
+    challenges: shuffleArray(bank).slice(0, 9),
+    qIdx: 0,
+    mistakesInCurrent: 0,
+    firstTryCount: 0,
+    hintCount: 0
+  };
+
+  const meta = LEVELS_META.find(l => l.id === levelId);
+  document.getElementById('ui-level-header').textContent = `Nivel ${meta.id}: ${meta.title}`;
+  document.getElementById('boss-hud').classList.toggle('hidden', levelId !== 8);
+  updateBossBar();
+
+  document.getElementById('screen-map').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.add('hidden');
+  document.getElementById('screen-play').classList.remove('hidden');
+  document.getElementById('btn-guide').classList.remove('hidden');
+  document.getElementById('btn-map').classList.remove('hidden');
+
+  // Asegurar redimensionado del canvas 3D al mostrarse la pantalla
+  setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+
+  loadCurrentChallenge();
+  if (levelId <= 3 || levelId === 7) openLevelGuide();
+}
+
+function replayCurrentLevel() {
+  launchLevel(session.levelId);
+}
+
+function openLevelGuide() {
+  const meta = LEVELS_META.find(l => l.id === session.levelId);
+  document.getElementById('guide-title').textContent = `${meta.icon} Nivel ${meta.id}: ${meta.title}`;
+  document.getElementById('guide-body').innerHTML = meta.theory;
+  document.getElementById('modal-guide').classList.remove('hidden');
+}
+
+function closeLevelGuide() {
+  document.getElementById('modal-guide').classList.add('hidden');
+}
+
+function updateBossBar() {
+  if (session.levelId !== 8) return;
+  const pct = Math.max(0, Math.round(((9 - session.qIdx) / 9) * 100));
+  document.getElementById('boss-hp-fill').style.width = `${pct}%`;
+  document.getElementById('boss-hp-label').textContent = `Energía: ${pct}%`;
+}
+
+function loadCurrentChallenge() {
+  session.mistakesInCurrent = 0;
+  session.hintCount = 0;
+  window.on3DElementSelected = null;
+
+  const ch = session.challenges[session.qIdx];
+  document.getElementById('ui-q-progress').textContent = session.qIdx + 1;
+  TempleWalker.advanceTo(session.qIdx);
+
+  document.getElementById('ui-feedback').classList.add('hidden');
+  document.getElementById('btn-next-challenge').classList.add('hidden');
+  document.getElementById('ui-challenge-prompt').innerHTML = ch.prompt;
+
+  // Cargar modelo en el Visor 3D
+  if (ch.type === 'fold_net') {
+    Viewer3D.loadFoldableNet(ch.netModel);
+  } else {
+    Viewer3D.loadSolid(ch.model, { showConvexityLaser: ch.showConvexityLaser });
+  }
+
+  const controls = document.getElementById('ui-challenge-controls');
+  controls.innerHTML = '';
+
+  if (ch.type === 'portal_sort') {
+    document.getElementById('ui-challenge-badge').textContent = 'CLASIFICACIÓN EN PORTALES 3D';
+    controls.innerHTML = `
+      <div class="portals-container">
+        <div class="portal-dropzone" id="portal-a" onclick="evaluatePortal('A')">
+          <div style="font-size:1.8rem; margin-bottom:4px;">🔷</div>
+          <div style="font-family:'Fredoka',sans-serif; font-size:0.95rem; color:var(--primary);">${ch.portalA}</div>
+        </div>
+        <div class="portal-dropzone violet-portal" id="portal-b" onclick="evaluatePortal('B')">
+          <div style="font-size:1.8rem; margin-bottom:4px;">🟣</div>
+          <div style="font-family:'Fredoka',sans-serif; font-size:0.95rem; color:var(--violet);">${ch.portalB}</div>
+        </div>
+      </div>
+    `;
+  } else if (ch.type === 'touch_3d') {
+    document.getElementById('ui-challenge-badge').textContent = 'EXPLORACIÓN INTERACTIVA EN EL VISOR 3D';
+    const elemName = ch.targetElement === 'face' ? 'caras' : (ch.targetElement === 'edge' ? 'aristas' : 'vértices');
+    controls.innerHTML = `
+      <div style="background:rgba(0,229,255,0.1); border:1.5px dashed var(--primary); border-radius:14px; padding:12px; text-align:center;">
+        <div style="font-size:0.92rem; margin-bottom:6px;">
+          Progreso en el modelo 3D: <b id="touch-progress-lbl" style="color:var(--gold); font-size:1.1rem;">0 / ${ch.targetCount} ${elemName}</b>
+        </div>
+        <small style="color:#94a3b8;">Puedes tocar directamente la figura 3D o usar los botones <b>+ Cara / + Arista / + Vértice</b> debajo del visor.</small>
+      </div>
+    `;
+    window.on3DElementSelected = function(type, role, fCount, eCount, vCount) {
+      const cur = ch.targetElement === 'face' ? fCount : (ch.targetElement === 'edge' ? eCount : vCount);
+      const lbl = document.getElementById('touch-progress-lbl');
+      if (lbl) lbl.textContent = `${Math.min(cur, ch.targetCount)} / ${ch.targetCount} ${elemName}`;
+
+      if (type !== ch.targetElement) {
+        const wrongMsg = ch.targetElement === 'edge'
+          ? 'Recuerda que las aristas son los segmentos donde se unen dos caras.'
+          : (ch.targetElement === 'vertex' ? 'Recuerda que los vértices son las esquinas (puntos) donde se unen 3 o más aristas.' : 'Recuerda que las caras son los polígonos planos que limitan el sólido.');
+        showFeedback('hint', `💡 Tocaste otro elemento. ${wrongMsg}`);
+        return;
+      }
+
+      if (cur >= ch.targetCount) {
+        window.on3DElementSelected = null;
+        completeChallengeSuccess(ch.explain);
+      }
+    };
+  } else if (ch.type === 'factory_build') {
+    document.getElementById('ui-challenge-badge').textContent = 'FÁBRICA DE POLIEDROS 3D';
+    const list = document.createElement('div');
+    list.className = 'options-list';
+    shuffleArray(ch.choices).forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.innerHTML = `⚙️ Construir molde: <b>${opt.label}</b>`;
+      b.onclick = () => {
+        Viewer3D.loadSolid(opt.model);
+        if (opt.faces === ch.targetFaces) {
+          b.classList.add('correct');
+          list.querySelectorAll('.opt-btn').forEach(btn => btn.disabled = true);
+          completeChallengeSuccess(ch.explain);
+        } else {
+          AudioFX.err();
+          b.classList.add('wrong');
+          b.disabled = true;
+          session.mistakesInCurrent++;
+          showFeedback('err', `🔍 Ese molde produjo un sólido de <b>${opt.faces} caras</b>, pero el pedido exige un <b>${ch.targetName} (${ch.targetFaces} caras)</b>. ¡Prueba otro molde!`);
+        }
+      };
+      list.appendChild(b);
+    });
+    controls.appendChild(list);
+  } else if (ch.type === 'euler_calc') {
+    document.getElementById('ui-challenge-badge').textContent = 'TEOREMA DE EULER: C + V = A + 2';
+    const list = document.createElement('div');
+    list.className = 'options-list';
+    shuffleArray(ch.choices).forEach(val => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.innerHTML = `🔢 Resultado = <b>${val}</b>`;
+      b.onclick = () => {
+        if (val === ch.targetVal) {
+          b.classList.add('correct');
+          list.querySelectorAll('.opt-btn').forEach(btn => btn.disabled = true);
+          completeChallengeSuccess(ch.explain);
+        } else {
+          AudioFX.err();
+          b.classList.add('wrong');
+          b.disabled = true;
+          session.mistakesInCurrent++;
+          showFeedback('err', `🔍 Comprueba tus resultados utilizando el teorema de Euler: <b>C + V = A + 2</b>. Observa los contadores del visor 3D y vuelve a intentarlo.`);
+        }
+      };
+      list.appendChild(b);
+    });
+    controls.appendChild(list);
+  } else {
+    // Quiz o Fold Net con 4 alternativas razonadas
+    document.getElementById('ui-challenge-badge').textContent = ch.type === 'fold_net' ? 'PLEGADO DE DESARROLLO PLANO 3D' : 'ANÁLISIS GEOMÉTRICO';
+    const list = document.createElement('div');
+    list.className = 'options-list';
+    shuffleArray(ch.options).forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.innerHTML = opt.text;
+      b.onclick = () => {
+        if (opt.ok) {
+          b.classList.add('correct');
+          list.querySelectorAll('.opt-btn').forEach(btn => btn.disabled = true);
+          completeChallengeSuccess('¡Excelente razonamiento geométrico!');
+        } else {
+          AudioFX.err();
+          b.classList.add('wrong');
+          b.disabled = true;
+          session.mistakesInCurrent++;
+          showFeedback('err', `🔍 <b>Atención:</b> ${opt.err || 'Observa el sólido desde otro ángulo en el visor 3D e inténtalo nuevamente.'}`);
+        }
+      };
+      list.appendChild(b);
+    });
+    controls.appendChild(list);
+  }
+}
+
+function evaluatePortal(chosen) {
+  const ch = session.challenges[session.qIdx];
+  if (chosen === ch.correctPortal) {
+    document.getElementById('portal-a').onclick = null;
+    document.getElementById('portal-b').onclick = null;
+    completeChallengeSuccess(ch.explain);
+  } else {
+    AudioFX.err();
+    session.mistakesInCurrent++;
+    showFeedback('err', `🔍 <b>Observa con cuidado:</b> ${ch.hint} ¡Envíalo al otro portal!`);
+  }
+}
+
+function completeChallengeSuccess(msg) {
+  if (session.levelId === 3) AudioFX.crystal();
+  else AudioFX.ok();
+
+  if (session.mistakesInCurrent === 0) {
+    session.firstTryCount++;
+    state.coins += 5;
+  } else {
+    state.coins += 2;
+  }
+  saveState();
+
+  showFeedback('ok', `✅ <b>¡Desafío superado!</b> ${msg}`);
+  document.getElementById('btn-next-challenge').classList.remove('hidden');
+}
+
+function showProgressiveHint() {
+  const ch = session.challenges[session.qIdx];
+  session.hintCount++;
+  const extra = session.levelId === 7 ? `<br>📐 <b>Fórmula:</b> ${ch.stepFormula || 'C + V = A + 2'}` : '';
+  showFeedback('hint', `💡 <b>Pista Pedagógica:</b> ${ch.hint}${session.hintCount > 1 ? extra : ''}`);
+}
+
+function showFeedback(type, html) {
+  const box = document.getElementById('ui-feedback');
+  box.className = `feedback-box ${type}`;
+  box.innerHTML = html;
+  box.classList.remove('hidden');
+}
+
+function advanceChallenge() {
+  session.qIdx++;
+  updateBossBar();
+  if (session.qIdx < session.challenges.length) {
+    loadCurrentChallenge();
+  } else {
+    finishLevel();
+  }
+}
+
+/* =========================================================================
+   7. DIPLOMAS PERSONALIZADOS (DESCARGA PNG E IMPRESIÓN)
+   ========================================================================= */
+function finishLevel() {
+  AudioFX.crystal();
+  const acc = Math.round((session.firstTryCount / 9) * 100);
+  const medal = acc >= 85 ? 'ORO' : acc >= 65 ? 'PLATA' : 'BRONCE';
+
+  state.stars += medal === 'ORO' ? 3 : medal === 'PLATA' ? 2 : 1;
+  state.coins += 25;
+  if (session.levelId === 3 || state.crystals < 5) {
+    state.crystals = Math.min(5, Object.keys(state.completed).length + 1);
+  }
+  state.completed[session.levelId] = { medal, accuracy: acc };
+  saveState();
+
+  openDiplomaScreen(session.levelId, acc, medal);
+}
+
+function viewLevelDiploma(lvId) {
+  const rec = state.completed[lvId];
+  if (!rec) return;
+  session.levelId = lvId;
+  openDiplomaScreen(lvId, rec.accuracy, rec.medal);
+}
+
+function openDiplomaScreen(lvId, acc, medal) {
+  document.getElementById('screen-map').classList.add('hidden');
+  document.getElementById('screen-play').classList.add('hidden');
+  document.getElementById('screen-diploma').classList.remove('hidden');
+  document.getElementById('btn-map').classList.remove('hidden');
+
+  const meta = LEVELS_META.find(l => l.id === lvId);
+  const canvas = document.getElementById('diploma-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  g.addColorStop(0, '#060916'); g.addColorStop(0.5, '#172554'); g.addColorStop(1, '#0f172a');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 8; ctx.strokeRect(20, 20, W - 40, H - 40);
+  ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 2.5; ctx.strokeRect(32, 32, W - 64, H - 64);
+
+  ctx.fillStyle = '#00e5ff'; ctx.font = 'bold 21px Nunito, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('POLIEDROLANDIA 3D: EL DESAFÍO DE EULER — 6.º DE PRIMARIA', W / 2, 82);
+
+  ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 40px Fredoka, sans-serif';
+  ctx.fillText('DIPLOMA DE MAESTRÍA GEOMÉTRICA', W / 2, 134);
+
+  ctx.fillStyle = '#cbd5e1'; ctx.font = '20px Nunito, sans-serif';
+  ctx.fillText('Se otorga con orgullo a:', W / 2, 178);
+
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 40px Fredoka, sans-serif';
+  ctx.fillText(state.studentName || 'Explorador de Poliedrolandia', W / 2, 228);
+
+  ctx.fillStyle = '#10b981'; ctx.font = 'bold 25px Fredoka, sans-serif';
+  ctx.fillText(`Por completar el NIVEL ${meta.id}: ${meta.title.toUpperCase()}`, W / 2, 290);
+
+  ctx.fillStyle = '#e2e8f0'; ctx.font = 'italic 18px Nunito, sans-serif';
+  ctx.fillText('«Por su excelente exploración tridimensional de caras, aristas, vértices y el Teorema de Euler.»', W / 2, 332);
+
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.9)'; ctx.strokeStyle = '#818cf8'; ctx.lineWidth = 2;
+  ctx.fillRect(130, 362, W - 260, 88); ctx.strokeRect(130, 362, W - 260, 88);
+
+  ctx.fillStyle = medal === 'ORO' ? '#fbbf24' : medal === 'PLATA' ? '#e2e8f0' : '#fb923c';
+  ctx.font = 'bold 24px Fredoka, sans-serif';
+  ctx.fillText(`🏅 MEDALLA DE ${medal}`, 265, 412);
+
+  ctx.fillStyle = '#a7f3d0';
+  ctx.fillText(`🎯 Aciertos: ${acc}%  |  ✅ Desafíos: 9 / 9`, 595, 412);
+
+  ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 38px "Dancing Script", cursive';
+  ctx.fillText('Prof. Jhon Dewis', W / 2, 518);
+
+  ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 14px Nunito, sans-serif';
+  ctx.fillText('CREADOR Y MENTOR DE POLIEDROLANDIA 3D', W / 2, 550);
+}
+
+function downloadDiploma() {
+  const c = document.getElementById('diploma-canvas');
+  const a = document.createElement('a');
+  a.download = `Diploma_Poliedrolandia_Nivel_${session.levelId}.png`;
+  a.href = c.toDataURL('image/png');
+  a.click();
+}
+
+function printDiploma() {
+  const url = document.getElementById('diploma-canvas').toDataURL('image/png');
+  const w = window.open('', '_blank');
+  if (w) {
+    w.document.write(`<html><body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;"><img src="${url}" style="max-width:95%;max-height:95%;" onload="window.print();"/></body></html>`);
+    w.document.close();
+  }
+}
+
+// Inicialización general
+window.addEventListener('DOMContentLoaded', () => {
+  Viewer3D.init();
+  loadSavedState();
+  if (state.studentName) showWorldMap();
+});
+</script>
+</body>
+</html>
