@@ -1,0 +1,3178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🏎️ FRACCIÓN KART: Gran Premio Matemático</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Orbitron (Arcade), Nunito (Legibilidad escolar y fracciones), Great Vibes (Firma Caligráfica Prof. Jhon Dewis) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@600;700;800;900&family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --panel-bg: rgba(15, 23, 42, 0.88);
+      --text-main: #f8fafc;
+      --accent-gold: #fbbf24;
+    }
+
+    body.day-mode {
+      --bg-primary: #e0f2fe;
+      --panel-bg: rgba(255, 255, 255, 0.93);
+      --text-main: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    .font-arcade {
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    /* Título Arcade con efecto de velocidad y brillo */
+    .arcade-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(180deg, #fffbeb 0%, #fde047 35%, #f97316 75%, #dc2626 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 0px #7c2d12) drop-shadow(0 0 18px rgba(251, 191, 36, 0.65));
+      animation: titlePulse 2.8s ease-in-out infinite;
+    }
+
+    @keyframes titlePulse {
+      0%, 100% { transform: scale(1) skewX(-4deg); }
+      50% { transform: scale(1.03) skewX(-4deg); }
+    }
+
+    /* Firma obligatoria Prof. Jhon Dewis */
+    .dewis-signature {
+      font-family: 'Great Vibes', cursive;
+      font-size: 1.65rem;
+      font-weight: 400;
+      letter-spacing: 1px;
+      background: linear-gradient(
+        90deg,
+        #ffd700 0%,
+        #38bdf8 20%,
+        #2dd4bf 40%,
+        #a855f7 60%,
+        #ec4899 80%,
+        #ffd700 100%
+      );
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: signatureFlow 7s linear infinite;
+      filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.35)) drop-shadow(0 0 12px rgba(56, 189, 248, 0.25));
+      display: inline-block;
+      padding: 0 8px;
+      line-height: 1.2;
+    }
+
+    @keyframes signatureFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 300% 50%; }
+    }
+
+    /* Representación vertical impecable de fracciones */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      margin: 0 0.28rem;
+      font-weight: 800;
+      line-height: 1.05;
+    }
+    .frac .num {
+      padding: 0 0.35rem 0.12rem;
+      text-align: center;
+    }
+    .frac .bar {
+      width: 100%;
+      min-width: 1.4rem;
+      height: 3px;
+      background-color: currentColor;
+      border-radius: 2px;
+    }
+    .frac .den {
+      padding: 0.12rem 0.35rem 0;
+      text-align: center;
+    }
+
+    /* Fracción compleja para Circuito 6 (Extremos y Medios) */
+    .complex-frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 0.4rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 23, 42, 0.12);
+    }
+    .complex-frac .main-bar {
+      width: 100%;
+      min-width: 3.4rem;
+      height: 4px;
+      background: #f59e0b;
+      margin: 0.2rem 0;
+      border-radius: 4px;
+    }
+
+    /* Tachado animado para simplificación (Circuito 2) */
+    .strike-num {
+      position: relative;
+      display: inline-block;
+      opacity: 0.65;
+    }
+    .strike-num::after {
+      content: '';
+      position: absolute;
+      left: -4px;
+      right: -4px;
+      top: 48%;
+      height: 3px;
+      background: #ef4444;
+      transform: rotate(-22deg);
+      border-radius: 2px;
+    }
+    .simplified-badge {
+      display: inline-block;
+      font-size: 0.8em;
+      color: #10b981;
+      font-weight: 900;
+      margin-left: 2px;
+      transform: translateY(-4px);
+    }
+
+    /* Animación de inversión de fracción (Circuito 4) */
+    @keyframes flipFraction {
+      0% { transform: rotateX(0deg) scale(1); }
+      50% { transform: rotateX(180deg) scale(1.2); color: #fbbf24; }
+      100% { transform: rotateX(360deg) scale(1); }
+    }
+    .flip-anim {
+      display: inline-flex;
+      animation: flipFraction 1.4s ease-in-out infinite;
+    }
+
+    /* Tarjetas Kahoot */
+    .kahoot-btn {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, filter 0.15s ease;
+    }
+    .kahoot-btn:hover:not(:disabled) {
+      transform: translateY(-3px) scale(1.015);
+      filter: brightness(1.08);
+    }
+    .kahoot-btn:active:not(:disabled) {
+      transform: translateY(1px) scale(0.985);
+    }
+    .kahoot-btn:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+      filter: grayscale(0.5);
+    }
+
+    /* Botones arcade generales */
+    .arcade-btn {
+      transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 5px 0 rgba(0,0,0,0.35);
+    }
+    .arcade-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 rgba(0,0,0,0.35);
+    }
+    .arcade-btn:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.35);
+    }
+
+    /* Paneles adaptables Día/Noche */
+    .glass-panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(255, 255, 255, 0.14);
+    }
+    body.day-mode .glass-panel {
+      border-color: rgba(14, 165, 233, 0.28);
+      box-shadow: 0 10px 30px -5px rgba(2, 132, 199, 0.15);
+    }
+
+    /* Animación flotante para banners de puntos / Superturbo */
+    @keyframes popBanner {
+      0% { opacity: 0; transform: translate(-50%, 20px) scale(0.7); }
+      20% { opacity: 1; transform: translate(-50%, 0px) scale(1.08); }
+      80% { opacity: 1; transform: translate(-50%, -6px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -25px) scale(0.9); }
+    }
+    .floating-banner {
+      animation: popBanner 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Scrollbar limpio */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.4); }
+    ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+  </style>
+</head>
+<body class="selection:bg-amber-400 selection:text-slate-900">
+
+  <!-- CANVAS DE FONDO PARA EL MENÚ PRINCIPAL -->
+  <canvas id="menuBgCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+  <!-- BARRA SUPERIOR DE NAVEGACIÓN Y CONTROLES -->
+  <header class="relative z-30 w-full px-3 py-2 glass-panel border-b border-white/10 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="GameApp.showMainMenu()">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-600 flex items-center justify-center shadow-lg text-white text-xl font-black">
+        🏎️
+      </div>
+      <div>
+        <span class="font-arcade font-black text-base sm:text-lg tracking-wider bg-gradient-to-r from-amber-300 via-orange-400 to-rose-400 bg-clip-text text-transparent">FRACCIÓN KART</span>
+        <span class="hidden md:inline-block ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">6.º PRIMARIA</span>
+      </div>
+    </div>
+
+    <!-- Controles rápidos -->
+    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+      <button id="btnMenuHome" onclick="GameApp.showMainMenu()" class="hidden px-3 py-1.5 rounded-xl bg-slate-700/80 hover:bg-slate-600 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-house"></i> <span class="hidden sm:inline">Menú</span>
+      </button>
+
+      <button id="btnDayNight" onclick="GameApp.toggleDayNight()" class="px-3 py-1.5 rounded-xl bg-indigo-600/80 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition" title="Cambiar Modo Día / Noche">
+        <i id="iconDayNight" class="fa-solid fa-moon text-amber-300"></i>
+        <span id="txtDayNight" class="hidden sm:inline">Noche</span>
+      </button>
+
+      <button id="btnMusic" onclick="AudioEngine.toggleMusic()" class="px-3 py-1.5 rounded-xl bg-emerald-600/80 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition" title="Activar / Desactivar Música">
+        <i id="iconMusic" class="fa-solid fa-music"></i>
+        <span class="hidden sm:inline">Música</span>
+      </button>
+
+      <button id="btnSfx" onclick="AudioEngine.toggleSfx()" class="px-3 py-1.5 rounded-xl bg-cyan-600/80 hover:bg-cyan-500 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition" title="Activar / Desactivar Efectos">
+        <i id="iconSfx" class="fa-solid fa-volume-high"></i>
+        <span class="hidden sm:inline">Efectos</span>
+      </button>
+
+      <button onclick="GameApp.openRecordsModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/90 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-extrabold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-trophy"></i>
+        <span class="hidden sm:inline">Récords</span>
+      </button>
+
+      <button onclick="GameApp.openDiplomasModal()" class="px-3 py-1.5 rounded-xl bg-purple-600/90 hover:bg-purple-500 text-white text-xs sm:text-sm font-extrabold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-scroll"></i>
+        <span class="hidden sm:inline">Diplomas</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="relative z-20 flex-1 w-full max-w-7xl mx-auto px-3 sm:px-5 py-3 flex flex-col justify-between">
+
+    <!-- =========================================================
+         1. PANTALLA DE INICIO Y MENÚ PRINCIPAL
+         ========================================================= -->
+    <section id="screenMenu" class="w-full flex flex-col gap-4 my-auto">
+      <!-- Encabezado principal del juego -->
+      <div class="text-center py-2">
+        <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-red-500/20 to-purple-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-extrabold mb-1 shadow">
+          <i class="fa-solid fa-flag-checkered"></i> CAMPEONATO ESCOLAR DE FRACCIONES • 240 DESAFÍOS
+        </div>
+        <h1 class="arcade-title text-3xl sm:text-5xl md:text-6xl tracking-tight leading-none py-1">
+          FRACCIÓN KART
+        </h1>
+        <p class="font-arcade text-sm sm:text-lg md:text-xl font-bold text-cyan-300 tracking-widest uppercase drop-shadow">
+          🏁 Gran Premio Matemático 🏁
+        </p>
+      </div>
+
+      <!-- Grid de configuración: Piloto, Kart, Modalidad -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+        <!-- Panel Izquierdo: Datos del Piloto + Selección de Kart + Modo -->
+        <div class="lg:col-span-5 glass-panel rounded-3xl p-4 sm:p-5 flex flex-col justify-between gap-4 shadow-2xl">
+          <!-- Nombre del Estudiante -->
+          <div>
+            <label for="inputStudentName" class="block text-xs sm:text-sm font-extrabold uppercase tracking-wider text-amber-400 mb-1.5">
+              <i class="fa-solid fa-id-card mr-1"></i> Nombre y Apellido del Piloto:
+            </label>
+            <div class="relative">
+              <input
+                id="inputStudentName"
+                type="text"
+                maxlength="42"
+                placeholder="Ej. Valentina Quispe / Mateo Rojas"
+                class="w-full px-4 py-2.5 rounded-2xl bg-slate-900/80 border-2 border-cyan-400/50 focus:border-amber-400 text-white font-bold text-base outline-none transition shadow-inner"
+                oninput="GameApp.savePlayerProfile()"
+              />
+              <span class="absolute right-3 top-2.5 text-emerald-400 text-sm">
+                <i class="fa-solid fa-circle-check"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Selección de Vehículo y Color -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-cyan-400">
+                <i class="fa-solid fa-car-side mr-1"></i> Elige tu Bólido y Color:
+              </span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold opacity-80">Pintura:</span>
+                <input id="inputKartColor" type="color" value="#ef4444" onchange="GameApp.selectCustomColor(this.value)" class="w-7 h-7 rounded-lg cursor-pointer border border-white/40 bg-transparent" title="Color personalizado" />
+              </div>
+            </div>
+
+            <div id="kartSelectorGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <!-- Se llena dinámicamente con los 4 modelos -->
+            </div>
+
+            <!-- Vista previa animada del Kart seleccionado -->
+            <div class="mt-2.5 rounded-2xl bg-slate-950/70 border border-white/10 p-2.5 flex items-center justify-between gap-3">
+              <canvas id="kartPreviewCanvas" width="160" height="72" class="w-36 h-16 rounded-xl"></canvas>
+              <div class="flex-1 text-left">
+                <div id="selectedKartTitle" class="font-arcade font-bold text-sm text-amber-300">Rayo Rojo</div>
+                <div id="selectedKartStats" class="text-xs opacity-80">Turbo equilibrado • Tracción Pro</div>
+                <div class="mt-1 w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div id="selectedKartBar" class="bg-gradient-to-r from-amber-400 to-red-500 h-full w-11/12"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Selección de Modalidad de Juego -->
+          <div>
+            <span class="block text-xs sm:text-sm font-extrabold uppercase tracking-wider text-purple-300 mb-2">
+              <i class="fa-solid fa-gamepad mr-1"></i> Modalidad de Juego:
+            </span>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button id="modeBtnGP" onclick="GameApp.setGameMode('gp')" class="p-3 rounded-2xl border-2 text-left transition flex flex-col justify-between bg-gradient-to-br from-amber-500/25 to-red-600/25 border-amber-400">
+                <div class="flex items-center justify-between">
+                  <span class="font-arcade font-black text-xs sm:text-sm text-amber-300">GRAN PREMIO</span>
+                  <i class="fa-solid fa-bolt text-amber-400"></i>
+                </div>
+                <p class="text-[11px] opacity-85 mt-1 leading-tight">Competencia Kahoot con reloj, rachas, Superturbo, rivales y podio.</p>
+              </button>
+
+              <button id="modeBtnPractice" onclick="GameApp.setGameMode('practice')" class="p-3 rounded-2xl border-2 text-left transition flex flex-col justify-between bg-slate-800/50 border-white/15 hover:border-cyan-400/50">
+                <div class="flex items-center justify-between">
+                  <span class="font-arcade font-black text-xs sm:text-sm text-cyan-300">PRÁCTICA</span>
+                  <i class="fa-solid fa-graduation-cap text-cyan-400"></i>
+                </div>
+                <p class="text-[11px] opacity-85 mt-1 leading-tight">Sin límite de tiempo, pistas paso a paso y enfoque de aprendizaje.</p>
+              </button>
+            </div>
+          </div>
+
+          <!-- Botón Grande ¡COMENZAR CARRERA! -->
+          <button onclick="GameApp.startSelectedCircuit()" class="arcade-btn w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-slate-950 font-arcade font-black text-base sm:text-lg tracking-wider uppercase flex items-center justify-center gap-3 border-2 border-emerald-200">
+            <i class="fa-solid fa-flag-checkered text-xl"></i>
+            <span>¡COMENZAR CARRERA!</span>
+          </button>
+        </div>
+
+        <!-- Panel Derecho: Selector de los 8 Circuitos -->
+        <div class="lg:col-span-7 glass-panel rounded-3xl p-4 sm:p-5 flex flex-col justify-between shadow-2xl">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <h2 class="font-arcade font-black text-base sm:text-lg text-amber-300 flex items-center gap-2">
+                <i class="fa-solid fa-route"></i> SELECCIONA UN CIRCUITO (8 PISTAS)
+              </h2>
+              <p class="text-xs opacity-80">30 ejercicios verificados por pista • 10 preguntas aleatorias por carrera</p>
+            </div>
+            <div id="MenuProgressBadge" class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-extrabold">
+              0 / 8 Circuitos Completados
+            </div>
+          </div>
+
+          <!-- Grid de los 8 circuitos -->
+          <div id="circuitsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[410px] overflow-y-auto pr-1">
+            <!-- Se genera dinámicamente -->
+          </div>
+
+          <!-- Barra inferior de acceso rápido al Diploma de Campeón -->
+          <div class="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+            <div class="text-xs opacity-85 flex items-center gap-2">
+              <i class="fa-solid fa-circle-info text-cyan-400"></i>
+              <span>Selecciona cualquier circuito y pulsa <b>¡COMENZAR CARRERA!</b> o haz clic en <b>Correr</b>.</span>
+            </div>
+            <button onclick="GameApp.openChampionDiploma()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow hover:brightness-110 transition">
+              <i class="fa-solid fa-crown"></i> Diploma Gran Campeón
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         2. PANTALLA DE CARRERA Y PREGUNTAS INTERACTIVAS
+         ========================================================= -->
+    <section id="screenRace" class="hidden w-full flex-1 flex flex-col gap-2.5 my-auto">
+
+      <!-- HUD Superior de Carrera -->
+      <div class="glass-panel rounded-2xl px-3 py-2 flex flex-wrap items-center justify-between gap-2">
+        <!-- Info del Circuito y Posición -->
+        <div class="flex items-center gap-2.5">
+          <div id="hudPositionBadge" class="px-3 py-1 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 text-slate-950 font-arcade font-black text-base sm:text-lg shadow">
+            1.º
+          </div>
+          <div>
+            <div id="hudCircuitTitle" class="font-arcade font-bold text-xs sm:text-sm text-amber-300 leading-tight">CIRCUITO 1</div>
+            <div class="flex items-center gap-2 text-xs font-bold">
+              <span id="hudQuestionCounter" class="text-cyan-300">Pregunta 1/10</span>
+              <span id="hudModeBadge" class="px-2 py-0.5 rounded bg-purple-500/30 text-purple-200 text-[10px] uppercase">Gran Premio</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de Progreso Lineal de los 4 Karts hacia la Meta -->
+        <div class="flex-1 min-w-[200px] max-w-md mx-2">
+          <div class="flex justify-between text-[10px] font-bold uppercase opacity-75 mb-0.5">
+            <span>Salida</span>
+            <span id="hudTurboStatus" class="text-amber-300 font-extrabold">⚡ Acelerando</span>
+            <span>🏁 Meta</span>
+          </div>
+          <div class="relative h-5 rounded-full bg-slate-900/90 border border-white/20 px-2 flex items-center">
+            <div class="w-full h-1 bg-white/15 rounded-full"></div>
+            <!-- Marcadores de rivales y jugador -->
+            <div id="progMarkerRival1" class="absolute top-0.5 text-xs transition-all duration-300" style="left: 5%;" title="Veloz Leo">🚙</div>
+            <div id="progMarkerRival2" class="absolute top-0.5 text-xs transition-all duration-300" style="left: 5%;" title="Turbo Sofía">🚕</div>
+            <div id="progMarkerRival3" class="absolute top-0.5 text-xs transition-all duration-300" style="left: 5%;" title="Cyber Max">🚓</div>
+            <div id="progMarkerPlayer" class="absolute -top-0.5 text-base transition-all duration-300 drop-shadow-[0_0_6px_#fbbf24]" style="left: 6%;" title="Tú">🏎️</div>
+          </div>
+        </div>
+
+        <!-- Puntos, Racha y Pausa -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="text-right">
+            <div class="text-[10px] uppercase opacity-75 font-bold">Puntuación</div>
+            <div id="hudScore" class="font-arcade font-black text-sm sm:text-base text-emerald-400">0 PTS</div>
+          </div>
+
+          <div class="px-2.5 py-1 rounded-xl bg-orange-500/20 border border-orange-400/40 text-center">
+            <div class="text-[10px] uppercase text-orange-300 font-bold">Racha</div>
+            <div id="hudStreak" class="font-arcade font-black text-xs sm:text-sm text-amber-300">🔥 0</div>
+          </div>
+
+          <button onclick="GameApp.togglePause()" class="p-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold transition" title="Pausar Carrera">
+            <i class="fa-solid fa-pause"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- VISTA DEL CIRCUITO 2.5D EN VIVO (CANVAS) -->
+      <div class="relative w-full h-40 sm:h-52 md:h-60 rounded-3xl overflow-hidden border-2 border-amber-400/40 shadow-2xl bg-slate-950">
+        <canvas id="raceCanvas" class="w-full h-full block"></canvas>
+
+        <!-- Banner flotante de eventos (¡EXCELENTE! +950 PUNTOS / ¡SUPERTURBO!) -->
+        <div id="raceFloatingBanner" class="hidden pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 text-slate-950 font-arcade font-black text-sm sm:text-lg shadow-2xl border-2 border-white text-center whitespace-nowrap">
+          ¡EXCELENTE! +950 PUNTOS
+        </div>
+
+        <!-- Indicador de velocidad y Superturbo en esquina -->
+        <div class="absolute bottom-2 left-3 px-3 py-1 rounded-xl bg-slate-950/75 border border-white/15 backdrop-blur-sm flex items-center gap-2 text-xs font-bold text-white">
+          <i class="fa-solid fa-gauge-high text-cyan-400"></i>
+          <span id="hudSpeedKmh" class="font-arcade text-amber-300">120 km/h</span>
+        </div>
+
+        <div id="superturboBadge" class="hidden absolute top-2 right-3 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 via-amber-500 to-red-500 text-slate-950 font-arcade font-black text-xs animate-bounce shadow-lg">
+          🌟 ¡SUPERTURBO MATEMÁTICO ACTIVO!
+        </div>
+      </div>
+
+      <!-- PANEL DE PREGUNTA Y CRONÓMETRO KAHOOT -->
+      <div class="glass-panel rounded-3xl p-3.5 sm:p-5 flex-1 flex flex-col justify-between gap-3 shadow-2xl relative">
+
+        <!-- Barra de Cronómetro y Estado de Intento -->
+        <div class="flex flex-col gap-1.5">
+          <div class="flex items-center justify-between gap-2 text-xs sm:text-sm font-extrabold">
+            <div class="flex items-center gap-2">
+              <span id="questionTypeBadge" class="px-2.5 py-0.5 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs">
+                Multiplicación
+              </span>
+              <span id="attemptBadge" class="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs">
+                1.er Intento (Hasta 1000 pts)
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <!-- Botón de Pista Pedagógica (Siempre activo en Práctica o disponible como ayuda) -->
+              <button id="btnShowHint" onclick="GameApp.showPedagogicalHint()" class="px-2.5 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/50 text-amber-300 text-xs font-extrabold flex items-center gap-1 transition">
+                <i class="fa-solid fa-lightbulb"></i> Pista
+              </button>
+              <div id="timerBox" class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-white/15 text-amber-300 font-arcade text-xs sm:text-sm">
+                <i class="fa-solid fa-stopwatch"></i>
+                <span id="timerText">20s</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de progreso del cronómetro -->
+          <div id="timerBarContainer" class="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden">
+            <div id="timerBarFill" class="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-200" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- Enunciado y Expresión Matemática Vertical -->
+        <div id="questionPromptArea" class="my-1 py-2.5 px-3 rounded-2xl bg-slate-900/65 border border-white/10 text-center flex flex-col items-center justify-center min-h-[96px]">
+          <p id="questionTitleText" class="text-sm sm:text-base font-extrabold text-amber-200 mb-1.5"></p>
+          <div id="questionMathVisual" class="text-xl sm:text-3xl font-black text-white flex flex-wrap items-center justify-center gap-2 py-1"></div>
+        </div>
+
+        <!-- Caja de Pista o Segunda Oportunidad -->
+        <div id="hintBannerBox" class="hidden px-4 py-2.5 rounded-2xl bg-amber-500/20 border-2 border-amber-400 text-amber-200 text-xs sm:text-sm font-bold flex items-start gap-2.5">
+          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-lg mt-0.5"></i>
+          <div id="hintBannerText" class="flex-1"></div>
+        </div>
+
+        <!-- Área dinámica para los 8 tipos de interacción -->
+        <div id="interactionArea" class="w-full my-auto">
+          <!-- Se inyecta dinámicamente según el tipo de pregunta (kahoot4, input_frac, drag_tiles, invert_select, simplify_tap, order_steps, find_error, word_problem) -->
+        </div>
+
+        <!-- PANEL DE CORRECCIÓN PEDAGÓGICA PASO A PASO (Aparece tras responder) -->
+        <div id="feedbackStepPanel" class="hidden mt-2 p-4 rounded-2xl border-2 bg-slate-950/90 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-white/10">
+            <div id="feedbackHeaderTitle" class="font-arcade font-black text-sm sm:text-base flex items-center gap-2"></div>
+            <div class="flex items-center gap-2">
+              <button id="btnRepeatPractice" onclick="GameApp.repeatCurrentQuestion()" class="hidden px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-rotate-right"></i> Repetir Ejercicio
+              </button>
+              <button id="btnNextQuestion" onclick="GameApp.nextQuestion()" class="arcade-btn px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-arcade font-black text-xs sm:text-sm flex items-center gap-2">
+                <span>CONTINUAR CARRERA</span> <i class="fa-solid fa-forward-step"></i>
+              </button>
+            </div>
+          </div>
+          <div id="feedbackStepContent" class="mt-2.5 text-xs sm:text-sm leading-relaxed space-y-1.5"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         3. PANTALLA DE PODIO, ESTADÍSTICAS Y META
+         ========================================================= -->
+    <section id="screenPodium" class="hidden w-full my-auto glass-panel rounded-3xl p-4 sm:p-6 shadow-2xl">
+      <div class="text-center mb-4">
+        <div class="inline-block px-4 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 font-arcade text-xs font-bold mb-1">
+          🏁 ¡BANDERA A CUADROS! CARRERA FINALIZADA 🏁
+        </div>
+        <h2 id="podiumCircuitTitle" class="arcade-title text-2xl sm:text-4xl">PODIO DEL CIRCUITO</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+        <!-- Podio Animado con 3 posiciones -->
+        <div class="lg:col-span-6 flex flex-col items-center justify-end bg-slate-950/60 rounded-3xl p-4 border border-white/10 min-h-[290px]">
+          <div class="grid grid-cols-3 gap-3 items-end w-full max-w-md pt-6">
+            <!-- 2.º Puesto -->
+            <div class="flex flex-col items-center">
+              <div class="text-2xl mb-1">🥈</div>
+              <div id="podiumName2" class="font-bold text-xs sm:text-sm text-center truncate w-full">Turbo Sofía</div>
+              <div id="podiumScore2" class="text-[11px] text-slate-300 font-bold mb-2">6800 pts</div>
+              <div class="w-full h-24 rounded-t-2xl bg-gradient-to-b from-slate-300 to-slate-500 flex items-center justify-center font-arcade font-black text-2xl text-slate-900 shadow-lg">
+                2.º
+              </div>
+            </div>
+            <!-- 1.er Puesto -->
+            <div class="flex flex-col items-center">
+              <div class="text-4xl mb-1 animate-bounce">🏆</div>
+              <div id="podiumName1" class="font-extrabold text-xs sm:text-base text-amber-300 text-center truncate w-full">Estudiante</div>
+              <div id="podiumScore1" class="text-xs text-amber-200 font-extrabold mb-2">8500 pts</div>
+              <div class="w-full h-36 rounded-t-2xl bg-gradient-to-b from-amber-300 via-amber-500 to-orange-600 flex items-center justify-center font-arcade font-black text-3xl text-slate-950 shadow-2xl border-2 border-yellow-200">
+                1.º
+              </div>
+            </div>
+            <!-- 3.er Puesto -->
+            <div class="flex flex-col items-center">
+              <div class="text-2xl mb-1">🥉</div>
+              <div id="podiumName3" class="font-bold text-xs sm:text-sm text-center truncate w-full">Veloz Leo</div>
+              <div id="podiumScore3" class="text-[11px] text-amber-600 font-bold mb-2">5400 pts</div>
+              <div class="w-full h-20 rounded-t-2xl bg-gradient-to-b from-amber-600 to-amber-800 flex items-center justify-center font-arcade font-black text-xl text-white shadow-lg">
+                3.º
+              </div>
+            </div>
+          </div>
+          <div id="podiumPosition4Box" class="mt-3 text-xs opacity-80 font-bold"></div>
+        </div>
+
+        <!-- Estadísticas Detalladas de la Carrera -->
+        <div class="lg:col-span-6 flex flex-col gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10">
+              <div class="text-[11px] opacity-75 uppercase font-bold">Piloto</div>
+              <div id="statStudentName" class="font-extrabold text-sm sm:text-base text-amber-300 truncate">-</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10">
+              <div class="text-[11px] opacity-75 uppercase font-bold">Bólido Usado</div>
+              <div id="statKartName" class="font-extrabold text-sm sm:text-base text-cyan-300 truncate">-</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10">
+              <div class="text-[11px] opacity-75 uppercase font-bold">Puntuación Total</div>
+              <div id="statTotalScore" class="font-arcade font-black text-base text-emerald-400">0</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10">
+              <div class="text-[11px] opacity-75 uppercase font-bold">Aciertos al 1.er Intento</div>
+              <div id="statFirstTry" class="font-extrabold text-base text-emerald-300">0 / 10</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10">
+              <div class="text-[11px] opacity-75 uppercase font-bold">Respuestas Incorrectas</div>
+              <div id="statWrongCount" class="font-extrabold text-base text-rose-400">0</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10">
+              <div class="text-[11px] opacity-75 uppercase font-bold">Tiempo / Mejor Racha</div>
+              <div id="statTimeAndStreak" class="font-extrabold text-sm text-amber-200">0s • 🔥 0</div>
+            </div>
+          </div>
+
+          <!-- Botones de Acción Post-Carrera -->
+          <div class="flex flex-wrap gap-2.5 mt-2">
+            <button onclick="GameApp.openCurrentCircuitDiploma()" class="arcade-btn flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-500 text-slate-950 font-arcade font-black text-xs sm:text-sm flex items-center justify-center gap-2">
+              <i class="fa-solid fa-certificate text-lg"></i> VER Y DESCARGAR DIPLOMA
+            </button>
+            <button onclick="GameApp.restartCurrentCircuit()" class="arcade-btn py-3 px-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-arcade font-bold text-xs sm:text-sm flex items-center justify-center gap-2">
+              <i class="fa-solid fa-rotate-right"></i> REPETIR PISTA
+            </button>
+            <button onclick="GameApp.showMainMenu()" class="arcade-btn py-3 px-4 rounded-2xl bg-slate-700 hover:bg-slate-600 text-white font-arcade font-bold text-xs sm:text-sm flex items-center justify-center gap-2">
+              <i class="fa-solid fa-house"></i> MENÚ
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================
+       MODAL DE INTRODUCCIÓN PEDAGÓGICA ANTES DE CADA CIRCUITO
+       ========================================================= -->
+  <div id="modalIntro" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-2xl w-full p-5 sm:p-6 border-2 border-amber-400/50 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-white/15">
+        <div class="flex items-center gap-2.5">
+          <span id="introCircuitIcon" class="text-2xl">🏎️</span>
+          <div>
+            <h3 id="introCircuitTitle" class="font-arcade font-black text-base sm:text-xl text-amber-300">CIRCUITO 1</h3>
+            <p id="introCircuitSub" class="text-xs text-cyan-300 font-bold">Guía Rápida de Pista</p>
+          </div>
+        </div>
+        <button onclick="GameApp.closeIntroAndStartRace()" class="text-sm font-bold text-slate-300 hover:text-white px-2.5 py-1 rounded-lg bg-white/10">
+          Saltar <i class="fa-solid fa-forward"></i>
+        </button>
+      </div>
+
+      <div id="introCircuitBody" class="my-4 text-sm sm:text-base space-y-3 leading-relaxed"></div>
+
+      <div class="flex justify-end gap-3 pt-3 border-t border-white/15">
+        <button onclick=" document.getElementById('modalIntro').classList.add('hidden') " class="px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs sm:text-sm font-bold">
+          Cancelar
+        </button>
+        <button onclick="GameApp.closeIntroAndStartRace()" class="arcade-btn px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-green-500 text-slate-950 font-arcade font-black text-xs sm:text-sm flex items-center gap-2">
+          <i class="fa-solid fa-play"></i> ¡A CORRER AHORA!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL DE PAUSA
+       ========================================================= -->
+  <div id="modalPause" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-md w-full p-6 text-center border-2 border-cyan-400/40 shadow-2xl space-y-4">
+      <div class="text-4xl">⏸️</div>
+      <h3 class="font-arcade font-black text-2xl text-amber-300">CARRERA EN PAUSA</h3>
+      <p class="text-sm opacity-85">El cronómetro está detenido. Tómate un respiro o ajusta el sonido.</p>
+      <div class="flex flex-col gap-2.5">
+        <button onclick="GameApp.togglePause()" class="arcade-btn w-full py-3 rounded-2xl bg-emerald-500 text-slate-950 font-arcade font-black text-sm">
+          <i class="fa-solid fa-play mr-1"></i> CONTINUAR CARRERA
+        </button>
+        <button onclick="GameApp.restartCurrentCircuit()" class="arcade-btn w-full py-3 rounded-2xl bg-amber-500 text-slate-950 font-arcade font-black text-sm">
+          <i class="fa-solid fa-rotate-right mr-1"></i> REINICIAR CIRCUITO
+        </button>
+        <button onclick="GameApp.quitRaceToMenu()" class="arcade-btn w-full py-3 rounded-2xl bg-rose-600 text-white font-arcade font-black text-sm">
+          <i class="fa-solid fa-house mr-1"></i> SALIR AL MENÚ PRINCIPAL
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL DE RÉCORDS LOCALES (LOCALSTORAGE)
+       ========================================================= -->
+  <div id="modalRecords" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-2xl w-full p-5 sm:p-6 border-2 border-amber-400/50 shadow-2xl flex flex-col max-h-[88vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-white/15">
+        <h3 class="font-arcade font-black text-lg sm:text-xl text-amber-300 flex items-center gap-2">
+          <i class="fa-solid fa-trophy"></i> CLASIFICACIÓN LOCAL DE RÉCORDS
+        </h3>
+        <button onclick="document.getElementById('modalRecords').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="recordsTableContainer" class="my-3 overflow-y-auto flex-1 pr-1"></div>
+
+      <div class="pt-3 border-t border-white/15 flex items-center justify-between text-xs opacity-75">
+        <span>Guardado automáticamente en este navegador (localStorage).</span>
+        <button onclick="GameApp.clearRecords()" class="px-3 py-1.5 rounded-lg bg-rose-600/30 hover:bg-rose-600/50 text-rose-200 font-bold">
+          Reiniciar Historial
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL DE DIPLOMAS PERSONALIZADOS (DESCARGA PNG E IMPRESIÓN)
+       ========================================================= -->
+  <div id="modalDiploma" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-panel rounded-3xl max-w-4xl w-full p-4 sm:p-6 border-2 border-amber-400 shadow-2xl flex flex-col max-h-[94vh] overflow-y-auto">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/15">
+        <div>
+          <h3 class="font-arcade font-black text-base sm:text-xl text-amber-300 flex items-center gap-2">
+            <i class="fa-solid fa-award"></i> DIPLOMA OFICIAL PERSONALIZADO
+          </h3>
+          <p class="text-xs opacity-80">Selecciona cualquier circuito o el Diploma Especial de Campeón para descargar o imprimir.</p>
+        </div>
+        <button onclick="document.getElementById('modalDiploma').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Selector rápido de diploma -->
+      <div id="diplomaSelectorBar" class="flex flex-wrap gap-1.5 my-3"></div>
+
+      <!-- Canvas del Diploma de Alta Resolución -->
+      <div class="w-full bg-slate-950/70 p-2 sm:p-3 rounded-2xl border border-amber-400/30 flex justify-center">
+        <canvas id="diplomaCanvas" width="1100" height="760" class="w-full max-w-[820px] h-auto rounded-xl shadow-2xl bg-white"></canvas>
+      </div>
+
+      <!-- Botones Descargar PNG e Imprimir -->
+      <div class="mt-4 flex flex-wrap justify-end gap-3">
+        <button onclick="DiplomaGenerator.downloadPNG()" class="arcade-btn px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 font-arcade font-black text-xs sm:text-sm flex items-center gap-2">
+          <i class="fa-solid fa-download"></i> DESCARGAR DIPLOMA (PNG)
+        </button>
+        <button onclick="DiplomaGenerator.printDiploma()" class="arcade-btn px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-arcade font-black text-xs sm:text-sm flex items-center gap-2">
+          <i class="fa-solid fa-print"></i> IMPRIMIR DIPLOMA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       PIE DE PÁGINA OBLIGATORIO EN TODAS LAS PANTALLAS
+       FIRMA CALIGRÁFICA ANIMADA: Prof. Jhon Dewis
+       ========================================================= -->
+  <footer class="relative z-30 w-full py-1.5 px-4 glass-panel border-t border-white/10 flex items-center justify-center gap-3 pointer-events-none">
+    <span class="text-[11px] uppercase tracking-widest opacity-70 font-bold hidden sm:inline">Creado por</span>
+    <span class="dewis-signature">Prof. Jhon Dewis</span>
+  </footer>
+
+  <!-- =========================================================
+       CÓDIGO JAVASCRIPT INTEGRADO (MOTOR DE AUDIO, 240 EJERCICIOS,
+       CARRERAS 2.5D, KAHOOT SCORING Y GENERADOR DE DIPLOMAS)
+       ========================================================= -->
+  <script>
+    /******************************************************************
+     * 1. UTILIDADES MATEMÁTICAS Y FORMATEADOR DE FRACCIONES VERTICALES
+     ******************************************************************/
+    const MathUtils = {
+      gcd(a, b) {
+        a = Math.abs(Math.round(a));
+        b = Math.abs(Math.round(b));
+        while (b !== 0) {
+          const t = b;
+          b = a % b;
+          a = t;
+        }
+        return a || 1;
+      },
+      simplify(n, d) {
+        if (d === 0) d = 1;
+        if (d < 0) { n = -n; d = -d; }
+        const g = this.gcd(n, d);
+        return { n: n / g, d: d / g, g };
+      },
+      fracHTML(n, d, extraClass = '') {
+        return `<span class="frac ${extraClass}"><span class="num">${n}</span><span class="bar"></span><span class="den">${d}</span></span>`;
+      },
+      strikeFracHTML(nOrig, nNew, dOrig, dNew) {
+        const top = nOrig !== nNew
+          ? `<span class="strike-num">${nOrig}</span><span class="simplified-badge">${nNew}</span>`
+          : `${nOrig}`;
+        const bot = dOrig !== dNew
+          ? `<span class="strike-num">${dOrig}</span><span class="simplified-badge">${dNew}</span>`
+          : `${dOrig}`;
+        return `<span class="frac"><span class="num">${top}</span><span class="bar"></span><span class="den">${bot}</span></span>`;
+      },
+      complexFracHTML(a, b, c, d) {
+        return `
+          <div class="inline-flex items-center gap-2 align-middle">
+            <span class="complex-frac">
+              ${this.fracHTML(a, b, 'text-cyan-300')}
+              <span class="main-bar"></span>
+              ${this.fracHTML(c, d, 'text-pink-300')}
+            </span>
+          </div>
+        `;
+      }
+    };
+
+    /******************************************************************
+     * 2. MOTOR DE SONIDO Y MÚSICA ARCADE (WEB AUDIO API - CERO ARCHIVOS EXTERNOS)
+     ******************************************************************/
+    const AudioEngine = {
+      ctx: null,
+      musicEnabled: true,
+      sfxEnabled: true,
+      musicTimer: null,
+      stepIndex: 0,
+      isFastMusic: false,
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+
+      toggleMusic() {
+        this.init();
+        this.musicEnabled = !this.musicEnabled;
+        const btn = document.getElementById('btnMusic');
+        const icon = document.getElementById('iconMusic');
+        if (this.musicEnabled) {
+          btn.className = 'px-3 py-1.5 rounded-xl bg-emerald-600/80 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition';
+          icon.className = 'fa-solid fa-music';
+          this.startMusicLoop();
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl bg-slate-700/80 hover:bg-slate-600 text-slate-300 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition';
+          icon.className = 'fa-solid fa-volume-xmark';
+          this.stopMusicLoop();
+        }
+      },
+
+      toggleSfx() {
+        this.init();
+        this.sfxEnabled = !this.sfxEnabled;
+        const btn = document.getElementById('btnSfx');
+        const icon = document.getElementById('iconSfx');
+        if (this.sfxEnabled) {
+          btn.className = 'px-3 py-1.5 rounded-xl bg-cyan-600/80 hover:bg-cyan-500 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition';
+          icon.className = 'fa-solid fa-volume-high';
+          this.playTone(660, 0.08, 'triangle', 0.12);
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl bg-slate-700/80 hover:bg-slate-600 text-slate-300 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition';
+          icon.className = 'fa-solid fa-volume-off';
+        }
+      },
+
+      playTone(freq, duration = 0.12, type = 'triangle', gainVal = 0.12, delay = 0) {
+        if (!this.sfxEnabled && !this.musicEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime + delay;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(gainVal, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration);
+        } catch (e) {}
+      },
+
+      playCorrect(isSuper = false) {
+        if (!this.sfxEnabled) return;
+        this.playTone(523.25, 0.11, 'triangle', 0.18, 0);
+        this.playTone(659.25, 0.11, 'triangle', 0.18, 0.09);
+        this.playTone(783.99, 0.16, 'triangle', 0.20, 0.18);
+        this.playTone(1046.5, 0.28, 'sine', 0.22, 0.27);
+        if (isSuper) {
+          this.playTone(1318.5, 0.35, 'sawtooth', 0.15, 0.36);
+        }
+      },
+
+      playWrong() {
+        if (!this.sfxEnabled) return;
+        this.playTone(220, 0.18, 'sawtooth', 0.16, 0);
+        this.playTone(164.8, 0.28, 'sawtooth', 0.16, 0.15);
+      },
+
+      playTurbo() {
+        if (!this.sfxEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.38);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } catch (e) {}
+      },
+
+      playFanfare() {
+        if (!this.sfxEnabled) return;
+        const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
+        const times = [0, 0.12, 0.24, 0.36, 0.52, 0.66];
+        notes.forEach((n, i) => this.playTone(n, 0.22, 'triangle', 0.2, times[i]));
+      },
+
+      startMusicLoop() {
+        this.stopMusicLoop();
+        if (!this.musicEnabled) return;
+        const melody = [
+          261.63, 329.63, 392.00, 523.25,
+          392.00, 329.63, 293.66, 392.00,
+          261.63, 329.63, 440.00, 523.25,
+          493.88, 392.00, 329.63, 293.66
+        ];
+        const intervalMs = this.isFastMusic ? 190 : 240;
+        this.musicTimer = setInterval(() => {
+          if (!this.musicEnabled) return;
+          if (GameApp.state.isPaused) return;
+          const freq = melody[this.stepIndex % melody.length];
+          this.stepIndex++;
+          if (this.ctx && this.ctx.state === 'running') {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.035, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.17);
+          }
+        }, intervalMs);
+      },
+
+      stopMusicLoop() {
+        if (this.musicTimer) {
+          clearInterval(this.musicTimer);
+          this.musicTimer = null;
+        }
+      }
+    };
+
+    /******************************************************************
+     * 3. DEFINICIÓN DE VEHÍCULOS Y LOS 8 CIRCUITOS
+     ******************************************************************/
+    const KART_MODELS = [
+      { id: 'rayo', name: 'Rayo Rojo', defaultColor: '#ef4444', accent: '#fde047', stats: 'Aceleración Turbo +10%', barWidth: '92%' },
+      { id: 'meteoro', name: 'Meteoro Azul', defaultColor: '#3b82f6', accent: '#38bdf8', stats: 'Velocidad Punta Pro', barWidth: '94%' },
+      { id: 'trueno', name: 'Trueno Verde', defaultColor: '#10b981', accent: '#a7f3d0', stats: 'Agarre en Curvas +12%', barWidth: '90%' },
+      { id: 'cometa', name: 'Cometa Dorado', defaultColor: '#f59e0b', accent: '#fef08a', stats: 'Superturbo Extendido', barWidth: '96%' }
+    ];
+
+    const CIRCUITS_DATA = [
+      {
+        id: 1,
+        name: 'CIRCUITO 1: PISTA DE ENTRENAMIENTO',
+        shortName: 'Pista de Entrenamiento',
+        topic: 'Multiplicación básica de fracciones',
+        icon: '🟢',
+        theme: { grass1: '#15803d', grass2: '#166534', road1: '#334155', road2: '#1e293b', curb: '#ef4444', skyTop: '#1e3a8a', skyBot: '#38bdf8', propType: 'tree' },
+        introHTML: `
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-emerald-400/40 space-y-2">
+            <div class="font-extrabold text-emerald-300">💡 Regla de Oro para Multiplicar Fracciones:</div>
+            <p>Para multiplicar dos fracciones, multiplicamos <b>numerador por numerador</b> (arriba) y <b>denominador por denominador</b> (abajo):</p>
+            <div class="text-center text-lg sm:text-xl py-2 bg-slate-950/70 rounded-xl font-black">
+              ${MathUtils.fracHTML('2', '3')} × ${MathUtils.fracHTML('1', '4')} = ${MathUtils.fracHTML('2 × 1', '3 × 4')} = ${MathUtils.fracHTML('2', '12')} = ${MathUtils.fracHTML('1', '6')}
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 2,
+        name: 'CIRCUITO 2: AUTOPISTA DE SIMPLIFICACIÓN',
+        shortName: 'Autopista de Simplificación',
+        topic: 'Simplificación vertical o cruzada antes de multiplicar',
+        icon: '⚡',
+        theme: { grass1: '#0f766e', grass2: '#115e59', road1: '#334155', road2: '#1e293b', curb: '#f59e0b', skyTop: '#0f172a', skyBot: '#0284c7', propType: 'palm' },
+        introHTML: `
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/40 space-y-2">
+            <div class="font-extrabold text-amber-300">✂️ Simplificar antes de Multiplicar:</div>
+            <p>Puedes dividir un numerador y un denominador entre un <b>factor común</b> antes de multiplicar para obtener números pequeños:</p>
+            <div class="text-center text-lg sm:text-xl py-2 bg-slate-950/70 rounded-xl font-black">
+              ${MathUtils.strikeFracHTML(3, 1, 8, 2)} × ${MathUtils.strikeFracHTML(4, 1, 9, 3)} = ${MathUtils.fracHTML('1 × 1', '2 × 3')} = ${MathUtils.fracHTML('1', '6')}
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 3,
+        name: 'CIRCUITO 3: CIUDAD FRACCIONARIA',
+        shortName: 'Ciudad Fraccionaria',
+        topic: 'Fracción de un número y problemas cotidianos',
+        icon: '🏙️',
+        theme: { grass1: '#312e81', grass2: '#1e1b4b', road1: '#334155', road2: '#1e293b', curb: '#06b6d4', skyTop: '#1e1b4b', skyBot: '#6366f1', propType: 'building' },
+        introHTML: `
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-cyan-400/40 space-y-2">
+            <div class="font-extrabold text-cyan-300">🏙️ ¿Cómo calcular la fracción de un número?</div>
+            <p>Dividimos el número entero entre el <b>denominador</b> y el resultado lo multiplicamos por el <b>numerador</b>:</p>
+            <div class="text-center text-lg sm:text-xl py-2 bg-slate-950/70 rounded-xl font-black">
+              ${MathUtils.fracHTML('3', '7')} de 28 ➔ (28 ÷ 7) × 3 = 4 × 3 = <span class="text-amber-300">12</span>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 4,
+        name: 'CIRCUITO 4: MONTAÑA INVERSA',
+        shortName: 'Montaña Inversa',
+        topic: 'División básica multiplicando por la fracción inversa',
+        icon: '⛰️',
+        theme: { grass1: '#3f6212', grass2: '#365314', road1: '#475569', road2: '#334155', curb: '#a855f7', skyTop: '#3b0764', skyBot: '#c084fc', propType: 'pine' },
+        introHTML: `
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-purple-400/40 space-y-2">
+            <div class="font-extrabold text-purple-300">🔄 División por el Inverso Multiplicativo:</div>
+            <p>Se conserva la <b>primera fracción igual</b>, el signo <b>÷ cambia a ×</b> y se <b>invierte la segunda fracción</b>:</p>
+            <div class="text-center text-lg sm:text-xl py-2 bg-slate-950/70 rounded-xl font-black">
+              ${MathUtils.fracHTML('3', '4')} ÷ ${MathUtils.fracHTML('2', '5')} = ${MathUtils.fracHTML('3', '4')} × <span class="flip-anim text-amber-300">${MathUtils.fracHTML('5', '2')}</span> = ${MathUtils.fracHTML('15', '8')}
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 5,
+        name: 'CIRCUITO 5: LA PISTA CRUZADA',
+        shortName: 'La Pista Cruzada',
+        topic: 'División de fracciones mediante productos cruzados',
+        icon: '⚔️',
+        theme: { grass1: '#7c2d12', grass2: '#9a3412', road1: '#334155', road2: '#1e293b', curb: '#facc15', skyTop: '#450a0a', skyBot: '#f97316', propType: 'arch' },
+        introHTML: `
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-orange-400/40 space-y-2">
+            <div class="font-extrabold text-orange-300">⚔️ Productos Cruzados en División:</div>
+            <p>Multiplicamos en diagonal (cruzado): <b>numerador 1 × denominador 2</b> va arriba, y <b>denominador 1 × numerador 2</b> va abajo:</p>
+            <div class="text-center text-lg sm:text-xl py-2 bg-slate-950/70 rounded-xl font-black">
+              ${MathUtils.fracHTML('2', '5')} <span class="text-amber-400">⤨</span> ${MathUtils.fracHTML('3', '7')} = ${MathUtils.fracHTML('2 × 7', '5 × 3')} = ${MathUtils.fracHTML('14', '15')}
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 6,
+        name: 'CIRCUITO 6: TÚNEL DE EXTREMOS Y MEDIOS',
+        shortName: 'Túnel de Extremos y Medios',
+        topic: 'Fracción compleja y producto de extremos y medios',
+        icon: '🚇',
+        theme: { grass1: '#0f172a', grass2: '#1e293b', road1: '#1e293b', road2: '#0f172a', curb: '#22d3ee', skyTop: '#020617', skyBot: '#0f172a', propType: 'tunnel' },
+        introHTML: `
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-cyan-400/40 space-y-2">
+            <div class="font-extrabold text-cyan-300">🚇 Producto de Extremos y Medios:</div>
+            <p>El producto de los <b>EXTREMOS</b> (arriba y abajo del todo) forma el numerador; el producto de los <b>MEDIOS</b> (centro) forma el denominador. ¡Es el mismo principio que los productos cruzados!</p>
+            <div class="text-center text-base sm:text-lg py-2 bg-slate-950/70 rounded-xl font-black flex items-center justify-center gap-3">
+              ${MathUtils.complexFracHTML(5, 3, 3, 4)} = ${MathUtils.fracHTML('<span class="text-cyan-300">5 × 4 (Extremos)</span>', '<span class="text-pink-300">3 × 3 (Medios)</span>')} = ${MathUtils.fracHTML('20', '9')}
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 7,
+        name: 'CIRCUITO 7: AUTOPISTA MATEMÁTICA',
+        shortName: 'Autopista Matemática',
+        topic: 'Multiplicación y división combinadas y paréntesis',
+        icon: '🛣️',
+        theme: { grass1: '#1e3a8a', grass2: '#172554', road1: '#334155', road2: '#1e293b', curb: '#ec4899', skyTop: '#090d16', skyBot: '#3b82f6', propType: 'bridge' },
+        introHTML: `
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-pink-400/40 space-y-2">
+            <div class="font-extrabold text-pink-300">🛣️ Operaciones Combinadas:</div>
+            <p>1.º Resuelve primero los <b>paréntesis ( )</b> si existen.<br>2.º Si solo hay multiplicaciones y divisiones, resuelve en orden de <b>izquierda a derecha</b>.</p>
+          </div>
+        `
+      },
+      {
+        id: 8,
+        name: 'CIRCUITO 8: GRAN PREMIO FINAL',
+        shortName: 'Gran Premio Final',
+        topic: 'Copa Maestra: Todos los temas y detección de errores',
+        icon: '👑',
+        theme: { grass1: '#4c1d95', grass2: '#2e1065', road1: '#18181b', road2: '#27272a', curb: '#fbbf24', skyTop: '#2e1065', skyBot: '#db2777', propType: 'trophy' },
+        introHTML: `
+          <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400 space-y-2">
+            <div class="font-extrabold text-amber-300">👑 ¡LA GRAN FINAL DEL CAMPEONATO!</div>
+            <p>Combina multiplicación, simplificación, fracción de un número, inverso, productos cruzados, extremos y medios y detección de errores. ¡Activa el Superturbo y conquista la Gran Copa!</p>
+          </div>
+        `
+      }
+    ];
+
+    /******************************************************************
+     * 4. BANCO DE 240 EJERCICIOS VERIFICADOS (30 POR CADA CIRCUITO)
+     *    Con los 8 tipos de interacción requeridos
+     ******************************************************************/
+    const QuestionBank = {
+      banks: {},
+
+      initAllBanks() {
+        for (let c = 1; c <= 8; c++) {
+          this.banks[c] = this.buildCircuitBank(c);
+        }
+      },
+
+      // Crea distractores plausibles y únicos sin denominador 0
+      makeOptions(correctN, correctD, isWhole = false, customWrongs = []) {
+        const correctStr = isWhole ? `${correctN}` : `${correctN}/${correctD}`;
+        const set = new Set([correctStr]);
+        const options = [{ n: correctN, d: correctD, isWhole, correct: true, label: correctStr }];
+
+        for (const w of customWrongs) {
+          const wN = w.n;
+          const wD = isWhole ? 1 : Math.max(1, w.d);
+          const key = isWhole ? `${wN}` : `${wN}/${wD}`;
+          if (!set.has(key) && wN > 0 && wD > 0) {
+            set.add(key);
+            options.push({ n: wN, d: wD, isWhole, correct: false, label: key });
+          }
+          if (options.length === 4) break;
+        }
+
+        let offset = 1;
+        while (options.length < 4) {
+          const candN = Math.max(1, correctN + (offset % 2 === 0 ? offset : -offset));
+          const candD = isWhole ? 1 : Math.max(2, correctD + offset);
+          const key = isWhole ? `${candN}` : `${candN}/${candD}`;
+          if (!set.has(key)) {
+            set.add(key);
+            options.push({ n: candN, d: candD, isWhole, correct: false, label: key });
+          }
+          offset++;
+        }
+
+        // Mezclar opciones
+        return options.sort(() => Math.random() - 0.5);
+      },
+
+      buildCircuitBank(circuitId) {
+        const list = [];
+
+        // === CIRCUITO 1: PISTA DE ENTRENAMIENTO (30 ejercicios de multiplicación básica) ===
+        if (circuitId === 1) {
+          const pairs = [
+            [2,3, 1,4], [3,5, 2,7], [4,9, 3,8], [1,2, 3,5], [2,5, 3,4],
+            [3,7, 1,2], [5,6, 1,3], [2,9, 5,7], [3,4, 5,8], [1,3, 2,5],
+            [4,7, 2,3], [5,8, 3,7], [2,7, 3,5], [1,4, 3,7], [3,8, 5,6],
+            [2,5, 4,9], [5,9, 2,3], [3,10, 7,2], [4,5, 1,3], [7,8, 1,2],
+            [2,3, 5,7], [3,4, 1,5], [5,7, 2,9], [1,6, 5,4], [3,5, 4,7],
+            [7,9, 2,5], [1,5, 3,8], [4,7, 3,5], [5,6, 5,7], [2,11, 3,4]
+          ];
+          pairs.forEach(([a,b, c,d], idx) => {
+            const rawN = a * c;
+            const rawD = b * d;
+            const simp = MathUtils.simplify(rawN, rawD);
+            const types = ['kahoot4', 'input_frac', 'drag_tiles', 'kahoot4', 'order_steps'];
+            const qType = types[idx % types.length];
+            const useSimp = (rawN === simp.n && rawD === simp.d);
+            const ansN = useSimp ? rawN : simp.n;
+            const ansD = useSimp ? rawD : simp.d;
+
+            list.push({
+              id: `c1_${idx}`,
+              circuit: 1,
+              type: qType,
+              difficulty: idx < 12 ? 'easy' : 'medium',
+              timeLimit: idx < 12 ? 20 : 30,
+              title: useSimp
+                ? 'Multiplica numerador por numerador y denominador por denominador:'
+                : 'Multiplica las fracciones y expresa en forma simplificada:',
+              mathHTML: `${MathUtils.fracHTML(a, b)} <span class="text-amber-400 mx-1">×</span> ${MathUtils.fracHTML(c, d)} <span class="mx-1">=</span> <span class="text-cyan-300">?</span>`,
+              ansN,
+              ansD,
+              rawN,
+              rawD,
+              acceptRaw: true,
+              hint: `Recuerda: multiplica arriba (${a} × ${c} = ${rawN}) y abajo (${b} × ${d} = ${rawD}).${!useSimp ? ` Luego simplifica dividiendo entre ${simp.g}.` : ''}`,
+              stepsHTML: `
+                <div>1.º Multiplicamos numeradores entre sí y denominadores entre sí: ${MathUtils.fracHTML(`${a} × ${c}`, `${b} × ${d}`)} = ${MathUtils.fracHTML(rawN, rawD)}</div>
+                ${!useSimp ? `<div>2.º Simplificamos dividiendo entre ${simp.g}: <b>${MathUtils.fracHTML(ansN, ansD)}</b></div>` : `<div>2.º La fracción <b>${MathUtils.fracHTML(ansN, ansD)}</b> ya es irreducible.</div>`}
+              `,
+              options: this.makeOptions(ansN, ansD, false, [
+                { n: a + c, d: b + d }, // Error típico: sumar en vez de multiplicar
+                { n: a * d, d: b * c }, // Error típico: cruzar
+                { n: rawN + 1, d: rawD }
+              ]),
+              orderStepsData: [
+                `Multiplicar los numeradores: ${a} × ${c} = ${rawN}`,
+                `Multiplicar los denominadores: ${b} × ${d} = ${rawD}`,
+                `Escribir la fracción resultante: ${ansN}/${ansD}`
+              ]
+            });
+          });
+        }
+
+        // === CIRCUITO 2: AUTOPISTA DE SIMPLIFICACIÓN (30 ejercicios con tachado de factores) ===
+        if (circuitId === 2) {
+          const pairs = [
+            [3,8, 4,9], [6,15, 5,8], [12,25, 5,18], [4,9, 3,8], [5,12, 6,15],
+            [8,15, 5,12], [9,14, 7,18], [6,7, 14,15], [10,21, 7,15], [4,15, 5,8],
+            [9,16, 8,27], [14,25, 5,7], [6,11, 22,9], [8,9, 3,16], [15,28, 14,25],
+            [12,17, 17,24], [5,18, 9,20], [7,12, 6,14], [10,27, 9,20], [16,21, 7,8],
+            [4,11, 22,12], [15,16, 8,5], [9,20, 10,27], [6,25, 15,12], [8,21, 7,16],
+            [14,15, 5,28], [18,25, 5,9], [12,35, 7,6], [20,27, 9,10], [15,22, 11,30]
+          ];
+          pairs.forEach(([a,b, c,d], idx) => {
+            const g1 = MathUtils.gcd(a, d);
+            const g2 = MathUtils.gcd(c, b);
+            const aS = a / g1, dS = d / g1;
+            const cS = c / g2, bS = b / g2;
+            const simp = MathUtils.simplify(a * c, b * d);
+            const types = ['simplify_tap', 'kahoot4', 'input_frac', 'find_error', 'drag_tiles'];
+            const qType = types[idx % types.length];
+
+            list.push({
+              id: `c2_${idx}`,
+              circuit: 2,
+              type: qType,
+              difficulty: 'medium',
+              timeLimit: 30,
+              title: 'Simplifica factores comunes antes de multiplicar y halla la fracción irreducible:',
+              mathHTML: `${MathUtils.fracHTML(a, b)} <span class="text-amber-400 mx-1">×</span> ${MathUtils.fracHTML(c, d)} <span class="mx-1">=</span> <span class="text-emerald-300">?</span>`,
+              ansN: simp.n,
+              ansD: simp.d,
+              rawN: a * c,
+              rawD: b * d,
+              acceptRaw: false,
+              simplifyData: { a, b, c, d, aS, bS, cS, dS, factorHint: Math.max(g1, g2) },
+              hint: `Observa los factores cruzados: (${a} y ${d} se dividen entre ${g1}) y (${c} y ${b} se dividen entre ${g2}).`,
+              stepsHTML: `
+                <div>1.º Simplificamos cruzado tachando factores comunes: ${MathUtils.strikeFracHTML(a, aS, b, bS)} × ${MathUtils.strikeFracHTML(c, cS, d, dS)}</div>
+                <div>2.º Multiplicamos los valores simplificados: ${MathUtils.fracHTML(`${aS} × ${cS}`, `${bS} × ${dS}`)} = <b>${MathUtils.fracHTML(simp.n, simp.d)}</b></div>
+              `,
+              options: this.makeOptions(simp.n, simp.d, false, [
+                { n: a * c, d: b * d },
+                { n: simp.d, d: simp.n },
+                { n: simp.n + 1, d: simp.d + 1 }
+              ]),
+              errorStepsData: {
+                steps: [
+                  `Paso 1: Identificar la operación ${a}/${b} × ${c}/${d}`,
+                  `Paso 2: Sumar numeradores ${a} + ${c} = ${a + c} y denominadores ${b} + ${d} = ${b + d}`,
+                  `Paso 3: Obtener la fracción ${(a + c)}/${(b + d)}`
+                ],
+                wrongIndex: 1,
+                explanation: 'En multiplicación no se suman los términos; se simplifican factores comunes y se multiplican.'
+              }
+            });
+          });
+        }
+
+        // === CIRCUITO 3: CIUDAD FRACCIONARIA (30 ejercicios de fracción de un número y problemas) ===
+        if (circuitId === 3) {
+          const items = [
+            [3,7, 28, 'Calcula los 3/7 de 28:'],
+            [5,8, 64, 'Calcula los 5/8 de 64:'],
+            [2,9, 45, 'Calcula los 2/9 de 45:'],
+            [3,4, 36, 'En una carrera de 36 vueltas, ya recorriste las 3/4 partes. ¿Cuántas vueltas llevas?'],
+            [2,5, 50, 'De 50 soles ahorrados, gastaste 2/5 en un libro. ¿Cuántos soles costó el libro?'],
+            [4,9, 63, 'Un álbum tiene 63 figuritas y tienes 4/9. ¿Cuántas figuritas tienes?'],
+            [5,6, 42, 'De 42 estudiantes de 6.º grado, 5/6 participan en Fracción Kart. ¿Cuántos participan?'],
+            [3,8, 56, 'Una pista mide 56 km y el tramo con turbo es 3/8. ¿Cuántos km tienen turbo?'],
+            [7,10, 80, 'Calcula los 7/10 de 80 litros de combustible:'],
+            [2,3, 48, 'De una caja de 48 manzanas, 2/3 son rojas. ¿Cuántas manzanas son rojas?'],
+            [3,5, 75, 'Calcula los 3/5 de 75 puntos:'],
+            [4,7, 49, 'Calcula los 4/7 de 49:'],
+            [5,9, 81, 'Un libro de aventuras tiene 81 páginas y leíste 5/9. ¿Cuántas páginas leíste?'],
+            [3,10, 90, 'Calcula los 3/10 de 90 minutos:'],
+            [5,12, 60, 'Calcula los 5/12 de 60 segundos (1 minuto):'],
+            [2,7, 35, 'De 35 monedas, 2/7 son doradas. ¿Cuántas monedas son doradas?'],
+            [7,8, 72, 'Calcula los 7/8 de 72:'],
+            [4,5, 40, 'En un taller de 40 karts, 4/5 están listos. ¿Cuántos karts están listos?'],
+            [3,11, 44, 'Calcula los 3/11 de 44:'],
+            [5,7, 42, 'Calcula los 5/7 de 42:'],
+            [6,7, 56, 'Calcula los 6/7 de 56:'],
+            [3,4, 80, 'Un circuito tiene 80 curvas y superaste 3/4. ¿Cuántas curvas superaste?'],
+            [2,5, 65, 'Calcula los 2/5 de 65:'],
+            [7,9, 54, 'Calcula los 7/9 de 54:'],
+            [5,6, 54, 'De 54 trofeos escolares, 5/6 ya fueron entregados. ¿Cuántos se entregaron?'],
+            [4,11, 55, 'Calcula los 4/11 de 55:'],
+            [3,8, 72, 'Calcula los 3/8 de 72:'],
+            [8,9, 90, 'Calcula los 8/9 de 90:'],
+            [7,12, 48, 'Calcula los 7/12 de 48:'],
+            [9,10, 120, 'De 120 kilómetros del Gran Premio, completaste 9/10. ¿Cuántos km recorriste?']
+          ];
+          items.forEach(([num, den, whole, text], idx) => {
+            const divStep = whole / den;
+            const ans = divStep * num;
+            const types = ['word_problem', 'kahoot4', 'input_frac', 'order_steps'];
+            const qType = types[idx % types.length];
+
+            list.push({
+              id: `c3_${idx}`,
+              circuit: 3,
+              type: qType,
+              difficulty: idx < 15 ? 'easy' : 'medium',
+              timeLimit: 30,
+              isWholeAnswer: true,
+              title: text,
+              mathHTML: `${MathUtils.fracHTML(num, den)} <span class="text-amber-400 mx-1">de</span> <span class="text-cyan-300 font-black">${whole}</span> <span class="mx-1">=</span> <span class="text-emerald-300">?</span>`,
+              ansN: ans,
+              ansD: 1,
+              hint: `Divide ${whole} entre el denominador ${den} (${whole} ÷ ${den} = ${divStep}) y multiplica por el numerador ${num}.`,
+              stepsHTML: `
+                <div>1.º Dividimos el total entre el denominador: <b>${whole} ÷ ${den} = ${divStep}</b></div>
+                <div>2.º Multiplicamos por el numerador: <b>${divStep} × ${num} = <span class="text-emerald-400">${ans}</span></b></div>
+              `,
+              options: this.makeOptions(ans, 1, true, [
+                { n: divStep, d: 1 },
+                { n: ans + num, d: 1 },
+                { n: Math.max(1, ans - divStep), d: 1 }
+              ]),
+              orderStepsData: [
+                `Dividir la cantidad total entre el denominador: ${whole} ÷ ${den} = ${divStep}`,
+                `Multiplicar el resultado por el numerador: ${divStep} × ${num} = ${ans}`,
+                `Respuesta final: ${ans}`
+              ]
+            });
+          });
+        }
+
+        // === CIRCUITO 4: MONTAÑA INVERSA (30 ejercicios de división invirtiendo la 2.ª fracción) ===
+        if (circuitId === 4) {
+          const pairs = [
+            [3,4, 2,5], [5,6, 3,7], [2,3, 4,9], [1,2, 3,5], [4,7, 2,3],
+            [5,8, 3,4], [3,5, 2,7], [7,9, 2,3], [2,5, 3,8], [4,5, 2,7],
+            [1,3, 5,6], [3,7, 6,5], [5,9, 10,3], [2,7, 4,5], [3,8, 9,4],
+            [7,10, 2,5], [4,9, 8,3], [5,7, 3,2], [6,11, 3,2], [1,4, 3,8],
+            [2,9, 4,3], [5,12, 5,6], [7,8, 3,4], [3,10, 6,5], [4,7, 8,21],
+            [5,6, 10,9], [2,3, 5,6], [7,9, 14,3], [3,5, 9,10], [8,11, 4,3]
+          ];
+          pairs.forEach(([a,b, c,d], idx) => {
+            const rawN = a * d;
+            const rawD = b * c;
+            const simp = MathUtils.simplify(rawN, rawD);
+            const types = ['invert_select', 'kahoot4', 'input_frac', 'find_error', 'drag_tiles'];
+            const qType = types[idx % types.length];
+
+            list.push({
+              id: `c4_${idx}`,
+              circuit: 4,
+              type: qType,
+              difficulty: 'medium',
+              timeLimit: 30,
+              title: 'Divide multiplicando la primera fracción por el inverso de la segunda:',
+              mathHTML: `${MathUtils.fracHTML(a, b)} <span class="text-purple-400 mx-1">÷</span> ${MathUtils.fracHTML(c, d)} <span class="mx-1">=</span> <span class="text-amber-300">?</span>`,
+              ansN: simp.n,
+              ansD: simp.d,
+              rawN,
+              rawD,
+              acceptRaw: true,
+              invertData: { a, b, c, d, invN: d, invD: c },
+              hint: `¡Recuerda! Para dividir, conservas ${a}/${b} y multiplicas por el inverso de la segunda fracción (${d}/${c}).`,
+              stepsHTML: `
+                <div>1.º Conservamos la primera fracción e invertimos la segunda cambiando ÷ por ×: ${MathUtils.fracHTML(a, b)} × <span class="text-amber-300 font-black">${MathUtils.fracHTML(d, c)}</span></div>
+                <div>2.º Multiplicamos: ${MathUtils.fracHTML(`${a} × ${d}`, `${b} × ${c}`)} = ${MathUtils.fracHTML(rawN, rawD)} ${simp.g > 1 ? `= <b>${MathUtils.fracHTML(simp.n, simp.d)}</b>` : ''}</div>
+              `,
+              options: this.makeOptions(simp.n, simp.d, false, [
+                MathUtils.simplify(a * c, b * d), // Error de no invertir
+                { n: simp.d, d: simp.n },         // Error de invertir la primera
+                { n: rawN + 1, d: rawD }
+              ]),
+              errorStepsData: {
+                steps: [
+                  `Paso 1: Tenemos la división ${a}/${b} ÷ ${c}/${d}`,
+                  `Paso 2: Invertimos la PRIMERA fracción: ${b}/${a} × ${c}/${d}`,
+                  `Paso 3: Multiplicamos para obtener ${(b * c)}/${(a * d)}`
+                ],
+                wrongIndex: 1,
+                explanation: '¡Error detectado! Nunca se invierte la primera fracción; siempre se invierte la SEGUNDA fracción.'
+              }
+            });
+          });
+        }
+
+        // === CIRCUITO 5: LA PISTA CRUZADA (30 ejercicios de productos cruzados con flechas) ===
+        if (circuitId === 5) {
+          const pairs = [
+            [2,5, 3,7], [4,9, 2,3], [5,8, 3,4], [3,7, 2,5], [1,3, 4,7],
+            [5,6, 2,5], [3,4, 5,7], [2,9, 5,6], [7,8, 3,5], [4,7, 3,8],
+            [5,9, 2,7], [3,10, 4,5], [2,3, 7,8], [6,7, 3,5], [5,11, 2,3],
+            [3,8, 5,9], [7,10, 3,4], [4,5, 7,9], [1,6, 3,7], [8,9, 4,5],
+            [3,5, 4,9], [2,7, 5,8], [5,12, 3,7], [7,9, 5,6], [4,11, 2,5],
+            [3,4, 7,9], [5,7, 4,9], [2,5, 7,11], [6,13, 3,4], [5,8, 7,10]
+          ];
+          pairs.forEach(([a,b, c,d], idx) => {
+            const rawN = a * d;
+            const rawD = b * c;
+            const simp = MathUtils.simplify(rawN, rawD);
+            const types = ['kahoot4', 'drag_tiles', 'input_frac', 'order_steps'];
+            const qType = types[idx % types.length];
+
+            list.push({
+              id: `c5_${idx}`,
+              circuit: 5,
+              type: qType,
+              difficulty: 'medium',
+              timeLimit: 30,
+              title: 'Aplica productos cruzados en diagonal para resolver la división:',
+              mathHTML: `
+                <div class="inline-flex items-center gap-2 bg-slate-950/70 px-4 py-2 rounded-2xl border border-orange-400/30">
+                  ${MathUtils.fracHTML(`<span class="text-cyan-300">${a}</span>`, `<span class="text-pink-300">${b}</span>`)}
+                  <span class="text-amber-400 font-black text-2xl" title="Productos Cruzados">⤨</span>
+                  ${MathUtils.fracHTML(`<span class="text-pink-300">${c}</span>`, `<span class="text-cyan-300">${d}</span>`)}
+                  <span>=</span>
+                  ${MathUtils.fracHTML(`<span class="text-cyan-300">${a}×${d}</span>`, `<span class="text-pink-300">${b}×${c}</span>`)}
+                </div>
+              `,
+              ansN: simp.n,
+              ansD: simp.d,
+              rawN,
+              rawD,
+              acceptRaw: true,
+              hint: `Flecha azul arriba: ${a} × ${d} = ${rawN} (numerador). Flecha rosa abajo: ${b} × ${c} = ${rawD} (denominador).`,
+              stepsHTML: `
+                <div>1.º Producto cruzado para el numerador (arriba): <span class="text-cyan-300 font-bold">${a} × ${d} = ${rawN}</span></div>
+                <div>2.º Producto cruzado para el denominador (abajo): <span class="text-pink-300 font-bold">${b} × ${c} = ${rawD}</span></div>
+                <div>3.º Resultado: ${MathUtils.fracHTML(rawN, rawD)} ${simp.g > 1 ? `= <b>${MathUtils.fracHTML(simp.n, simp.d)}</b>` : ''}</div>
+              `,
+              options: this.makeOptions(simp.n, simp.d, false, [
+                { n: rawD, d: rawN },
+                MathUtils.simplify(a * c, b * d),
+                { n: rawN + 2, d: rawD }
+              ]),
+              orderStepsData: [
+                `Multiplicar en diagonal principal para el numerador: ${a} × ${d} = ${rawN}`,
+                `Multiplicar en diagonal secundaria para el denominador: ${b} × ${c} = ${rawD}`,
+                `Formar la fracción ${simp.n}/${simp.d}`
+              ]
+            });
+          });
+        }
+
+        // === CIRCUITO 6: TÚNEL DE EXTREMOS Y MEDIOS (30 ejercicios de fracción compleja) ===
+        if (circuitId === 6) {
+          const pairs = [
+            [5,3, 3,4], [2,5, 3,7], [3,4, 2,9], [4,7, 5,6], [7,5, 2,3],
+            [3,8, 5,4], [5,6, 7,3], [2,9, 5,4], [4,5, 3,8], [7,6, 5,2],
+            [1,4, 3,7], [5,9, 4,3], [3,7, 8,5], [6,5, 7,4], [2,3, 9,5],
+            [5,8, 3,7], [4,9, 7,2], [7,10, 3,5], [3,5, 7,4], [8,7, 3,2],
+            [5,4, 7,3], [2,7, 3,8], [9,5, 4,3], [3,11, 2,5], [7,8, 5,3],
+            [4,3, 5,7], [6,7, 5,4], [5,9, 2,7], [3,8, 7,5], [7,4, 3,5]
+          ];
+          pairs.forEach(([a,b, c,d], idx) => {
+            const rawN = a * d;
+            const rawD = b * c;
+            const simp = MathUtils.simplify(rawN, rawD);
+            const types = ['kahoot4', 'input_frac', 'drag_tiles', 'find_error'];
+            const qType = types[idx % types.length];
+
+            list.push({
+              id: `c6_${idx}`,
+              circuit: 6,
+              type: qType,
+              difficulty: 'hard',
+              timeLimit: 45,
+              title: 'Aplica el producto de EXTREMOS (arriba) y MEDIOS (abajo):',
+              mathHTML: `
+                <div class="inline-flex items-center gap-3">
+                  ${MathUtils.complexFracHTML(a, b, c, d)}
+                  <span class="text-xs sm:text-sm text-left bg-slate-950/80 p-2 rounded-xl border border-white/10">
+                    <span class="block text-cyan-300">╭─ Extremos: ${a} y ${d}</span>
+                    <span class="block text-pink-300">╰─ Medios: ${b} y ${c}</span>
+                  </span>
+                </div>
+              `,
+              ansN: simp.n,
+              ansD: simp.d,
+              rawN,
+              rawD,
+              acceptRaw: true,
+              hint: `Extremos (${a} × ${d} = ${rawN}) van al numerador. Medios (${b} × ${c} = ${rawD}) van al denominador.`,
+              stepsHTML: `
+                <div>1.º Multiplicamos los <b>EXTREMOS</b> (${a} y ${d}): <span class="text-cyan-300 font-bold">${a} × ${d} = ${rawN}</span> (Numerador)</div>
+                <div>2.º Multiplicamos los <b>MEDIOS</b> (${b} y ${c}): <span class="text-pink-300 font-bold">${b} × ${c} = ${rawD}</span> (Denominador)</div>
+                <div>3.º Resultado: ${MathUtils.fracHTML(rawN, rawD)} ${simp.g > 1 ? `= <b>${MathUtils.fracHTML(simp.n, simp.d)}</b>` : ''} (Equivalente a productos cruzados).</div>
+              `,
+              options: this.makeOptions(simp.n, simp.d, false, [
+                { n: rawD, d: rawN }, // Poner medios arriba
+                MathUtils.simplify(a * c, b * d),
+                { n: rawN + 1, d: rawD }
+              ]),
+              errorStepsData: {
+                steps: [
+                  `Paso 1: Identificar Extremos (${a} y ${d}) y Medios (${b} y ${c})`,
+                  `Paso 2: Colocar el producto de Medios arriba (${b}×${c}) y Extremos abajo (${a}×${d})`,
+                  `Paso 3: Resultado ${rawD}/${rawN}`
+                ],
+                wrongIndex: 1,
+                explanation: '¡Atención! El producto de los EXTREMOS siempre va en el numerador (arriba) y el de los MEDIOS en el denominador (abajo).'
+              }
+            });
+          });
+        }
+
+        // === CIRCUITO 7: AUTOPISTA MATEMÁTICA (30 ejercicios de operaciones combinadas) ===
+        if (circuitId === 7) {
+          const combos = [
+            // [a,b, op1, c,d, op2, e,f, hasParenOnSecond]
+            [2,3, '×', 3,4, '÷', 1,2, false],
+            [3,5, '÷', 2,5, '×', 1,3, false],
+            [4,7, '×', 7,8, '×', 2,3, false],
+            [5,6, '÷', 5,3, '×', 2,5, false],
+            [1,2, '×', 4,5, '÷', 2,3, true],
+            [3,4, '÷', 1,2, '÷', 3,2, false],
+            [2,5, '×', 5,6, '÷', 1,3, false],
+            [7,8, '÷', 7,4, '×', 2,3, false],
+            [3,7, '×', 7,9, '÷', 1,3, false],
+            [4,5, '÷', 2,5, '×', 3,8, false],
+            [5,9, '×', 3,5, '÷', 2,3, false],
+            [2,3, '÷', 4,9, '×', 1,2, false],
+            [3,8, '×', 4,3, '÷', 5,6, false],
+            [6,7, '÷', 3,7, '×', 1,4, false],
+            [5,6, '×', 3,10, '÷', 1,4, false],
+            [2,9, '÷', 1,3, '×', 3,4, false],
+            [4,5, '×', 5,8, '÷', 3,4, false],
+            [7,10, '÷', 7,5, '×', 4,3, false],
+            [3,4, '×', 8,9, '÷', 2,3, false],
+            [5,7, '÷', 10,7, '×', 4,5, false],
+            [1,3, '×', 6,5, '÷', 2,5, false],
+            [8,9, '÷', 4,3, '×', 3,4, false],
+            [3,5, '×', 10,9, '÷', 4,3, false],
+            [7,12, '÷', 7,6, '×', 2,3, false],
+            [4,9, '×', 3,2, '÷', 2,3, false],
+            [5,8, '÷', 5,4, '×', 6,7, false],
+            [2,7, '×', 7,4, '÷', 3,5, false],
+            [9,10, '÷', 3,5, '×', 2,3, false],
+            [3,4, '÷', 9,8, '×', 3,5, false],
+            [5,6, '×', 2,5, '÷', 2,9, false]
+          ];
+
+          combos.forEach(([a,b, op1, c,d, op2, e,f, paren], idx) => {
+            // Paso 1: (a/b op1 c/d)
+            let s1N, s1D;
+            if (op1 === '×') { s1N = a * c; s1D = b * d; }
+            else { s1N = a * d; s1D = b * c; }
+            const step1 = MathUtils.simplify(s1N, s1D);
+
+            // Paso 2: step1 op2 (e/f)
+            let s2N, s2D;
+            if (op2 === '×') { s2N = step1.n * e; s2D = step1.d * f; }
+            else { s2N = step1.n * f; s2D = step1.d * e; }
+            const finalSimp = MathUtils.simplify(s2N, s2D);
+
+            const types = ['kahoot4', 'input_frac', 'order_steps', 'drag_tiles'];
+            const qType = types[idx % types.length];
+
+            list.push({
+              id: `c7_${idx}`,
+              circuit: 7,
+              type: qType,
+              difficulty: 'multi',
+              timeLimit: 60,
+              title: 'Resuelve la operación combinada paso a paso de izquierda a derecha:',
+              mathHTML: `
+                <div class="inline-flex items-center gap-1.5 flex-wrap justify-center">
+                  <span>(</span>${MathUtils.fracHTML(a, b)} <span class="text-amber-400">${op1}</span> ${MathUtils.fracHTML(c, d)}<span>)</span>
+                  <span class="text-cyan-400">${op2}</span>
+                  ${MathUtils.fracHTML(e, f)}
+                  <span>=</span> <span class="text-emerald-300">?</span>
+                </div>
+              `,
+              ansN: finalSimp.n,
+              ansD: finalSimp.d,
+              rawN: s2N,
+              rawD: s2D,
+              acceptRaw: true,
+              hint: `1.º Resuelve el paréntesis: ${a}/${b} ${op1} ${c}/${d} = ${step1.n}/${step1.d}. 2.º Luego haz ${step1.n}/${step1.d} ${op2} ${e}/${f}.`,
+              stepsHTML: `
+                <div>1.º Resolvemos la primera operación: ${MathUtils.fracHTML(a, b)} ${op1} ${MathUtils.fracHTML(c, d)} = <b>${MathUtils.fracHTML(step1.n, step1.d)}</b></div>
+                <div>2.º Operamos con la tercera fracción: ${MathUtils.fracHTML(step1.n, step1.d)} ${op2} ${MathUtils.fracHTML(e, f)} = <b>${MathUtils.fracHTML(finalSimp.n, finalSimp.d)}</b></div>
+              `,
+              options: this.makeOptions(finalSimp.n, finalSimp.d, false, [
+                { n: step1.n, d: step1.d },
+                { n: finalSimp.d, d: finalSimp.n },
+                { n: finalSimp.n + 1, d: finalSimp.d + 1 }
+              ]),
+              orderStepsData: [
+                `Resolver la primera operación entre paréntesis: da ${step1.n}/${step1.d}`,
+                `Operar ${step1.n}/${step1.d} ${op2} ${e}/${f}`,
+                `Simplificar al resultado irreducible: ${finalSimp.n}/${finalSimp.d}`
+              ]
+            });
+          });
+        }
+
+        // === CIRCUITO 8: GRAN PREMIO FINAL (30 desafíos combinando los 7 circuitos anteriores) ===
+        if (circuitId === 8) {
+          for (let i = 0; i < 30; i++) {
+            const sourceCircuit = (i % 7) + 1;
+            const sourceList = this.banks[sourceCircuit];
+            const baseQ = JSON.parse(JSON.stringify(sourceList[Math.floor(i / 7) * 3 + (i % 3)]));
+            baseQ.id = `c8_${i}`;
+            baseQ.circuit = 8;
+            baseQ.timeLimit = baseQ.difficulty === 'multi' ? 60 : 45;
+            baseQ.title = `👑 DESAFÍO GRAN PREMIO (${CIRCUITS_DATA[sourceCircuit - 1].shortName}): ` + baseQ.title;
+            list.push(baseQ);
+          }
+        }
+
+        return list;
+      },
+
+      getRandom10(circuitId) {
+        const pool = [...(this.banks[circuitId] || [])];
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        return pool.slice(0, 10);
+      }
+    };
+
+    /******************************************************************
+     * 5. MOTOR GRÁFICO 2.5D DE CARRERAS EN CANVAS HTML5
+     *    Perspectiva pseudo-3D con curvas, decoración, modo día/noche,
+     *    4 karts en pista, partículas de turbo y humo de derrape.
+     ******************************************************************/
+    const RaceRenderer = {
+      menuCanvas: null,
+      menuCtx: null,
+      raceCanvas: null,
+      raceCtx: null,
+      kartPreviewCanvas: null,
+      kartPreviewCtx: null,
+
+      roadOffset: 0,
+      curvePhase: 0,
+      particles: [],
+      stars: [],
+
+      init() {
+        this.menuCanvas = document.getElementById('menuBgCanvas');
+        this.menuCtx = this.menuCanvas.getContext('2d');
+        this.raceCanvas = document.getElementById('raceCanvas');
+        this.raceCtx = this.raceCanvas.getContext('2d');
+        this.kartPreviewCanvas = document.getElementById('kartPreviewCanvas');
+        this.kartPreviewCtx = this.kartPreviewCanvas.getContext('2d');
+
+        // Generar estrellas para el modo noche
+        for (let i = 0; i < 65; i++) {
+          this.stars.push({
+            x: Math.random(),
+            y: Math.random() * 0.45,
+            r: Math.random() * 1.8 + 0.6
+          });
+        }
+
+        window.addEventListener('resize', () => this.resizeCanvases());
+        this.resizeCanvases();
+        requestAnimationFrame(() => this.animateLoop());
+      },
+
+      resizeCanvases() {
+        if (this.menuCanvas) {
+          this.menuCanvas.width = window.innerWidth;
+          this.menuCanvas.height = window.innerHeight;
+        }
+        if (this.raceCanvas && this.raceCanvas.parentElement) {
+          const rect = this.raceCanvas.parentElement.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            this.raceCanvas.width = rect.width;
+            this.raceCanvas.height = rect.height;
+          }
+        }
+      },
+
+      spawnParticles(type, count = 16) {
+        for (let i = 0; i < count; i++) {
+          this.particles.push({
+            x: 0.5 + (Math.random() - 0.5) * 0.14,
+            y: 0.84 + (Math.random() - 0.5) * 0.05,
+            vx: (Math.random() - 0.5) * 0.008,
+            vy: Math.random() * 0.01 + 0.004,
+            size: Math.random() * 7 + 4,
+            life: 1,
+            type // 'turbo', 'super', 'smoke'
+          });
+        }
+      },
+
+      drawKartSprite(ctx, x, y, scale, color, accentColor, label, isTurbo = false, isSuper = false, isSkid = false, isNight = true) {
+        ctx.save();
+        ctx.translate(x, y);
+        if (isSkid) {
+          ctx.rotate(Math.sin(Date.now() * 0.03) * 0.18);
+        }
+        ctx.scale(scale, scale);
+
+        // Sombra bajo el kart
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.beginPath();
+        ctx.ellipse(0, 18, 38, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Aura dorada si tiene Superturbo
+        if (isSuper) {
+          const grad = ctx.createRadialGradient(0, 0, 10, 0, 0, 52);
+          grad.addColorStop(0, 'rgba(251, 191, 36, 0.75)');
+          grad.addColorStop(1, 'rgba(251, 191, 36, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(0, 0, 52, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Faros delanteros en Modo Noche
+        if (isNight) {
+          ctx.fillStyle = 'rgba(254, 240, 138, 0.22)';
+          ctx.beginPath();
+          ctx.moveTo(-18, -8);
+          ctx.lineTo(-42, -65);
+          ctx.lineTo(42, -65);
+          ctx.lineTo(18, -8);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Ruedas traseras y delanteras
+        ctx.fillStyle = '#111827';
+        ctx.fillRect(-36, -6, 12, 22);
+        ctx.fillRect(24, -6, 12, 22);
+        ctx.fillRect(-30, -22, 9, 14);
+        ctx.fillRect(21, -22, 9, 14);
+
+        // Chasis del Kart
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.roundRect(-26, -20, 52, 34, 10);
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        // Alerón trasero con franja
+        ctx.fillStyle = accentColor;
+        ctx.beginPath();
+        ctx.roundRect(-30, 6, 60, 8, 4);
+        ctx.fill();
+
+        // Casco del piloto
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(0, -10, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(-7, -14, 14, 5);
+
+        // Llamas de escape Turbo
+        if (isTurbo || isSuper) {
+          const flameLen = isSuper ? 26 + Math.random() * 14 : 16 + Math.random() * 10;
+          ctx.fillStyle = isSuper ? '#38bdf8' : '#f97316';
+          ctx.beginPath();
+          ctx.moveTo(-14, 14);
+          ctx.lineTo(-8, 14 + flameLen);
+          ctx.lineTo(-2, 14);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(2, 14);
+          ctx.lineTo(8, 14 + flameLen);
+          ctx.lineTo(14, 14);
+          ctx.fill();
+        }
+
+        // Etiqueta con el nombre encima del kart
+        if (label) {
+          ctx.font = 'bold 11px Nunito, sans-serif';
+          const tw = ctx.measureText(label).width + 12;
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+          ctx.beginPath();
+          ctx.roundRect(-tw / 2, -40, tw, 16, 6);
+          ctx.fill();
+          ctx.fillStyle = '#fde047';
+          ctx.textAlign = 'center';
+          ctx.fillText(label, 0, -28);
+        }
+
+        ctx.restore();
+      },
+
+      renderTrackScene(ctx, w, h, circuitTheme, isMenuBg = false) {
+        const isNight = !GameApp.state.isDayMode;
+        const speedFactor = isMenuBg ? 1.3 : GameApp.state.currentSpeedFactor;
+
+        this.roadOffset = (this.roadOffset + 0.08 * speedFactor) % 1;
+        this.curvePhase += 0.008 * speedFactor;
+        const curveAmount = Math.sin(this.curvePhase) * 0.45;
+
+        // 1. Cielo Día / Noche
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.52);
+        if (isNight) {
+          skyGrad.addColorStop(0, circuitTheme.skyTop);
+          skyGrad.addColorStop(1, circuitTheme.skyBot);
+        } else {
+          skyGrad.addColorStop(0, '#0284c7');
+          skyGrad.addColorStop(1, '#bae6fd');
+        }
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, w, h * 0.52);
+
+        // Sol o Estrellas + Luna
+        if (isNight) {
+          ctx.fillStyle = '#ffffff';
+          this.stars.forEach(s => {
+            ctx.beginPath();
+            ctx.arc(s.x * w, s.y * h, s.r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath();
+          ctx.arc(w * 0.85, h * 0.16, 18, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath();
+          ctx.arc(w * 0.85, h * 0.16, 22, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Montañas / Horizonte
+        ctx.fillStyle = isNight ? '#1e293b' : '#64748b';
+        ctx.beginPath();
+        ctx.moveTo(0, h * 0.52);
+        for (let x = 0; x <= w; x += w / 6) {
+          const peak = h * 0.38 + Math.sin(x * 0.02 + this.curvePhase * 0.2) * 16;
+          ctx.lineTo(x, peak);
+        }
+        ctx.lineTo(w, h * 0.52);
+        ctx.closePath();
+        ctx.fill();
+
+        // 2. Renderizado por franjas horizontales en perspectiva 2.5D
+        const horizonY = Math.floor(h * 0.5);
+        const strips = 36;
+        const stripH = (h - horizonY) / strips;
+
+        for (let i = 0; i < strips; i++) {
+          const t = i / strips; // 0 en horizonte, 1 abajo
+          const y = horizonY + i * stripH;
+          const perspective = Math.pow(t, 1.55);
+          const segIndex = Math.floor((1 / (t + 0.05)) * 3 + this.roadOffset * 6);
+          const isAlt = segIndex % 2 === 0;
+
+          // Césped / Escenario lateral
+          ctx.fillStyle = isAlt ? circuitTheme.grass1 : circuitTheme.grass2;
+          ctx.fillRect(0, y, w, stripH + 1);
+
+          // Centro de la pista con curva suave
+          const curveShift = Math.pow(1 - t, 2) * curveAmount * w * 0.35;
+          const roadCenterX = w * 0.5 + curveShift;
+          const roadHalfW = (w * 0.07) + perspective * (w * 0.38);
+
+          // Bordes / pianos rojo-blanco o color del circuito
+          const curbW = roadHalfW * 0.14;
+          ctx.fillStyle = isAlt ? circuitTheme.curb : '#f8fafc';
+          ctx.fillRect(roadCenterX - roadHalfW - curbW, y, roadHalfW * 2 + curbW * 2, stripH + 1);
+
+          // Asfalto
+          ctx.fillStyle = isAlt ? circuitTheme.road1 : circuitTheme.road2;
+          ctx.fillRect(roadCenterX - roadHalfW, y, roadHalfW * 2, stripH + 1);
+
+          // Líneas de carril
+          if (isAlt) {
+            ctx.fillStyle = '#f8fafc';
+            const laneW = Math.max(2, roadHalfW * 0.03);
+            ctx.fillRect(roadCenterX - laneW / 2, y, laneW, stripH + 1);
+          }
+        }
+
+        // 3. Elementos decorativos laterales (Árboles, Tribunas, Arcos)
+        for (let p = 0; p < 5; p++) {
+          const depth = ((p / 5) + (this.roadOffset * 0.2)) % 1;
+          if (depth < 0.12) continue;
+          const py = horizonY + Math.pow(depth, 1.55) * (h - horizonY);
+          const scale = depth * 1.1;
+          const roadHalfW = (w * 0.07) + Math.pow(depth, 1.55) * (w * 0.38);
+          const curveShift = Math.pow(1 - depth, 2) * curveAmount * w * 0.35;
+          const leftX = (w * 0.5 + curveShift) - roadHalfW - 35 * scale;
+          const rightX = (w * 0.5 + curveShift) + roadHalfW + 35 * scale;
+
+          ctx.save();
+          ctx.fillStyle = isNight ? '#10b981' : '#15803d';
+          ctx.beginPath();
+          ctx.arc(leftX, py - 18 * scale, 14 * scale, 0, Math.PI * 2);
+          ctx.arc(rightX, py - 18 * scale, 14 * scale, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 4. Dibujar Karts Rivales y del Estudiante
+        const playerColor = GameApp.state.playerColor;
+        const model = KART_MODELS.find(k => k.id === GameApp.state.selectedKartId) || KART_MODELS[0];
+
+        if (isMenuBg) {
+          this.drawKartSprite(ctx, w * 0.32, h * 0.78, 0.75, '#3b82f6', '#38bdf8', 'Veloz Leo', true, false, false, isNight);
+          this.drawKartSprite(ctx, w * 0.68, h * 0.80, 0.8, '#ec4899', '#fbcfe8', 'Turbo Sofía', true, false, false, isNight);
+          this.drawKartSprite(ctx, w * 0.50, h * 0.86, 1.0, playerColor, model.accent, GameApp.state.studentName || 'Tu Kart', true, false, false, isNight);
+        } else {
+          // Posicionar rivales según su diferencia de avance con el jugador
+          const pProg = GameApp.state.playerProgress;
+          GameApp.state.rivals.forEach((riv, idx) => {
+            const diff = riv.progress - pProg; // positivo si el rival va adelante
+            const normZ = Math.max(0.18, Math.min(0.95, 0.78 - diff * 0.015));
+            const ry = horizonY + normZ * (h - horizonY);
+            const laneOffset = (idx - 1) * (w * 0.16) * normZ;
+            const rx = w * 0.5 + laneOffset + Math.sin(Date.now() * 0.002 + idx) * 8;
+            const rScale = 0.42 + normZ * 0.55;
+            this.drawKartSprite(ctx, rx, ry, rScale, riv.color, '#ffffff', riv.name, riv.speed > 1.05, false, false, isNight);
+          });
+
+          // Partículas de turbo o derrape
+          for (let i = this.particles.length - 1; i >= 0; i--) {
+            const pt = this.particles[i];
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+            pt.life -= 0.04;
+            if (pt.life <= 0) {
+              this.particles.splice(i, 1);
+              continue;
+            }
+            ctx.fillStyle = pt.type === 'super'
+              ? `rgba(250, 204, 21, ${pt.life})`
+              : pt.type === 'turbo'
+                ? `rgba(56, 189, 248, ${pt.life})`
+                : `rgba(148, 163, 184, ${pt.life})`;
+            ctx.beginPath();
+            ctx.arc(pt.x * w, pt.y * h, pt.size * pt.life, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Kart del estudiante en primer plano
+          const bounceY = Math.sin(Date.now() * 0.02) * 1.5;
+          this.drawKartSprite(
+            ctx,
+            w * 0.5,
+            h * 0.84 + bounceY,
+            1.02,
+            playerColor,
+            model.accent,
+            GameApp.state.studentName || 'Piloto',
+            GameApp.state.isTurboVisual,
+            GameApp.state.streak >= 3,
+            GameApp.state.isSkidVisual,
+            isNight
+          );
+        }
+      },
+
+      renderKartPreview() {
+        if (!this.kartPreviewCtx || !this.kartPreviewCanvas) return;
+        const ctx = this.kartPreviewCtx;
+        const w = this.kartPreviewCanvas.width;
+        const h = this.kartPreviewCanvas.height;
+        ctx.clearRect(0, 0, w, h);
+        const model = KART_MODELS.find(k => k.id === GameApp.state.selectedKartId) || KART_MODELS[0];
+        this.drawKartSprite(ctx, w * 0.5, h * 0.66, 0.85, GameApp.state.playerColor, model.accent, '', true, false, false, false);
+      },
+
+      animateLoop() {
+        const activeTheme = CIRCUITS_DATA[(GameApp.state.selectedCircuit || 1) - 1].theme;
+
+        if (!document.getElementById('screenMenu').classList.contains('hidden')) {
+          this.renderTrackScene(this.menuCtx, this.menuCanvas.width, this.menuCanvas.height, activeTheme, true);
+          this.renderKartPreview();
+        } else if (!document.getElementById('screenRace').classList.contains('hidden')) {
+          if (!GameApp.state.isPaused) {
+            GameApp.updateRaceSimulation();
+          }
+          this.renderTrackScene(this.raceCtx, this.raceCanvas.width, this.raceCanvas.height, activeTheme, false);
+        }
+
+        requestAnimationFrame(() => this.animateLoop());
+      }
+    };
+
+    /******************************************************************
+     * 6. GENERADOR DE DIPLOMAS PERSONALIZADOS EN CANVAS DE ALTA RESOLUCIÓN
+     *    Con firma caligráfica del Prof. Jhon Dewis, descarga PNG e impresión
+     ******************************************************************/
+    const DiplomaGenerator = {
+      currentDiplomaCircuit: 1, // 1..8 o 'champion'
+
+      renderDiploma(targetId = 1) {
+        this.currentDiplomaCircuit = targetId;
+        const canvas = document.getElementById('diplomaCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+
+        const studentName = (GameApp.state.studentName || 'Estudiante Campeón/a').trim();
+        const progress = GameApp.state.circuitProgress || {};
+        const isChampion = targetId === 'champion';
+        const cData = !isChampion ? CIRCUITS_DATA[targetId - 1] : null;
+        const record = !isChampion ? (progress[targetId] || { score: 0, medal: 'Participación' }) : null;
+
+        // Fondo pergamino imperial
+        const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+        bgGrad.addColorStop(0, '#fffbeb');
+        bgGrad.addColorStop(0.5, '#fef3c7');
+        bgGrad.addColorStop(1, '#fde68a');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Marco doble dorado elegante
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 14;
+        ctx.strokeRect(28, 28, w - 56, h - 56);
+
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(46, 46, w - 92, h - 92);
+
+        // Encabezado superior
+        ctx.fillStyle = '#78350f';
+        ctx.font = '900 34px Orbitron, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🏎️ FRACCIÓN KART: GRAN PREMIO MATEMÁTICO 🏁', w / 2, 115);
+
+        ctx.fillStyle = '#b45309';
+        ctx.font = '800 22px Nunito, sans-serif';
+        ctx.fillText(
+          isChampion ? 'DIPLOMA DE HONOR AL CAMPEÓN DEL GRAN PREMIO MATEMÁTICO' : 'DIPLOMA DE EXCELENCIA Y PARTICIPACIÓN',
+          w / 2,
+          158
+        );
+
+        // Texto central
+        ctx.fillStyle = '#334155';
+        ctx.font = '700 22px Nunito, sans-serif';
+        ctx.fillText('Se otorga el presente reconocimiento a:', w / 2, 215);
+
+        // Nombre del estudiante destacado
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '900 48px Nunito, sans-serif';
+        ctx.fillText(studentName, w / 2, 280);
+
+        // Línea decorativa bajo el nombre
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.2, 300);
+        ctx.lineTo(w * 0.8, 300);
+        ctx.stroke();
+
+        // Motivo y circuito
+        ctx.fillStyle = '#1e293b';
+        ctx.font = '800 26px Orbitron, sans-serif';
+        const circuitLabel = isChampion
+          ? '🏆 CAMPEÓN DEL GRAN PREMIO MATEMÁTICO (8 CIRCUITOS) 🏆'
+          : cData.name;
+        ctx.fillText(circuitLabel, w / 2, 360);
+
+        // Estadísticas (Puntuación, Medalla, Fecha)
+        const totalAllScore = Object.values(progress).reduce((acc, r) => acc + (r.score || 0), 0);
+        const displayScore = isChampion ? `${totalAllScore} PUNTOS ACUMULADOS` : `${record.score || 0} PUNTOS`;
+        const displayMedal = isChampion ? 'MEDALLA SUPREMA DE ORO' : `MEDALLA DE ${(record.medal || 'ORO').toUpperCase()}`;
+        const dateStr = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
+
+        ctx.fillStyle = '#047857';
+        ctx.font = '900 26px Nunito, sans-serif';
+        ctx.fillText(`${displayMedal}  •  PUNTUACIÓN: ${displayScore}`, w / 2, 420);
+
+        // Frase motivadora
+        ctx.fillStyle = '#334155';
+        ctx.font = 'italic 700 21px Nunito, sans-serif';
+        ctx.fillText(
+          '«Con constancia, agilidad mental y pasión por las matemáticas, no hay meta imposible de alcanzar.»',
+          w / 2,
+          485
+        );
+
+        // Fecha a la izquierda y Firma Prof. Jhon Dewis a la derecha
+        ctx.fillStyle = '#475569';
+        ctx.font = '700 20px Nunito, sans-serif';
+        ctx.fillText(`Fecha: ${dateStr}`, w * 0.27, 635);
+
+        // Firma caligráfica elegante del Prof. Jhon Dewis en el diploma
+        const sigGrad = ctx.createLinearGradient(w * 0.58, 560, w * 0.88, 620);
+        sigGrad.addColorStop(0, '#b45309');
+        sigGrad.addColorStop(0.35, '#2563eb');
+        sigGrad.addColorStop(0.7, '#7c3aed');
+        sigGrad.addColorStop(1, '#db2777');
+        ctx.fillStyle = sigGrad;
+        ctx.font = '48px "Great Vibes", cursive';
+        ctx.fillText('Prof. Jhon Dewis', w * 0.73, 610);
+
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.58, 625);
+        ctx.lineTo(w * 0.88, 625);
+        ctx.stroke();
+
+        ctx.fillStyle = '#334155';
+        ctx.font = '800 18px Nunito, sans-serif';
+        ctx.fillText('Firma: Prof. Jhon Dewis', w * 0.73, 652);
+        ctx.font = '600 15px Nunito, sans-serif';
+        ctx.fillText('Director del Gran Premio Matemático', w * 0.73, 675);
+      },
+
+      downloadPNG() {
+        const canvas = document.getElementById('diplomaCanvas');
+        const link = document.createElement('a');
+        const nameClean = (GameApp.state.studentName || 'Estudiante').replace(/\s+/g, '_');
+        link.download = `Diploma_Fraccion_Kart_${nameClean}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      },
+
+      printDiploma() {
+        const canvas = document.getElementById('diplomaCanvas');
+        const dataUrl = canvas.toDataURL('image/png');
+        const win = window.open('', '_blank');
+        if (!win) return;
+        win.document.write(`
+          <html>
+            <head><title>Imprimir Diploma - Fracción Kart</title></head>
+            <body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#fff;">
+              <img src="${dataUrl}" style="max-width:96%;max-height:96%;" onload="window.print();window.close();" />
+            </body>
+          </html>
+        `);
+        win.document.close();
+      }
+    };
+
+    /******************************************************************
+     * 7. CONTROLADOR PRINCIPAL DEL VIDEOJUEGO (GameApp)
+     ******************************************************************/
+    const GameApp = {
+      state: {
+        studentName: '',
+        selectedKartId: 'rayo',
+        playerColor: '#ef4444',
+        isDayMode: false,
+        gameMode: 'gp', // 'gp' (Gran Premio) o 'practice' (Práctica)
+        selectedCircuit: 1,
+        circuitProgress: {},
+        localRecords: [],
+
+        // Estado de carrera activa
+        questions: [],
+        qIndex: 0,
+        attempt: 1,
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        firstTryHits: 0,
+        wrongCount: 0,
+        raceStartTime: 0,
+        questionTimeTotal: 20,
+        questionTimeLeft: 20,
+        timerInterval: null,
+        isQuestionResolved: false,
+        isPaused: false,
+
+        // Progreso físico en la pista (0 a 100)
+        playerProgress: 6,
+        currentSpeedFactor: 1.0,
+        isTurboVisual: false,
+        isSkidVisual: false,
+        rivals: [
+          { name: 'Veloz Leo', color: '#3b82f6', progress: 6, speed: 1.0 },
+          { name: 'Turbo Sofía', color: '#ec4899', progress: 6, speed: 1.05 },
+          { name: 'Cyber Max', color: '#10b981', progress: 6, speed: 0.96 }
+        ]
+      },
+
+      init() {
+        QuestionBank.initAllBanks();
+        this.loadStorage();
+        this.renderKartSelector();
+        this.renderCircuitsGrid();
+        RaceRenderer.init();
+      },
+
+      loadStorage() {
+        try {
+          const savedProfile = JSON.parse(localStorage.getItem('fk_profile_v1') || '{}');
+          if (savedProfile.studentName) {
+            this.state.studentName = savedProfile.studentName;
+            document.getElementById('inputStudentName').value = savedProfile.studentName;
+          }
+          if (savedProfile.selectedKartId) this.state.selectedKartId = savedProfile.selectedKartId;
+          if (savedProfile.playerColor) {
+            this.state.playerColor = savedProfile.playerColor;
+            document.getElementById('inputKartColor').value = savedProfile.playerColor;
+          }
+          this.state.circuitProgress = JSON.parse(localStorage.getItem('fk_progress_v1') || '{}');
+          this.state.localRecords = JSON.parse(localStorage.getItem('fk_records_v1') || '[]');
+        } catch (e) {}
+      },
+
+      savePlayerProfile() {
+        const input = document.getElementById('inputStudentName');
+        this.state.studentName = input.value.trim();
+        try {
+          localStorage.setItem('fk_profile_v1', JSON.stringify({
+            studentName: this.state.studentName,
+            selectedKartId: this.state.selectedKartId,
+            playerColor: this.state.playerColor
+          }));
+        } catch (e) {}
+      },
+
+      toggleDayNight() {
+        this.state.isDayMode = !this.state.isDayMode;
+        document.body.classList.toggle('day-mode', this.state.isDayMode);
+        const icon = document.getElementById('iconDayNight');
+        const txt = document.getElementById('txtDayNight');
+        if (this.state.isDayMode) {
+          icon.className = 'fa-solid fa-sun text-amber-300';
+          txt.textContent = 'Día';
+        } else {
+          icon.className = 'fa-solid fa-moon text-amber-300';
+          txt.textContent = 'Noche';
+        }
+      },
+
+      selectKart(kartId) {
+        const model = KART_MODELS.find(k => k.id === kartId) || KART_MODELS[0];
+        this.state.selectedKartId = model.id;
+        this.state.playerColor = model.defaultColor;
+        document.getElementById('inputKartColor').value = model.defaultColor;
+        document.getElementById('selectedKartTitle').textContent = model.name;
+        document.getElementById('selectedKartStats').textContent = model.stats;
+        document.getElementById('selectedKartBar').style.width = model.barWidth;
+        this.savePlayerProfile();
+        this.renderKartSelector();
+        AudioEngine.playTone(587.33, 0.08, 'triangle', 0.12);
+      },
+
+      selectCustomColor(hex) {
+        this.state.playerColor = hex;
+        this.savePlayerProfile();
+      },
+
+      renderKartSelector() {
+        const grid = document.getElementById('kartSelectorGrid');
+        grid.innerHTML = KART_MODELS.map(k => {
+          const active = k.id === this.state.selectedKartId;
+          return `
+            <button onclick="GameApp.selectKart('${k.id}')" class="p-2 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1 ${active ? 'bg-amber-500/25 border-amber-400 scale-[1.02]' : 'bg-slate-900/60 border-white/10 hover:border-white/30'}">
+              <span class="w-6 h-6 rounded-full border-2 border-white shadow" style="background:${k.defaultColor}"></span>
+              <span class="font-arcade font-bold text-[11px] leading-tight">${k.name}</span>
+            </button>
+          `;
+        }).join('');
+      },
+
+      setGameMode(mode) {
+        this.state.gameMode = mode;
+        const btnGP = document.getElementById('modeBtnGP');
+        const btnPr = document.getElementById('modeBtnPractice');
+        if (mode === 'gp') {
+          btnGP.className = 'p-3 rounded-2xl border-2 text-left transition flex flex-col justify-between bg-gradient-to-br from-amber-500/25 to-red-600/25 border-amber-400';
+          btnPr.className = 'p-3 rounded-2xl border-2 text-left transition flex flex-col justify-between bg-slate-800/50 border-white/15 hover:border-cyan-400/50';
+        } else {
+          btnPr.className = 'p-3 rounded-2xl border-2 text-left transition flex flex-col justify-between bg-gradient-to-br from-cyan-500/25 to-blue-600/25 border-cyan-400';
+          btnGP.className = 'p-3 rounded-2xl border-2 text-left transition flex flex-col justify-between bg-slate-800/50 border-white/15 hover:border-amber-400/50';
+        }
+        AudioEngine.playTone(523.25, 0.08, 'triangle', 0.12);
+      },
+
+      selectCircuitCard(id) {
+        this.state.selectedCircuit = id;
+        this.renderCircuitsGrid();
+        AudioEngine.playTone(659.25, 0.07, 'triangle', 0.1);
+      },
+
+      renderCircuitsGrid() {
+        const grid = document.getElementById('circuitsGrid');
+        const prog = this.state.circuitProgress || {};
+        const completedCount = Object.keys(prog).length;
+        document.getElementById('MenuProgressBadge').textContent = `${completedCount} / 8 Circuitos Completados`;
+
+        grid.innerHTML = CIRCUITS_DATA.map(c => {
+          const isSelected = c.id === this.state.selectedCircuit;
+          const rec = prog[c.id];
+          const medalIcon = rec
+            ? (rec.medal === 'Oro' ? '🥇 Oro' : rec.medal === 'Plata' ? '🥈 Plata' : '🥉 Bronce')
+            : 'Sin correr';
+          return `
+            <div onclick="GameApp.selectCircuitCard(${c.id})" class="cursor-pointer p-3 rounded-2xl border-2 transition flex flex-col justify-between gap-2 ${isSelected ? 'bg-gradient-to-br from-amber-500/25 via-orange-500/15 to-slate-900 border-amber-400 shadow-lg' : 'bg-slate-900/65 border-white/10 hover:border-cyan-400/40'}">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl">${c.icon}</span>
+                  <div>
+                    <div class="font-arcade font-black text-xs text-amber-300">CIRCUITO ${c.id}</div>
+                    <div class="font-extrabold text-sm leading-tight">${c.shortName}</div>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${rec ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 'bg-slate-800 text-slate-400'}">
+                  ${medalIcon}
+                </span>
+              </div>
+
+              <p class="text-xs opacity-80 leading-snug">${c.topic}</p>
+
+              <div class="flex items-center justify-between pt-1 border-t border-white/10">
+                <span class="text-[11px] font-bold text-cyan-300">
+                  ${rec ? `Récord: ${rec.score} pts` : '30 ejercicios'}
+                </span>
+                <div class="flex items-center gap-1.5">
+                  ${rec ? `<button onclick="event.stopPropagation(); GameApp.openDiplomaForCircuit(${c.id})" class="px-2 py-1 rounded-lg bg-purple-500/30 hover:bg-purple-500/50 text-purple-200 text-[11px] font-bold" title="Ver Diploma"><i class="fa-solid fa-scroll"></i></button>` : ''}
+                  <button onclick="event.stopPropagation(); GameApp.selectCircuitCard(${c.id}); GameApp.startSelectedCircuit();" class="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-arcade font-black text-[11px]">
+                    CORRER <i class="fa-solid fa-play ml-0.5"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      startSelectedCircuit() {
+        const nameInput = document.getElementById('inputStudentName');
+        if (!nameInput.value.trim()) {
+          nameInput.value = 'Piloto Matemático';
+          this.savePlayerProfile();
+        }
+        AudioEngine.init();
+        const cData = CIRCUITS_DATA[this.state.selectedCircuit - 1];
+        document.getElementById('introCircuitIcon').textContent = cData.icon;
+        document.getElementById('introCircuitTitle').textContent = cData.name;
+        document.getElementById('introCircuitSub').textContent = cData.topic;
+        document.getElementById('introCircuitBody').innerHTML = cData.introHTML;
+        document.getElementById('modalIntro').classList.remove('hidden');
+      },
+
+      closeIntroAndStartRace() {
+        document.getElementById('modalIntro').classList.add('hidden');
+        this.beginRace(this.state.selectedCircuit);
+      },
+
+      beginRace(circuitId) {
+        this.state.selectedCircuit = circuitId;
+        this.state.questions = QuestionBank.getRandom10(circuitId);
+        this.state.qIndex = 0;
+        this.state.score = 0;
+        this.state.streak = 0;
+        this.state.bestStreak = 0;
+        this.state.firstTryHits = 0;
+        this.state.wrongCount = 0;
+        this.state.raceStartTime = Date.now();
+        this.state.isPaused = false;
+        this.state.playerProgress = 6;
+        this.state.currentSpeedFactor = 1.0;
+        this.state.isTurboVisual = false;
+        this.state.isSkidVisual = false;
+
+        // Configurar velocidad de los 3 rivales según el circuito
+        const diffBoost = circuitId === 8 ? 1.18 : 0.92 + circuitId * 0.03;
+        this.state.rivals = [
+          { name: 'Veloz Leo', color: '#3b82f6', progress: 6, speed: 0.95 * diffBoost },
+          { name: 'Turbo Sofía', color: '#ec4899', progress: 6, speed: 1.04 * diffBoost },
+          { name: 'Cyber Max', color: '#10b981', progress: 6, speed: 0.88 * diffBoost }
+        ];
+
+        // Mostrar pantalla de carrera
+        document.getElementById('screenMenu').classList.add('hidden');
+        document.getElementById('screenPodium').classList.add('hidden');
+        document.getElementById('screenRace').classList.remove('hidden');
+        document.getElementById('btnMenuHome').classList.remove('hidden');
+
+        RaceRenderer.resizeCanvases();
+        AudioEngine.isFastMusic = circuitId === 8;
+        AudioEngine.startMusicLoop();
+
+        this.loadCurrentQuestion();
+      },
+
+      updateRaceSimulation() {
+        // Avance suave de los rivales entre preguntas
+        this.state.rivals.forEach(r => {
+          const targetCap = Math.min(94, (this.state.qIndex + 1) * 9.2);
+          if (r.progress < targetCap) {
+            r.progress += 0.018 * r.speed;
+          }
+        });
+        this.updateRaceHUD();
+      },
+
+      updateRaceHUD() {
+        const cData = CIRCUITS_DATA[this.state.selectedCircuit - 1];
+        document.getElementById('hudCircuitTitle').textContent = cData.shortName.toUpperCase();
+        document.getElementById('hudQuestionCounter').textContent = `Pregunta ${this.state.qIndex + 1}/10`;
+        document.getElementById('hudModeBadge').textContent = this.state.gameMode === 'gp' ? 'Gran Premio' : 'Modo Práctica';
+        document.getElementById('hudScore').textContent = `${this.state.score} PTS`;
+        document.getElementById('hudStreak').textContent = `🔥 ${this.state.streak}`;
+
+        // Posición actual entre los 4 karts
+        const allProgress = [
+          { isPlayer: true, p: this.state.playerProgress },
+          ...this.state.rivals.map(r => ({ isPlayer: false, p: r.progress }))
+        ].sort((a, b) => b.p - a.p);
+
+        const pos = allProgress.findIndex(x => x.isPlayer) + 1;
+        document.getElementById('hudPositionBadge').textContent = `${pos}.º`;
+
+        // Actualizar iconos en la barra lineal
+        document.getElementById('progMarkerPlayer').style.left = `${Math.min(93, this.state.playerProgress)}%`;
+        document.getElementById('progMarkerRival1').style.left = `${Math.min(93, this.state.rivals[0].progress)}%`;
+        document.getElementById('progMarkerRival2').style.left = `${Math.min(93, this.state.rivals[1].progress)}%`;
+        document.getElementById('progMarkerRival3').style.left = `${Math.min(93, this.state.rivals[2].progress)}%`;
+
+        const kmh = Math.round(115 * this.state.currentSpeedFactor + (this.state.streak >= 3 ? 65 : 0));
+        document.getElementById('hudSpeedKmh').textContent = `${kmh} km/h`;
+        document.getElementById('superturboBadge').classList.toggle('hidden', this.state.streak < 3);
+      },
+
+      /****************************************************************
+       * CARGA Y RENDERIZADO DE LOS 8 TIPOS DE INTERACCIÓN DE PREGUNTAS
+       ****************************************************************/
+      loadCurrentQuestion() {
+        this.stopQuestionTimer();
+        const q = this.state.questions[this.state.qIndex];
+        this.state.attempt = 1;
+        this.state.isQuestionResolved = false;
+
+        document.getElementById('feedbackStepPanel').classList.add('hidden');
+        document.getElementById('hintBannerBox').classList.add('hidden');
+
+        // Etiquetas superiores
+        const typeNames = {
+          kahoot4: '🎯 4 Alternativas Kahoot',
+          input_frac: '⌨️ Completar Fracción',
+          drag_tiles: '🧩 Construir con Fichas',
+          invert_select: '🔄 Invertir Fracción',
+          simplify_tap: '✂️ Tocar Factor Común',
+          order_steps: '📋 Ordenar Pasos',
+          find_error: '🔍 Encontrar el Error',
+          word_problem: '🏙️ Problema Aplicado'
+        };
+        document.getElementById('questionTypeBadge').textContent = typeNames[q.type] || 'Desafío';
+        document.getElementById('attemptBadge').textContent = '1.er Intento (Hasta 1000 pts)';
+        document.getElementById('attemptBadge').className = 'px-2.5 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs';
+
+        document.getElementById('questionTitleText').textContent = q.title;
+        document.getElementById('questionMathVisual').innerHTML = q.mathHTML;
+
+        this.renderInteractionUI(q);
+
+        // Iniciar cronómetro si estamos en Modo Gran Premio
+        if (this.state.gameMode === 'gp') {
+          document.getElementById('timerBox').classList.remove('hidden');
+          document.getElementById('timerBarContainer').classList.remove('hidden');
+          this.startQuestionTimer(q.timeLimit || 30);
+        } else {
+          document.getElementById('timerBox').classList.add('hidden');
+          document.getElementById('timerBarContainer').classList.add('hidden');
+        }
+
+        this.updateRaceHUD();
+      },
+
+      startQuestionTimer(seconds) {
+        this.state.questionTimeTotal = seconds;
+        this.state.questionTimeLeft = seconds;
+        this.updateTimerVisual();
+
+        this.state.timerInterval = setInterval(() => {
+          if (this.state.isPaused || this.state.isQuestionResolved) return;
+          this.state.questionTimeLeft = Math.max(0, +(this.state.questionTimeLeft - 0.2).toFixed(1));
+          this.updateTimerVisual();
+          if (this.state.questionTimeLeft <= 0) {
+            this.stopQuestionTimer();
+            this.handleTimeOut();
+          }
+        }, 200);
+      },
+
+      stopQuestionTimer() {
+        if (this.state.timerInterval) {
+          clearInterval(this.state.timerInterval);
+          this.state.timerInterval = null;
+        }
+      },
+
+      updateTimerVisual() {
+        const s = Math.ceil(this.state.questionTimeLeft);
+        document.getElementById('timerText').textContent = `${s}s`;
+        const pct = Math.max(0, (this.state.questionTimeLeft / this.state.questionTimeTotal) * 100);
+        document.getElementById('timerBarFill').style.width = `${pct}%`;
+      },
+
+      renderInteractionUI(q) {
+        const area = document.getElementById('interactionArea');
+
+        // 1 & 8. Cuatro alternativas Kahoot o Problema corto
+        if (q.type === 'kahoot4' || q.type === 'word_problem') {
+          const colors = [
+            'bg-rose-600 hover:bg-rose-500 border-rose-300',
+            'bg-blue-600 hover:bg-blue-500 border-blue-300',
+            'bg-amber-500 hover:bg-amber-400 border-amber-200 text-slate-950',
+            'bg-emerald-600 hover:bg-emerald-500 border-emerald-300'
+          ];
+          const shapes = ['▲', '◆', '●', '■'];
+          area.innerHTML = `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              ${q.options.map((opt, idx) => `
+                <button
+                  id="optBtn_${idx}"
+                  onclick="GameApp.submitChoice(${opt.n}, ${opt.d}, this)"
+                  class="kahoot-btn p-3.5 rounded-2xl border-b-4 ${colors[idx]} font-black text-xl sm:text-2xl flex items-center justify-between shadow-lg"
+                >
+                  <span class="w-8 h-8 rounded-xl bg-black/20 flex items-center justify-center text-base">${shapes[idx]}</span>
+                  <span class="flex-1 text-center">${opt.isWhole ? opt.n : MathUtils.fracHTML(opt.n, opt.d)}</span>
+                  <span class="w-6"></span>
+                </button>
+              `).join('')}
+            </div>
+          `;
+          return;
+        }
+
+        // 2. Completar numerador y denominador (con teclado en pantalla)
+        if (q.type === 'input_frac') {
+          if (q.isWholeAnswer) {
+            area.innerHTML = `
+              <div class="flex flex-col items-center gap-3">
+                <div class="flex items-center gap-3">
+                  <input id="inpWholeVal" type="number" placeholder="?" class="w-32 text-center py-2.5 px-3 rounded-2xl bg-slate-900 border-2 border-amber-400 text-white font-black text-2xl outline-none" />
+                  <button onclick="GameApp.submitInputFrac(true)" class="arcade-btn px-6 py-3 rounded-2xl bg-emerald-500 text-slate-950 font-arcade font-black text-sm">
+                    COMPROBAR
+                  </button>
+                </div>
+              </div>
+            `;
+          } else {
+            area.innerHTML = `
+              <div class="flex flex-wrap items-center justify-center gap-4">
+                <div class="flex flex-col items-center bg-slate-900/90 p-3 rounded-2xl border-2 border-cyan-400/50">
+                  <input id="inpNumVal" type="number" placeholder="Numerador" class="w-32 text-center py-1.5 px-2 rounded-xl bg-slate-800 border border-white/20 text-amber-300 font-black text-xl outline-none" />
+                  <div class="w-32 h-1 bg-white my-2 rounded"></div>
+                  <input id="inpDenVal" type="number" placeholder="Denominador" class="w-32 text-center py-1.5 px-2 rounded-xl bg-slate-800 border border-white/20 text-cyan-300 font-black text-xl outline-none" />
+                </div>
+                <button onclick="GameApp.submitInputFrac(false)" class="arcade-btn px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 font-arcade font-black text-sm">
+                  <i class="fa-solid fa-check mr-1"></i> VALIDAR FRACCIÓN
+                </button>
+              </div>
+            `;
+          }
+          return;
+        }
+
+        // 3. Construir la fracción tocando/arrastrando fichas numéricas
+        if (q.type === 'drag_tiles') {
+          const tileSet = new Set([q.ansN, q.ansD, q.rawN || q.ansN + 2, q.rawD || q.ansD + 3, q.ansN + 1, q.ansD + 2]);
+          const tiles = Array.from(tileSet).filter(n => n > 0).slice(0, 6).sort((a, b) => a - b);
+          this.state.dragSlot = { activeSlot: 'num', num: null, den: null };
+
+          area.innerHTML = `
+            <div class="flex flex-col items-center gap-3">
+              <p class="text-xs font-bold text-cyan-300">Toca una casilla (Numerador o Denominador) y elige su ficha numérica:</p>
+              <div class="flex items-center gap-6">
+                <div class="flex flex-col items-center bg-slate-900 p-3 rounded-2xl border border-white/15">
+                  <button id="slotNumBtn" onclick="GameApp.selectDragSlot('num')" class="w-24 h-11 rounded-xl border-2 border-amber-400 bg-amber-500/20 font-black text-xl text-amber-300">?</button>
+                  <div class="w-24 h-1 bg-white my-1.5"></div>
+                  <button id="slotDenBtn" onclick="GameApp.selectDragSlot('den')" class="w-24 h-11 rounded-xl border-2 border-white/20 bg-slate-800 font-black text-xl text-cyan-300">?</button>
+                </div>
+
+                <div class="flex flex-wrap gap-2 max-w-xs justify-center">
+                  ${tiles.map(val => `
+                    <button onclick="GameApp.placeTileValue(${val})" class="arcade-btn w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg border border-indigo-300">
+                      ${val}
+                    </button>
+                  `).join('')}
+                </div>
+
+                <button onclick="GameApp.submitDragTiles()" class="arcade-btn px-5 py-3 rounded-2xl bg-emerald-500 text-slate-950 font-arcade font-black text-xs sm:text-sm">
+                  LISTO
+                </button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // 4. Seleccionar qué fracción debe invertirse y cómo queda (Circuito 4)
+        if (q.type === 'invert_select' && q.invertData) {
+          const { a, b, c, d } = q.invertData;
+          area.innerHTML = `
+            <div class="space-y-3 text-center">
+              <div class="text-xs sm:text-sm font-extrabold text-purple-300">
+                Paso 1: Elige la multiplicación equivalente invirtiendo la fracción correcta y su resultado:
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button onclick="GameApp.submitChoice(${q.ansN}, ${q.ansD}, this)" class="kahoot-btn p-3 rounded-2xl bg-purple-700 hover:bg-purple-600 border-b-4 border-purple-300 font-bold text-lg flex items-center justify-center gap-2">
+                  <span>Invertir la 2.ª: ${MathUtils.fracHTML(a, b)} × ${MathUtils.fracHTML(d, c)} =</span>
+                  <span class="text-amber-300 font-black">${MathUtils.fracHTML(q.ansN, q.ansD)}</span>
+                </button>
+                <button onclick="GameApp.submitChoice(${b * c}, ${a * d}, this)" class="kahoot-btn p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border-b-4 border-slate-500 font-bold text-lg flex items-center justify-center gap-2">
+                  <span>Invertir la 1.ª: ${MathUtils.fracHTML(b, a)} × ${MathUtils.fracHTML(c, d)} =</span>
+                  <span>${MathUtils.fracHTML(b * c, a * d)}</span>
+                </button>
+                <button onclick="GameApp.submitChoice(${a * c}, ${b * d}, this)" class="kahoot-btn p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border-b-4 border-slate-500 font-bold text-lg flex items-center justify-center gap-2">
+                  <span>Sin invertir: ${MathUtils.fracHTML(a, b)} × ${MathUtils.fracHTML(c, d)} =</span>
+                  <span>${MathUtils.fracHTML(a * c, b * d)}</span>
+                </button>
+                <button onclick="GameApp.submitChoice(${q.ansD}, ${q.ansN}, this)" class="kahoot-btn p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border-b-4 border-slate-500 font-bold text-lg flex items-center justify-center gap-2">
+                  <span>Invertir ambas: ${MathUtils.fracHTML(b, a)} × ${MathUtils.fracHTML(d, c)} =</span>
+                  <span>${MathUtils.fracHTML(q.ansD, q.ansN)}</span>
+                </button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // 5. Simplificar tocando factores comunes para ver el tachado en vivo (Circuito 2)
+        if (q.type === 'simplify_tap' && q.simplifyData) {
+          const sd = q.simplifyData;
+          area.innerHTML = `
+            <div class="flex flex-col items-center gap-3">
+              <div id="liveStrikeBox" class="px-4 py-2 rounded-2xl bg-slate-950/80 border border-emerald-400/40 text-lg font-bold">
+                <button onclick="GameApp.triggerVisualSimplify()" class="px-3 py-1 rounded-xl bg-amber-500 text-slate-950 font-extrabold text-xs mr-2 animate-pulse">
+                  ✂️ Tocar para Simplificar Factores (÷${sd.factorHint})
+                </button>
+                <span id="liveStrikeMath">${MathUtils.fracHTML(sd.a, sd.b)} × ${MathUtils.fracHTML(sd.c, sd.d)}</span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
+                ${q.options.map((opt, idx) => `
+                  <button onclick="GameApp.submitChoice(${opt.n}, ${opt.d}, this)" class="kahoot-btn p-3 rounded-2xl bg-teal-700 hover:bg-teal-600 border-b-4 border-teal-300 font-black text-xl">
+                    ${MathUtils.fracHTML(opt.n, opt.d)}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // 6. Ordenar los pasos de una operación
+        if (q.type === 'order_steps' && q.orderStepsData) {
+          const steps = q.orderStepsData.map((text, idx) => ({ text, correctOrder: idx }));
+          const shuffled = [...steps].sort(() => Math.random() - 0.5);
+          this.state.orderState = { shuffled, picked: [] };
+
+          area.innerHTML = `
+            <div class="space-y-2">
+              <p class="text-xs font-extrabold text-amber-300 text-center">Haz clic en los pasos en el ORDEN CORRECTO (1.º, 2.º y 3.º):</p>
+              <div id="orderStepsList" class="grid grid-cols-1 gap-2">
+                ${shuffled.map((st, i) => `
+                  <button id="orderBtn_${i}" onclick="GameApp.pickOrderStep(${i})" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/15 text-left text-xs sm:text-sm font-bold flex items-center justify-between">
+                    <span>${st.text}</span>
+                    <span id="orderBadge_${i}" class="px-2 py-0.5 rounded bg-white/10 text-amber-300 text-xs">Elegir</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // 7. Encontrar el error en una operación desarrollada
+        if (q.type === 'find_error' && q.errorStepsData) {
+          const ed = q.errorStepsData;
+          area.innerHTML = `
+            <div class="space-y-2">
+              <p class="text-xs font-extrabold text-rose-300 text-center">🔍 Un piloto cometió un error al resolver. Toca el paso que tiene el ERROR:</p>
+              <div class="grid grid-cols-1 gap-2">
+                ${ed.steps.map((st, idx) => `
+                  <button onclick="GameApp.submitFindError(${idx}, ${ed.wrongIndex}, this)" class="kahoot-btn p-3 rounded-xl bg-slate-800 hover:bg-rose-950/60 border-2 border-white/15 hover:border-rose-400 text-left text-xs sm:text-sm font-bold flex items-center justify-between">
+                    <span>${st}</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 text-xs font-extrabold">¿Error aquí?</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          return;
+        }
+      },
+
+      // Interacciones auxiliares para los modos especiales
+      selectDragSlot(slot) {
+        this.state.dragSlot.activeSlot = slot;
+        document.getElementById('slotNumBtn').classList.toggle('border-amber-400', slot === 'num');
+        document.getElementById('slotDenBtn').classList.toggle('border-amber-400', slot === 'den');
+      },
+
+      placeTileValue(val) {
+        if (!this.state.dragSlot) return;
+        if (this.state.dragSlot.activeSlot === 'num') {
+          this.state.dragSlot.num = val;
+          document.getElementById('slotNumBtn').textContent = val;
+          this.selectDragSlot('den');
+        } else {
+          this.state.dragSlot.den = val;
+          document.getElementById('slotDenBtn').textContent = val;
+        }
+        AudioEngine.playTone(587.33, 0.06, 'triangle', 0.1);
+      },
+
+      submitDragTiles() {
+        const { num, den } = this.state.dragSlot || {};
+        if (!num || !den) return;
+        this.submitChoice(num, den, null);
+      },
+
+      submitInputFrac(isWhole) {
+        if (isWhole) {
+          const v = parseInt(document.getElementById('inpWholeVal').value, 10);
+          if (isNaN(v)) return;
+          this.submitChoice(v, 1, null);
+        } else {
+          const n = parseInt(document.getElementById('inpNumVal').value, 10);
+          const d = parseInt(document.getElementById('inpDenVal').value, 10);
+          if (isNaN(n) || isNaN(d) || d === 0) return;
+          this.submitChoice(n, d, null);
+        }
+      },
+
+      triggerVisualSimplify() {
+        const q = this.state.questions[this.state.qIndex];
+        if (!q || !q.simplifyData) return;
+        const sd = q.simplifyData;
+        const el = document.getElementById('liveStrikeMath');
+        if (el) {
+          el.innerHTML = `${MathUtils.strikeFracHTML(sd.a, sd.aS, sd.b, sd.bS)} × ${MathUtils.strikeFracHTML(sd.c, sd.cS, sd.d, sd.dS)} = ${MathUtils.fracHTML(sd.aS * sd.cS, sd.bS * sd.dS)}`;
+          AudioEngine.playTone(880, 0.12, 'triangle', 0.15);
+        }
+      },
+
+      pickOrderStep(idx) {
+        if (this.state.isQuestionResolved) return;
+        const st = this.state.orderState;
+        if (st.picked.includes(idx)) return;
+        st.picked.push(idx);
+        const badge = document.getElementById(`orderBadge_${idx}`);
+        if (badge) badge.textContent = `${st.picked.length}.º`;
+
+        if (st.picked.length === st.shuffled.length) {
+          const isAllRight = st.picked.every((pickedIdx, pos) => st.shuffled[pickedIdx].correctOrder === pos);
+          const q = this.state.questions[this.state.qIndex];
+          if (isAllRight) {
+            this.submitChoice(q.ansN, q.ansD, null);
+          } else {
+            st.picked = [];
+            st.shuffled.forEach((_, i) => {
+              const b = document.getElementById(`orderBadge_${i}`);
+              if (b) b.textContent = 'Elegir';
+            });
+            this.submitChoice(-999, 1, null);
+          }
+        }
+      },
+
+      submitFindError(pickedIdx, wrongIdx, btnEl) {
+        const q = this.state.questions[this.state.qIndex];
+        if (pickedIdx === wrongIdx) {
+          this.submitChoice(q.ansN, q.ansD, btnEl);
+        } else {
+          this.submitChoice(-999, 1, btnEl);
+        }
+      },
+
+      showPedagogicalHint() {
+        const q = this.state.questions[this.state.qIndex];
+        const box = document.getElementById('hintBannerBox');
+        const txt = document.getElementById('hintBannerText');
+        txt.innerHTML = `<b>💡 Pista Pedagógica:</b> ${q.hint}`;
+        box.classList.remove('hidden');
+        AudioEngine.playTone(659.25, 0.1, 'sine', 0.12);
+      },
+
+      /****************************************************************
+       * VALIDACIÓN MATEMÁTICA, KAHOOT SCORING Y SEGUNDA OPORTUNIDAD
+       ****************************************************************/
+      submitChoice(userN, userD, btnElement) {
+        if (this.state.isQuestionResolved) return;
+        const q = this.state.questions[this.state.qIndex];
+
+        // Comprobar equivalencia matemática e irreducibilidad
+        const isEquivalent = (userN * q.ansD === userD * q.ansN) && userD > 0;
+        const isExactSimp = (userN === q.ansN && userD === q.ansD);
+
+        // Si es equivalente pero el circuito exige fracción irreducible (ej. Circuito 2)
+        if (isEquivalent && !isExactSimp && !q.acceptRaw) {
+          const box = document.getElementById('hintBannerBox');
+          const txt = document.getElementById('hintBannerText');
+          txt.innerHTML = `<b>✂️ ¡Casi listo!</b> La fracción <b>${userN}/${userD}</b> es equivalente, pero este circuito pide la <b>fracción irreducible</b> (simplificada al máximo). ¡Simplifícala!`;
+          box.classList.remove('hidden');
+          AudioEngine.playTone(440, 0.15, 'triangle', 0.15);
+          return;
+        }
+
+        if (isEquivalent) {
+          this.handleCorrectAnswer(q);
+        } else {
+          this.handleWrongAnswer(q, btnElement);
+        }
+      },
+
+      handleCorrectAnswer(q) {
+        this.stopQuestionTimer();
+        this.state.isQuestionResolved = true;
+
+        let earnedPoints = 0;
+        const timeRatio = this.state.gameMode === 'gp'
+          ? (this.state.questionTimeLeft / this.state.questionTimeTotal)
+          : 1;
+
+        if (this.state.attempt === 1) {
+          this.state.firstTryHits++;
+          this.state.streak++;
+          if (this.state.streak > this.state.bestStreak) {
+            this.state.bestStreak = this.state.streak;
+          }
+
+          // Bono de racha: 2=+50, 3=+100, 4=+150, >=5=+200
+          let streakBonus = 0;
+          if (this.state.streak === 2) streakBonus = 50;
+          else if (this.state.streak === 3) streakBonus = 100;
+          else if (this.state.streak === 4) streakBonus = 150;
+          else if (this.state.streak >= 5) streakBonus = 200;
+
+          // Fórmula exacta exigida: Puntos = 500 + redondear(500 * tRestante / tTotal) + bonoRacha
+          earnedPoints = 500 + Math.round(500 * timeRatio) + streakBonus;
+        } else {
+          // Segunda oportunidad: hasta 250 puntos sin bono de rapidez ni racha
+          earnedPoints = 250;
+        }
+
+        this.state.score += Math.max(0, earnedPoints);
+
+        // Reacción física del kart en la carrera
+        const isSuper = this.state.streak >= 3;
+        const isFast = timeRatio >= 0.5 && this.state.attempt === 1;
+        this.state.playerProgress = Math.min(96, this.state.playerProgress + (isSuper ? 10.5 : isFast ? 9.5 : 8.2));
+        this.state.currentSpeedFactor = isSuper ? 1.85 : isFast ? 1.55 : 1.25;
+        this.state.isTurboVisual = true;
+        this.state.isSkidVisual = false;
+
+        RaceRenderer.spawnParticles(isSuper ? 'super' : 'turbo', isSuper ? 28 : 16);
+        AudioEngine.playCorrect(isSuper);
+        if (isFast || isSuper) AudioEngine.playTurbo();
+
+        // Mostrar banner flotante animado
+        const bannerMsg = isSuper
+          ? `🌟 ¡SUPERTURBO! RACHA DE ${this.state.streak} (+${earnedPoints} PTS)`
+          : `¡EXCELENTE! +${earnedPoints} PUNTOS`;
+        this.showFloatingBanner(bannerMsg);
+
+        this.showStepByStepPanel(true, q, earnedPoints);
+        this.updateRaceHUD();
+      },
+
+      handleWrongAnswer(q, btnElement) {
+        this.state.wrongCount++;
+        this.state.streak = 0;
+        AudioEngine.playWrong();
+
+        // Bloquear el botón erróneo para evitar clics al azar
+        if (btnElement) {
+          btnElement.disabled = true;
+        }
+
+        // Si estaba en el 1.er intento, conceder SEGUNDA OPORTUNIDAD con corrección pedagógica preventiva
+        if (this.state.attempt === 1) {
+          this.state.attempt = 2;
+          document.getElementById('attemptBadge').textContent = '2.ª Oportunidad (Hasta 250 pts)';
+          document.getElementById('attemptBadge').className = 'px-2.5 py-0.5 rounded-lg bg-amber-500/20 border border-amber-400 text-amber-300 text-xs';
+
+          const box = document.getElementById('hintBannerBox');
+          const txt = document.getElementById('hintBannerText');
+          txt.innerHTML = `<b>⚠️ 1.er Intento Fallido — ¡Tienes una 2.ª Oportunidad por 250 pts!</b><br>${q.hint}`;
+          box.classList.remove('hidden');
+
+          this.state.currentSpeedFactor = 0.82;
+          this.state.isSkidVisual = true;
+          RaceRenderer.spawnParticles('smoke', 12);
+          setTimeout(() => { this.state.isSkidVisual = false; }, 900);
+          this.updateRaceHUD();
+          return;
+        }
+
+        // Si falló también en la 2.ª oportunidad: 0 puntos y mostrar resolución completa paso a paso
+        this.stopQuestionTimer();
+        this.state.isQuestionResolved = true;
+        this.state.currentSpeedFactor = 0.75;
+        this.state.isTurboVisual = false;
+        this.state.isSkidVisual = true;
+        this.state.playerProgress = Math.min(96, this.state.playerProgress + 4.5);
+        RaceRenderer.spawnParticles('smoke', 18);
+
+        this.showFloatingBanner('💨 DERRAPE: 0 PUNTOS — MIRA LA SOLUCIÓN');
+        this.showStepByStepPanel(false, q, 0);
+        this.updateRaceHUD();
+      },
+
+      handleTimeOut() {
+        const q = this.state.questions[this.state.qIndex];
+        this.state.wrongCount++;
+        this.state.streak = 0;
+        this.state.isQuestionResolved = true;
+        AudioEngine.playWrong();
+        this.showFloatingBanner('⏱️ ¡TIEMPO AGOTADO! 0 PUNTOS');
+        this.showStepByStepPanel(false, q, 0);
+      },
+
+      showFloatingBanner(text) {
+        const b = document.getElementById('raceFloatingBanner');
+        b.textContent = text;
+        b.classList.remove('hidden', 'floating-banner');
+        void b.offsetWidth;
+        b.classList.add('floating-banner');
+      },
+
+      showStepByStepPanel(isCorrect, q, pts) {
+        const panel = document.getElementById('feedbackStepPanel');
+        const header = document.getElementById('feedbackHeaderTitle');
+        const content = document.getElementById('feedbackStepContent');
+        const btnRepeat = document.getElementById('btnRepeatPractice');
+
+        panel.classList.remove('hidden', 'border-emerald-400', 'border-rose-400');
+        panel.classList.add(isCorrect ? 'border-emerald-400' : 'border-rose-400');
+
+        header.innerHTML = isCorrect
+          ? `<span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> ¡RESPUESTA CORRECTA! (+${pts} PTS)</span>`
+          : `<span class="text-rose-400"><i class="fa-solid fa-circle-xmark"></i> CORRECCIÓN PEDAGÓGICA PASO A PASO</span>`;
+
+        content.innerHTML = q.stepsHTML;
+        btnRepeat.classList.toggle('hidden', this.state.gameMode !== 'practice');
+      },
+
+      repeatCurrentQuestion() {
+        this.loadCurrentQuestion();
+      },
+
+      nextQuestion() {
+        this.state.isTurboVisual = false;
+        this.state.isSkidVisual = false;
+        this.state.currentSpeedFactor = 1.0;
+
+        if (this.state.qIndex + 1 < this.state.questions.length) {
+          this.state.qIndex++;
+          this.loadCurrentQuestion();
+        } else {
+          this.finishRace();
+        }
+      },
+
+      /****************************************************************
+       * FINAL DE CARRERA, PODIO Y GUARDADO EN LOCALSTORAGE
+       ****************************************************************/
+      finishRace() {
+        this.stopQuestionTimer();
+        this.state.playerProgress = 100;
+        AudioEngine.playFanfare();
+
+        const elapsedSec = Math.round((Date.now() - this.state.raceStartTime) / 1000);
+        const cData = CIRCUITS_DATA[this.state.selectedCircuit - 1];
+        const model = KART_MODELS.find(k => k.id === this.state.selectedKartId) || KART_MODELS[0];
+
+        // Calcular puntuaciones coherentes para los 3 rivales virtuales
+        const baseRivalScore = 4800 + this.state.selectedCircuit * 220;
+        const Standings = [
+          { name: this.state.studentName || 'Estudiante', score: this.state.score, isPlayer: true },
+          { name: 'Turbo Sofía', score: baseRivalScore + 950, isPlayer: false },
+          { name: 'Veloz Leo', score: baseRivalScore + 200, isPlayer: false },
+          { name: 'Cyber Max', score: baseRivalScore - 600, isPlayer: false }
+        ].sort((a, b) => b.score - a.score);
+
+        const playerRank = Standings.findIndex(s => s.isPlayer) + 1;
+        const medal = playerRank === 1 ? 'Oro' : playerRank === 2 ? 'Plata' : 'Bronce';
+
+        // Guardar progreso del circuito y tabla de récords en localStorage
+        const prev = this.state.circuitProgress[this.state.selectedCircuit];
+        if (!prev || this.state.score >= prev.score) {
+          this.state.circuitProgress[this.state.selectedCircuit] = {
+            score: this.state.score,
+            medal,
+            rank: playerRank,
+            date: new Date().toLocaleDateString('es-PE')
+          };
+        }
+
+        this.state.localRecords.push({
+          studentName: this.state.studentName || 'Estudiante',
+          circuitId: this.state.selectedCircuit,
+          circuitName: cData.shortName,
+          kartName: model.name,
+          score: this.state.score,
+          rank: playerRank,
+          medal,
+          date: new Date().toLocaleDateString('es-PE')
+        });
+        this.state.localRecords.sort((a, b) => b.score - a.score);
+        this.state.localRecords = this.state.localRecords.slice(0, 25);
+
+        try {
+          localStorage.setItem('fk_progress_v1', JSON.stringify(this.state.circuitProgress));
+          localStorage.setItem('fk_records_v1', JSON.stringify(this.state.localRecords));
+        } catch (e) {}
+
+        // Poblar UI del Podio
+        document.getElementById('podiumCircuitTitle').textContent = cData.name;
+        document.getElementById('podiumName1').textContent = Standings[0].name;
+        document.getElementById('podiumScore1').textContent = `${Standings[0].score} pts`;
+        document.getElementById('podiumName2').textContent = Standings[1].name;
+        document.getElementById('podiumScore2').textContent = `${Standings[1].score} pts`;
+        document.getElementById('podiumName3').textContent = Standings[2].name;
+        document.getElementById('podiumScore3').textContent = `${Standings[2].score} pts`;
+        document.getElementById('podiumPosition4Box').textContent = `4.º Puesto: ${Standings[3].name} (${Standings[3].score} pts)`;
+
+        document.getElementById('statStudentName').textContent = `${this.state.studentName} (${playerRank}.º Puesto)`;
+        document.getElementById('statKartName').textContent = model.name;
+        document.getElementById('statTotalScore').textContent = `${this.state.score} PTS`;
+        document.getElementById('statFirstTry').textContent = `${this.state.firstTryHits} / 10`;
+        document.getElementById('statWrongCount').textContent = `${this.state.wrongCount}`;
+        document.getElementById('statTimeAndStreak').textContent = `${elapsedSec}s • 🔥 ${this.state.bestStreak}`;
+
+        document.getElementById('screenRace').classList.add('hidden');
+        document.getElementById('screenPodium').classList.remove('hidden');
+        this.renderCircuitsGrid();
+      },
+
+      restartCurrentCircuit() {
+        document.getElementById('modalPause').classList.add('hidden');
+        this.beginRace(this.state.selectedCircuit);
+      },
+
+      togglePause() {
+        if (document.getElementById('screenRace').classList.contains('hidden')) return;
+        this.state.isPaused = !this.state.isPaused;
+        document.getElementById('modalPause').classList.toggle('hidden', !this.state.isPaused);
+      },
+
+      quitRaceToMenu() {
+        this.stopQuestionTimer();
+        this.state.isPaused = false;
+        document.getElementById('modalPause').classList.add('hidden');
+        this.showMainMenu();
+      },
+
+      showMainMenu() {
+        this.stopQuestionTimer();
+        document.getElementById('screenRace').classList.add('hidden');
+        document.getElementById('screenPodium').classList.add('hidden');
+        document.getElementById('screenMenu').classList.remove('hidden');
+        document.getElementById('btnMenuHome').classList.add('hidden');
+        this.renderCircuitsGrid();
+        RaceRenderer.resizeCanvases();
+      },
+
+      /****************************************************************
+       * MODALES DE RÉCORDS Y DIPLOMAS
+       ****************************************************************/
+      openRecordsModal() {
+        const container = document.getElementById('recordsTableContainer');
+        const recs = this.state.localRecords || [];
+        if (recs.length === 0) {
+          container.innerHTML = `<div class="p-6 text-center opacity-75">Aún no hay carreras registradas. ¡Completa tu primer circuito para inaugurar el salón de la fama!</div>`;
+        } else {
+          container.innerHTML = `
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="border-b border-white/20 text-amber-300 font-arcade text-xs">
+                  <th class="py-2 px-2">#</th>
+                  <th class="py-2 px-2">Piloto</th>
+                  <th class="py-2 px-2">Circuito</th>
+                  <th class="py-2 px-2">Bólido</th>
+                  <th class="py-2 px-2">Puntos</th>
+                  <th class="py-2 px-2">Medalla</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${recs.map((r, i) => `
+                  <tr class="border-b border-white/10 hover:bg-white/5">
+                    <td class="py-2 px-2 font-black text-amber-400">${i + 1}</td>
+                    <td class="py-2 px-2 font-bold">${r.studentName}</td>
+                    <td class="py-2 px-2">${r.circuitName}</td>
+                    <td class="py-2 px-2 text-cyan-300">${r.kartName}</td>
+                    <td class="py-2 px-2 font-arcade font-bold text-emerald-400">${r.score}</td>
+                    <td class="py-2 px-2">${r.medal}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+        document.getElementById('modalRecords').classList.remove('hidden');
+      },
+
+      clearRecords() {
+        this.state.localRecords = [];
+        try { localStorage.removeItem('fk_records_v1'); } catch (e) {}
+        this.openRecordsModal();
+      },
+
+      openDiplomasModal(initialTarget = 1) {
+        const bar = document.getElementById('diplomaSelectorBar');
+        bar.innerHTML = CIRCUITS_DATA.map(c => `
+          <button onclick="DiplomaGenerator.renderDiploma(${c.id})" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-xs font-extrabold border border-white/15 transition">
+            ${c.icon} Pista ${c.id}
+          </button>
+        `).join('') + `
+          <button onclick="DiplomaGenerator.renderDiploma('champion')" class="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 text-xs font-extrabold shadow">
+            👑 CAMPEÓN GRAN PREMIO
+          </button>
+        `;
+        document.getElementById('modalDiploma').classList.remove('hidden');
+        DiplomaGenerator.renderDiploma(initialTarget);
+      },
+
+      openCurrentCircuitDiploma() {
+        this.openDiplomasModal(this.state.selectedCircuit);
+      },
+
+      openDiplomaForCircuit(cid) {
+        this.openDiplomasModal(cid);
+      },
+
+      openChampionDiploma() {
+        this.openDiplomasModal('champion');
+      }
+    };
+
+    // Iniciar el videojuego al cargar la ventana
+    window.onload = function () {
+      GameApp.init();
+    };
+  </script>
+</body>
+</html>
