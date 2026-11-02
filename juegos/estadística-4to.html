@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Estadisticópolis: Detectives de Datos</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome for crisp game icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Fredoka & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;800&family=Marck+Script&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            fredoka: ['Fredoka', 'sans-serif'],
+            inter: ['Inter', 'sans-serif'],
+            cursive: ['"Marck Script"', 'cursive']
+          },
+          colors: {
+            brand: {
+              yellow: '#FBBF24',
+              orange: '#F97316',
+              cyan: '#06B6D4',
+              blue: '#3B82F6',
+              purple: '#8B5CF6',
+              green: '#10B981',
+              dark: '#0F172A',
+              cardDark: '#1E293B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Transiciones suaves para modo día/noche y animaciones lúdicas */
+    * {
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      font-family: 'Fredoka', 'Inter', sans-serif;
+    }
+    .text-cursive-jhon {
+      font-family: 'Marck Script', cursive;
+      letter-spacing: 0.5px;
+      animation: colorCycle 8s infinite ease-in-out;
+    }
+    @keyframes colorCycle {
+      0%, 100% { color: #f59e0b; }
+      33% { color: #3b82f6; }
+      66% { color: #10b981; }
+    }
+    @keyframes floatRobot {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(1.5deg); }
+    }
+    .animate-robot {
+      animation: floatRobot 3.5s ease-in-out infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+      50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.85); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 2s infinite;
+    }
+    .confetti-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #FBBF24;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-amber-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+  <!-- Canvas global para confeti y celebraciones -->
+  <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+  <!-- BARRA DE NAVEGACIÓN Y CONFIGURACIÓN SUPERIOR -->
+  <header class="w-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-md border-b border-amber-200 dark:border-slate-700 py-2 px-4 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="Game.showScreen('map')">
+        <div class="w-10 h-10 bg-amber-400 rounded-2xl flex items-center justify-center text-white shadow-md transform hover:rotate-6 transition">
+          <i class="fa-solid fa-chart-pie text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg md:text-xl tracking-tight text-amber-600 dark:text-amber-400 leading-tight">
+            ESTADISTICÓPOLIS
+          </h1>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 font-inter">Detectives de Datos</p>
+        </div>
+      </div>
+
+      <!-- Barra de Estado del Jugador (Oculta al inicio) -->
+      <div id="playerStatsBar" class="hidden md:flex items-center space-x-5 text-sm font-semibold bg-amber-100/70 dark:bg-slate-700/60 py-1.5 px-4 rounded-full">
+        <span class="flex items-center text-slate-700 dark:text-slate-200">
+          <i class="fa-solid fa-user-astronaut text-amber-500 mr-1.5"></i>
+          <span id="navPlayerName">Detective</span>
+        </span>
+        <span class="flex items-center text-yellow-500">
+          <i class="fa-solid fa-star text-amber-400 mr-1"></i>
+          <span id="navTotalStars">0</span>
+        </span>
+        <span class="flex items-center text-purple-500">
+          <i class="fa-solid fa-award text-purple-400 mr-1"></i>
+          <span id="navTotalBadges">0/8</span>
+        </span>
+      </div>
+
+      <!-- Controles de Audio y Modo Día/Noche -->
+      <div class="flex items-center space-x-2">
+        <button id="btnSoundFx" onclick="AudioEngine.toggleSfx()" title="Activar/Silenciar Efectos" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center hover:scale-105 active:scale-95 shadow-sm">
+          <i class="fa-solid fa-volume-high text-xs" id="iconSoundFx"></i>
+        </button>
+        <button id="btnMusic" onclick="AudioEngine.toggleMusic()" title="Activar/Silenciar Música" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center hover:scale-105 active:scale-95 shadow-sm">
+          <i class="fa-solid fa-music text-xs" id="iconMusic"></i>
+        </button>
+        <button id="btnTheme" onclick="Game.toggleTheme()" title="Modo Día/Noche" class="w-9 h-9 rounded-full bg-amber-200 dark:bg-slate-700 text-amber-700 dark:text-amber-300 flex items-center justify-center hover:scale-105 active:scale-95 shadow-sm">
+          <i class="fa-solid fa-moon text-xs" id="iconTheme"></i>
+        </button>
+        <button id="btnMapNav" onclick="Game.showScreen('map')" class="hidden px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow items-center space-x-1.5">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <span class="hidden sm:inline">Mapa</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DE PANTALLAS -->
+  <main class="flex-grow max-w-6xl w-full mx-auto p-3 md:p-6 flex flex-col justify-center items-center relative">
+
+    <!-- 1. PANTALLA DE BIENVENIDA -->
+    <section id="screen-welcome" class="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-amber-300 dark:border-amber-500/30 text-center relative overflow-hidden">
+      <!-- Decoración de fondo de ciudad -->
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-amber-200/40 dark:bg-amber-400/10 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-sky-200/40 dark:bg-sky-400/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Avatar SVG Animado de Datín con lupa y visor -->
+      <div class="w-36 h-36 md:w-44 md:h-44 mx-auto mb-4 animate-robot relative cursor-pointer" onclick="AudioEngine.playSpeechBeep(); Datín.showDialogue('¡Hola! Soy Datín, tu compañero detective. ¡Ayúdame a recuperar los datos de la ciudad!', 'happy')">
+        <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+          <!-- Antena -->
+          <line x1="100" y1="40" x2="100" y2="15" stroke="#F59E0B" stroke-width="6" stroke-linecap="round" />
+          <circle cx="100" cy="12" r="10" fill="#EF4444" class="animate-ping opacity-75" />
+          <circle cx="100" cy="12" r="9" fill="#EF4444" />
+          <!-- Cabeza -->
+          <rect x="50" y="40" width="100" height="75" rx="28" fill="#3B82F6" stroke="#1D4ED8" stroke-width="4"/>
+          <!-- Pantalla Visor Facial -->
+          <rect x="62" y="52" width="76" height="50" rx="16" fill="#0F172A"/>
+          <!-- Ojos Digitales Grandes y Expresivos -->
+          <ellipse cx="80" cy="74" rx="12" ry="14" fill="#38BDF8"/>
+          <circle cx="84" cy="70" r="4" fill="#FFFFFF"/>
+          <ellipse cx="120" cy="74" rx="12" ry="14" fill="#38BDF8"/>
+          <circle cx="124" cy="70" r="4" fill="#FFFFFF"/>
+          <!-- Sonrisa Digital -->
+          <path d="M 90 92 Q 100 99 110 92" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <!-- Auriculares / Orejeras -->
+          <rect x="38" y="60" width="12" height="35" rx="6" fill="#F59E0B"/>
+          <rect x="150" y="60" width="12" height="35" rx="6" fill="#F59E0B"/>
+          <!-- Cuerpo -->
+          <rect x="68" y="120" width="64" height="60" rx="20" fill="#2563EB" stroke="#1E40AF" stroke-width="4"/>
+          <!-- Botones del pecho -->
+          <circle cx="85" cy="140" r="5" fill="#10B981"/>
+          <circle cx="100" cy="140" r="5" fill="#F59E0B"/>
+          <circle cx="115" cy="140" r="5" fill="#EF4444"/>
+          <!-- Cuello -->
+          <rect x="88" y="114" width="24" height="7" rx="3" fill="#94A3B8"/>
+          <!-- Lupa Digital sosteniendo -->
+          <g transform="translate(130, 115) rotate(15)">
+            <circle cx="16" cy="16" r="14" fill="#E0F2FE" fill-opacity="0.7" stroke="#F59E0B" stroke-width="5"/>
+            <line x1="26" y1="26" x2="42" y2="42" stroke="#92400E" stroke-width="6" stroke-linecap="round"/>
+            <path d="M 10 14 Q 15 10 20 14" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.8"/>
+          </g>
+        </svg>
+      </div>
+
+      <h1 class="text-3xl md:text-5xl font-black text-amber-500 dark:text-amber-400 tracking-wide mb-1 uppercase drop-shadow-sm">
+        ESTADISTICÓPOLIS
+      </h1>
+      <p class="text-base md:text-lg font-medium text-slate-600 dark:text-slate-300 mb-6">
+        ¡Conviértete en un gran detective de datos y ayuda al alcalde!
+      </p>
+
+      <!-- Formulario del Jugador -->
+      <div class="max-w-md mx-auto space-y-4">
+        <div class="text-left">
+          <label for="playerNameInput" class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1 ml-1">
+            <i class="fa-solid fa-id-badge text-amber-500 mr-1"></i> Tu Nombre de Detective:
+          </label>
+          <input type="text" id="playerNameInput" maxlength="25" placeholder="Escribe tu nombre aquí..."
+            class="w-full text-center text-lg md:text-xl font-bold py-3 px-4 rounded-2xl border-2 border-amber-300 dark:border-slate-600 bg-amber-50/50 dark:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-amber-400 text-slate-800 dark:text-white transition">
+        </div>
+
+        <button onclick="Game.startAdventure()" class="w-full py-4 px-6 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xl rounded-2xl shadow-lg transform hover:-translate-y-1 active:translate-y-0 transition duration-150 flex items-center justify-center space-x-2">
+          <span>¡COMENZAR AVENTURA!</span>
+          <i class="fa-solid fa-magnifying-glass-location text-2xl"></i>
+        </button>
+
+        <div class="flex items-center justify-center space-x-3 pt-2">
+          <button onclick="Game.showInstructionsModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold rounded-xl text-sm transition flex items-center space-x-2">
+            <i class="fa-solid fa-circle-question text-sky-500"></i>
+            <span>Instrucciones</span>
+          </button>
+          <button onclick="Game.resetProgressPrompt()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-slate-500 dark:text-slate-300 hover:text-rose-600 font-semibold rounded-xl text-sm transition flex items-center space-x-2">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+            <span>Reiniciar</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. PANTALLA DEL MAPA DE ESTADISTICÓPOLIS -->
+    <section id="screen-map" class="hidden w-full flex flex-col items-center">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl md:text-4xl font-extrabold text-amber-500 dark:text-amber-400">
+          MAPA DE LA CIUDAD DE LOS DATOS
+        </h2>
+        <p class="text-sm md:text-base text-slate-600 dark:text-slate-400">
+          Supera cada zona para desbloquear nuevos misterios y obtener insignias
+        </p>
+      </div>
+
+      <!-- Cuadrícula interactiva de las 8 zonas/niveles -->
+      <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-8">
+        <!-- Generado dinámicamente con JS (renderMap) -->
+        <div id="mapZonesContainer" class="contents"></div>
+      </div>
+
+      <!-- Medallero y botón de diploma maestro -->
+      <div class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-3xl p-5 border-2 border-amber-200 dark:border-slate-700 shadow-md flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-white text-2xl shadow">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800 dark:text-slate-200">Progreso de la Ciudad</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400" id="mapProgressSummary">0 de 8 misiones completadas</p>
+          </div>
+        </div>
+        <button id="btnGrandDiploma" onclick="DiplomaSystem.generateFinalDiploma()" disabled class="px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-200 text-slate-400 cursor-not-allowed transition flex items-center space-x-2">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>Diploma de Gran Detective</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. PANTALLA PRINCIPAL DE JUEGO (NIVELES) -->
+    <section id="screen-level" class="hidden w-full max-w-4xl flex flex-col space-y-4">
+      <!-- Encabezado del Nivel -->
+      <div class="w-full bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-amber-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center space-x-3">
+          <button onclick="Game.showScreen('map')" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 hover:bg-amber-100 dark:hover:bg-slate-600 flex items-center justify-center transition">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <div>
+            <span id="levelBadgeTag" class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
+              NIVEL 1
+            </span>
+            <h3 id="levelTitle" class="text-lg md:text-xl font-black text-slate-800 dark:text-white leading-tight">
+              La Ciudad de los Habitantes
+            </h3>
+          </div>
+        </div>
+
+        <!-- Fases pedagógicas: Descubre -> Experimenta -> Desafíate -->
+        <div class="flex items-center space-x-1 sm:space-x-2 bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl text-xs font-bold">
+          <span id="phaseTab-descubre" class="px-2.5 py-1 rounded-lg transition bg-amber-500 text-white">1. Descubre</span>
+          <span id="phaseTab-experimenta" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 transition">2. Experimenta</span>
+          <span id="phaseTab-desafiate" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 transition">3. Desafíate</span>
+        </div>
+      </div>
+
+      <!-- CUADRO INTERACTIVO DE DATÍN (Compañero Detective) -->
+      <div id="datinBox" class="w-full bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/90 border-2 border-sky-300 dark:border-sky-600/40 rounded-3xl p-4 shadow-md flex items-start space-x-3 md:space-x-4">
+        <!-- Avatar pequeño expresivo de Datín -->
+        <div class="w-14 h-14 md:w-16 md:h-16 flex-shrink-0 relative cursor-pointer" onclick="AudioEngine.playSpeechBeep()">
+          <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow">
+            <rect x="25" y="20" width="50" height="40" rx="14" fill="#3B82F6"/>
+            <rect x="32" y="27" width="36" height="26" rx="8" fill="#0F172A"/>
+            <!-- Ojos dinámicos -->
+            <ellipse id="datinEyeLeft" cx="42" cy="40" rx="5" ry="6" fill="#38BDF8"/>
+            <ellipse id="datinEyeRight" cx="58" cy="40" rx="5" ry="6" fill="#38BDF8"/>
+            <path id="datinMouth" d="M 44 47 Q 50 51 56 47" stroke="#38BDF8" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <rect x="35" y="64" width="30" height="24" rx="8" fill="#2563EB"/>
+            <line x1="50" y1="20" x2="50" y2="8" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="7" r="4" fill="#EF4444"/>
+          </svg>
+        </div>
+        <div class="flex-grow">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black uppercase tracking-wider text-sky-600 dark:text-sky-400">Datín el Robot Detective</span>
+            <button id="btnDatinHint" onclick="Game.requestHint()" class="text-xs font-semibold text-amber-600 hover:text-amber-700 dark:text-amber-400 flex items-center space-x-1">
+              <i class="fa-regular fa-lightbulb"></i>
+              <span>¿Necesitas una pista?</span>
+            </button>
+          </div>
+          <p id="datinText" class="text-sm md:text-base font-medium text-slate-700 dark:text-slate-200 mt-1 leading-snug">
+            ¡Hola Detective! Estoy preparando la misión para ti...
+          </p>
+        </div>
+      </div>
+
+      <!-- ÁREA DINÁMICA DE LA ACTIVIDAD -->
+      <div id="gameplayArea" class="w-full min-h-[420px] bg-white dark:bg-slate-800/90 rounded-3xl p-4 md:p-6 shadow-xl border-2 border-amber-100 dark:border-slate-700 flex flex-col justify-between relative overflow-hidden">
+        <!-- Aquí se inyectan las vistas de Descubre, Experimenta o Desafíate -->
+        <div id="activityContent" class="w-full flex-grow flex flex-col justify-center items-center"></div>
+
+        <!-- Barra inferior de acciones del reto -->
+        <div id="activityFooter" class="w-full pt-4 mt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span id="challengeCounter" class="text-xs font-bold text-slate-400">Progreso: 1/8</span>
+            <div class="w-24 md:w-36 bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+              <div id="challengeProgressBar" class="bg-amber-400 h-full w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="btnActionPrimary" onclick="Game.handlePrimaryAction()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 text-white font-bold rounded-xl shadow-md transform hover:scale-102 active:scale-98 transition flex items-center space-x-2">
+              <span>Continuar</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. MODAL / PANTALLA DE MISIÓN SUPERADA Y RECOMPENSA -->
+    <div id="modalMissionSuccess" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 text-center border-4 border-amber-400 dark:border-amber-500 shadow-2xl transform transition-all scale-95 opacity-0 duration-300" id="missionModalBox">
+        <div class="w-20 h-20 mx-auto -mt-12 bg-amber-400 text-white rounded-full flex items-center justify-center text-3xl shadow-lg border-4 border-white dark:border-slate-800">
+          <i class="fa-solid fa-award"></i>
+        </div>
+        <h3 class="text-2xl font-black text-amber-500 dark:text-amber-400 mt-3 uppercase">¡MISIÓN SUPERADA!</h3>
+        <p class="text-sm text-slate-600 dark:text-slate-300 mb-4" id="modalLevelTitleComplete">Nivel Completado</p>
+
+        <!-- Estrellas conseguidas -->
+        <div class="flex justify-center space-x-2 text-3xl text-amber-400 mb-4" id="modalStarsRow">
+          <i class="fa-solid fa-star animate-bounce"></i>
+          <i class="fa-solid fa-star animate-bounce" style="animation-delay: 0.15s"></i>
+          <i class="fa-solid fa-star animate-bounce" style="animation-delay: 0.3s"></i>
+        </div>
+
+        <!-- Concepto clave aprendido -->
+        <div class="bg-amber-50 dark:bg-slate-700/60 p-3 rounded-2xl mb-5 text-left text-xs text-slate-700 dark:text-slate-300 border border-amber-200 dark:border-slate-600">
+          <span class="font-bold text-amber-600 dark:text-amber-400 block mb-1">
+            <i class="fa-solid fa-book-open mr-1"></i> Aprendizaje Detective:
+          </span>
+          <p id="modalLearningSummary">Explicación del concepto aprendido en la misión.</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button onclick="DiplomaSystem.generateLevelDiploma(Game.currentLevel)" class="flex-1 py-3 px-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold text-sm shadow transition flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-scroll"></i>
+            <span>Ver Diploma</span>
+          </button>
+          <button onclick="Game.closeSuccessModalToMap()" class="flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm shadow transition flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-map"></i>
+            <span>Ir al Mapa</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. MODAL DE VISUALIZACIÓN Y DESCARGA DE DIPLOMAS (CANVAS RENDER) -->
+    <div id="modalDiploma" class="fixed inset-0 bg-black/75 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 overflow-y-auto">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-2xl w-full p-4 md:p-6 shadow-2xl border-2 border-amber-400 text-center relative my-auto">
+        <button onclick="DiplomaSystem.closeModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-rose-500 hover:text-white transition flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <h3 class="text-xl md:text-2xl font-black text-amber-500 mb-2">DIPLOMA OFICIAL DE RECONOCIMIENTO</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Puedes guardarlo como recuerdo o imprimirlo directamente.</p>
+
+        <!-- Canvas del Diploma donde se dibuja el certificado en alta definición -->
+        <div class="w-full overflow-hidden rounded-xl shadow-lg border border-amber-300 mb-4 bg-amber-50">
+          <canvas id="diplomaCanvas" width="900" height="636" class="w-full h-auto block"></canvas>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-3">
+          <button onclick="DiplomaSystem.downloadPNG()" class="px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+            <i class="fa-solid fa-download"></i>
+            <span>Descargar como PNG</span>
+          </button>
+          <button onclick="DiplomaSystem.printCertificate()" class="px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+            <i class="fa-solid fa-print"></i>
+            <span>Imprimir Diploma</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE INSTRUCCIONES -->
+    <div id="modalInstructions" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border-2 border-amber-400 shadow-2xl text-left relative">
+        <button onclick="document.getElementById('modalInstructions').classList.add('hidden')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-rose-500 hover:text-white transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h3 class="text-2xl font-black text-amber-500 mb-3 flex items-center space-x-2">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>Guía del Detective</span>
+        </h3>
+        <div class="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-h-96 overflow-y-auto pr-2">
+          <p><strong>1. Recorre los 8 niveles:</strong> Cada zona de Estadisticópolis esconde un concepto clave (Población, Muestra, Variables y Frecuencias).</p>
+          <p><strong>2. Tres momentos por nivel:</strong> Primero <em>Descubre</em> la situación con Datín, luego <em>Experimenta</em> manipulando elementos interactivos y finalmente <em>Desafíate</em> resolviendo retos reales.</p>
+          <p><strong>3. Gana estrellas e insignias:</strong> Recibirás diplomas al terminar cada nivel y un Gran Diploma al salvar toda la ciudad.</p>
+          <p><strong>4. Guarda tu progreso:</strong> Tu aventura se guarda automáticamente en tu navegador para continuar cuando quieras.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- PIE DE PÁGINA PROFESIONAL Y ELEGANTE -->
+  <footer class="w-full py-3 px-4 text-center border-t border-amber-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm">
+    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+      ESTADISTICÓPOLIS &bull; Videojuego Educativo de Matemática 4.º de Primaria
+    </p>
+    <p class="text-base text-cursive-jhon font-normal mt-0.5">
+      Diseñado por Prof. Jhon Dewis
+    </p>
+  </footer>
+
+  <!-- ========================================== -->
+  <!-- SISTEMA DE JUEGO Y LÓGICA JAVASCRIPT      -->
+  <!-- ========================================== -->
+  <script>
+    /* ----------------------------------------------------
+       1. MOTOR DE AUDIO AUTÓNOMO (WEB AUDIO API PURA)
+       Música instrumental infantil y efectos de sonido
+    ---------------------------------------------------- */
+    const AudioEngine = {
+      ctx: null,
+      sfxEnabled: true,
+      musicEnabled: false,
+      musicTimer: null,
+      noteIndex: 0,
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+
+      toggleSfx() {
+        this.sfxEnabled = !this.sfxEnabled;
+        const icon = document.getElementById('iconSoundFx');
+        icon.className = this.sfxEnabled ? 'fa-solid fa-volume-high text-xs' : 'fa-solid fa-volume-xmark text-xs text-rose-500';
+        Game.savePlayer();
+      },
+
+      toggleMusic() {
+        this.init();
+        this.musicEnabled = !this.musicEnabled;
+        const icon = document.getElementById('iconMusic');
+        if (this.musicEnabled) {
+          icon.className = 'fa-solid fa-music text-xs text-green-500';
+          this.startBgmLoop();
+        } else {
+          icon.className = 'fa-solid fa-music-slash text-xs text-slate-400';
+          this.stopBgmLoop();
+        }
+        Game.savePlayer();
+      },
+
+      playTone(freq, type, duration, gainValue = 0.1) {
+        if (!this.sfxEnabled && !this.musicEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainValue, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) { /* Audio fallback silencioso */ }
+      },
+
+      playCorrect() {
+        if (!this.sfxEnabled) return;
+        this.playTone(523.25, 'triangle', 0.12, 0.15); // C5
+        setTimeout(() => this.playTone(659.25, 'triangle', 0.15, 0.15), 100); // E5
+        setTimeout(() => this.playTone(783.99, 'triangle', 0.25, 0.18), 200); // G5
+      },
+
+      playWrong() {
+        if (!this.sfxEnabled) return;
+        this.playTone(280, 'sawtooth', 0.18, 0.12);
+        setTimeout(() => this.playTone(210, 'sawtooth', 0.28, 0.14), 140);
+      },
+
+      playClick() {
+        if (!this.sfxEnabled) return;
+        this.playTone(600, 'sine', 0.05, 0.06);
+      },
+
+      playFanfare() {
+        if (!this.sfxEnabled) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((f, idx) => {
+          setTimeout(() => this.playTone(f, 'square', 0.3, 0.12), idx * 140);
+        });
+      },
+
+      playSpeechBeep() {
+        if (!this.sfxEnabled) return;
+        this.playTone(480 + Math.random() * 80, 'sine', 0.06, 0.08);
+      },
+
+      startBgmLoop() {
+        if (this.musicTimer) clearInterval(this.musicTimer);
+        // Melodía alegre y juguetona de fondo (C Major Pentatónica)
+        const melody = [
+          { f: 261.63, d: 0.2 }, { f: 329.63, d: 0.2 }, { f: 392.00, d: 0.2 }, { f: 523.25, d: 0.3 },
+          { f: 392.00, d: 0.2 }, { f: 329.63, d: 0.2 }, { f: 440.00, d: 0.2 }, { f: 392.00, d: 0.3 },
+          { f: 349.23, d: 0.2 }, { f: 392.00, d: 0.2 }, { f: 440.00, d: 0.2 }, { f: 523.25, d: 0.3 },
+          { f: 493.88, d: 0.2 }, { f: 392.00, d: 0.2 }, { f: 523.25, d: 0.4 }
+        ];
+        this.noteIndex = 0;
+        this.musicTimer = setInterval(() => {
+          if (!this.musicEnabled) return;
+          const current = melody[this.noteIndex % melody.length];
+          this.playTone(current.f, 'sine', current.d, 0.025);
+          this.noteIndex++;
+        }, 340);
+      },
+
+      stopBgmLoop() {
+        if (this.musicTimer) {
+          clearInterval(this.musicTimer);
+          this.musicTimer = null;
+        }
+      }
+    };
+
+    /* ----------------------------------------------------
+       2. DATOS DE LOS 8 NIVELES PEDAGÓGICOS
+    ---------------------------------------------------- */
+    const LEVEL_CONFIG = [
+      {
+        id: 1,
+        title: "La Ciudad de los Habitantes",
+        topic: "Población",
+        icon: "fa-school",
+        desc: "Comprende qué es el conjunto completo que deseamos estudiar.",
+        learning: "La POBLACIÓN es el conjunto COMPLETO de todos los elementos, personas u objetos sobre los cuales se realiza una investigación estadística.",
+        concept: {
+          title: "¿Qué es la Población?",
+          descubreText: "¡Hola Detective! El director del colegio quiere saber el deporte favorito de TODOS los estudiantes de 4.º grado. En estadística, al conjunto completo de todos los elementos a investigar lo llamamos POBLACIÓN."
+        }
+      },
+      {
+        id: 2,
+        title: "La Misión de los Elegidos",
+        topic: "Muestra",
+        icon: "fa-users-viewfinder",
+        desc: "Descubre que una muestra es una parte representativa de la población.",
+        learning: "Una MUESTRA es un subconjunto o PARTE seleccionada de la población cuando no es posible o práctico estudiar a todos.",
+        concept: {
+          title: "¿Qué es una Muestra?",
+          descubreText: "En el colegio hay 30 estudiantes en total (la población). Pero para ahorrar tiempo, encuestaremos sólo a 6 elegidos al azar. Ese grupito seleccionado es la MUESTRA."
+        }
+      },
+      {
+        id: 3,
+        title: "El Misterio de las Preguntas",
+        topic: "Variable Estadística",
+        icon: "fa-clipboard-question",
+        desc: "Identifica qué característica específica se quiere investigar.",
+        learning: "La VARIABLE estadística es la CARACTERÍSTICA, cualidad o propiedad que se investiga en la población (como la fruta favorita, la edad o el deporte).",
+        concept: {
+          title: "¿Qué es la Variable?",
+          descubreText: "Cada investigación busca conocer un dato especial: ¿Qué fruta prefieren? ¿Cuántas mascotas tienen? Esa característica que investigamos se llama VARIABLE."
+        }
+      },
+      {
+        id: 4,
+        title: "Los Dos Cofres Mágicos",
+        topic: "Variables Cualitativas y Cuantitativas",
+        icon: "fa-gem",
+        desc: "Clasifica si la variable es una cualidad o una cantidad numérica.",
+        learning: "Las variables CUALITATIVAS expresan cualidades o preferencias (palabras). Las CUANTITATIVAS expresan cantidades o medidas (números contables o medibles).",
+        concept: {
+          title: "Cualitativas vs Cuantitativas",
+          descubreText: "¡Abre bien los ojos! Si la respuesta es una cualidad o palabra (ej. Color favorito), va al Cofre Azul (Cualitativa). Si representa una cantidad o conteo (ej. Número de hermanos), va al Cofre Dorado (Cuantitativa)."
+        }
+      },
+      {
+        id: 5,
+        title: "Reporteros por un Día",
+        topic: "La Encuesta",
+        icon: "fa-microphone-lines",
+        desc: "Formula preguntas claras y entrevista a los habitantes del parque.",
+        learning: "Una ENCUESTA es un método de recolección de datos mediante preguntas bien formuladas y respetuosas aplicadas a la muestra seleccionada.",
+        concept: {
+          title: "¿Cómo hacer una Encuesta?",
+          descubreText: "¡Tomemos la libreta digital! En el parque investigaremos cuál es el jugo favorito. Debemos formular una pregunta precisa y registrar la respuesta de cada habitante."
+        }
+      },
+      {
+        id: 6,
+        title: "La Fábrica de Jugos",
+        topic: "Frecuencia y Tablas",
+        icon: "fa-blender",
+        desc: "Cuenta cuántas veces se repite cada dato y organiza la tabla.",
+        learning: "La FRECUENCIA es la cantidad de veces que se repite un dato o respuesta. Al sumar todas las frecuencias obtenemos el total de encuestados.",
+        concept: {
+          title: "¿Qué es la Frecuencia?",
+          descubreText: "En la fábrica llegan muchos pedidos de jugos. La cantidad de veces que aparece cada sabor es su FRECUENCIA. ¡Organicémoslos en una tabla ordenada!"
+        }
+      },
+      {
+        id: 7,
+        title: "El Gran Misterio Estadístico",
+        topic: "Población, Muestra y Variable Integrados",
+        icon: "fa-magnifying-glass-chart",
+        desc: "Resuelve casos de la vida real identificando los tres elementos clave.",
+        learning: "En cualquier estudio estadístico serio debes tener claridad total sobre: ¿A quiénes se quiere conocer? (Población), ¿a quiénes se preguntó? (Muestra) y ¿qué se investigó? (Variable).",
+        concept: {
+          title: "Casos de la Vida Real",
+          descubreText: "Los detectives más expertos resuelven casos completos: en el colegio Francisco Bolognesi, en empresas de transporte y fábricas. ¡Identifica cada pieza del enigma!"
+        }
+      },
+      {
+        id: 8,
+        title: "El Festival de los Datos",
+        topic: "Misión Integral Final",
+        icon: "fa-champagne-glasses",
+        desc: "El gran evento del alcalde: ¡diseña y resuelve una investigación completa!",
+        learning: "¡Felicitaciones! Has dominado el ciclo estadístico: Definir Población, Elegir Muestra, Variable, Encuesta, Frecuencia y Toma de Decisiones.",
+        concept: {
+          title: "El Gran Festival de la Ciudad",
+          descubreText: "El alcalde necesita decidir qué jugo comprar en masa para el festival. ¡Tú dirigirás todo el proceso de investigación paso a paso!"
+        }
+      }
+    ];
+
+    /* ----------------------------------------------------
+       3. BANCO DE ACTIVIDADES POR NIVEL (DESAFÍATE)
+       20+ Desafíos rigurosos basados en los libros escolares:
+       Colegio Francisco Bolognesi, Empresa Tigre,
+       Empresa El Rápido, I.E. N.° 1216, etc.
+    ---------------------------------------------------- */
+    const CHALLENGE_BANK = {
+      1: [ // NIVEL 1: POBLACIÓN (Definición formal y casos de libros escolares)
+        { q: "Según tu libro de Matemática: 'Es el conjunto de individuos con características comunes que se desea estudiar'. ¿A qué concepto corresponde?", options: ["Población", "Muestra", "Frecuencia", "Encuesta"], answer: 0, exp: "La POBLACIÓN es el conjunto total de individuos con características comunes que se desea investigar." },
+        { q: "CASO ESCOLAR: En la Institución Educativa N.° 1216 hay un total de 1 000 estudiantes y se encuesta a 200 para conocer sus gustos. ¿Cuál es la POBLACIÓN?", options: ["Los 1 000 estudiantes de la I.E. N.° 1216", "Los 200 estudiantes encuestados", "El director del colegio", "Los profesores de aula"], answer: 0, exp: "La población es el total de estudiantes de la institución: 1 000 estudiantes." },
+        { q: "CASO EMPRESA 'TIGRE': Se encuestó a 120 trabajadores escogidos al azar de la empresa 'Tigre'. ¿Cuál es la POBLACIÓN de este estudio?", options: ["El total de trabajadores de la empresa 'Tigre'", "Solo los 120 trabajadores encuestados", "Los clientes que compran calzado Tigre", "Los gerentes de la empresa"], answer: 0, exp: "La población corresponde al total de trabajadores de la empresa 'Tigre'." },
+        { q: "CASO COLEGIO 'FRANCISCO BOLOGNESI': Se aplica una encuesta a 100 estudiantes al azar para conocer su alimentación. ¿Cuál es la POBLACIÓN?", options: ["El total de estudiantes del colegio 'Francisco Bolognesi'", "Los 100 estudiantes elegidos", "Los profesores de ciencias", "El comedor escolar"], answer: 0, exp: "La población la conforman todos los estudiantes del colegio 'Francisco Bolognesi'." },
+        { q: "CASO 'EL RÁPIDO': Se encuesta a 60 trabajadores de la Empresa de Transportes 'El Rápido' sobre el tránsito. ¿Cuál es la POBLACIÓN?", options: ["Total de trabajadores de la Empresa de Transportes 'El Rápido'", "Los 60 trabajadores encuestados", "Los pasajeros de los buses", "Los policías de tránsito"], answer: 0, exp: "La población es el conjunto completo: todos los trabajadores de la Empresa 'El Rápido'." },
+        { q: "CASO SEGUNDO GRADO: Se realiza una encuesta en las tres secciones de 2.° de primaria seleccionando a 10 alumnos por aula. ¿Cuál es la POBLACIÓN?", options: ["Todos los estudiantes de segundo grado de primaria", "Los 30 estudiantes seleccionados", "Las tres profesoras de aula", "Los padres de familia"], answer: 0, exp: "La población son todos los estudiantes de las tres secciones de segundo grado." },
+        { q: "CASO LA GRANJA: Un veterinario estudia 30 animales elegidos al azar en una granja campestre. ¿Cuál es la POBLACIÓN?", options: ["Todos los animales de la granja", "Los 30 animales elegidos", "Solo los caballos", "El dueño de la granja"], answer: 0, exp: "La población está formada por la totalidad de animales de dicha granja." },
+        { q: "¿Cuál de las siguientes afirmaciones describe con exactitud a una POBLACIÓN estadística?", options: ["El conjunto total de personas, animales u objetos que tienen una característica en común a estudiar", "Una pequeña muestra de 5 personas elegidas", "La hoja donde se escriben las preguntas", "El gráfico de barras"], answer: 0, exp: "La población comprende la totalidad de los elementos bajo investigación." },
+        { q: "En un hospital laboran 450 trabajadores de salud y se desea conocer su horario de descanso. La POBLACIÓN es:", options: ["Los 450 trabajadores de salud del hospital", "50 enfermeras de guardia", "Los pacientes internados", "Las camillas del hospital"], answer: 0, exp: "El grupo total objeto de estudio son los 450 trabajadores de salud." },
+        { q: "En una biblioteca escolar hay 850 libros infantiles. Si se desea saber cuáles necesitan reparación, la POBLACIÓN es:", options: ["Los 850 libros infantiles de la biblioteca", "40 libros con hojas rotas", "Los alumnos que leen", "Las estanterías"], answer: 0, exp: "El universo total de análisis son los 850 libros infantiles." },
+        { q: "Si investigamos el deporte favorito de todos los 180 alumnos de 4.° de primaria de un distrito, la POBLACIÓN es:", options: ["Los 180 alumnos de 4.° de primaria del distrito", "20 niños que juegan fútbol", "Los profesores de educación física", "Los balones de básquet"], answer: 0, exp: "Los 180 alumnos de 4.° de primaria forman la población completa." },
+        { q: "Un fabricante prueba la resistencia de todos los 300 pares de zapatillas fabricados en el día. La POBLACIÓN es:", options: ["Los 300 pares de zapatillas producidos", "Solo 10 pares defectuosos", "La máquina de coser", "Los compradores"], answer: 0, exp: "La totalidad son los 300 pares de zapatillas producidos en la fábrica." },
+        { q: "¿Puede una población estadística estar conformada por plantas o árboles?", options: ["Sí, la población puede ser cualquier conjunto de seres vivos u objetos con características comunes", "No, solo pueden ser seres humanos", "No, solo pueden ser ciudades", "Solo si tienen números"], answer: 0, exp: "En estadística la población puede ser de personas, animales, plantas u objetos." },
+        { q: "En un condominio residen 95 familias y se desea conocer sus mascotas. La POBLACIÓN corresponde a:", options: ["Las 95 familias del condominio", "15 familias del primer piso", "Los perros guardianes", "El conserje del edificio"], answer: 0, exp: "Las 95 familias representan el total a estudiar." },
+        { q: "Se desea saber la marca de computadora preferida por los 70 docentes de un instituto. La POBLACIÓN es:", options: ["Los 70 docentes del instituto", "12 docentes del área de cómputo", "Las pantallas del laboratorio", "Los alumnos del instituto"], answer: 0, exp: "Todos los 70 docentes constituyen la población." },
+        { q: "Si decimos: 'Todos los habitantes de la ciudad de Estadisticópolis', estamos hablando de:", options: ["La población total de la ciudad", "Una muestra representativa", "Una variable cuantitativa", "Una tabla de frecuencias"], answer: 0, exp: "La palabra 'todos' designa a la población completa." },
+        { q: "Un veterinario vacuna a los 60 perros registrados en un albergue. La POBLACIÓN es:", options: ["Los 60 perros registrados en el albergue", "5 cachorros recién llegados", "Los voluntarios del albergue", "Las jaulas"], answer: 0, exp: "Los 60 perros registrados son la población total." },
+        { q: "En una fábrica de jugos hay 500 botellas recién envasadas. Se verifica el sellado de todas. La POBLACIÓN es:", options: ["Las 500 botellas recién envasadas", "20 botellas sin tapa", "El operario de envasado", "Las cajas de cartón"], answer: 0, exp: "Las 500 botellas conforman la población." },
+        { q: "Para saber la talla de calzado de los 25 niños del equipo de fútbol, la POBLACIÓN es:", options: ["Los 25 niños del equipo", "Los 11 titulares", "El arquero", "Las zapatillas"], answer: 0, exp: "Los 25 niños que integran el equipo son la población." },
+        { q: "¿Qué diferencia a la POBLACIÓN de una MUESTRA?", options: ["La población es el conjunto total, mientras que la muestra es solo una parte representativa", "La población es pequeña y la muestra grande", "No existe diferencia alguna", "La población solo tiene letras"], answer: 0, exp: "La población es el todo y la muestra es una parte representativa de dicho todo." }
+      ],
+
+      2: [ // NIVEL 2: MUESTRA (Concepto formal y ejercicios prácticos escolares)
+        { q: "Según tu libro de texto: 'Es un subconjunto representativo de la población, elegido adecuadamente'. ¿A qué concepto corresponde?", options: ["Muestra", "Población", "Frecuencia", "Variable"], answer: 0, exp: "La MUESTRA es el subconjunto representativo elegido de la población." },
+        { q: "CASO INSTITUCIÓN EDUCATIVA N.° 1216: De un total de 1 000 estudiantes, se aplica una encuesta a 200 estudiantes elegidos al azar. ¿Cuál es la MUESTRA?", options: ["Los 200 estudiantes elegidos al azar", "Los 1 000 estudiantes del colegio", "Todos los profesores", "Los alumnos de 4.° grado"], answer: 0, exp: "La muestra está formada por los 200 estudiantes seleccionados." },
+        { q: "CASO EMPRESA 'TIGRE': Se encuestó a 120 trabajadores escogidos al azar para conocer sus horas de trabajo. ¿Cuál es la MUESTRA?", options: ["Los 120 trabajadores escogidos al azar", "El total de trabajadores de la empresa Tigre", "Los clientes de la tienda", "Los supervisores de turno"], answer: 0, exp: "La muestra son los 120 trabajadores encuestados." },
+        { q: "CASO 'FRANCISCO BOLOGNESI': De todos los alumnos del colegio, se seleccionó a 100 estudiantes al azar para conocer su alimentación. ¿Cuál es la MUESTRA?", options: ["Los 100 estudiantes elegidos al azar", "Todo el colegio Francisco Bolognesi", "La comisión de alimentación", "El quiosco escolar"], answer: 0, exp: "Los 100 estudiantes seleccionados forman la muestra." },
+        { q: "CASO TRANSPORTE 'EL RÁPIDO': Se aplicó una encuesta a 60 trabajadores de la empresa sobre el tránsito en horas punta. ¿Cuál es la MUESTRA?", options: ["Los 60 trabajadores escogidos al azar", "Todos los trabajadores de la empresa", "Los buses de la empresa", "Los pasajeros"], answer: 0, exp: "La muestra son exactamente los 60 trabajadores escogidos." },
+        { q: "CASO 2.° DE PRIMARIA: En tres secciones se seleccionó a 10 estudiantes de cada aula al azar (en total 30 niños). ¿Cuál es la MUESTRA?", options: ["10 estudiantes de cada aula elegidos al azar (30 en total)", "Todos los estudiantes de segundo de primaria", "Las profesoras de segundo", "Los útiles escolares"], answer: 0, exp: "La muestra son los 10 estudiantes de cada aula elegidos al azar." },
+        { q: "CASO LA GRANJA: De todos los animales de la granja, el veterinario elige 30 animales al azar para pesarlos y revisarlos. ¿Cuál es la MUESTRA?", options: ["Los 30 animales de la granja elegidos al azar", "Todos los animales de la granja", "Solo los pollos", "Los corrales de madera"], answer: 0, exp: "Los 30 animales elegidos al azar son la muestra." },
+        { q: "¿Por qué es indispensable que la muestra sea elegida 'al azar' y de forma representativa?", options: ["Para que los resultados reflejen fielmente la realidad de toda la población", "Para que la encuesta salga más rápida sin pensar", "Porque está prohibido preguntar a más de diez personas", "Para que gane mi amigo"], answer: 0, exp: "La representatividad garantiza conclusiones confiables y válidas sobre la población." },
+        { q: "En un colegio de 400 alumnos se quiere conocer su plato preferido. Si solo encuestamos a 5 amigos del recreo, ¿es una buena muestra?", options: ["No, porque es muy reducida y no representa la diversidad del colegio", "Sí, los amigos saben lo que todos quieren", "Sí, porque 5 es un número mágico", "Es la mejor muestra posible"], answer: 0, exp: "Una muestra sesgada de solo 5 amigos no representa adecuadamente a 400 alumnos." },
+        { q: "Un chef saca una pequeña porción con una cuchara para probar el sabor de una gran olla de sopa. Esa cucharada representa:", options: ["Una muestra", "La población", "Una frecuencia", "Una variable cuantitativa"], answer: 0, exp: "La cucharada es una muestra representativa de toda la olla de sopa." },
+        { q: "En una fábrica con 500 empleados se selecciona a 45 para una consulta de salud. La cantidad 45 representa:", options: ["El tamaño de la muestra", "El total de la población", "La variable", "La encuesta"], answer: 0, exp: "45 es el número de elementos que componen la muestra." },
+        { q: "Si la población de un estudio son 80 perros y se evalúan 12 al azar, ¿quiénes forman la muestra?", options: ["Los 12 perros evaluados", "Los 80 perros del albergue", "Los veterinarios", "Las jaulas"], answer: 0, exp: "Los 12 perros evaluados constituyen la muestra." },
+        { q: "¿Puede una muestra tener más individuos que la población de la cual fue extraída?", options: ["No, jamás, pues la muestra siempre es una parte o subconjunto de la población", "Sí, cuando se multiplica por 2", "A veces en poblaciones pequeñas", "Siempre es más grande"], answer: 0, exp: "Por definición matemática, la muestra está contenida dentro de la población." },
+        { q: "De una caja con 200 lápices de colores se prueban 15 para revisar la punta. La MUESTRA es:", options: ["Los 15 lápices probados", "Los 200 lápices de la caja", "La marca de los lápices", "El estuche"], answer: 0, exp: "Los 15 lápices seleccionados son la muestra." },
+        { q: "Se encuesta a 35 pasajeros de un tren que transporta a 350 personas. La MUESTRA es:", options: ["Los 35 pasajeros encuestados", "Las 350 personas del tren", "El maquinista", "Las vías del tren"], answer: 0, exp: "Los 35 pasajeros forman la muestra." },
+        { q: "Un inspector agrícola analiza 25 espigas de maíz de un campo que tiene 5 000 plantas. ¿Cuál es la MUESTRA?", options: ["Las 25 espigas analizadas", "Las 5 000 plantas del campo", "El terreno del agricultor", "El agua de riego"], answer: 0, exp: "Las 25 espigas constituyen la muestra analizada." },
+        { q: "¿Cómo se llama cuando se investiga a TODOS los miembros de una población sin tomar muestra?", options: ["Censo completo", "Muestreo al azar", "Frecuencia simple", "Entrevista aleatoria"], answer: 0, exp: "Cuando se estudia al 100% de la población se denomina censo." },
+        { q: "En un concurso escolar con 90 participantes se sortean 5 para una entrevista previa. Los 5 participantes son:", options: ["La muestra", "La población", "El jurado", "El trofeo"], answer: 0, exp: "Los 5 participantes seleccionados por sorteo forman la muestra." },
+        { q: "Al seleccionar al azar a 50 votantes de una ciudad de 10 000 habitantes, la MUESTRA es:", options: ["Los 50 votantes seleccionados", "Los 10 000 habitantes", "El alcalde", "La mesa de votación"], answer: 0, exp: "Los 50 votantes son el subconjunto representativo." },
+        { q: "¿Qué símbolo o herramienta utiliza nuestro robot Datín para enfocar la muestra representativa?", options: ["Su lupa digital detective", "Un telescopio espacial", "Una brújula", "Un termómetro"], answer: 0, exp: "Datín utiliza su lupa digital para enfocar y examinar la muestra." }
+      ],
+
+      3: [ // NIVEL 3: VARIABLE ESTADÍSTICA (Identificación de la característica en casos reales)
+        { q: "CASO COLEGIO 'FRANCISCO BOLOGNESI': Se encuesta a 100 estudiantes para conocer sobre su alimentación diaria. ¿Cuál es la VARIABLE?", options: ["Alimentación diaria", "Total de estudiantes", "Los 100 alumnos", "El nombre del colegio"], answer: 0, exp: "La variable es la característica que se investiga: la alimentación diaria." },
+        { q: "CASO EMPRESA 'TIGRE': Se investiga a 120 trabajadores para conocer el número de horas diarias que trabajan. ¿Cuál es la VARIABLE?", options: ["Número de horas diarias que trabajan", "Los 120 trabajadores", "La empresa Tigre", "La fábrica"], answer: 0, exp: "La variable es la característica investigada: el número de horas que trabajan." },
+        { q: "CASO EMPRESA 'EL RÁPIDO': Se entrevista a 60 choferes sobre el problema del tránsito en horas punta. ¿Cuál es la VARIABLE?", options: ["Problema del tránsito en horas punta", "Los 60 trabajadores", "La Empresa El Rápido", "Los buses"], answer: 0, exp: "La variable es el problema del tránsito en horas punta." },
+        { q: "CASO SEGUNDO GRADO: Se encuesta a 10 niños por aula para saber si saben leer y escribir. ¿Cuál es la VARIABLE?", options: ["Capacidad para leer y escribir", "Los estudiantes de segundo grado", "Las 3 secciones", "El lápiz y cuaderno"], answer: 0, exp: "La característica observada es la capacidad para leer y escribir." },
+        { q: "CASO LA GRANJA: El veterinario evalúa en 30 animales: tipo de animal, peso y color de ojos. ¿Cuáles son las VARIABLES?", options: ["Tipo de animal, peso y color de los ojos", "Los 30 animales", "La granja campestre", "El corral"], answer: 0, exp: "Las tres características analizadas son el tipo de animal, el peso y el color de ojos." },
+        { q: "CASO I.E. N.° 1216: Se desea conocer la edad, el curso favorito y la estación del año preferida. ¿Cuáles son las VARIABLES?", options: ["Edad, curso favorito y estación del año preferida", "Los 1 000 estudiantes", "Los 200 encuestados", "La fecha del examen"], answer: 0, exp: "Las tres características que se buscan conocer son las variables del estudio." },
+        { q: "¿Qué es una VARIABLE ESTADÍSTICA?", options: ["La característica, cualidad o propiedad que se investiga en una población o muestra", "El número de hojas que tiene la encuesta", "El nombre del encuestador", "El salón de clases"], answer: 0, exp: "Una variable es la cualidad o cantidad observable que varía entre individuos." },
+        { q: "Si la pregunta de la encuesta es: '¿Cuál es tu deporte preferido?', la VARIABLE investigada es:", options: ["Deporte preferido", "El estadio", "El árbitro", "La pelota"], answer: 0, exp: "La característica investigada es el deporte preferido." },
+        { q: "En un consultorio médico se anota la 'estatura en centímetros' de los niños. La VARIABLE es:", options: ["La estatura en centímetros", "El consultorio", "La camilla médica", "El doctor"], answer: 0, exp: "La propiedad evaluada es la estatura en centímetros." },
+        { q: "Si se pregunta: '¿Cuántos compañeros tienes en tu aula de 4.° grado?', la VARIABLE investigada es:", options: ["Número de compañeros", "El aula de clases", "La pizarra", "El profesor"], answer: 0, exp: "La característica investigada es el número de compañeros." },
+        { q: "Un estudio registra el 'título de los libros leídos' durante el año por los alumnos. La VARIABLE es:", options: ["Título de libros leídos", "La pasta del libro", "El número de estantes", "La biblioteca"], answer: 0, exp: "El título de los libros leídos es la variable bajo estudio." },
+        { q: "Si una empresa pregunta a sus clientes por la 'marca de galletas' que más consumen, la VARIABLE es:", options: ["Marca de galletas", "El empaque plástico", "El supermercado", "El precio del pasaje"], answer: 0, exp: "La marca de galletas es la variable analizada." },
+        { q: "Un pediatra registra el 'número de calzado' de 40 estudiantes. La VARIABLE es:", options: ["Número de calzado", "Los 40 estudiantes", "Las medias", "La regla de medir"], answer: 0, exp: "La variable es el número o talla de calzado." },
+        { q: "Si se pregunta a los estudiantes por la 'profesión de los padres', la VARIABLE estadística es:", options: ["Profesión de los padres", "El sueldo mensual", "La oficina de trabajo", "El uniforme"], answer: 0, exp: "La característica consultada es la profesión de los padres." },
+        { q: "En una clase de educación física se mide la 'palma de la mano' con una regla. La VARIABLE es:", options: ["Medida de la palma de la mano", "La regla graduada", "La mano izquierda", "El salón"], answer: 0, exp: "La medida de la palma es la variable observada." },
+        { q: "Al registrar la 'cantidad de goles anotados en un partido', la VARIABLE es:", options: ["Goles de un partido", "El arco de fútbol", "El silbato", "Los botines"], answer: 0, exp: "La variable son los goles anotados en el partido." },
+        { q: "Si se investiga: '¿Cuál es tu color de ojos?', la VARIABLE es:", options: ["Color de los ojos", "Las pestañas", "El espejo", "La luz solar"], answer: 0, exp: "El color de los ojos es la variable del estudio." },
+        { q: "En un zoológico se anota el 'peso en kilogramos' de cada cría de oso. La VARIABLE es:", options: ["Peso de las crías en kilogramos", "La jaula del oso", "La comida", "El cuidador"], answer: 0, exp: "El peso es la característica cuantificada." },
+        { q: "¿Por qué se llama VARIABLE a este elemento en estadística?", options: ["Porque adquiere distintos valores o respuestas según cada individuo observado", "Porque nunca cambia en ningún caso", "Porque siempre vale cero", "Porque solo se usa los días viernes"], answer: 0, exp: "Se llama variable porque puede variar o cambiar entre distintos elementos estudiados." },
+        { q: "Si se registra la 'estación del año preferida (verano, otoño, invierno, primavera)', la VARIABLE es:", options: ["Estación del año preferida", "El calendario escolar", "El termómetro", "El reloj"], answer: 0, exp: "La estación del año preferida es la característica cualitativa investigada." }
+      ],
+
+      4: [ // NIVEL 4: CUALITATIVAS VS CUANTITATIVAS (Clasificación exacta de los libros escolares)
+        { q: "Según tu libro de texto, la variable 'Goles de un partido' es:", options: ["Variable cuantitativa", "Variable cualitativa", "Variable de texto", "Variable nominal"], answer: 0, exp: "Los goles se expresan en números que se cuentan (0, 1, 2, 3...), por tanto es cuantitativa." },
+        { q: "Según tu libro de texto, la variable 'Número de calzado' es:", options: ["Variable cuantitativa", "Variable cualitativa", "Variable alfabética", "Variable fija"], answer: 0, exp: "El número de calzado (32, 34, 36...) representa una medida numérica, es cuantitativa." },
+        { q: "Según tu libro de texto, la variable 'Deporte preferido' es:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable decimal", "Variable de conteo"], answer: 0, exp: "El deporte preferido (fútbol, vóley, natación) se expresa con palabras o cualidades: es cualitativa." },
+        { q: "Según tu libro de texto, la variable 'Profesión de los padres' es:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable numérica", "Variable fraccionaria"], answer: 0, exp: "Las profesiones (ingeniero, médico, profesor) son cualidades o categorías: variable cualitativa." },
+        { q: "Según tu libro de texto, la variable 'Título de libros leídos' es:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable de cálculo", "Variable entera"], answer: 0, exp: "Los títulos de los libros son palabras y nombres: variable cualitativa." },
+        { q: "Según tu libro de texto, la variable 'Marca de galletas' es:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable de suma", "Variable geométrica"], answer: 0, exp: "Las marcas de galletas representan nombres comerciales: variable cualitativa." },
+        { q: "Según tu libro de texto, la variable 'Medida de la palma de la mano' es:", options: ["Variable cuantitativa", "Variable cualitativa", "Variable de categoría", "Variable simbólica"], answer: 0, exp: "La medida en centímetros representa una cantidad medible: variable cuantitativa." },
+        { q: "Según tu libro de texto, la variable 'Número de compañeros' es:", options: ["Variable cuantitativa", "Variable cualitativa", "Variable textual", "Variable de nombre"], answer: 0, exp: "Indica una cantidad numérica de personas: variable cuantitativa." },
+        { q: "CASO I.E. N.° 1216: La variable 'Edad de los estudiantes' corresponde a:", options: ["Variable cuantitativa", "Variable cualitativa", "Variable gráfica", "Variable de etiqueta"], answer: 0, exp: "La edad se expresa en números de años cumplidos: variable cuantitativa." },
+        { q: "CASO I.E. N.° 1216: La variable 'Curso favorito' corresponde a:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable numérica", "Variable de medida"], answer: 0, exp: "El curso favorito (Matemática, Comunicación) es una categoría: variable cualitativa." },
+        { q: "CASO I.E. N.° 1216: La variable 'Estación del año preferida' corresponde a:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable de conteo", "Variable de peso"], answer: 0, exp: "Las estaciones (primavera, verano, otoño, invierno) son cualidades: variable cualitativa." },
+        { q: "CASO EMPRESA 'TIGRE': La variable 'Número de horas que trabajan' corresponde a:", options: ["Variable cuantitativa", "Variable cualitativa", "Variable de palabra", "Variable de opinión"], answer: 0, exp: "Las horas trabajadas representan una cantidad numérica medible: cuantitativa." },
+        { q: "CASO SEGUNDO GRADO: La variable 'Capacidad para leer y escribir (Sí / No)' corresponde a:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable matemática", "Variable de suma"], answer: 0, exp: "Indica una cualidad o cualificación (Sí/No): variable cualitativa." },
+        { q: "CASO LA GRANJA: La variable 'Peso de los animales en kilogramos' corresponde a:", options: ["Variable cuantitativa", "Variable cualitativa", "Variable de color", "Variable de nombre"], answer: 0, exp: "El peso es una magnitud medible numéricamente: cuantitativa." },
+        { q: "CASO LA GRANJA: La variable 'Color de los ojos de los animales' corresponde a:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable métrica", "Variable entera"], answer: 0, exp: "El color (marrón, negro, azul) describe una cualidad: cualitativa." },
+        { q: "¿En qué cofre debe colocarse una variable que se responde mediante una PALABRA o CATEGORÍA?", options: ["Cofre de Variables Cualitativas", "Cofre de Variables Cuantitativas", "Cofre de Números Primos", "Cofre Vacío"], answer: 0, exp: "Las cualidades, atributos o categorías pertenecen a las variables cualitativas." },
+        { q: "¿En qué cofre debe colocarse una variable que responde a una CANTIDAD que se cuenta o mide?", options: ["Cofre de Variables Cuantitativas", "Cofre de Variables Cualitativas", "Cofre de Sinónimos", "Cofre Alfabético"], answer: 0, exp: "Las cantidades numéricas pertenecen a las variables cuantitativas." },
+        { q: "¡Atención detective! El número de teléfono de una persona es:", options: ["Variable cualitativa (sirve como código de identificación, no es una cantidad que se sume)", "Variable cuantitativa (porque tiene números)", "Una frecuencia", "Una población"], answer: 0, exp: "El número telefónico identifica un contacto; no representa una cantidad ni se promedia." },
+        { q: "La variable 'Cantidad de hermanos que tiene cada alumno' es:", options: ["Variable cuantitativa", "Variable cualitativa", "Variable de adjetivo", "Variable de texto"], answer: 0, exp: "Se puede contar numéricamente (0, 1, 2, 3...): cuantitativa." },
+        { q: "La variable 'Sabor de helado preferido (vainilla, chocolate, lúcuma)' es:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable métrica", "Variable de cálculo"], answer: 0, exp: "Expresa preferencias o cualidades con palabras: variable cualitativa." }
+      ],
+
+      5: [ // NIVEL 5: LA ENCUESTA (Definición formal de los libros y aplicación)
+        { q: "Según tu libro de Matemática: 'Es un instrumento que puede contener una o más preguntas para recoger información sobre un determinado tema'. ¿A qué concepto corresponde?", options: ["La encuesta", "La frecuencia", "La población", "La muestra"], answer: 0, exp: "LA ENCUESTA es el instrumento que contiene preguntas para recolectar información sobre un tema." },
+        { q: "Si queremos averiguar la alimentación diaria de los estudiantes del colegio 'Francisco Bolognesi', ¿cuál es la mejor pregunta para la encuesta?", options: ["¿Qué alimentos sueles consumir en tu desayuno y almuerzo escolar?", "¿Cuántos años tiene tu hermano mayor?", "¿Qué marca de bicicleta te gusta?", "¿Cuál es el color del patio del colegio?"], answer: 0, exp: "La pregunta debe enfocarse directamente en los hábitos de alimentación diaria." },
+        { q: "En la empresa 'Tigre' deseamos conocer el número de horas diarias que trabajan. ¿Qué pregunta formulamos en la encuesta?", options: ["¿Cuántas horas trabajas al día en tu puesto laboral?", "¿Te gusta pasear los domingos por la tarde?", "¿Cuál es tu comida favorita?", "¿Cuánto pesa tu maletín?"], answer: 0, exp: "Pregunta con precisión por el número de horas trabajadas." },
+        { q: "En la Empresa 'El Rápido' se investiga el problema del tránsito en horas punta. ¿Cuál pregunta es la más adecuada?", options: ["¿Cuál consideras que es el principal problema del tránsito en horas punta?", "¿A qué hora compras el pan?", "¿Cuál es el color de tu camisa favorita?", "¿Cuántos árboles hay en la avenida?"], answer: 0, exp: "Indaga exactamente sobre los problemas del tránsito en horas de mayor congestión." },
+        { q: "¿Qué característica fundamental debe tener la pregunta de una encuesta para niños de primaria?", options: ["Debe ser clara, sencilla, respetuosa y orientada a la variable de estudio", "Debe tener palabras muy complicadas y engañosas", "Debe sugerir la respuesta que quiere el encuestador", "Debe tener 20 páginas de extensión"], answer: 0, exp: "Una buena pregunta es clara, comprensible y neutral." },
+        { q: "Al aplicar una encuesta en el parque de Estadisticópolis, las respuestas de los ciudadanos deben:", options: ["Registrarse fielmente en la libreta digital tal como las expresaron", "Cambiarse por las opciones que más le gusten al detective", "Borrarse si no nos parecen bonitas", "Ignorarse por completo"], answer: 0, exp: "El detective estadístico siempre registra con total honestidad y fidelidad cada dato." },
+        { q: "Una pregunta sesgada como: '¿Verdad que el jugo de naranja es el más rico del mundo?', es:", options: ["Una pregunta inadecuada porque induce y condiciona la respuesta", "Una pregunta perfecta y neutral", "Una variable cuantitativa", "Una población estadística"], answer: 0, exp: "Una encuesta científica no debe condicionar la opinión del entrevistado." },
+        { q: "¿En qué soporte o instrumento Datín registra las respuestas de los encuestados?", options: ["En su libreta o formulario de recolección de datos", "En una hoja en blanco que luego bota", "En una calculadora de bolsillo", "En una regla de dibujo"], answer: 0, exp: "Las encuestas se registran en libretas, formularios o cuestionarios organizados." },
+        { q: "Para conocer la 'estación del año preferida' de los estudiantes de la I.E. N.° 1216, preguntamos:", options: ["¿Cuál es tu estación del año favorita: primavera, verano, otoño o invierno?", "¿Cuántos grados marca el termómetro?", "¿Tienes paraguas en casa?", "¿Qué día comienzan las clases?"], answer: 0, exp: "Permite registrar las opciones correspondientes a las estaciones del año." },
+        { q: "¿Cuál es el propósito primordial de aplicar una encuesta?", options: ["Recoger datos e información relevante para responder a una investigación", "Adivinar lo que piensa la gente sin preguntar", "Hacer perder el tiempo a los ciudadanos", "Comprobar qué persona corre más rápido"], answer: 0, exp: "La encuesta es una técnica de recolección de información estructurada y confiable." },
+        { q: "Si un habitante encuestado responde amablemente, la actitud del detective estadístico debe ser:", options: ["Agradecerle cordialmente por su tiempo y colaboración", "Burlarse de su respuesta", "Exigirle que cambie de opinión", "Salir corriendo sin despedirse"], answer: 0, exp: "La cortesía y el agradecimiento son normas esenciales del encuestador." },
+        { q: "Al investigar el 'número de calzado' de 40 compañeros, la pregunta ideal es:", options: ["¿Qué número de calzado o talla de zapatos usas?", "¿Qué color de medias te compraste?", "¿Cuánto te costaron tus zapatos?", "¿En qué tienda compras tus zapatillas?"], answer: 0, exp: "Permite obtener directamente el dato del número de calzado." },
+        { q: "En una encuesta sobre la 'mascota preferida', una pregunta de opción múltiple cerrada debe tener opciones como:", options: ["Perro, Gato, Loro, Conejo, Otro", "Azul, Rojo, Verde", "10 años, 11 años", "Lunes, Martes, Miércoles"], answer: 0, exp: "Las opciones deben guardar estricta coherencia con la variable evaluada." },
+        { q: "¿Qué sucede si en una encuesta formulamos preguntas confusas?", options: ["Los encuestados responderán de forma errónea y los datos no serán confiables", "Los datos saldrán más interesantes", "Datín resolverá todo automáticamente", "Se ganan más estrellas"], answer: 0, exp: "Las preguntas confusas invalidan la precisión del estudio estadístico." },
+        { q: "Se encuesta a 20 alumnos sobre su curso favorito y 12 eligen Matemática. El dato '12' representa:", options: ["La frecuencia de la preferencia por Matemática", "La población del colegio", "La pregunta de la encuesta", "La muestra total"], answer: 0, exp: "12 es la cantidad de repeticiones o votos recibidos por Matemática." },
+        { q: "¿Quién responde la encuesta en una investigación?", options: ["El encuestado o participante que integra la muestra", "El detective que formula la pregunta", "El micrófono", "El cuaderno de notas"], answer: 0, exp: "El encuestado es la persona que proporciona la información." },
+        { q: "Si la variable es 'Título de libros leídos', la pregunta de la encuesta es:", options: ["¿Cuáles son los títulos de los libros que has leído este mes?", "¿Cuánto pesa tu mochila escolar?", "¿Quién es el autor de tu cuaderno?", "¿Cuántas páginas tiene la pizarra?"], answer: 0, exp: "Consulta directamente por los títulos de las obras leídas." },
+        { q: "Al encuestar a 60 choferes sobre el tránsito en horas punta, las respuestas recolectadas formarán:", options: ["La base de datos o muestra del estudio sobre el tránsito", "Una nueva ley de transporte", "El mapa de la ciudad", "El precio de la gasolina"], answer: 0, exp: "Constituyen los datos muestrales que serán analizados." },
+        { q: "Una encuesta puede aplicarse de manera:", options: ["Presencial oral, escrita en papel o mediante formularios digitales", "Únicamente gritando por la ventana", "Solo leyendo el pensamiento", "Mediante señales de humo"], answer: 0, exp: "Se puede aplicar cara a cara, por escrito o con medios tecnológicos." },
+        { q: "¿Qué paso sigue inmediatamente después de recoger todas las encuestas?", options: ["Organizar, contar y clasificar las respuestas en una tabla de frecuencias", "Romper las hojas de preguntas", "Inventar respuestas nuevas", "Guardar todo sin revisar"], answer: 0, exp: "El siguiente paso metodológico es la tabulación y conteo de frecuencias." }
+      ],
+
+      6: [ // NIVEL 6: FRECUENCIA Y TABLAS (Concepto escolar formal y análisis cuantitativo)
+        { q: "Según tu libro de texto: 'Es la cantidad de veces que se repite un determinado valor'. ¿A qué concepto corresponde?", options: ["La frecuencia", "La población", "La muestra", "La encuesta"], answer: 0, exp: "LA FRECUENCIA es la cantidad de veces que se repite un valor o respuesta determinada." },
+        { q: "En la fábrica de jugos: Naranja tiene 12 pedidos, Fresa 6, Papaya 8, Zanahoria 2 y Surtido 4. ¿Cuál sabor tiene la MAYOR FRECUENCIA?", options: ["Naranja (frecuencia 12)", "Papaya (frecuencia 8)", "Fresa (frecuencia 6)", "Surtido (frecuencia 4)"], answer: 0, exp: "Naranja se repite 12 veces, siendo el valor más alto de la distribución." },
+        { q: "Con los mismos datos de jugos: Naranja 12, Fresa 6, Papaya 8, Zanahoria 2 y Surtido 4. ¿Cuál sabor tiene la MENOR FRECUENCIA?", options: ["Zanahoria (frecuencia 2)", "Fresa (frecuencia 6)", "Surtido (frecuencia 4)", "Papaya (frecuencia 8)"], answer: 0, exp: "Zanahoria sólo tiene 2 pedidos, siendo la frecuencia más baja." },
+        { q: "Si sumamos las frecuencias de los pedidos: 12 + 6 + 8 + 2 + 4, ¿cuál es el total de estudiantes encuestados?", options: ["32 estudiantes encuestados", "28 estudiantes encuestados", "30 estudiantes encuestados", "36 estudiantes encuestados"], answer: 0, exp: "La suma exacta de todas las frecuencias absolutas da 32 encuestados." },
+        { q: "En un conteo escolar de mascotas: Perro = 15, Gato = 10, Loro = 5. ¿Cuántos estudiantes prefieren GATO?", options: ["10 estudiantes", "15 estudiantes", "5 estudiantes", "30 estudiantes"], answer: 0, exp: "La frecuencia asociada a la categoría 'Gato' es exactamente 10." },
+        { q: "En el mismo conteo de mascotas (Perro 15, Gato 10, Loro 5), ¿cuántos estudiantes fueron encuestados en total?", options: ["30 estudiantes (15 + 10 + 5)", "25 estudiantes", "35 estudiantes", "20 estudiantes"], answer: 0, exp: "Sumando todas las frecuencias: 15 + 10 + 5 = 30 encuestados." },
+        { q: "Si la frecuencia de Naranja es 12 y la de Papaya es 8, ¿cuántos estudiantes prefieren Naranja o Papaya juntos?", options: ["20 estudiantes (12 + 8)", "4 estudiantes", "96 estudiantes", "16 estudiantes"], answer: 0, exp: "12 + 8 = 20 estudiantes en conjunto." },
+        { q: "¿Qué ocurre siempre al sumar TODAS las frecuencias absolutas de una tabla?", options: ["Se obtiene el número total de individuos de la muestra investigada", "Siempre da como resultado cero", "Siempre da exactamente 100 en cualquier caso", "El resultado es un número decimal"], answer: 0, exp: "La suma total de frecuencias reconstruye el tamaño total de la muestra." },
+        { q: "En un registro con marcas de palotes: ||||  ||||  || , ¿qué frecuencia numérica representa?", options: ["12", "10", "14", "7"], answer: 0, exp: "Dos grupos de cinco (10) más dos palotes adicionales suman 12." },
+        { q: "Si el jugo de Fresa tiene frecuencia 6 y Zanahoria frecuencia 2, ¿cuántos prefieren Fresa MÁS que Zanahoria?", options: ["4 personas más (6 - 2)", "8 personas más", "3 personas más", "12 personas más"], answer: 0, exp: "La diferencia es 6 - 2 = 4 personas." },
+        { q: "Si ningún habitante encuestado eligió el jugo de maracuyá, ¿cuál es su FRECUENCIA en la tabla?", options: ["0 (cero)", "1", "10", "No se puede saber"], answer: 0, exp: "Al no haber recibido elecciones, su frecuencia es cero." },
+        { q: "Una tabla de frecuencias es de gran utilidad pedagógica porque:", options: ["Permite ordenar los datos recolectados y visualizar la información con claridad", "Sirve para colorear casillas al azar", "Borra las preguntas de la encuesta", "Cambia las respuestas de las personas"], answer: 0, exp: "Permite condensar, ordenar y analizar con claridad la distribución de datos." },
+        { q: "En una elección de delegado escolar: Luis obtuvo 14 votos y María 19 votos. ¿Quién ganó por tener mayor frecuencia?", options: ["María por obtener 19 votos (mayor frecuencia)", "Luis por tener 14 votos", "Hubo un empate", "No hubo ganador"], answer: 0, exp: "María obtuvo la frecuencia más alta: 19 > 14." },
+        { q: "Si en una tabla de frecuencia con 4 categorías las frecuencias son 5, 8, 7 y 10, ¿cuál es el total muestral?", options: ["30 (5 + 8 + 7 + 10)", "25", "35", "20"], answer: 0, exp: "5 + 8 + 7 + 10 = 30." },
+        { q: "En un gráfico de barras construido a partir de una tabla de frecuencias, la altura de cada barra representa:", options: ["La frecuencia de dicha categoría", "La edad del estudiante", "La hora en que se hizo el dibujo", "El ancho de la hoja"], answer: 0, exp: "La altura es directamente proporcional a la frecuencia del valor." },
+        { q: "Si la frecuencia de Naranja es 12 y la de Surtido es 4, ¿cuántas veces más se pidió Naranja respecto a Surtido?", options: ["El triple (12 ÷ 4 = 3)", "El doble", "Cinco veces más", "Cuatro veces más"], answer: 0, exp: "12 dividido entre 4 es igual a 3 (el triple)." },
+        { q: "En la variable 'Número de calzado', si el número 34 se repite 8 veces en la muestra, su FRECUENCIA es:", options: ["8", "34", "42", "26"], answer: 0, exp: "La cantidad de repeticiones es 8." },
+        { q: "Para que el alcalde tome la mejor decisión sobre qué jugo comprar, debe observar:", options: ["El sabor que tenga la MAYOR frecuencia de preferencia", "El sabor que tenga cero pedidos", "El sabor más amargo", "Elegir sin mirar los datos"], answer: 0, exp: "La decisión óptima se apoya en el sabor preferido por la mayor frecuencia." },
+        { q: "¿Puede una frecuencia estadística ser un número negativo como -5?", options: ["No, porque representa el conteo de elementos o personas reales (es cero o positivo)", "Sí, cuando hace mucho frío", "A veces en días lluviosos", "Siempre son negativas"], answer: 0, exp: "Un conteo de respuestas siempre es mayor o igual a cero." },
+        { q: "Al organizar los datos en una tabla de frecuencia, la columna donde se colocan los números contados se titula:", options: ["Frecuencia", "Población", "Muestra", "Título"], answer: 0, exp: "En la columna de frecuencia se anotan los valores del conteo." }
+      ],
+
+      7: [ // NIVEL 7: EL GRAN MISTERIO ESTADÍSTICO (Casos de estudio completos de las fotos)
+        { q: "RESOLUCIÓN COMPLETA: En el caso del colegio 'Francisco Bolognesi' (100 estudiantes al azar sobre alimentación), identifica la terna correcta:", options: ["Población: Total de estudiantes del colegio 'Francisco Bolognesi' | Muestra: 100 estudiantes | Variable: Alimentación diaria", "Población: 100 estudiantes | Muestra: Todo el colegio | Variable: El quiosco", "Población: El director | Muestra: 100 alumnos | Variable: La hora", "Población: Alimentación | Muestra: Francisco Bolognesi | Variable: 100"], answer: 0, exp: "Población: Total de estudiantes; Muestra: 100 estudiantes; Variable: Alimentación diaria." },
+        { q: "RESOLUCIÓN COMPLETA: En el caso de la empresa 'Tigre' (120 trabajadores al azar sobre horas de trabajo), identifica la terna correcta:", options: ["Población: Total de trabajadores de la empresa 'Tigre' | Muestra: 120 trabajadores | Variable: Número de horas que trabajan", "Población: 120 trabajadores | Muestra: Empresa Tigre | Variable: Zapatillas", "Población: Gerente | Muestra: 12 trabajadores | Variable: Salario", "Población: Número de horas | Muestra: Fábrica | Variable: 120"], answer: 0, exp: "Población: Total de trabajadores de Tigre; Muestra: 120 trabajadores; Variable: Número de horas que trabajan." },
+        { q: "RESOLUCIÓN COMPLETA: En la Empresa de Transportes 'El Rápido' (60 choferes sobre el tránsito en horas punta), identifica la terna correcta:", options: ["Población: Total de trabajadores de la Empresa de Transportes 'El Rápido' | Muestra: 60 trabajadores | Variable: Problema del tránsito en horas punta", "Población: 60 trabajadores | Muestra: Buses | Variable: La pista", "Población: El chofer | Muestra: La avenida | Variable: El semáforo", "Población: El tránsito | Muestra: 60 | Variable: El pasaje"], answer: 0, exp: "Población: Total de trabajadores de El Rápido; Muestra: 60 trabajadores; Variable: Problema del tránsito en horas punta." },
+        { q: "RESOLUCIÓN COMPLETA: En las 3 secciones de segundo de primaria (10 alumnos por aula sobre si saben leer y escribir), identifica la terna correcta:", options: ["Población: Estudiantes de segundo de primaria | Muestra: 10 estudiantes de cada aula de segundo elegidos al azar | Variable: Capacidad para leer y escribir", "Población: Las 3 profesoras | Muestra: Todo el colegio | Variable: La pizarra", "Población: Capacidad de leer | Muestra: Los libros | Variable: 10 niños", "Población: El aula | Muestra: El lápiz | Variable: Las letras"], answer: 0, exp: "Población: Estudiantes de 2.° de primaria; Muestra: 10 estudiantes de cada aula al azar; Variable: Capacidad para leer y escribir." },
+        { q: "RESOLUCIÓN COMPLETA: En el reto del veterinario en la granja (30 animales al azar sobre peso, tipo y color de ojos), identifica la terna correcta:", options: ["Población: Animales de la granja | Muestra: 30 animales de la granja elegidos al azar | Variable: Tipo de animal, peso y color de ojos", "Población: 30 animales | Muestra: Toda la granja | Variable: La cerca", "Población: El veterinario | Muestra: El corral | Variable: El pasto", "Población: Peso | Muestra: Color de ojos | Variable: 30 animales"], answer: 0, exp: "Población: Animales de la granja; Muestra: 30 animales elegidos al azar; Variable: Tipo de animal, peso y color de ojos." },
+        { q: "RESOLUCIÓN COMPLETA: En la I.E. N.° 1216 (1 000 estudiantes en total, 200 encuestados sobre edad, curso y estación), identifica los datos de partida:", options: ["Población: 1 000 estudiantes | Muestra: 200 estudiantes", "Población: 200 estudiantes | Muestra: 1 000 estudiantes", "Población: Solo el 4.° grado | Muestra: 5 alumnos", "Población: Los profesores | Muestra: El director"], answer: 0, exp: "Población total: 1 000 estudiantes de la institución; Muestra: 200 estudiantes encuestados." },
+        { q: "CASO I.E. N.° 1216: ¿Cuál es la clasificación correcta de las tres variables investigadas?", options: ["Edad (Cuantitativa), Curso favorito (Cualitativa), Estación del año preferida (Cualitativa)", "Edad (Cualitativa), Curso (Cuantitativa), Estación (Cuantitativa)", "Las tres variables son cuantitativas", "Las tres variables son cualitativas"], answer: 0, exp: "La edad es cuantitativa (número); curso y estación son cualitativas (cualidades)." },
+        { q: "En el caso de la empresa 'Tigre', la variable 'Número de horas que trabajan' es de tipo:", options: ["Cuantitativa", "Cualitativa", "Gráfica", "De identificación"], answer: 0, exp: "Mide una cantidad de tiempo en horas: variable cuantitativa." },
+        { q: "En el caso de 'El Rápido', la variable 'Problema del tránsito en horas punta' es de tipo:", options: ["Cualitativa", "Cuantitativa", "Monetaria", "Decimal"], answer: 0, exp: "Describe situaciones cualitativas (congestión, baches, falta de señalización): variable cualitativa." },
+        { q: "En el caso de la granja, si analizamos la variable 'Peso', esta es:", options: ["Cuantitativa (se mide en kilogramos numéricos)", "Cualitativa", "Un nombre", "Una muestra"], answer: 0, exp: "El peso es una medida numérica cuantitativa." },
+        { q: "¿Por qué en el caso del colegio Bolognesi es incorrecto afirmar que la población son 'los 100 estudiantes'?", options: ["Porque 100 estudiantes son solo la MUESTRA elegida; la población es el TOTAL de estudiantes del colegio", "Porque 100 es un número muy grande", "Porque faltan los profesores", "Porque eran 200"], answer: 0, exp: "Los 100 estudiantes encuestados constituyen la muestra seleccionada." },
+        { q: "Si en un estudio médico la población son 500 pacientes y la muestra son 50, ¿a cuántas personas se encuestó?", options: ["A las 50 personas de la muestra", "A las 500 personas de la población", "A ninguna", "A 550 personas"], answer: 0, exp: "El instrumento de recolección se aplica a los 50 integrantes de la muestra." },
+        { q: "En el estudio de segundo grado, la variable 'Capacidad para leer y escribir' admite respuestas como:", options: ["'Sí sabe' o 'No sabe' (Cualitativa)", "10 centímetros", "25 kilogramos", "Año 2026"], answer: 0, exp: "Se califica con atributos o palabras descriptivas (cualitativa)." },
+        { q: "Si en la empresa 'Tigre' se encuestó a 120 trabajadores de 600 en total, ¿qué porcentaje de la población representa la muestra?", options: ["La quinta parte (120 de 600 = 20%)", "La mitad exacta", "Casi todos", "El 100%"], answer: 0, exp: "600 dividido entre 5 es exactamente 120 (la quinta parte)." },
+        { q: "¿Qué elemento fundamental permite diferenciar entre una variable Cualitativa y Cuantitativa en estos casos?", options: ["Si la respuesta se expresa mediante una cualidad/palabra (Cualitativa) o una cantidad numérica (Cuantitativa)", "Si el número tiene más de dos cifras", "Si la encuesta fue por la mañana o por la tarde", "El color de la hoja"], answer: 0, exp: "La naturaleza del dato: palabra/categoría vs cantidad/magnitud medible." },
+        { q: "En el caso del veterinario en la granja, ¿cuál de las tres variables analizadas es CUANTITATIVA?", options: ["El peso de los animales", "El tipo de animal", "El color de los ojos", "El nombre de la granja"], answer: 0, exp: "El peso se expresa en valores numéricos (cuantitativa)." },
+        { q: "En la I.E. N.° 1216, si 80 estudiantes eligen primavera y 50 verano, ¿cuál es la frecuencia acumulada de ambas estaciones?", options: ["130 estudiantes (80 + 50)", "30 estudiantes", "400 estudiantes", "200 estudiantes"], answer: 0, exp: "80 + 50 = 130 estudiantes." },
+        { q: "Para resolver con rigor matemático cualquier caso de libro de texto, el orden lógico detective es:", options: ["1.° Identificar Población, 2.° Identificar Muestra, 3.° Identificar Variable y su tipo", "1.° Adivinar la respuesta, 2.° Escribir números al azar", "1.° Inventar la muestra, 2.° Borrar la población", "1.° Cerrar el libro"], answer: 0, exp: "El método riguroso establece población, muestra y variable con precisión." },
+        { q: "En la empresa 'El Rápido', si los 60 trabajadores señalan 3 problemas distintos, esos datos se organizan en:", options: ["Una tabla de frecuencias", "Un dibujo libre", "Una carta al conductor", "Un álbum de fotos"], answer: 0, exp: "Se estructuran en una tabla de distribución de frecuencias." },
+        { q: "¡Misterio resuelto! ¿Qué beneficio brinda a una institución o empresa realizar este tipo de estudios?", options: ["Tomar decisiones correctas basadas en información verídica y representativa", "Gastar dinero en encuestas innecesarias", "Confundir a los trabajadores", "No tiene ningún beneficio"], answer: 0, exp: "Fundamenta la toma de decisiones basada en evidencia estadística." }
+      ],
+
+      8: [ // NIVEL 8: EL FESTIVAL DE LOS DATOS (Aplicación integral del ciclo estadístico)
+        { q: "MISIÓN 1: El alcalde de Estadisticópolis organizará el festival para los 600 habitantes de la ciudad. La POBLACIÓN es:", options: ["Los 600 habitantes de Estadisticópolis", "Solo 10 amigos del alcalde", "Los músicos del festival", "Los vasos de jugo"], answer: 0, exp: "La población comprende a la totalidad de los 600 habitantes de la ciudad." },
+        { q: "MISIÓN 2: Para ahorrar tiempo y presupuesto, el alcalde te pide seleccionar una MUESTRA al azar. La mejor muestra es:", options: ["60 habitantes elegidos aleatoriamente de diferentes zonas de la ciudad", "Solo los 2 guardias del palacio municipal", "Nadie, inventar los números en un papel", "El alcalde únicamente"], answer: 0, exp: "60 habitantes elegidos al azar constituyen una muestra representativa." },
+        { q: "MISIÓN 3: El alcalde necesita saber qué jugo preparar en mayor cantidad. La VARIABLE central a investigar es:", options: ["Sabor de jugo preferido por los habitantes", "La hora en que se encenderán las luces", "El precio de la vestimenta del animador", "El color del escenario"], answer: 0, exp: "La característica de interés para la compra es el sabor de jugo preferido." },
+        { q: "MISIÓN 4: La variable 'Sabor de jugo preferido (Naranja, Fresa, Papaya, Zanahoria)' es de tipo:", options: ["Variable cualitativa", "Variable cuantitativa", "Variable fraccionaria", "Variable temporal"], answer: 0, exp: "Expresa preferencias descriptivas con palabras: variable cualitativa." },
+        { q: "MISIÓN 5: Datín y tú diseñan la ENCUESTA. ¿Cuál es la pregunta más clara y adecuada para la libreta detective?", options: ["¿Cuál es tu sabor de jugo preferido para el festival?", "¿A qué hora te gusta dormir?", "¿Cuánto calzas en zapatos deportivos?", "¿Qué opinas del clima de ayer?"], answer: 0, exp: "Apunta directamente a recolectar el dato de la variable deseada." },
+        { q: "MISIÓN 6: Entrevistas a los 60 habitantes de la muestra y obtienes: Naranja 28, Fresa 16, Papaya 12 y Zanahoria 4. ¿La suma coincide?", options: ["Sí: 28 + 16 + 12 + 4 = 60 encuestados", "No, sobran datos", "Faltan 10 habitantes", "Da cero"], answer: 0, exp: "La suma exacta de las frecuencias: 28 + 16 + 12 + 4 = 60." },
+        { q: "MISIÓN 7: En la tabla de frecuencias construida, ¿cuál sabor obtuvo la MAYOR FRECUENCIA?", options: ["Naranja (con 28 preferencias)", "Fresa (con 16 preferencias)", "Papaya (con 12 preferencias)", "Zanahoria (con 4 preferencias)"], answer: 0, exp: "Naranja tiene la frecuencia más elevada: 28 pedidos." },
+        { q: "MISIÓN 8 (DECISIÓN FINAL): Según el estudio estadístico realizado, ¿qué recomendación fundamentada le das al alcalde?", options: ["Preparar y adquirir principalmente jugo de Naranja por contar con la mayor frecuencia de preferencia", "Comprar solo jugo de Zanahoria aunque casi nadie lo prefiera", "Cancelar el festival por falta de información", "Elegir cualquier jugo lanzando una moneda"], answer: 0, exp: "La estadística permite tomar decisiones seguras basadas en la mayor preferencia popular." },
+        { q: "¿Qué hubiera ocurrido si el alcalde compraba jugos sin realizar este estudio de datos?", options: ["Podría haber comprado jugos no preferidos, generando pérdidas y desperdicio", "Habría acertado con seguridad", "No importa lo que la gente prefiera", "Los festivales no necesitan preparación"], answer: 0, exp: "Investigar con datos previene gastos inútiles y asegura la satisfacción de la comunidad." },
+        { q: "Si el alcalde también deseara saber cuántos vasos toma cada persona, esa nueva variable sería:", options: ["Variable cuantitativa (número de vasos consumidos)", "Variable cualitativa", "Población total", "Una insignia"], answer: 0, exp: "La cantidad de vasos consumidos es un número que se cuenta: cuantitativa." },
+        { q: "En la encuesta del festival, ¿cuál sabor obtuvo la MENOR FRECUENCIA?", options: ["Zanahoria (con 4 preferencias)", "Naranja", "Fresa", "Papaya"], answer: 0, exp: "Zanahoria sólo obtuvo 4 preferencias en la muestra." },
+        { q: "¿Cuántos habitantes prefieren Fresa o Papaya en conjunto según la muestra?", options: ["28 habitantes (16 + 12)", "20 habitantes", "14 habitantes", "40 habitantes"], answer: 0, exp: "16 + 12 = 28 habitantes." },
+        { q: "¿Qué instrumento gráfico le presentas al alcalde para mostrar los resultados de forma rápida?", options: ["Un gráfico de barras basado en la tabla de frecuencias", "Un plano de calles desordenado", "Un recibo de compras", "Un sobre cerrado sin datos"], answer: 0, exp: "El gráfico de barras comunica visualmente las frecuencias obtenidas." },
+        { q: "Si en el festival asisten finalmente 1 200 personas, la nueva POBLACIÓN será de:", options: ["1 200 personas", "60 personas", "600 personas", "24 personas"], answer: 0, exp: "La población se amplía al total de asistentes: 1 200 personas." },
+        { q: "La muestra de 60 habitantes representó adecuadamente a los 600 porque:", options: ["Fue seleccionada al azar en distintos sectores de la ciudad sin inclinaciones", "Eran todos familiares del alcalde", "Solo se consultó a una persona", "Se hizo en 2 segundos"], answer: 0, exp: "La aleatoriedad y representatividad aseguran la validez matemática del estudio." },
+        { q: "¿Cuál de estos pasos NO forma parte del método estadístico aplicado en el festival?", options: ["Inventar respuestas falsas para beneficiar a un amigo", "Definir con claridad la población", "Elegir una muestra aleatoria", "Elaborar la tabla de frecuencias"], answer: 0, exp: "La ética estadística exige registrar únicamente datos verdaderos." },
+        { q: "Al culminar con éxito la investigación, el estudiante recibe el título honorífico de:", options: ["GRAN DETECTIVE ESTADÍSTICO", "Cocinero mayor del festival", "Conductor del tranvía", "Vigilante municipal"], answer: 0, exp: "Es el máximo reconocimiento detective en Estadisticópolis." },
+        { q: "¿Quién diseñó este entorno y videojuego educativo interactivo?", options: ["Prof. Jhon Dewis", "El chofer del autobús escolar", "Un cantante del festival", "El árbitro del partido"], answer: 0, exp: "Diseñado por el Prof. Jhon Dewis para 4.° de primaria." },
+        { q: "La estadística aprendida en esta gran aventura nos demuestra que:", options: ["Es una ciencia fundamental y práctica que nos ayuda a entender el mundo y tomar mejores decisiones", "Solo sirve para aprobar exámenes de memoria", "No se usa en la vida real", "Es solo para adultos"], answer: 0, exp: "La estadística nos rodea y es una herramienta indispensable para resolver problemas cotidianos." },
+        { q: "¡Felicidades Detective! ¿Qué valor matemático garantiza que la tabla de frecuencias del festival esté correcta?", options: ["Que la suma de todas las frecuencias individuales sea exactamente igual al tamaño de la muestra encuestada", "Que todos los números sean pares", "Que no haya números mayores a diez", "Que termine en cero"], answer: 0, exp: "La suma de frecuencias debe igualar con total exactitud al total de datos recolectados." }
+      ]
+    };
+
+    /* ----------------------------------------------------
+       4. ESTADO GLOBAL DEL JUGADOR Y PERSISTENCIA
+    ---------------------------------------------------- */
+    const Game = {
+      playerName: "Detective",
+      currentLevel: 1,
+      unlockedLevels: 1,
+      stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 },
+      badges: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false, 8: false },
+      theme: 'light',
+      currentPhase: 'descubre', // 'descubre', 'experimenta', 'desafiate'
+      challengeIndex: 0,
+      activeChallenges: [],
+      scoreInLevel: 0,
+      experimentState: {},
+
+      init() {
+        this.loadPlayer();
+        this.applyTheme();
+        this.renderMap();
+        this.updateNavStats();
+        // Listener para redimensionamiento suave
+        window.addEventListener('resize', () => {
+          if (DiplomaSystem.currentDiplomaData) {
+            DiplomaSystem.redraw();
+          }
+        });
+      },
+
+      loadPlayer() {
+        try {
+          const saved = localStorage.getItem('estadisticopolis_save_v2');
+          if (saved) {
+            const data = JSON.parse(saved);
+            this.playerName = data.playerName || "Detective";
+            this.unlockedLevels = data.unlockedLevels || 1;
+            this.stars = data.stars || this.stars;
+            this.badges = data.badges || this.badges;
+            this.theme = data.theme || 'light';
+            AudioEngine.sfxEnabled = data.sfx !== undefined ? data.sfx : true;
+            AudioEngine.musicEnabled = data.music !== undefined ? data.music : false;
+
+            document.getElementById('playerNameInput').value = this.playerName;
+          }
+        } catch (e) {
+          console.warn("No se pudo cargar localStorage:", e);
+        }
+      },
+
+      savePlayer() {
+        try {
+          const data = {
+            playerName: this.playerName,
+            unlockedLevels: this.unlockedLevels,
+            stars: this.stars,
+            badges: this.badges,
+            theme: this.theme,
+            sfx: AudioEngine.sfxEnabled,
+            music: AudioEngine.musicEnabled
+          };
+          localStorage.setItem('estadisticopolis_save_v2', JSON.stringify(data));
+          this.updateNavStats();
+        } catch (e) {
+          console.warn("No se pudo guardar localStorage:", e);
+        }
+      },
+
+      resetProgressPrompt() {
+        if (window.confirm("¿Seguro que deseas reiniciar tu progreso? Volverás al nivel 1.")) {
+          localStorage.removeItem('estadisticopolis_save_v2');
+          this.playerName = "Detective";
+          this.unlockedLevels = 1;
+          this.stars = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+          this.badges = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false, 8: false };
+          document.getElementById('playerNameInput').value = "";
+          this.updateNavStats();
+          this.renderMap();
+          this.showScreen('welcome');
+          AudioEngine.playWrong();
+        }
+      },
+
+      toggleTheme() {
+        this.theme = this.theme === 'light' ? 'dark' : 'light';
+        this.applyTheme();
+        this.savePlayer();
+      },
+
+      applyTheme() {
+        const icon = document.getElementById('iconTheme');
+        if (this.theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          icon.className = 'fa-solid fa-sun text-xs text-yellow-400';
+        } else {
+          document.documentElement.classList.remove('dark');
+          icon.className = 'fa-solid fa-moon text-xs text-slate-700';
+        }
+      },
+
+      updateNavStats() {
+        document.getElementById('navPlayerName').innerText = this.playerName;
+        let totalStars = 0;
+        let totalBadges = 0;
+        for (let i = 1; i <= 8; i++) {
+          totalStars += (this.stars[i] || 0);
+          if (this.badges[i]) totalBadges++;
+        }
+        document.getElementById('navTotalStars').innerText = totalStars;
+        document.getElementById('navTotalBadges').innerText = `${totalBadges}/8`;
+
+        const grandBtn = document.getElementById('btnGrandDiploma');
+        if (totalBadges >= 8) {
+          grandBtn.disabled = false;
+          grandBtn.className = "px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 to-yellow-400 text-white shadow-lg pulse-glow transform hover:scale-105 active:scale-95 transition flex items-center space-x-2 cursor-pointer";
+        } else {
+          grandBtn.disabled = true;
+          grandBtn.className = "px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed transition flex items-center space-x-2";
+        }
+
+        const mapProgress = document.getElementById('mapProgressSummary');
+        if (mapProgress) {
+          mapProgress.innerText = `${totalBadges} de 8 misiones completadas (${totalStars} estrellas)`;
+        }
+      },
+
+      showScreen(screenId) {
+        AudioEngine.playClick();
+        const screens = ['welcome', 'map', 'level'];
+        screens.forEach(s => {
+          const el = document.getElementById(`screen-${s}`);
+          if (el) el.classList.add('hidden');
+        });
+
+        const target = document.getElementById(`screen-${screenId}`);
+        if (target) target.classList.remove('hidden');
+
+        const navStats = document.getElementById('playerStatsBar');
+        const mapNav = document.getElementById('btnMapNav');
+        if (screenId === 'welcome') {
+          navStats.classList.add('hidden');
+          mapNav.classList.add('hidden');
+        } else {
+          navStats.classList.remove('hidden');
+          mapNav.classList.remove('hidden');
+        }
+
+        if (screenId === 'map') {
+          this.renderMap();
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+
+      startAdventure() {
+        const input = document.getElementById('playerNameInput');
+        const name = input.value.trim();
+        if (name.length < 2) {
+          Datín.showDialogue("¡Por favor escribe tu nombre de detective para poder identificarte en la comisaría y emitir tus diplomas!", "thinking");
+          AudioEngine.playWrong();
+          input.focus();
+          return;
+        }
+        this.playerName = name;
+        this.savePlayer();
+        AudioEngine.init();
+        AudioEngine.playFanfare();
+        this.showScreen('map');
+      },
+
+      showInstructionsModal() {
+        AudioEngine.playClick();
+        document.getElementById('modalInstructions').classList.remove('hidden');
+      },
+
+      /* Render del Mapa Interactivo con las 8 Zonas */
+      renderMap() {
+        const container = document.getElementById('mapZonesContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        LEVEL_CONFIG.forEach(lvl => {
+          const isUnlocked = lvl.id <= this.unlockedLevels;
+          const starsEarned = this.stars[lvl.id] || 0;
+          const isCompleted = this.badges[lvl.id];
+
+          const card = document.createElement('div');
+          card.className = `relative rounded-3xl p-5 border-2 transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-md ${
+            isUnlocked
+              ? 'bg-white dark:bg-slate-800 border-amber-300 dark:border-amber-500/40 hover:-translate-y-1.5 hover:shadow-xl cursor-pointer'
+              : 'bg-slate-100 dark:bg-slate-800/50 border-slate-300 dark:border-slate-700 opacity-60 cursor-not-allowed'
+          }`;
+
+          let starsHtml = '';
+          for (let s = 1; s <= 3; s++) {
+            starsHtml += `<i class="fa-solid fa-star text-xs ${s <= starsEarned ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'}"></i>`;
+          }
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                isCompleted ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+              }">
+                Misión ${lvl.id}
+              </span>
+              <div class="flex space-x-1">${starsHtml}</div>
+            </div>
+
+            <div class="flex items-center space-x-3 mb-3">
+              <div class="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-xl shadow ${
+                isUnlocked ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-slate-400 dark:bg-slate-600'
+              }">
+                <i class="fa-solid ${lvl.icon}"></i>
+              </div>
+              <div>
+                <h4 class="font-black text-sm md:text-base text-slate-800 dark:text-slate-100 leading-snug">
+                  ${lvl.title}
+                </h4>
+                <p class="text-[11px] font-semibold text-sky-600 dark:text-sky-400">${lvl.topic}</p>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">
+              ${lvl.desc}
+            </p>
+
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
+              ${
+                isUnlocked
+                  ? `<button class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs shadow flex items-center justify-center space-x-1.5">
+                      <span>${isCompleted ? 'Volver a Jugar' : '¡Investigar!'}</span>
+                      <i class="fa-solid fa-play text-[10px]"></i>
+                    </button>`
+                  : `<span class="text-xs text-slate-400 dark:text-slate-500 flex items-center justify-center w-full py-1.5 space-x-1">
+                      <i class="fa-solid fa-lock text-xs"></i>
+                      <span>Bloqueado</span>
+                    </span>`
+              }
+            </div>
+          `;
+
+          if (isUnlocked) {
+            card.onclick = () => Game.loadLevel(lvl.id);
+          }
+          container.appendChild(card);
+        });
+      },
+
+      /* Cargar un Nivel y arrancar en Fase "Descubre" */
+      loadLevel(levelId) {
+        this.currentLevel = levelId;
+        const config = LEVEL_CONFIG.find(l => l.id === levelId);
+        if (!config) return;
+
+        document.getElementById('levelBadgeTag').innerText = `NIVEL ${config.id}`;
+        document.getElementById('levelTitle').innerText = config.title;
+
+        this.showScreen('level');
+        this.setPhase('descubre');
+      },
+
+      setPhase(phase) {
+        this.currentPhase = phase;
+        ['descubre', 'experimenta', 'desafiate'].forEach(p => {
+          const tab = document.getElementById(`phaseTab-${p}`);
+          if (p === phase) {
+            tab.className = "px-2.5 py-1 rounded-lg transition bg-amber-500 text-white shadow-sm";
+          } else {
+            tab.className = "px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 transition hover:text-slate-700";
+          }
+        });
+
+        if (phase === 'descubre') {
+          this.renderPhaseDescubre();
+        } else if (phase === 'experimenta') {
+          this.renderPhaseExperimenta();
+        } else if (phase === 'desafiate') {
+          this.startPhaseDesafiate();
+        }
+      },
+
+      /* FASE 1: DESCUBRE */
+      renderPhaseDescubre() {
+        const config = LEVEL_CONFIG.find(l => l.id === this.currentLevel);
+        Datín.showDialogue(config.concept.descubreText, "happy");
+
+        const content = document.getElementById('activityContent');
+        const counter = document.getElementById('challengeCounter');
+        const pbar = document.getElementById('challengeProgressBar');
+        counter.innerText = "Momento 1: Observa y Descubre";
+        pbar.style.width = "33%";
+
+        // Gráfico conceptual dinámico según el nivel
+        let visualHtml = '';
+        if (this.currentLevel === 1) { // Población
+          visualHtml = `
+            <div class="text-center max-w-lg">
+              <div class="p-6 bg-amber-100/50 dark:bg-slate-700/50 rounded-3xl border-2 border-dashed border-amber-300 dark:border-amber-500/40 mb-4 relative">
+                <span class="absolute -top-3 left-6 bg-amber-500 text-white text-[10px] font-black px-3 py-0.5 rounded-full uppercase">Población Total del Colegio</span>
+                <div class="grid grid-cols-6 gap-2 text-2xl md:text-3xl text-amber-600 dark:text-amber-400 p-2">
+                  <i class="fa-solid fa-child animate-bounce"></i>
+                  <i class="fa-solid fa-child-dress"></i>
+                  <i class="fa-solid fa-child"></i>
+                  <i class="fa-solid fa-child-dress animate-bounce"></i>
+                  <i class="fa-solid fa-child"></i>
+                  <i class="fa-solid fa-child-dress"></i>
+                  <i class="fa-solid fa-child"></i>
+                  <i class="fa-solid fa-child-dress"></i>
+                  <i class="fa-solid fa-child animate-bounce"></i>
+                  <i class="fa-solid fa-child-dress"></i>
+                  <i class="fa-solid fa-child"></i>
+                  <i class="fa-solid fa-child-dress"></i>
+                </div>
+              </div>
+              <p class="text-sm text-slate-600 dark:text-slate-300">
+                La <strong>POBLACIÓN</strong> es el grupo <em>completo</em> de estudiantes sobre los que se investiga. ¡Nadie se queda afuera!
+              </p>
+            </div>
+          `;
+        } else if (this.currentLevel === 2) { // Muestra
+          visualHtml = `
+            <div class="text-center max-w-lg">
+              <div class="flex items-center justify-center space-x-6 mb-4">
+                <div class="p-4 bg-slate-100 dark:bg-slate-700 rounded-2xl border border-slate-300 text-center">
+                  <div class="text-xs font-bold text-slate-500 mb-1">POBLACIÓN TOTAL</div>
+                  <div class="text-2xl font-black text-slate-700 dark:text-slate-200">30 niños</div>
+                </div>
+                <i class="fa-solid fa-arrow-right text-xl text-amber-500"></i>
+                <div class="p-4 bg-amber-100 dark:bg-slate-700 rounded-2xl border-2 border-amber-400 text-center relative pulse-glow">
+                  <span class="absolute -top-2.5 right-2 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full">LUPA DETECTIVE</span>
+                  <div class="text-xs font-bold text-amber-700 dark:text-amber-300 mb-1">MUESTRA</div>
+                  <div class="text-2xl font-black text-amber-600 dark:text-amber-400">6 elegidos</div>
+                </div>
+              </div>
+              <p class="text-sm text-slate-600 dark:text-slate-300">
+                Una <strong>MUESTRA</strong> es una <em>parte pequeña</em> de la población elegida al azar para facilitar el estudio.
+              </p>
+            </div>
+          `;
+        } else if (this.currentLevel === 4) { // Cualitativa vs Cuantitativa
+          visualHtml = `
+            <div class="flex flex-wrap justify-center gap-4 max-w-lg text-center mb-4">
+              <div class="flex-1 min-w-[140px] p-4 bg-sky-100 dark:bg-sky-950/60 rounded-3xl border-2 border-sky-400">
+                <i class="fa-solid fa-box-open text-3xl text-sky-500 mb-2"></i>
+                <h5 class="font-black text-sm text-sky-700 dark:text-sky-300 uppercase">Cofre Azul</h5>
+                <p class="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1">CUALITATIVAS</p>
+                <span class="text-[10px] text-slate-500 block">Cualidades o palabras (ej: Color, Gustos)</span>
+              </div>
+              <div class="flex-1 min-w-[140px] p-4 bg-amber-100 dark:bg-amber-950/60 rounded-3xl border-2 border-amber-400">
+                <i class="fa-solid fa-box-open text-3xl text-amber-500 mb-2"></i>
+                <h5 class="font-black text-sm text-amber-700 dark:text-amber-300 uppercase">Cofre Dorado</h5>
+                <p class="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1">CUANTITATIVAS</p>
+                <span class="text-[10px] text-slate-500 block">Cantidades numéricas (ej: Edad, Hermanos)</span>
+              </div>
+            </div>
+          `;
+        } else {
+          visualHtml = `
+            <div class="text-center max-w-md p-6 bg-amber-50 dark:bg-slate-700/40 rounded-3xl border border-amber-200 dark:border-slate-600">
+              <div class="w-16 h-16 mx-auto bg-amber-400 text-white rounded-2xl flex items-center justify-center text-3xl mb-3 shadow">
+                <i class="fa-solid ${config.icon}"></i>
+              </div>
+              <h4 class="font-black text-lg text-slate-800 dark:text-white mb-2">${config.concept.title}</h4>
+              <p class="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${config.learning}</p>
+            </div>
+          `;
+        }
+
+        content.innerHTML = `
+          <div class="w-full flex flex-col items-center justify-center py-4">
+            ${visualHtml}
+          </div>
+        `;
+
+        const btn = document.getElementById('btnActionPrimary');
+        btn.innerHTML = `<span>Ir a Experimentar</span> <i class="fa-solid fa-flask"></i>`;
+        btn.onclick = () => Game.setPhase('experimenta');
+      },
+
+      /* FASE 2: EXPERIMENTA (Manipulativo interactivo por nivel) */
+      renderPhaseExperimenta() {
+        const content = document.getElementById('activityContent');
+        const counter = document.getElementById('challengeCounter');
+        const pbar = document.getElementById('challengeProgressBar');
+        counter.innerText = "Momento 2: Manipula y Experimenta";
+        pbar.style.width = "66%";
+
+        const lvl = this.currentLevel;
+
+        if (lvl === 1) { // Seleccionar estudiantes de 4to grado
+          Datín.showDialogue("¡Haz clic únicamente sobre los estudiantes de 4.º grado (con mochila amarilla) para formar nuestra población!", "thinking");
+          this.experimentState = { selected: 0, totalTarget: 4 };
+
+          content.innerHTML = `
+            <div class="w-full text-center">
+              <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mb-3 font-semibold">
+                Objetivo: Identifica a los 4 estudiantes de 4.º grado (con mochila dorada) para definir la población.
+              </p>
+              <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 max-w-xl mx-auto mb-4" id="exp1Grid">
+                <!-- 6 estudiantes generados -->
+              </div>
+              <div class="text-sm font-bold text-amber-600 dark:text-amber-400" id="exp1Feedback">
+                Seleccionados: 0 de 4
+              </div>
+            </div>
+          `;
+
+          const students = [
+            { id: 1, grade: 4, name: "Alizée (4.°)", isTarget: true },
+            { id: 2, grade: 2, name: "Mateo (2.°)", isTarget: false },
+            { id: 3, grade: 4, name: "Avrill (4.°)", isTarget: true },
+            { id: 4, grade: 5, name: "Diego (5.°)", isTarget: false },
+            { id: 5, grade: 4, name: "Lesly (4.°)", isTarget: true },
+            { id: 6, grade: 4, name: "Thiago (4.°)", isTarget: true }
+          ];
+
+          const grid = document.getElementById('exp1Grid');
+          students.forEach(st => {
+            const btn = document.createElement('button');
+            btn.className = "p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/60 hover:border-amber-400 flex flex-col items-center justify-center transition";
+            btn.innerHTML = `
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-1 ${st.isTarget ? 'text-amber-500' : 'text-slate-400'}">
+                <i class="fa-solid ${st.isTarget ? 'fa-child-reaching' : 'fa-child'}"></i>
+              </div>
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-200">${st.name}</span>
+            `;
+            btn.onclick = () => {
+              if (st.isTarget && !btn.classList.contains('bg-amber-100')) {
+                btn.classList.add('bg-amber-100', 'border-amber-500', 'dark:bg-amber-950/60');
+                this.experimentState.selected++;
+                AudioEngine.playCorrect();
+                document.getElementById('exp1Feedback').innerText = `Seleccionados: ${this.experimentState.selected} de 4`;
+                if (this.experimentState.selected === 4) {
+                  Datín.showDialogue("¡Excelente! Has agrupado al conjunto completo de 4.° grado: esa es exactamente la POBLACIÓN.", "happy");
+                  AudioEngine.playFanfare();
+                }
+              } else if (!st.isTarget) {
+                AudioEngine.playWrong();
+                Datín.showDialogue("¡Ese estudiante pertenece a otro grado! La población solo abarca a los de 4.°.", "thinking");
+              }
+            };
+            grid.appendChild(btn);
+          });
+
+        } else if (lvl === 2) { // Muestra de 6 sobre 30 con botón de sorteo aleatorio
+          Datín.showDialogue("Toca el botón 'Muestreo Aleatorio' para que mi lupa digital extraiga 6 estudiantes al azar como muestra representativa.", "happy");
+
+          content.innerHTML = `
+            <div class="w-full text-center max-w-xl mx-auto">
+              <div class="flex items-center justify-between mb-3 text-xs font-bold text-slate-500">
+                <span>Población completa: 30 alumnos</span>
+                <span id="sampleCountText" class="text-amber-500">Muestra seleccionada: 0/6</span>
+              </div>
+              <div class="grid grid-cols-6 sm:grid-cols-10 gap-1.5 p-3 bg-slate-100 dark:bg-slate-700/40 rounded-2xl border border-slate-200 dark:border-slate-700 mb-4" id="sample30Grid"></div>
+              <button onclick="Game.runRandomSampling()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl shadow hover:scale-105 active:scale-95 transition flex items-center space-x-2 mx-auto">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>¡Realizar Muestreo Aleatorio!</span>
+              </button>
+            </div>
+          `;
+
+          const grid = document.getElementById('sample30Grid');
+          for (let i = 1; i <= 30; i++) {
+            const dot = document.createElement('div');
+            dot.id = `pupil-${i}`;
+            dot.className = "w-7 h-7 rounded-lg bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 flex items-center justify-center text-[10px] font-bold text-slate-500 transition";
+            dot.innerText = i;
+            grid.appendChild(dot);
+          }
+
+        } else if (lvl === 4) { // Drag & Drop o selección a Cofres
+          Datín.showDialogue("Clasifica esta tarjeta: ¿es una Cualidad (Cofre Azul) o una Cantidad (Cofre Dorado)?", "thinking");
+          this.setupChestExperiment(content);
+
+        } else if (lvl === 6) { // Fábrica de Jugos: arrastrar vasos a sabores
+          Datín.showDialogue("¡Llegaron los pedidos a la fábrica! Haz clic en cada jugo para despacharlo a su sabor y armar la tabla de frecuencias.", "happy");
+          this.setupJuiceFactoryExperiment(content);
+
+        } else {
+          // Vista de experimentación genérica con tarjetas interactivas
+          Datín.showDialogue("¡Excelente! Manipulemos estos conceptos clave para fijar el aprendizaje antes de pasar al desafío.", "happy");
+          content.innerHTML = `
+            <div class="text-center max-w-lg p-6 bg-amber-50 dark:bg-slate-700/30 rounded-3xl border-2 border-amber-300 dark:border-slate-600">
+              <i class="fa-solid fa-puzzle-piece text-4xl text-amber-500 mb-3"></i>
+              <h4 class="font-bold text-lg text-slate-800 dark:text-white mb-2">Simulación Guiada por Datín</h4>
+              <p class="text-xs md:text-sm text-slate-600 dark:text-slate-300 mb-4">
+                El detective estadístico comprende la relación entre el conjunto total (Población), la parte investigada (Muestra) y la propiedad medida (Variable).
+              </p>
+              <div class="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm text-xs text-amber-600 dark:text-amber-400 font-bold">
+                ✓ Todo listo para resolver el banco de desafíos de esta zona.
+              </div>
+            </div>
+          `;
+        }
+
+        const btn = document.getElementById('btnActionPrimary');
+        btn.innerHTML = `<span>Ir a Desafíos</span> <i class="fa-solid fa-trophy"></i>`;
+        btn.onclick = () => Game.setPhase('desafiate');
+      },
+
+      /* Lógica de sorteo de muestra de 6 sobre 30 */
+      runRandomSampling() {
+        AudioEngine.playClick();
+        for (let i = 1; i <= 30; i++) {
+          const el = document.getElementById(`pupil-${i}`);
+          el.className = "w-7 h-7 rounded-lg bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 flex items-center justify-center text-[10px] font-bold text-slate-500 transition";
+        }
+
+        const selected = [];
+        while (selected.length < 6) {
+          const r = Math.floor(Math.random() * 30) + 1;
+          if (!selected.includes(r)) selected.push(r);
+        }
+
+        selected.forEach((idx, delayIdx) => {
+          setTimeout(() => {
+            const el = document.getElementById(`pupil-${idx}`);
+            el.className = "w-7 h-7 rounded-lg bg-amber-400 border-2 border-amber-600 text-slate-900 font-black flex items-center justify-center text-xs shadow-md transform scale-110";
+            AudioEngine.playCorrect();
+          }, delayIdx * 120);
+        });
+
+        setTimeout(() => {
+          document.getElementById('sampleCountText').innerText = "Muestra seleccionada: 6/6 (Listos para la encuesta)";
+          Datín.showDialogue("¡Perfecto! Los 6 niños resaltados representan fielmente a la población de 30.", "happy");
+          AudioEngine.playFanfare();
+        }, 800);
+      },
+
+      /* Lógica del Cofre Mágico */
+      setupChestExperiment(content) {
+        const cards = [
+          { text: "Comida favorita", type: "cual" },
+          { text: "Número de hermanos", type: "cuan" },
+          { text: "Color de ojos", type: "cual" },
+          { text: "Edad en años", type: "cuan" },
+          { text: "Deporte preferido", type: "cual" }
+        ];
+        let cardIdx = 0;
+
+        const renderCard = () => {
+          if (cardIdx >= cards.length) {
+            content.innerHTML = `
+              <div class="text-center p-6">
+                <i class="fa-solid fa-award text-4xl text-amber-500 mb-2"></i>
+                <h4 class="font-black text-lg text-slate-800 dark:text-white">¡Cofres Completados!</h4>
+                <p class="text-xs text-slate-500 mt-1">Has diferenciado con éxito entre cualidades y cantidades.</p>
+              </div>
+            `;
+            AudioEngine.playFanfare();
+            return;
+          }
+
+          const current = cards[cardIdx];
+          content.innerHTML = `
+            <div class="w-full text-center max-w-md">
+              <div class="p-4 bg-amber-50 dark:bg-slate-700/60 rounded-2xl border-2 border-amber-300 dark:border-amber-500/40 mb-4 shadow">
+                <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Tarjeta Flotante ${cardIdx + 1} de ${cards.length}</span>
+                <h4 class="text-xl font-black text-slate-800 dark:text-white">${current.text}</h4>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <button onclick="Game.handleChestChoice('cual', '${current.type}')" class="p-4 rounded-2xl bg-sky-100 hover:bg-sky-200 dark:bg-sky-950/60 border-2 border-sky-400 text-sky-800 dark:text-sky-200 font-bold transition flex flex-col items-center">
+                  <i class="fa-solid fa-box text-3xl text-sky-500 mb-1"></i>
+                  <span>Cofre Azul</span>
+                  <span class="text-[10px] text-sky-600 font-normal">CUALITATIVA</span>
+                </button>
+                <button onclick="Game.handleChestChoice('cuan', '${current.type}')" class="p-4 rounded-2xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/60 border-2 border-amber-400 text-amber-800 dark:text-amber-200 font-bold transition flex flex-col items-center">
+                  <i class="fa-solid fa-box text-3xl text-amber-500 mb-1"></i>
+                  <span>Cofre Dorado</span>
+                  <span class="text-[10px] text-amber-600 font-normal">CUANTITATIVA</span>
+                </button>
+              </div>
+            </div>
+          `;
+        };
+
+        this.handleChestChoice = (chosen, actual) => {
+          if (chosen === actual) {
+            AudioEngine.playCorrect();
+            Datín.showDialogue("¡Excelente! Esa variable va exactamente en ese cofre.", "happy");
+            cardIdx++;
+            renderCard();
+          } else {
+            AudioEngine.playWrong();
+            Datín.showDialogue(
+              actual === 'cual'
+                ? "¡Recuerda! Si la respuesta es una cualidad o palabra, va al Cofre Azul."
+                : "¡Recuerda! Si representa una cantidad o número contable, va al Cofre Dorado.",
+              "thinking"
+            );
+          }
+        };
+
+        renderCard();
+      },
+
+      /* Lógica de la Fábrica de Jugos en el nivel 6 */
+      setupJuiceFactoryExperiment(content) {
+        let counts = { Naranja: 0, Fresa: 0, Papaya: 0 };
+        const totalNeeded = 8;
+        let delivered = 0;
+
+        content.innerHTML = `
+          <div class="w-full text-center max-w-lg">
+            <p class="text-xs text-slate-500 mb-2 font-semibold">Toca cada vaso de jugo para enviarlo a la mesa y registrar su frecuencia:</p>
+            <div class="flex justify-center space-x-3 mb-4" id="juiceCupsRow">
+              <button onclick="Game.addJuice('Naranja')" class="px-4 py-2 bg-orange-100 hover:bg-orange-200 border-2 border-orange-400 rounded-2xl flex flex-col items-center shadow-sm">
+                <i class="fa-solid fa-glass-water text-2xl text-orange-500"></i>
+                <span class="text-[11px] font-bold text-orange-700 mt-1">+ Naranja</span>
+              </button>
+              <button onclick="Game.addJuice('Fresa')" class="px-4 py-2 bg-rose-100 hover:bg-rose-200 border-2 border-rose-400 rounded-2xl flex flex-col items-center shadow-sm">
+                <i class="fa-solid fa-glass-water text-2xl text-rose-500"></i>
+                <span class="text-[11px] font-bold text-rose-700 mt-1">+ Fresa</span>
+              </button>
+              <button onclick="Game.addJuice('Papaya')" class="px-4 py-2 bg-amber-100 hover:bg-amber-200 border-2 border-amber-400 rounded-2xl flex flex-col items-center shadow-sm">
+                <i class="fa-solid fa-glass-water text-2xl text-amber-500"></i>
+                <span class="text-[11px] font-bold text-amber-700 mt-1">+ Papaya</span>
+              </button>
+            </div>
+
+            <!-- Tabla de frecuencias dinámica -->
+            <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 max-w-sm mx-auto shadow-sm">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-amber-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase font-black">
+                  <tr>
+                    <th class="p-2.5">Sabor de Jugo</th>
+                    <th class="p-2.5 text-center">Frecuencia (Pedidos)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                  <tr><td class="p-2 font-medium">Naranja</td><td class="p-2 text-center font-bold text-orange-500" id="freq-Naranja">0</td></tr>
+                  <tr><td class="p-2 font-medium">Fresa</td><td class="p-2 text-center font-bold text-rose-500" id="freq-Fresa">0</td></tr>
+                  <tr><td class="p-2 font-medium">Papaya</td><td class="p-2 text-center font-bold text-amber-500" id="freq-Papaya">0</td></tr>
+                  <tr class="bg-amber-50 dark:bg-slate-800 font-black"><td class="p-2">TOTAL PEDIDOS</td><td class="p-2 text-center" id="freq-Total">0 / 8</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        this.addJuice = (flavor) => {
+          if (delivered >= totalNeeded) {
+            Datín.showDialogue("¡Excelente! La tabla de frecuencias está completa y sumó exactamente 8 pedidos.", "happy");
+            return;
+          }
+          counts[flavor]++;
+          delivered++;
+          AudioEngine.playClick();
+          document.getElementById(`freq-${flavor}`).innerText = counts[flavor];
+          document.getElementById('freq-Total').innerText = `${delivered} / ${totalNeeded}`;
+        };
+      },
+
+      /* FASE 3: DESAFÍATE (Banco de 20 preguntas -> 6 a 8 aleatorias por partida con claves barajadas al azar) */
+      startPhaseDesafiate() {
+        const lvl = this.currentLevel;
+        const bank = CHALLENGE_BANK[lvl] || CHALLENGE_BANK[1];
+
+        // Barajado Fisher-Yates para seleccionar exactamente entre 6 y 8 preguntas al azar sin repetición
+        const shuffledBank = [...bank];
+        for (let i = shuffledBank.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledBank[i], shuffledBank[j]] = [shuffledBank[j], shuffledBank[i]];
+        }
+
+        // Se eligen 7 preguntas al azar por partida (dentro del rango requerido de 5 a 8)
+        const sampleSize = Math.min(7, shuffledBank.length);
+        this.activeChallenges = shuffledBank.slice(0, sampleSize);
+        this.challengeIndex = 0;
+        this.scoreInLevel = 0;
+
+        this.renderChallenge();
+      },
+
+      renderChallenge() {
+        if (this.challengeIndex >= this.activeChallenges.length) {
+          this.completeMission();
+          return;
+        }
+
+        const current = this.activeChallenges[this.challengeIndex];
+        const counter = document.getElementById('challengeCounter');
+        const pbar = document.getElementById('challengeProgressBar');
+
+        counter.innerText = `Desafío ${this.challengeIndex + 1} de ${this.activeChallenges.length}`;
+        const pct = ((this.challengeIndex) / this.activeChallenges.length) * 100;
+        pbar.style.width = `${pct}%`;
+
+        Datín.showDialogue("Analiza con calma el enunciado detective. ¡Tú puedes resolverlo!", "neutral");
+
+        // BARAJADO ALEATORIO ESTRICTO DE ALTERNATIVAS (Fisher-Yates)
+        // Garantiza que la respuesta correcta quede distribuida de forma impredecible entre A, B, C y D
+        const originalOptions = current.options.map((text, idx) => ({
+          text: text,
+          isCorrect: idx === current.answer
+        }));
+
+        for (let i = originalOptions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [originalOptions[i], originalOptions[j]] = [originalOptions[j], originalOptions[i]];
+        }
+
+        // Asignar el nuevo índice correcto tras la mezcla aleatoria
+        this.currentShuffledOptions = originalOptions;
+        this.currentCorrectShuffledIndex = originalOptions.findIndex(o => o.isCorrect);
+
+        const content = document.getElementById('activityContent');
+        content.innerHTML = `
+          <div class="w-full max-w-xl">
+            <div class="p-4 md:p-5 bg-amber-50/70 dark:bg-slate-700/60 rounded-3xl border-2 border-amber-200 dark:border-slate-600 mb-4 shadow-sm">
+              <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white inline-block mb-2">
+                Pregunta ${this.challengeIndex + 1}
+              </span>
+              <h4 class="text-base md:text-lg font-bold text-slate-800 dark:text-white leading-snug">
+                ${current.q}
+              </h4>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="optionsGrid">
+              <!-- Opciones generadas de forma aleatoria -->
+            </div>
+            <div id="challengeFeedback" class="mt-3 text-xs font-semibold text-center min-h-[20px]"></div>
+          </div>
+        `;
+
+        const grid = document.getElementById('optionsGrid');
+        originalOptions.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = "p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-amber-400 hover:bg-amber-50/40 dark:hover:bg-slate-700/80 text-left font-bold text-xs md:text-sm text-slate-700 dark:text-slate-200 shadow-sm transition flex items-center space-x-2.5";
+          btn.innerHTML = `
+            <span class="w-6 h-6 rounded-lg bg-amber-100 dark:bg-slate-700 text-amber-700 dark:text-amber-400 flex items-center justify-center text-xs flex-shrink-0">
+              ${String.fromCharCode(65 + idx)}
+            </span>
+            <span>${opt.text}</span>
+          `;
+          btn.onclick = () => Game.handleOptionSelect(idx, btn);
+          grid.appendChild(btn);
+        });
+
+        const actionBtn = document.getElementById('btnActionPrimary');
+        actionBtn.innerHTML = `<span>Siguiente</span> <i class="fa-solid fa-arrow-right"></i>`;
+        actionBtn.disabled = true;
+        actionBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      },
+
+      handleOptionSelect(selectedIdx, btnElement) {
+        const current = this.activeChallenges[this.challengeIndex];
+        const buttons = document.querySelectorAll('#optionsGrid button');
+        buttons.forEach(b => b.disabled = true);
+
+        const feedback = document.getElementById('challengeFeedback');
+        const actionBtn = document.getElementById('btnActionPrimary');
+
+        const isCorrect = this.currentShuffledOptions && this.currentShuffledOptions[selectedIdx].isCorrect;
+
+        if (isCorrect) {
+          AudioEngine.playCorrect();
+          btnElement.classList.remove('border-slate-200', 'bg-white');
+          btnElement.classList.add('border-green-500', 'bg-green-100', 'text-green-800', 'dark:bg-green-950/80', 'dark:text-green-200');
+          feedback.innerHTML = `<span class="text-green-600 dark:text-green-400"><i class="fa-solid fa-circle-check mr-1"></i> ¡Correcto! ${current.exp}</span>`;
+          Datín.showDialogue("¡Excelente deducción detective! Has acertado en el blanco.", "happy");
+          this.scoreInLevel++;
+        } else {
+          AudioEngine.playWrong();
+          btnElement.classList.add('border-rose-500', 'bg-rose-100', 'text-rose-800', 'dark:bg-rose-950/80', 'dark:text-rose-200');
+          // Resaltar la alternativa correcta en su posición barajada
+          const correctIdx = this.currentCorrectShuffledIndex;
+          if (correctIdx !== undefined && buttons[correctIdx]) {
+            buttons[correctIdx].classList.add('border-green-500', 'bg-green-50', 'text-green-800', 'dark:bg-green-950/40');
+          }
+          feedback.innerHTML = `<span class="text-rose-600 dark:text-rose-400"><i class="fa-solid fa-circle-xmark mr-1"></i> No es correcto. ${current.exp}</span>`;
+          Datín.showDialogue("¡No te preocupes! De los errores también se aprende. Observa la explicación y continuemos.", "thinking");
+        }
+
+        actionBtn.disabled = false;
+        actionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        actionBtn.onclick = () => {
+          Game.challengeIndex++;
+          Game.renderChallenge();
+        };
+      },
+
+      requestHint() {
+        AudioEngine.playClick();
+        const current = this.activeChallenges[this.challengeIndex];
+        if (current && current.exp) {
+          Datín.showDialogue(`Pista de Datín: ${current.exp.substring(0, 80)}...`, "thinking");
+        } else {
+          const cfg = LEVEL_CONFIG.find(l => l.id === this.currentLevel);
+          Datín.showDialogue(`Pista: ${cfg.learning}`, "thinking");
+        }
+      },
+
+      handlePrimaryAction() {
+        if (this.currentPhase === 'descubre') {
+          this.setPhase('experimenta');
+        } else if (this.currentPhase === 'experimenta') {
+          this.setPhase('desafiate');
+        }
+      },
+
+      /* FASE 4: MISIÓN SUPERADA */
+      completeMission() {
+        const lvl = this.currentLevel;
+        const total = this.activeChallenges.length || 8;
+        const ratio = this.scoreInLevel / total;
+
+        let starsEarned = 1;
+        if (ratio >= 0.85) starsEarned = 3;
+        else if (ratio >= 0.55) starsEarned = 2;
+
+        this.stars[lvl] = Math.max(this.stars[lvl] || 0, starsEarned);
+        this.badges[lvl] = true;
+
+        if (this.unlockedLevels < 8 && this.unlockedLevels === lvl) {
+          this.unlockedLevels = lvl + 1;
+        }
+
+        this.savePlayer();
+        AudioEngine.playFanfare();
+        Confetti.launch();
+
+        const config = LEVEL_CONFIG.find(l => l.id === lvl);
+        document.getElementById('modalLevelTitleComplete').innerText = `Misión ${lvl}: ${config.title}`;
+        document.getElementById('modalLearningSummary').innerText = config.learning;
+
+        let starsHtml = '';
+        for (let s = 1; s <= 3; s++) {
+          starsHtml += `<i class="fa-solid fa-star ${s <= starsEarned ? 'text-amber-400' : 'text-slate-300'} animate-bounce" style="animation-delay: ${s * 0.15}s"></i>`;
+        }
+        document.getElementById('modalStarsRow').innerHTML = starsHtml;
+
+        const modal = document.getElementById('modalMissionSuccess');
+        const box = document.getElementById('missionModalBox');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          box.classList.remove('scale-95', 'opacity-0');
+          box.classList.add('scale-100', 'opacity-100');
+        }, 10);
+      },
+
+      closeSuccessModalToMap() {
+        const modal = document.getElementById('modalMissionSuccess');
+        const box = document.getElementById('missionModalBox');
+        box.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          Game.showScreen('map');
+        }, 200);
+      }
+    };
+
+    /* ----------------------------------------------------
+       5. DATÍN: CONTROLADOR DE EMOCIONES Y DIÁLOGOS
+    ---------------------------------------------------- */
+    const Datín = {
+      showDialogue(text, emotion = 'happy') {
+        const textBox = document.getElementById('datinText');
+        if (textBox) {
+          textBox.innerText = text;
+        }
+
+        const eyeL = document.getElementById('datinEyeLeft');
+        const eyeR = document.getElementById('datinEyeRight');
+        const mouth = document.getElementById('datinMouth');
+
+        if (!eyeL || !eyeR || !mouth) return;
+
+        if (emotion === 'happy') {
+          eyeL.setAttribute('ry', '6');
+          eyeR.setAttribute('ry', '6');
+          mouth.setAttribute('d', 'M 44 47 Q 50 53 56 47'); // Sonrisa amplia
+        } else if (emotion === 'thinking') {
+          eyeL.setAttribute('ry', '4');
+          eyeR.setAttribute('ry', '7');
+          mouth.setAttribute('d', 'M 44 48 Q 50 48 56 48'); // Boca recta pensativa
+        } else {
+          eyeL.setAttribute('ry', '5');
+          eyeR.setAttribute('ry', '5');
+          mouth.setAttribute('d', 'M 44 47 Q 50 51 56 47');
+        }
+
+        AudioEngine.playSpeechBeep();
+      }
+    };
+
+    /* ----------------------------------------------------
+       6. GENERADOR DE DIPLOMAS PERSONALIZADOS (CANVAS)
+    ---------------------------------------------------- */
+    const DiplomaSystem = {
+      currentDiplomaData: null,
+
+      generateLevelDiploma(levelId) {
+        const config = LEVEL_CONFIG.find(l => l.id === levelId) || LEVEL_CONFIG[0];
+        const stars = Game.stars[levelId] || 3;
+        this.renderCertificate({
+          studentName: Game.playerName,
+          levelName: `Misión ${levelId}: ${config.title}`,
+          topic: config.topic,
+          stars: stars,
+          isFinal: false
+        });
+      },
+
+      generateFinalDiploma() {
+        this.renderCertificate({
+          studentName: Game.playerName,
+          levelName: "GRAN DETECTIVE ESTADÍSTICO",
+          topic: "Dominio Integral de la Estadística",
+          stars: 3,
+          isFinal: true
+        });
+      },
+
+      renderCertificate(data) {
+        this.currentDiplomaData = data;
+        const modal = document.getElementById('modalDiploma');
+        modal.classList.remove('hidden');
+
+        const canvas = document.getElementById('diplomaCanvas');
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+
+        // Fondo pergamino elegante
+        const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+        bgGrad.addColorStop(0, '#FFFBEB');
+        bgGrad.addColorStop(1, '#FEF3C7');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Marco ornamentado
+        ctx.strokeStyle = data.isFinal ? '#D97706' : '#F59E0B';
+        ctx.lineWidth = 14;
+        ctx.strokeRect(20, 20, w - 40, h - 40);
+
+        ctx.strokeStyle = '#92400E';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(32, 32, w - 64, h - 64);
+
+        // Esquinas decorativas
+        const drawCorner = (x, y) => {
+          ctx.fillStyle = '#D97706';
+          ctx.beginPath();
+          ctx.arc(x, y, 12, 0, Math.PI * 2);
+          ctx.fill();
+        };
+        drawCorner(32, 32);
+        drawCorner(w - 32, 32);
+        drawCorner(32, h - 32);
+        drawCorner(w - 32, h - 32);
+
+        // Encabezado
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#B45309';
+        ctx.font = 'bold 24px Fredoka, sans-serif';
+        ctx.fillText("ESTADISTICÓPOLIS: DETECTIVES DE DATOS", w / 2, 85);
+
+        ctx.fillStyle = '#78350F';
+        ctx.font = '900 38px Fredoka, sans-serif';
+        ctx.fillText("DIPLOMA DE RECONOCIMIENTO", w / 2, 135);
+
+        ctx.fillStyle = '#64748B';
+        ctx.font = 'italic 18px Inter, sans-serif';
+        ctx.fillText("Se otorga con honor y distinción a:", w / 2, 185);
+
+        // Nombre del Alumno
+        ctx.fillStyle = '#1E3A8A';
+        ctx.font = 'bold 44px Fredoka, sans-serif';
+        ctx.fillText(data.studentName.toUpperCase(), w / 2, 245);
+
+        // Línea dorada bajo el nombre
+        ctx.strokeStyle = '#F59E0B';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(w / 2 - 220, 260);
+        ctx.lineTo(w / 2 + 220, 260);
+        ctx.stroke();
+
+        // Descripción de logro
+        ctx.fillStyle = '#334155';
+        ctx.font = '500 20px Inter, sans-serif';
+        ctx.fillText("Por haber superado satisfactoriamente los desafíos estadísticos de:", w / 2, 305);
+
+        ctx.fillStyle = '#B45309';
+        ctx.font = 'bold 28px Fredoka, sans-serif';
+        ctx.fillText(data.levelName, w / 2, 350);
+
+        // Tema
+        ctx.fillStyle = '#0284C7';
+        ctx.font = 'bold 18px Inter, sans-serif';
+        ctx.fillText(`Tema: ${data.topic}`, w / 2, 385);
+
+        // Medalla / Estrellas gráficas
+        ctx.fillStyle = '#F59E0B';
+        const starX = w / 2 - 40;
+        for (let i = 0; i < data.stars; i++) {
+          ctx.font = '32px FontAwesome, sans-serif';
+          ctx.fillText("★", starX + (i * 40), 430);
+        }
+
+        // Medalla Dorada Central si es final
+        if (data.isFinal) {
+          ctx.fillStyle = '#F59E0B';
+          ctx.beginPath();
+          ctx.arc(w / 2, 470, 32, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = 'bold 13px Inter, sans-serif';
+          ctx.fillText("GRAN", w / 2, 466);
+          ctx.fillText("DETECTIVE", w / 2, 482);
+        }
+
+        // Fecha actual
+        const today = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#64748B';
+        ctx.font = '15px Inter, sans-serif';
+        ctx.fillText(`Fecha: ${today}`, 60, 560);
+
+        // Firma del Autor: Prof. Jhon Dewis
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#0F172A';
+        ctx.font = 'italic 28px "Marck Script", cursive';
+        ctx.fillText("Prof. Jhon Dewis", w - 80, 545);
+
+        ctx.strokeStyle = '#64748B';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(w - 240, 555);
+        ctx.lineTo(w - 60, 555);
+        ctx.stroke();
+
+        ctx.font = 'bold 13px Inter, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText("Diseñador y Especialista en Matemática", w - 60, 575);
+      },
+
+      redraw() {
+        if (this.currentDiplomaData) {
+          this.renderCertificate(this.currentDiplomaData);
+        }
+      },
+
+      downloadPNG() {
+        AudioEngine.playClick();
+        const canvas = document.getElementById('diplomaCanvas');
+        const link = document.createElement('a');
+        link.download = `Diploma_${Game.playerName}_Estadisticopolis.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      },
+
+      printCertificate() {
+        AudioEngine.playClick();
+        const canvas = document.getElementById('diplomaCanvas');
+        const win = window.open('', '_blank');
+        win.document.write(`
+          <html>
+            <head><title>Imprimir Diploma - Estadisticópolis</title></head>
+            <body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;">
+              <img src="${canvas.toDataURL()}" style="max-width:98%;max-height:98%;box-shadow:0 0 10px rgba(0,0,0,0.2);" onload="window.print();window.close();"/>
+            </body>
+          </html>
+        `);
+      },
+
+      closeModal() {
+        AudioEngine.playClick();
+        document.getElementById('modalDiploma').classList.add('hidden');
+      }
+    };
+
+    /* ----------------------------------------------------
+       7. SISTEMA DE CONFETI EN CANVAS
+    ---------------------------------------------------- */
+    const Confetti = {
+      canvas: document.getElementById('confettiCanvas'),
+      particles: [],
+      animId: null,
+
+      launch() {
+        const ctx = this.canvas.getContext('2d');
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.particles = [];
+
+        const colors = ['#F59E0B', '#EF4444', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'];
+        for (let i = 0; i < 90; i++) {
+          this.particles.push({
+            x: Math.random() * this.canvas.width,
+            y: Math.random() * this.canvas.height - this.canvas.height,
+            size: Math.random() * 8 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            speedY: Math.random() * 3 + 2,
+            speedX: Math.random() * 2 - 1,
+            rotation: Math.random() * 360,
+            rotSpeed: Math.random() * 6 - 3
+          });
+        }
+
+        if (this.animId) cancelAnimationFrame(this.animId);
+        this.loop(ctx);
+      },
+
+      loop(ctx) {
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        let active = false;
+
+        this.particles.forEach(p => {
+          p.y += p.speedY;
+          p.x += p.speedX;
+          p.rotation += p.rotSpeed;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+
+          if (p.y < this.canvas.height) active = true;
+        });
+
+        if (active) {
+          this.animId = requestAnimationFrame(() => this.loop(ctx));
+        } else {
+          ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+      }
+    };
+
+    // Inicialización del Videojuego al cargar la ventana
+    window.onload = () => {
+      Game.init();
+    };
+  </script>
+</body>
+</html>
