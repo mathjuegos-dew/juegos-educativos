@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DECIMAL BATTLE: Guerra de Redondeo</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Outfit & Great Vibes for Professor Signature -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Great+Vibes&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background-color: #0c1021;
+      overflow-x: hidden;
+    }
+
+    /* Animated gradient for teacher signature */
+    .teacher-signature {
+      font-family: 'Great Vibes', cursive;
+      font-size: 1.55rem;
+      background: linear-gradient(120deg, #38bdf8, #a855f7, #2dd4bf, #fbbf24, #38bdf8);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbowGlow 7s ease infinite;
+      text-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes rainbowGlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Glow utilities */
+    .glow-cyan {
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.45);
+    }
+    .glow-gold {
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.5);
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #111827;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
+
+    /* Pulse animation for angle keys */
+    @keyframes subtlePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .selected-angle-card {
+      animation: subtlePulse 1.8s infinite ease-in-out;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.6) !important;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(30, 58, 138, 0.5)) !important;
+    }
+  </style>
+</head>
+
+<body class="text-white min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
+
+  <!-- ================= TOP NAV BAR ================= -->
+  <header class="w-full bg-slate-900/80 backdrop-blur-md border-b border-cyan-900/50 px-4 py-2 flex items-center justify-between z-40 sticky top-0">
+    <div class="flex items-center space-x-3 cursor-pointer" onclick="GameApp.switchScreen('title-screen')">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-black text-xl shadow-lg shadow-cyan-500/30">
+        💥
+      </div>
+      <div>
+        <h1 class="text-lg md:text-xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-amber-300 to-emerald-400">
+          DECIMAL BATTLE
+        </h1>
+        <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">Guerra de Redondeo</p>
+      </div>
+    </div>
+
+    <!-- Quick stats / controls -->
+    <div class="flex items-center space-x-3 text-xs md:text-sm font-semibold">
+      <div class="hidden sm:flex items-center space-x-1.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+        <span class="text-amber-400">⭐</span>
+        <span id="nav-stars-count" class="text-slate-200">0</span>
+      </div>
+      <div class="flex items-center space-x-1.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+        <span class="text-cyan-400">👤</span>
+        <span id="nav-player-name" class="text-slate-200 truncate max-w-[100px] md:max-w-[140px]">Cadete</span>
+      </div>
+      <!-- Audio toggle button -->
+      <button id="btn-toggle-sound" onclick="SoundFX.toggleMute()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-400 transition" title="Activar/Silenciar Sonido">
+        🔊
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= SCREENS CONTAINER ================= -->
+  <main class="flex-grow flex flex-col relative w-full overflow-hidden">
+
+    <!-- 1. PANTALLA DE INICIO (HOME SCREEN) -->
+    <section id="title-screen" class="relative flex-grow flex flex-col items-center justify-center px-4 py-8 overflow-hidden">
+      <!-- Animated Canvas Background for Title -->
+      <canvas id="title-bg-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+      <div class="relative z-10 max-w-4xl w-full text-center flex flex-col items-center">
+        <!-- Badge -->
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs md:text-sm font-semibold mb-4 backdrop-blur-sm">
+          <span>🚀</span>
+          <span>Artillería Táctica &amp; Matemáticas para 4.º y 5.º Primaria</span>
+        </div>
+
+        <!-- Big Shiny Title -->
+        <h1 class="text-4xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-200 to-cyan-500 drop-shadow-[0_10px_20px_rgba(6,182,212,0.4)] mb-2">
+          💥 DECIMAL BATTLE
+        </h1>
+        <h2 class="text-lg sm:text-2xl font-bold text-amber-300 tracking-wide mb-6 drop-shadow-md">
+          ¡Calcula, apunta y conquista la batalla decimal!
+        </h2>
+
+        <!-- Student Name input if unset -->
+        <div class="w-full max-w-md bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-cyan-500/30 shadow-2xl mb-6">
+          <label class="block text-xs font-bold text-slate-300 uppercase tracking-widest mb-2 text-left">
+            Nombre del Cadete:
+          </label>
+          <div class="flex space-x-2">
+            <input id="input-player-name" type="text" maxlength="16" placeholder="Ingresa tu nombre..." 
+                   class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-white font-bold focus:outline-none focus:border-cyan-400 transition" />
+            <button onclick="GameApp.savePlayerName()" class="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black rounded-xl transition shadow-lg shadow-cyan-500/30">
+              OK
+            </button>
+          </div>
+        </div>
+
+        <!-- Menu Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 w-full max-w-2xl px-2">
+          <button onclick="GameApp.continueCampaign()" class="group relative flex items-center justify-center space-x-2.5 py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 font-black text-white shadow-lg shadow-emerald-500/30 hover:scale-[1.03] active:scale-95 transition">
+            <span class="text-xl">⚔️</span>
+            <span class="tracking-wider" id="btn-play-label">CAMPAÑA (NIVEL 1)</span>
+          </button>
+
+          <button onclick="GameApp.openMapSelect()" class="group relative flex items-center justify-center space-x-2.5 py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 font-black text-white shadow-lg shadow-orange-500/30 hover:scale-[1.03] active:scale-95 transition">
+            <span class="text-xl">🗺️</span>
+            <span class="tracking-wider">ELEGIR NIVEL (1-7)</span>
+          </button>
+
+          <button onclick="GameApp.openAcademy()" class="group relative flex items-center justify-center space-x-2.5 py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 font-black text-white shadow-lg shadow-cyan-500/30 hover:scale-[1.03] active:scale-95 transition">
+            <span class="text-xl">🎓</span>
+            <span class="tracking-wider">ACADEMIA DECIMAL</span>
+          </button>
+
+          <button onclick="GameApp.openVehicleSelect()" class="group relative flex items-center justify-center space-x-2.5 py-3.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 font-black text-white shadow-lg shadow-indigo-500/30 hover:scale-[1.03] active:scale-95 transition">
+            <span class="text-xl">🚗</span>
+            <span class="tracking-wider">ELEGIR VEHÍCULO</span>
+          </button>
+
+          <button onclick="GameApp.openAchievements()" class="group relative flex items-center justify-center space-x-2.5 py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 font-bold text-slate-200 hover:scale-[1.03] active:scale-95 transition">
+            <span class="text-xl">🏆</span>
+            <span class="tracking-wider">MIS LOGROS</span>
+          </button>
+
+          <button onclick="GameApp.openSettings()" class="group relative flex items-center justify-center space-x-2.5 py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 font-bold text-slate-200 hover:scale-[1.03] active:scale-95 transition">
+            <span class="text-xl">⚙️</span>
+            <span class="tracking-wider">CONFIGURACIÓN</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 2. ACADEMIA DECIMAL (DECIBOT & LESSONS) -->
+    <section id="academy-screen" class="hidden flex-grow flex-col items-center justify-center p-4 max-w-5xl mx-auto w-full z-10">
+      <div class="w-full bg-slate-900/95 backdrop-blur-xl border border-cyan-500/30 rounded-3xl p-5 md:p-8 shadow-2xl flex flex-col my-auto">
+        <!-- Header with DECIBOT Avatar -->
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+          <div class="flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/40 text-3xl animate-bounce">
+              🤖
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs uppercase tracking-widest font-black text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">Instructor Virtual</span>
+                <span class="text-xs font-bold text-slate-400">Base Militar Decimal</span>
+              </div>
+              <h2 class="text-2xl font-black text-white">DECIBOT: Módulo de Entrenamiento</h2>
+            </div>
+          </div>
+          <button onclick="GameApp.switchScreen('title-screen')" class="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+            ✖ Cerrar
+          </button>
+        </div>
+
+        <!-- Lessons Tab Selector -->
+        <div class="flex flex-wrap gap-2 mb-6">
+          <button id="tab-lec-1" onclick="Academy.showLesson(1)" class="px-4 py-2 rounded-xl font-bold text-xs md:text-sm bg-cyan-600 text-white transition shadow-md">
+            1. Valor Posicional
+          </button>
+          <button id="tab-lec-2" onclick="Academy.showLesson(2)" class="px-4 py-2 rounded-xl font-bold text-xs md:text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+            2. Regla del Redondeo
+          </button>
+          <button id="tab-lec-3" onclick="Academy.showLesson(3)" class="px-4 py-2 rounded-xl font-bold text-xs md:text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+            3. Ejemplos Prácticos
+          </button>
+          <button id="tab-quiz" onclick="Academy.startQuiz()" class="ml-auto px-5 py-2 rounded-xl font-black text-xs md:text-sm bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow-lg shadow-amber-500/20">
+            📝 Examen de Graduación (7 Preguntas)
+          </button>
+        </div>
+
+        <!-- Lesson Dynamic Content Container -->
+        <div id="academy-content" class="bg-slate-950/70 border border-slate-800 rounded-2xl p-6 min-h-[300px] flex flex-col justify-center">
+          <!-- Populated by Academy.renderLesson -->
+        </div>
+
+        <!-- Academy Footer Nav -->
+        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-800/80">
+          <button id="btn-prev-lesson" onclick="Academy.prevLesson()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 font-bold text-sm transition">
+            ⬅ Anterior
+          </button>
+          <span id="lesson-step-indicator" class="text-xs font-semibold text-slate-400">Lección 1 de 3</span>
+          <button id="btn-next-lesson" onclick="Academy.nextLesson()" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-white font-bold text-sm transition shadow-lg shadow-cyan-600/30">
+            Siguiente ➡
+          </button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 3. VEHICLE SELECTION SCREEN -->
+    <section id="vehicles-screen" class="hidden flex-grow flex-col items-center justify-center p-4 max-w-6xl mx-auto w-full z-10">
+      <div class="w-full bg-slate-900/95 backdrop-blur-xl border border-purple-500/30 rounded-3xl p-6 shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-6">
+          <div class="flex items-center space-x-3">
+            <span class="text-3xl">🚗</span>
+            <div>
+              <h2 class="text-2xl font-black text-white">Garaje de Guerreros Decimales</h2>
+              <p class="text-xs text-purple-300">Selecciona tu tanque de artillería para el próximo combate</p>
+            </div>
+          </div>
+          <button onclick="GameApp.switchScreen('title-screen')" class="px-4 py-1.5 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl">
+            Volver
+          </button>
+        </div>
+
+        <!-- Vehicle Grid -->
+        <div id="vehicles-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 max-h-[60vh] overflow-y-auto p-1">
+          <!-- Populated by VehicleManager.renderList() -->
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <button onclick="GameApp.startBattleGame()" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl shadow-lg shadow-emerald-500/30 transition">
+            ¡Entrar al Combate con este Vehículo! 🚀
+          </button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 4. MAP SELECTION SCREEN -->
+    <section id="maps-screen" class="hidden flex-grow flex-col items-center justify-center p-4 max-w-5xl mx-auto w-full z-10">
+      <div class="w-full bg-slate-900/95 backdrop-blur-xl border border-amber-500/30 rounded-3xl p-6 shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-6">
+          <div class="flex items-center space-x-3">
+            <span class="text-3xl">🗺️</span>
+            <div>
+              <h2 class="text-2xl font-black text-white">Campaña de 7 Niveles Decimales</h2>
+              <p class="text-xs text-amber-300">Supera cada nivel secuencialmente para desbloquear el siguiente y obtener el Diploma de Maestro</p>
+            </div>
+          </div>
+          <button onclick="GameApp.switchScreen('title-screen')" class="px-4 py-1.5 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl">
+            Volver
+          </button>
+        </div>
+
+        <!-- Map List -->
+        <div id="maps-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 max-h-[60vh] overflow-y-auto p-1">
+          <!-- Populated by MapManager.renderList() -->
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 5. ACHIEVEMENTS & STATS SCREEN -->
+    <section id="achievements-screen" class="hidden flex-grow flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full z-10">
+      <div class="w-full bg-slate-900/95 backdrop-blur-xl border border-yellow-500/30 rounded-3xl p-6 shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-6">
+          <div class="flex items-center space-x-3">
+            <span class="text-3xl">🏆</span>
+            <div>
+              <h2 class="text-2xl font-black text-white">Registro de Conquistas &amp; Logros</h2>
+              <p class="text-xs text-yellow-300">Progreso guardado automáticamente en tu navegador</p>
+            </div>
+          </div>
+          <button onclick="GameApp.switchScreen('title-screen')" class="px-4 py-1.5 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl">
+            Volver
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 text-center">
+            <div class="text-3xl font-black text-amber-400" id="stat-wins">0</div>
+            <div class="text-xs text-slate-400 uppercase font-semibold mt-1">Victorias</div>
+          </div>
+          <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 text-center">
+            <div class="text-3xl font-black text-cyan-400" id="stat-shots">0</div>
+            <div class="text-xs text-slate-400 uppercase font-semibold mt-1">Disparos Totales</div>
+          </div>
+          <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 text-center">
+            <div class="text-3xl font-black text-emerald-400" id="stat-accuracy">0%</div>
+            <div class="text-xs text-slate-400 uppercase font-semibold mt-1">Precisión Decimal</div>
+          </div>
+          <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 text-center">
+            <div class="text-3xl font-black text-purple-400" id="stat-stars">0</div>
+            <div class="text-xs text-slate-400 uppercase font-semibold mt-1">Estrellas Ganadas</div>
+          </div>
+        </div>
+
+        <div id="diploma-container" class="hidden bg-gradient-to-r from-amber-950/60 to-yellow-950/60 border-2 border-amber-500/60 p-6 rounded-2xl text-center mb-4">
+          <span class="text-4xl">🎖️</span>
+          <h3 class="text-xl font-black text-amber-300">¡GRAN CAMPEÓN DECIMAL!</h3>
+          <p class="text-xs text-slate-200 mt-2 max-w-lg mx-auto">
+            Completaste todas las batallas demostrando maestría absoluta en el redondeo de décimos, centésimos y milésimos.
+          </p>
+          <button onclick="GameApp.printDiploma()" class="mt-4 px-4 py-2 bg-amber-500 text-black font-black text-xs rounded-xl hover:bg-amber-400">
+            🖨️ Imprimir / Guardar Diploma
+          </button>
+        </div>
+
+        <div class="flex justify-end">
+          <button onclick="GameApp.resetProgress()" class="text-xs text-red-400 hover:text-red-300 underline">
+            Reiniciar datos de progreso
+          </button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 6. SETTINGS SCREEN -->
+    <section id="settings-screen" class="hidden flex-grow flex-col items-center justify-center p-4 max-w-3xl mx-auto w-full z-10">
+      <div class="w-full bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-3xl p-6 shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-6">
+          <div class="flex items-center space-x-3">
+            <span class="text-3xl">⚙️</span>
+            <div>
+              <h2 class="text-2xl font-black text-white">Configuración del Combate</h2>
+              <p class="text-xs text-slate-400">Personaliza la dificultad y ayudas pedagógicas</p>
+            </div>
+          </div>
+          <button onclick="GameApp.switchScreen('title-screen')" class="px-4 py-1.5 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl">
+            Volver
+          </button>
+        </div>
+
+        <div class="space-y-5 text-sm">
+          <div class="flex items-center justify-between bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+            <div>
+              <div class="font-bold text-white">Dificultad de los Rivales (IA)</div>
+              <div class="text-xs text-slate-400">Probabilidad de que el rival calcule el redondeo exacto</div>
+            </div>
+            <select id="setting-difficulty" onchange="GameApp.updateSettings()" class="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none">
+              <option value="0.35">Principiante (35% acierto)</option>
+              <option value="0.45" selected>Fácil (45% acierto)</option>
+              <option value="0.60">Normal (60% acierto)</option>
+              <option value="0.75">Difícil (75% acierto)</option>
+              <option value="0.90">Experto (90% acierto)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center justify-between bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+            <div>
+              <div class="font-bold text-white">Número de Rivales en Combate</div>
+              <div class="text-xs text-slate-400">Duelo 1 vs 1, Triple Batalla o Caos de 4</div>
+            </div>
+            <select id="setting-fighters" onchange="GameApp.updateSettings()" class="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none">
+              <option value="2" selected>Duelo (Tú vs 1 Rival)</option>
+              <option value="3">Triple Batalla (Tú vs 2 Rivales)</option>
+              <option value="4">Batalla de 4 (Tú vs 3 Rivales)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center justify-between bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+            <div>
+              <div class="font-bold text-white">Ayudas Matemáticas (Modo Tutorial)</div>
+              <div class="text-xs text-slate-400">Muestra pistas visuales sobre la cifra decisiva a observar</div>
+            </div>
+            <input type="checkbox" id="setting-hints" onchange="GameApp.updateSettings()" checked class="w-5 h-5 accent-cyan-500 rounded" />
+          </div>
+
+          <div class="flex items-center justify-between bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+            <div>
+              <div class="font-bold text-white">Efectos de Sonido Sintetizados</div>
+              <div class="text-xs text-slate-400">Audio sintetizado mediante Web Audio API</div>
+            </div>
+            <input type="checkbox" id="setting-sound" onchange="GameApp.updateSettings()" checked class="w-5 h-5 accent-cyan-500 rounded" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 7. BATALLA PRINCIPAL EN VIVO (BATTLE ARENA) -->
+    <section id="battle-screen" class="hidden flex-grow flex-col relative w-full h-full overflow-hidden select-none">
+      
+      <!-- Top Battle HUD -->
+      <div class="absolute top-2 left-2 right-2 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+        
+        <!-- Player & Enemy Status Cards -->
+        <div id="battle-players-hud" class="flex flex-wrap gap-2 pointer-events-auto">
+          <!-- Dynamically populated with vehicle health bars -->
+        </div>
+
+        <!-- Center Match Info (Map & Turn & Timer) -->
+        <div class="pointer-events-auto flex items-center space-x-3 bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-cyan-500/40 shadow-xl">
+          <div class="text-center">
+            <span id="hud-map-name" class="text-[10px] font-black text-cyan-400 tracking-wider uppercase block">Nivel 1: Valle de los Décimos</span>
+            <span id="hud-turn-label" class="text-xs font-bold text-white">Turno de: Cadete</span>
+          </div>
+          <!-- Turn timer circular/box badge -->
+          <div id="hud-timer" class="w-9 h-9 rounded-xl bg-slate-800 border-2 border-emerald-400 flex items-center justify-center font-black text-emerald-400 text-sm">
+            40
+          </div>
+          <button onclick="GameApp.surrenderMatch()" class="text-xs bg-red-950/80 hover:bg-red-800 text-red-200 border border-red-700 px-2.5 py-1 rounded-lg transition" title="Salir de la batalla">
+            🏳️ Rendirse
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Battle Canvas (Full responsive area) -->
+      <div id="canvas-container" class="relative w-full flex-grow h-[55vh] md:h-[65vh] bg-slate-950 overflow-hidden">
+        <canvas id="battle-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+        
+        <!-- Center Banner Notifications (Disparo Perfecto, Fallido, etc.) -->
+        <div id="battle-banner" class="hidden absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none flex flex-col items-center">
+          <div id="battle-banner-badge" class="px-6 py-3 rounded-2xl font-black text-lg md:text-2xl shadow-2xl transform scale-110 transition duration-300">
+            ¡DISPARO PERFECTO!
+          </div>
+          <p id="battle-banner-sub" class="text-xs md:text-sm font-semibold bg-slate-900/90 px-4 py-1.5 rounded-full border border-slate-700 mt-2 text-slate-200 max-w-md text-center shadow-lg">
+            Explicación matemática aquí
+          </p>
+        </div>
+      </div>
+
+      <!-- ================= THE FIVE SECRET ANGLES INTERACTIVE PANEL ================= -->
+      <div id="battle-control-panel" class="z-20 bg-slate-900/95 backdrop-blur-md border-t border-cyan-500/30 p-3 md:p-4 flex flex-col items-center justify-center shadow-2xl transition-all duration-300">
+        
+        <!-- Target Selection Notice if multi-enemy -->
+        <div id="target-selector-bar" class="hidden mb-2 items-center space-x-2 text-xs font-bold text-slate-300">
+          <span>🎯 Objetivo Fijado:</span>
+          <div id="target-buttons" class="flex space-x-1.5"></div>
+        </div>
+
+        <!-- The Mathematical Challenge Title -->
+        <div class="w-full max-w-4xl flex items-center justify-between mb-2">
+          <div class="flex items-center space-x-2">
+            <span class="text-amber-400 font-bold text-sm md:text-base">🎯 RETO DECIMAL:</span>
+            <span id="math-challenge-text" class="text-sm md:text-base font-extrabold text-white tracking-wide">
+              Redondea 8,376 al centésimo
+            </span>
+          </div>
+          <span id="math-hint-tag" class="hidden md:inline-block text-[11px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-2.5 py-0.5 rounded-full">
+            💡 Observa la cifra a la derecha
+          </span>
+        </div>
+
+        <!-- Five Secret Angles Buttons Container -->
+        <div class="w-full max-w-4xl grid grid-cols-5 gap-2 md:gap-3 mb-2.5">
+          <!-- Angle 1 -->
+          <button id="angle-card-0" onclick="BattleEngine.selectAngleIndex(0)" 
+                  class="angle-choice flex flex-col items-center justify-center p-2 rounded-xl bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 active:scale-95 transition">
+            <span class="text-[11px] md:text-xs font-bold text-slate-400">20°</span>
+            <span class="angle-val text-sm md:text-lg font-black text-cyan-300">8,37</span>
+          </button>
+          <!-- Angle 2 -->
+          <button id="angle-card-1" onclick="BattleEngine.selectAngleIndex(1)" 
+                  class="angle-choice flex flex-col items-center justify-center p-2 rounded-xl bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 active:scale-95 transition">
+            <span class="text-[11px] md:text-xs font-bold text-slate-400">35°</span>
+            <span class="angle-val text-sm md:text-lg font-black text-cyan-300">8,40</span>
+          </button>
+          <!-- Angle 3 -->
+          <button id="angle-card-2" onclick="BattleEngine.selectAngleIndex(2)" 
+                  class="angle-choice flex flex-col items-center justify-center p-2 rounded-xl bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 active:scale-95 transition">
+            <span class="text-[11px] md:text-xs font-bold text-slate-400">45°</span>
+            <span class="angle-val text-sm md:text-lg font-black text-cyan-300">8,38</span>
+          </button>
+          <!-- Angle 4 -->
+          <button id="angle-card-3" onclick="BattleEngine.selectAngleIndex(3)" 
+                  class="angle-choice flex flex-col items-center justify-center p-2 rounded-xl bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 active:scale-95 transition">
+            <span class="text-[11px] md:text-xs font-bold text-slate-400">60°</span>
+            <span class="angle-val text-sm md:text-lg font-black text-cyan-300">8,39</span>
+          </button>
+          <!-- Angle 5 -->
+          <button id="angle-card-4" onclick="BattleEngine.selectAngleIndex(4)" 
+                  class="angle-choice flex flex-col items-center justify-center p-2 rounded-xl bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 active:scale-95 transition">
+            <span class="text-[11px] md:text-xs font-bold text-slate-400">75°</span>
+            <span class="angle-val text-sm md:text-lg font-black text-cyan-300">8,30</span>
+          </button>
+        </div>
+
+        <!-- Action Fire Button -->
+        <div class="flex items-center space-x-4">
+          <div class="text-xs font-semibold text-slate-400 hidden sm:block">
+            Elevación del cañón: <span id="label-selected-angle" class="text-cyan-400 font-bold">45°</span>
+          </div>
+          <button id="btn-fire-action" onclick="BattleEngine.playerFire()" 
+                  class="px-8 md:px-12 py-2.5 md:py-3 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-base md:text-lg tracking-wider rounded-2xl shadow-xl shadow-red-600/40 hover:scale-105 active:scale-95 transition flex items-center space-x-2">
+            <span>💥</span>
+            <span>¡DISPARAR!</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 8. PANTALLA Y DIPLOMA FINAL DE MAESTRO DEL REDONDEO -->
+    <section id="victory-master-screen" class="hidden flex-grow flex-col items-center justify-center p-4 max-w-4xl mx-auto w-full z-30">
+      <div class="w-full bg-slate-900/95 backdrop-blur-2xl border-2 border-amber-400/80 rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+        <!-- Confetti Canvas -->
+        <canvas id="confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+        <div class="relative z-10 flex flex-col items-center w-full">
+          <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-200 flex items-center justify-center text-4xl shadow-xl shadow-amber-500/50 mb-3 animate-bounce">
+            🏆
+          </div>
+
+          <h2 class="text-2xl sm:text-4xl font-black text-amber-300 tracking-wide uppercase drop-shadow-lg mb-2">
+            ¡FELICIDADES, TE ACABAS DE CONVERTIR EN UN MAESTRO DEL REDONDEO DE DECIMALES!
+          </h2>
+          <p class="text-sm md:text-base text-slate-200 max-w-2xl mb-6 font-medium">
+            Has superado con valentía, cálculo y puntería los 7 niveles de batalla, dominando desde los décimos básicos hasta las llevadas y problemas contextualizados más complejos.
+          </p>
+
+          <!-- DIPLOMA PREVIEW CONTAINER -->
+          <div id="diploma-card" class="w-full max-w-2xl bg-[#090d16] border-4 border-amber-400/90 rounded-2xl p-6 sm:p-8 shadow-2xl relative text-slate-100 my-2">
+            <!-- Elegant Diploma Inner Border -->
+            <div class="border border-dashed border-amber-500/50 p-6 rounded-xl flex flex-col items-center relative">
+              <div class="text-xs uppercase tracking-widest text-amber-400 font-extrabold mb-1">
+                REPÚBLICA DE LAS MATEMÁTICAS &bull; ACADEMIA DECIMAL
+              </div>
+              <h3 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-300 font-serif tracking-wider uppercase mb-3">
+                Diploma de Honor al Mérito
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-300 italic mb-2">
+                Se otorga el presente reconocimiento oficial a:
+              </p>
+              <div id="diploma-student-name" class="text-2xl sm:text-4xl font-black text-cyan-300 underline decoration-amber-400 decoration-2 underline-offset-8 my-2">
+                Cadete Matemático
+              </div>
+              <p class="text-xs sm:text-sm text-slate-300 max-w-lg mt-3 leading-relaxed">
+                Por haber completado con excelencia los <strong>7 Niveles de Campaña</strong> en el videojuego de artillería táctica <strong class="text-amber-300">DECIMAL BATTLE: GUERRA DE REDONDEO</strong>, demostrando maestría absoluta en el redondeo exacto de décimos, centésimos, milésimos y situaciones con llevadas.
+              </p>
+
+              <!-- Stats & Date Grid in Diploma -->
+              <div class="grid grid-cols-3 gap-2 w-full mt-6 pt-4 border-t border-slate-800 text-[11px] sm:text-xs">
+                <div>
+                  <span class="text-slate-400 block font-semibold">Fecha de Graduación:</span>
+                  <span id="diploma-date" class="text-white font-bold">10 de Noviembre, 2026</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block font-semibold">Precisión Artillera:</span>
+                  <span id="diploma-accuracy" class="text-emerald-400 font-bold">100%</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block font-semibold">Instructor Evaluador:</span>
+                  <span class="text-amber-300 font-bold font-serif">Prof. Jhon Dewis</span>
+                </div>
+              </div>
+
+              <!-- Seal Badge -->
+              <div class="mt-4 flex items-center space-x-2">
+                <span class="text-xl">🎖️</span>
+                <span class="text-[10px] tracking-widest uppercase font-black text-amber-400">CERTIFICACIÓN OFICIAL DE MAESTRO DECIMAL</span>
+                <span class="text-xl">⭐</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diploma Action Buttons -->
+          <div class="flex flex-wrap gap-3 justify-center mt-6">
+            <button onclick="GameApp.downloadDiplomaPNG()" class="px-5 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-sm shadow-lg shadow-amber-500/30 flex items-center space-x-2 transition hover:scale-105">
+              <span>💾</span>
+              <span>Descargar Diploma (PNG)</span>
+            </button>
+            <button onclick="window.print()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold rounded-xl text-sm transition">
+              <span>🖨️</span>
+              <span>Imprimir Diploma</span>
+            </button>
+            <button onclick="GameApp.switchScreen('title-screen')" class="px-5 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-cyan-600/30">
+              <span>🏠</span>
+              <span>Volver al Menú Principal</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= PERSISTENT TEACHER SIGNATURE FOOTER ================= -->
+  <footer class="w-full bg-slate-950/90 border-t border-slate-800/80 py-2.5 px-4 text-center z-30 select-none">
+    <div class="flex items-center justify-center space-x-2">
+      <span class="text-xs text-slate-500 font-semibold tracking-wide">Videojuego Educativo Matemático &bull;</span>
+      <span class="teacher-signature">Diseñado por Prof. Jhon Dewis</span>
+    </div>
+  </footer>
+
+
+  <!-- ================= JAVASCRIPT GAME CODE ================= -->
+  <script>
+    /* ==========================================================================
+       1. SYNTHETIC AUDIO ENGINE (WEB AUDIO API)
+       ========================================================================== */
+    const SoundFX = {
+      ctx: null,
+      enabled: true,
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+
+      toggleMute() {
+        this.enabled = !this.enabled;
+        const btn = document.getElementById('btn-toggle-sound');
+        if (btn) btn.innerText = this.enabled ? '🔊' : '🔇';
+      },
+
+      playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      },
+
+      click() {
+        this.playTone(600, 'sine', 0.06, 0.05);
+      },
+
+      fire() {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(260, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 0.25);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.25);
+        } catch (e) {}
+      },
+
+      explosion() {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const bufferSize = this.ctx.sampleRate * 0.35;
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.08));
+          }
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(320, this.ctx.currentTime);
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          noise.start();
+        } catch (e) {}
+      },
+
+      correct() {
+        this.playTone(523.25, 'triangle', 0.1, 0.12);
+        setTimeout(() => this.playTone(659.25, 'triangle', 0.1, 0.12), 100);
+        setTimeout(() => this.playTone(783.99, 'triangle', 0.2, 0.15), 200);
+      },
+
+      wrong() {
+        this.playTone(220, 'sawtooth', 0.18, 0.15);
+        setTimeout(() => this.playTone(180, 'sawtooth', 0.25, 0.18), 150);
+      },
+
+      victory() {
+        const notes = [440, 554, 659, 880];
+        notes.forEach((freq, idx) => {
+          setTimeout(() => this.playTone(freq, 'triangle', 0.22, 0.15), idx * 140);
+        });
+      }
+    };
+
+    /* ==========================================================================
+       2. VEHICLE DATA DEFINITIONS (7 DECIMAL WARRIORS)
+       ========================================================================== */
+    const VEHICLES = [
+      {
+        id: 'rocket-fox',
+        name: '🔴 ROCKET FOX',
+        type: 'Deportivo / Asalto',
+        color: '#ef4444',
+        accentColor: '#b91c1c',
+        bulletColor: '#f97316',
+        description: 'Vehículo deportivo y compacto de artillería con proyectiles balísticos rápidos.',
+        unlocked: true
+      },
+      {
+        id: 'aqua-blaster',
+        name: '🔵 AQUA BLASTER',
+        type: 'Hidro-Tecnológico',
+        color: '#06b6d4',
+        accentColor: '#0891b2',
+        bulletColor: '#38bdf8',
+        description: 'Diseño hidrodinámico con munición de pulsos acuáticos de alta presión.',
+        unlocked: true
+      },
+      {
+        id: 'nature-tank',
+        name: '🟢 NATURE TANK',
+        type: 'Biomimético',
+        color: '#22c55e',
+        accentColor: '#15803d',
+        bulletColor: '#4ade80',
+        description: 'Inspirado en la botánica blindada, dispara cápsulas concentradas de energía verde.',
+        unlocked: false
+      },
+      {
+        id: 'thunder-bot',
+        name: '🟡 THUNDER BOT',
+        type: 'Electromagnético',
+        color: '#eab308',
+        accentColor: '#ca8a04',
+        bulletColor: '#fde047',
+        description: 'Blindaje con condensadores eléctricos y proyectiles de descarga fulminante.',
+        unlocked: false
+      },
+      {
+        id: 'cosmic-cannon',
+        name: '🟣 COSMIC CANNON',
+        type: 'Energía Estelar',
+        color: '#a855f7',
+        accentColor: '#7e22ce',
+        bulletColor: '#c084fc',
+        description: 'Tecnología cósmica experimental con cañón de plasma violeta gravitatorio.',
+        unlocked: false
+      },
+      {
+        id: 'lava-destroyer',
+        name: '🟠 LAVA DESTROYER',
+        type: 'Magmático Pesado',
+        color: '#ea580c',
+        accentColor: '#9a3412',
+        bulletColor: '#f97316',
+        description: 'Chasis forjado en basalto volcánico que dispara rocas incandescentes.',
+        unlocked: false
+      },
+      {
+        id: 'titan-decimal',
+        name: '⚪ TITAN DECIMAL',
+        type: 'Artillería Suprema',
+        color: '#f8fafc',
+        accentColor: '#e2e8f0',
+        bulletColor: '#38bdf8',
+        description: 'Armadura premium de aleación blanca y dorada. Símbolo del Gran Campeón.',
+        unlocked: false
+      }
+    ];
+
+    /* ==========================================================================
+       3. MAP DATA DEFINITIONS (7 PROGRESSIVE ENVIRONMENTS & INCREASING DIFFICULTY)
+       ========================================================================== */
+    const MAPS = [
+      {
+        id: 1,
+        name: 'Nivel 1: Valle de los Décimos',
+        subtitle: 'Redondeo básico al décimo & colinas estables',
+        orderTarget: 'tenth',
+        difficulty: 0.35, // 35% IA accuracy
+        turnTime: 40,     // 40 seconds
+        skyGradient: ['#0284c7', '#38bdf8', '#bae6fd'],
+        rockColor: '#15803d',
+        rockDark: '#14532d',
+        unlocked: true,
+        chasmDanger: 0.1
+      },
+      {
+        id: 2,
+        name: 'Nivel 2: Bosque de los Centésimos',
+        subtitle: 'Redondeo al centésimo & pequeños desfiladeros',
+        orderTarget: 'hundredth',
+        difficulty: 0.45, // 45% IA accuracy
+        turnTime: 35,     // 35 seconds
+        skyGradient: ['#0f766e', '#14b8a6', '#99f6e4'],
+        rockColor: '#047857',
+        rockDark: '#064e3b',
+        unlocked: false,
+        chasmDanger: 0.15
+      },
+      {
+        id: 3,
+        name: 'Nivel 3: Desierto Milésimo',
+        subtitle: 'Redondeo al milésimo & terreno frágil con fosas',
+        orderTarget: 'thousandth',
+        difficulty: 0.55, // 55% IA accuracy
+        turnTime: 30,     // 30 seconds
+        skyGradient: ['#b45309', '#f59e0b', '#fed7aa'],
+        rockColor: '#c2410c',
+        rockDark: '#7c2d12',
+        unlocked: false,
+        chasmDanger: 0.22
+      },
+      {
+        id: 4,
+        name: 'Nivel 4: Montañas Heladas',
+        subtitle: 'Mezcla décimos/centésimos & trampas de caída',
+        orderTarget: 'mixed_easy',
+        difficulty: 0.65, // 65% IA accuracy
+        turnTime: 25,     // 25 seconds
+        skyGradient: ['#1e293b', '#475569', '#cbd5e1'],
+        rockColor: '#64748b',
+        rockDark: '#334155',
+        unlocked: false,
+        chasmDanger: 0.28
+      },
+      {
+        id: 5,
+        name: 'Nivel 5: Planeta Decimal',
+        subtitle: 'Ceros intermedios & números de 4 cifras',
+        orderTarget: 'zeros_and_large',
+        difficulty: 0.75, // 75% IA accuracy
+        turnTime: 22,     // 22 seconds
+        skyGradient: ['#3b0764', '#6b21a8', '#d8b4fe'],
+        rockColor: '#581c87',
+        rockDark: '#3b0764',
+        unlocked: false,
+        chasmDanger: 0.35
+      },
+      {
+        id: 6,
+        name: 'Nivel 6: Volcán de los Números',
+        subtitle: 'Casos con llevadas (9,996 -> 10,00) & problemas contextualizados',
+        orderTarget: 'carry_cases',
+        difficulty: 0.85, // 85% IA accuracy
+        turnTime: 18,     // 18 seconds
+        skyGradient: ['#450a0a', '#991b1b', '#fca5a5'],
+        rockColor: '#262626',
+        rockDark: '#0a0a0a',
+        unlocked: false,
+        chasmDanger: 0.42
+      },
+      {
+        id: 7,
+        name: 'Nivel 7: Fortaleza del Gran Redondeo',
+        subtitle: 'Batalla Final Suprema: IA Maestra & tiempo límite extremo',
+        orderTarget: 'grand_master',
+        difficulty: 0.92, // 92% IA accuracy
+        turnTime: 15,     // 15 seconds!
+        skyGradient: ['#09090b', '#18181b', '#3f3f46'],
+        rockColor: '#1e1b4b',
+        rockDark: '#0f172a',
+        unlocked: false,
+        chasmDanger: 0.50
+      }
+    ];
+
+    /* ==========================================================================
+       4. MATHEMATICAL ENGINE & ROUNDING GENERATOR
+       Accurate string/scaled-integer rounding without IEEE-754 precision flaws.
+       ========================================================================== */
+    const MathEngine = {
+      // Formats string with decimal comma
+      formatComma(valStr) {
+        return String(valStr).replace('.', ',');
+      },
+
+      // Accurate rounding using string digit analysis
+      roundDecimalExact(num, targetOrder) {
+        // targetOrder: 1 = décimo (0.1), 2 = centésimo (0.01), 3 = milésimo (0.001)
+        const parts = num.toFixed(7).split('.');
+        let decStr = parts[1];
+
+        // The digit right after the target precision determines rounding
+        const decisiveDigit = parseInt(decStr.charAt(targetOrder), 10);
+        let digitsToKeep = decStr.slice(0, targetOrder);
+
+        // Turn integer + kept digits into a large BigInt to avoid float overflow
+        let fullBig = BigInt(parts[0] + digitsToKeep);
+
+        if (decisiveDigit >= 5) {
+          fullBig += 1n;
+        }
+
+        let fullStr = fullBig.toString();
+        // Insert decimal point back
+        if (fullStr.length <= targetOrder) {
+          fullStr = fullStr.padStart(targetOrder + 1, '0');
+        }
+        const splitIndex = fullStr.length - targetOrder;
+        const resInt = fullStr.slice(0, splitIndex);
+        const resDec = fullStr.slice(splitIndex);
+
+        return `${resInt}.${resDec}`;
+      },
+
+      generateQuestion(mode = 'hundredth') {
+        let order = 2; // default centésimo
+        let orderName = 'centésimo';
+        let decimalsCount = 3;
+        let isContextualized = false;
+        let contextPrefix = '';
+
+        if (mode === 'tenth') {
+          order = 1;
+          orderName = 'décimo';
+          decimalsCount = 3;
+        } else if (mode === 'hundredth') {
+          order = 2;
+          orderName = 'centésimo';
+          decimalsCount = 3;
+        } else if (mode === 'thousandth') {
+          order = 3;
+          orderName = 'milésimo';
+          decimalsCount = 4;
+        } else if (mode === 'mixed_easy') {
+          order = Math.random() > 0.5 ? 1 : 2;
+          orderName = order === 1 ? 'décimo' : 'centésimo';
+          decimalsCount = order + 2;
+        } else if (mode === 'zeros_and_large') {
+          // Intermediate zeros e.g. 14.0507 or 7.0089
+          order = Math.random() > 0.5 ? 2 : 3;
+          orderName = order === 2 ? 'centésimo' : 'milésimo';
+          decimalsCount = order + 2;
+        } else if (mode === 'carry_cases') {
+          // Numbers with trailing nines like 9.996 or 19.997 or real-world money
+          order = 2;
+          orderName = 'centésimo';
+          decimalsCount = 3;
+          isContextualized = Math.random() > 0.4;
+          if (isContextualized) {
+            contextPrefix = 'En una tienda balística un blindaje cuesta S/. ';
+          }
+        } else {
+          // Grand Master Level 7: Mixed carry cases, money, weights, 4-digit decimals
+          const r = Math.random();
+          if (r < 0.33) {
+            order = 1; orderName = 'décimo'; decimalsCount = 3;
+            contextPrefix = 'Un proyectil viaja a ';
+          } else if (r < 0.66) {
+            order = 2; orderName = 'centésimo'; decimalsCount = 4;
+            contextPrefix = 'El combustible pesa ';
+          } else {
+            order = 3; orderName = 'milésimo'; decimalsCount = 5;
+            contextPrefix = 'La coordenada satelital marca ';
+          }
+        }
+
+        // Generate base number
+        let intVal = Math.floor(Math.random() * 30);
+        let decVal = '';
+
+        if (mode === 'carry_cases') {
+          // Force a case where 9 rolls over to 0 e.g. 9.996 or 14.998
+          decVal = '99' + Math.floor(Math.random() * 5 + 5);
+        } else if (mode === 'zeros_and_large') {
+          // Insert intermediate zeros
+          decVal = '0' + Math.floor(Math.random() * 9 + 1) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10);
+        } else {
+          for (let i = 0; i < decimalsCount; i++) {
+            decVal += Math.floor(Math.random() * 10);
+          }
+        }
+
+        const rawNumberStr = `${intVal}.${decVal}`;
+        const rawNumber = parseFloat(rawNumberStr);
+
+        const correctStr = this.roundDecimalExact(rawNumber, order);
+        const correctFormatted = this.formatComma(correctStr);
+
+        // Generate 4 plausible student distractors
+        const optionsSet = new Set();
+        optionsSet.add(correctFormatted);
+
+        // Distractor 1: Truncation without increasing (ignoring >= 5 rule)
+        const truncatedStr = `${rawNumberStr.split('.')[0]}.${rawNumberStr.split('.')[1].slice(0, order)}`;
+        optionsSet.add(this.formatComma(truncatedStr));
+
+        // Distractor 2: Increased even if digit was < 5, or wrong offset
+        const wrongAdd = (parseFloat(correctStr) + (1 / Math.pow(10, order))).toFixed(order);
+        optionsSet.add(this.formatComma(wrongAdd));
+
+        // Distractor 3: Wrong precision order (one digit too few or too many)
+        const wrongPrecision = (parseFloat(correctStr)).toFixed(Math.max(1, order - 1));
+        optionsSet.add(this.formatComma(wrongPrecision));
+
+        // Distractor 4: Subtracted offset or altered last digit
+        const wrongSub = Math.max(0, parseFloat(correctStr) - (1 / Math.pow(10, order))).toFixed(order);
+        optionsSet.add(this.formatComma(wrongSub));
+
+        // Fill up to 5 unique options if any collided
+        let safetyCounter = 1;
+        while (optionsSet.size < 5) {
+          const fake = (parseFloat(correctStr) + (safetyCounter * 2 / Math.pow(10, order))).toFixed(order);
+          optionsSet.add(this.formatComma(fake));
+          safetyCounter++;
+        }
+
+        const optionsArray = Array.from(optionsSet);
+        // Shuffle options
+        for (let i = optionsArray.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [optionsArray[i], optionsArray[j]] = [optionsArray[j], optionsArray[i]];
+        }
+
+        const correctIdx = optionsArray.indexOf(correctFormatted);
+        const rawFormatted = this.formatComma(rawNumberStr);
+
+        // Explanation text
+        const decisiveIndex = rawNumberStr.indexOf('.') + 1 + order;
+        const decisiveChar = rawNumberStr.charAt(decisiveIndex) || '0';
+        const ruleExplanation = parseInt(decisiveChar, 10) >= 5
+          ? `La cifra a la derecha es ${decisiveChar} (≥ 5), por lo tanto la última cifra aumenta en 1.`
+          : `La cifra a la derecha es ${decisiveChar} (< 5), por lo tanto la última cifra se mantiene igual.`;
+
+        const questionTitle = contextPrefix !== ''
+          ? `${contextPrefix}${rawFormatted}. Redondea al ${orderName}`
+          : `Redondea ${rawFormatted} al ${orderName}`;
+
+        return {
+          questionText: questionTitle,
+          rawNumber: rawFormatted,
+          orderName,
+          options: optionsArray,
+          correctIndex: correctIdx,
+          correctValue: correctFormatted,
+          explanation: `Resultado: ${correctFormatted}. ${ruleExplanation}`
+        };
+      }
+    };
+
+
+    /* ==========================================================================
+       5. ACADEMY MODULE (DECIBOT & 7-QUESTION CERTIFICATION QUIZ)
+       ========================================================================== */
+    const Academy = {
+      currentLessonIndex: 1,
+      quizQuestions: [],
+      currentQuizIndex: 0,
+      quizScore: 0,
+      inQuizMode: false,
+
+      showLesson(index) {
+        this.inQuizMode = false;
+        this.currentLessonIndex = index;
+        SoundFX.click();
+
+        // Update Tab UI
+        [1, 2, 3].forEach(i => {
+          const tab = document.getElementById(`tab-lec-${i}`);
+          if (tab) {
+            tab.className = (i === index)
+              ? 'px-4 py-2 rounded-xl font-bold text-xs md:text-sm bg-cyan-600 text-white transition shadow-md'
+              : 'px-4 py-2 rounded-xl font-bold text-xs md:text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+          }
+        });
+
+        const ind = document.getElementById('lesson-step-indicator');
+        if (ind) ind.innerText = `Lección ${index} de 3`;
+
+        const container = document.getElementById('academy-content');
+        if (!container) return;
+
+        if (index === 1) {
+          container.innerHTML = `
+            <div class="space-y-4">
+              <div class="flex items-center space-x-2 text-cyan-400 font-bold text-lg">
+                <span>📚</span> <h3>Lección 1: El Valor Posicional de los Decimales</h3>
+              </div>
+              <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                Todo número decimal tiene una <strong class="text-white">parte entera</strong> (a la izquierda de la coma) 
+                y una <strong class="text-cyan-300">parte decimal</strong> (a la derecha de la coma). 
+                Cada posición decimal tiene un nombre y valor único:
+              </p>
+
+              <!-- Visual number breakdown -->
+              <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl flex flex-col items-center justify-center my-4 shadow-inner">
+                <div class="text-4xl md:text-6xl font-black tracking-widest flex items-center space-x-1">
+                  <span class="text-emerald-400" title="Parte Entera">3</span>
+                  <span class="text-slate-400">,</span>
+                  <span class="text-cyan-400 border-b-4 border-cyan-400 pb-1" title="Décimos">4</span>
+                  <span class="text-amber-400 border-b-4 border-amber-400 pb-1" title="Centésimos">7</span>
+                  <span class="text-purple-400 border-b-4 border-purple-400 pb-1" title="Milésimos">6</span>
+                </div>
+                <div class="grid grid-cols-4 gap-2 md:gap-6 text-center mt-5 w-full max-w-lg text-xs md:text-sm font-bold">
+                  <div class="bg-emerald-950/60 text-emerald-300 border border-emerald-800/60 p-2 rounded-xl">Enteros: 3</div>
+                  <div class="bg-cyan-950/60 text-cyan-300 border border-cyan-800/60 p-2 rounded-xl">Décimos: 4</div>
+                  <div class="bg-amber-950/60 text-amber-300 border border-amber-800/60 p-2 rounded-xl">Centésimos: 7</div>
+                  <div class="bg-purple-950/60 text-purple-300 border border-purple-800/60 p-2 rounded-xl">Milésimos: 6</div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-cyan-950/40 border border-cyan-800/50 rounded-xl text-xs text-cyan-200">
+                💡 <strong>Regla clave de artillería:</strong> Identifica primero hasta qué cifra te ordenan redondear. Esa posición será el último dígito de tu coordenada.
+              </div>
+            </div>
+          `;
+        } else if (index === 2) {
+          container.innerHTML = `
+            <div class="space-y-4">
+              <div class="flex items-center space-x-2 text-cyan-400 font-bold text-lg">
+                <span>🎯</span> <h3>Lección 2: La Regla de Oro del Redondeo</h3>
+              </div>
+              <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                Para redondear, <strong class="text-white">miramos ÚNICAMENTE la cifra inmediatamente a la derecha</strong> del orden deseado:
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+                <div class="bg-slate-900 border-l-4 border-emerald-500 p-4 rounded-xl">
+                  <h4 class="font-black text-emerald-400 text-sm uppercase">Cifra menor que 5 (0, 1, 2, 3, 4)</h4>
+                  <p class="text-xs text-slate-300 mt-1">La cifra que se redondea <strong class="text-white">se mantiene IGUAL</strong>. Las cifras posteriores se eliminan.</p>
+                  <div class="mt-2 text-sm font-mono bg-slate-950 px-2 py-1 rounded text-emerald-300 font-bold">
+                    Ej: 5,4<span class="text-white underline">2</span> ➔ 5,4 (al décimo)
+                  </div>
+                </div>
+
+                <div class="bg-slate-900 border-l-4 border-amber-500 p-4 rounded-xl">
+                  <h4 class="font-black text-amber-400 text-sm uppercase">Cifra igual o mayor a 5 (5, 6, 7, 8, 9)</h4>
+                  <p class="text-xs text-slate-300 mt-1">La cifra que se redondea <strong class="text-white">AUMENTA EN 1 UNIDAD</strong>. Las cifras posteriores se eliminan.</p>
+                  <div class="mt-2 text-sm font-mono bg-slate-950 px-2 py-1 rounded text-amber-300 font-bold">
+                    Ej: 3,47<span class="text-white underline">6</span> ➔ 3,48 (al centésimo)
+                  </div>
+                </div>
+              </div>
+
+              <!-- Animated interactive preview box -->
+              <div class="bg-indigo-950/40 border border-indigo-500/40 p-4 rounded-xl flex items-center justify-between">
+                <div class="text-xs md:text-sm text-indigo-200">
+                  ¿Por qué 3,476 se convierte en 3,48? Porque el <span class="font-black text-amber-300">6</span> es mayor o igual a 5, impulsando al <span class="font-black text-cyan-300">7</span> a subir a <span class="font-black text-emerald-400">8</span>.
+                </div>
+                <span class="text-2xl ml-2">🚀</span>
+              </div>
+            </div>
+          `;
+        } else if (index === 3) {
+          container.innerHTML = `
+            <div class="space-y-4">
+              <div class="flex items-center space-x-2 text-cyan-400 font-bold text-lg">
+                <span>⚡</span> <h3>Lección 3: Casos Especiales y Llevadas Críticas</h3>
+              </div>
+              <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                ¡Cuidado con el 9 en combate! Cuando un <strong class="text-white">9</strong> debe subir una unidad, se transforma en 10 y transfiere su llevada a la cifra anterior:
+              </p>
+
+              <div class="space-y-2">
+                <div class="flex items-center justify-between bg-slate-900 border border-slate-700 p-3 rounded-xl">
+                  <div>
+                    <span class="text-xs text-slate-400 font-semibold block">Caso con Llevada (Centésimo):</span>
+                    <span class="font-mono text-base font-bold text-white">9,996 al centésimo</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xs text-emerald-400 font-bold block">El 6 sube al 9 ➔ 10</span>
+                    <span class="font-mono text-lg font-black text-amber-400">10,00</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-slate-900 border border-slate-700 p-3 rounded-xl">
+                  <div>
+                    <span class="text-xs text-slate-400 font-semibold block">Situación de Precios y Balística:</span>
+                    <span class="font-mono text-base font-bold text-white">S/. 15,259 al centésimo</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xs text-cyan-400 font-bold block">El 9 sube al 5</span>
+                    <span class="font-mono text-lg font-black text-cyan-400">15,26</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-center pt-2">
+                <p class="text-xs text-slate-400 mb-3">¡Ya tienes el conocimiento táctico! Demuestra tu nivel en el Examen de la Academia.</p>
+                <button onclick="Academy.startQuiz()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black rounded-xl text-sm shadow-lg shadow-amber-500/20 hover:scale-105 transition">
+                  Iniciar Examen de Graduación (7 Preguntas) 🎖️
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      },
+
+      nextLesson() {
+        if (this.currentLessonIndex < 3) {
+          this.showLesson(this.currentLessonIndex + 1);
+        } else {
+          this.startQuiz();
+        }
+      },
+
+      prevLesson() {
+        if (this.currentLessonIndex > 1) {
+          this.showLesson(this.currentLessonIndex - 1);
+        }
+      },
+
+      startQuiz() {
+        this.inQuizMode = true;
+        this.currentQuizIndex = 0;
+        this.quizScore = 0;
+        SoundFX.click();
+
+        // 7 fixed & procedural curriculum questions
+        this.quizQuestions = [
+          {
+            q: "Redondea 0,748 al décimo.",
+            options: ["0,7", "0,8", "0,75", "0,70"],
+            correct: 0,
+            expl: "Al décimo miramos el 4 (< 5), por lo tanto el 7 se queda igual: 0,7."
+          },
+          {
+            q: "Redondea 15,259 al centésimo.",
+            options: ["15,25", "15,26", "15,30", "15,20"],
+            correct: 1,
+            expl: "Al centésimo miramos el 9 (≥ 5), por lo que el 5 aumenta a 6: 15,26."
+          },
+          {
+            q: "Redondea 3,5079 al milésimo.",
+            options: ["3,507", "3,508", "3,510", "3,500"],
+            correct: 1,
+            expl: "Al milésimo miramos el 9 (≥ 5), así que el 7 sube a 8: 3,508."
+          },
+          // 4 procedural challenging questions
+          this.generateQuizItem('tenth'),
+          this.generateQuizItem('hundredth'),
+          this.generateQuizItem('thousandth'),
+          this.generateQuizItem('carry_cases')
+        ];
+
+        this.renderQuizQuestion();
+      },
+
+      generateQuizItem(type) {
+        const item = MathEngine.generateQuestion(type);
+        return {
+          q: `${item.questionText}.`,
+          options: item.options.slice(0, 4), // 4 alternatives for quiz
+          correct: item.options.indexOf(item.correctValue),
+          expl: item.explanation
+        };
+      },
+
+      renderQuizQuestion() {
+        const container = document.getElementById('academy-content');
+        const q = this.quizQuestions[this.currentQuizIndex];
+        const ind = document.getElementById('lesson-step-indicator');
+        if (ind) ind.innerText = `Pregunta ${this.currentQuizIndex + 1} de 7`;
+
+        let optionsHtml = '';
+        q.options.forEach((opt, idx) => {
+          optionsHtml += `
+            <button onclick="Academy.answerQuiz(${idx})" class="p-3.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-400 hover:bg-slate-800 text-left font-bold text-white transition flex items-center justify-between">
+              <span><span class="text-cyan-400 mr-2">${String.fromCharCode(65 + idx)})</span> ${opt}</span>
+              <span class="text-slate-500 text-xs">Elegir ➔</span>
+            </button>
+          `;
+        });
+
+        container.innerHTML = `
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-xs uppercase font-extrabold text-amber-400">Evaluación de Cadete &bull; Examen #${this.currentQuizIndex + 1}</span>
+              <span class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 font-bold">Puntaje actual: ${this.quizScore}</span>
+            </div>
+            
+            <h3 class="text-xl md:text-2xl font-black text-white py-2">${q.q}</h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              ${optionsHtml}
+            </div>
+
+            <div id="quiz-feedback-box" class="hidden p-3 rounded-xl text-xs md:text-sm font-semibold"></div>
+          </div>
+        `;
+      },
+
+      answerQuiz(selectedIdx) {
+        const q = this.quizQuestions[this.currentQuizIndex];
+        const isRight = selectedIdx === q.correct;
+        const fb = document.getElementById('quiz-feedback-box');
+
+        if (isRight) {
+          SoundFX.correct();
+          this.quizScore++;
+          if (fb) {
+            fb.className = 'p-3 rounded-xl text-xs md:text-sm font-semibold bg-emerald-950 border border-emerald-500 text-emerald-200 block';
+            fb.innerHTML = `✅ <strong>¡Correcto!</strong> ${q.expl}`;
+          }
+        } else {
+          SoundFX.wrong();
+          if (fb) {
+            fb.className = 'p-3 rounded-xl text-xs md:text-sm font-semibold bg-red-950 border border-red-500 text-red-200 block';
+            fb.innerHTML = `❌ <strong>Incorrecto.</strong> ${q.expl}`;
+          }
+        }
+
+        setTimeout(() => {
+          this.currentQuizIndex++;
+          if (this.currentQuizIndex < 7) {
+            this.renderQuizQuestion();
+          } else {
+            this.finishQuiz();
+          }
+        }, 1400);
+      },
+
+      finishQuiz() {
+        const container = document.getElementById('academy-content');
+        const passed = this.quizScore >= 5;
+
+        if (passed) {
+          SoundFX.victory();
+          GameApp.playerData.academyPassed = true;
+          GameApp.saveState();
+
+          container.innerHTML = `
+            <div class="text-center py-6 space-y-4">
+              <div class="text-5xl animate-bounce">🎖️</div>
+              <h3 class="text-2xl font-black text-amber-400">¡FELICIDADES, CADETE DECIMAL!</h3>
+              <p class="text-sm md:text-base text-slate-200 max-w-md mx-auto">
+                Has completado tu entrenamiento con <strong>${this.quizScore} de 7 respuestas correctas</strong>. 
+                Estás oficialmente calificado para operar vehículos de artillería en combate real.
+              </p>
+              <div class="pt-4 flex justify-center space-x-3">
+                <button onclick="GameApp.startBattleGame()" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black rounded-xl shadow-lg shadow-emerald-500/30 hover:scale-105 transition">
+                  ¡Ir a la Primera Batalla! 🚀
+                </button>
+                <button onclick="Academy.showLesson(1)" class="px-4 py-3 bg-slate-800 text-slate-300 font-bold rounded-xl hover:bg-slate-700 transition">
+                  Repasar Teoría 📖
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          SoundFX.wrong();
+          container.innerHTML = `
+            <div class="text-center py-6 space-y-4">
+              <div class="text-5xl">⚠️</div>
+              <h3 class="text-2xl font-black text-red-400">ENTRENAMIENTO INCOMPLETO</h3>
+              <p class="text-sm text-slate-300 max-w-md mx-auto">
+                Obtuviste <strong>${this.quizScore} de 7</strong>. Se necesitan al menos 5 respuestas correctas para obtener tu licencia de combate.
+              </p>
+              <div class="pt-4 flex justify-center space-x-3">
+                <button onclick="Academy.startQuiz()" class="px-5 py-2.5 bg-amber-500 text-slate-950 font-black rounded-xl hover:bg-amber-400 transition">
+                  Intentar de Nuevo 🔄
+                </button>
+                <button onclick="Academy.showLesson(1)" class="px-4 py-2.5 bg-slate-800 text-slate-300 font-bold rounded-xl hover:bg-slate-700 transition">
+                  Repasar las Lecciones 📚
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      }
+    };
+
+
+    /* ==========================================================================
+       6. PROCEDURAL DESTRUCTIBLE TERRAIN & VEHICLE ARTILLERY CANVAS ENGINE
+       ========================================================================== */
+    const BattleEngine = {
+      canvas: null,
+      ctx: null,
+      terrainCanvas: null, // Offscreen canvas for destructible terrain
+      tCtx: null,
+
+      width: 800,
+      height: 450,
+
+      running: false,
+      animationFrameId: null,
+
+      // Participants
+      players: [],
+      currentPlayerIndex: 0,
+      activeTargetIndex: 1,
+
+      // Math Challenge for current turn
+      currentQuestion: null,
+      selectedAngleIndex: 2, // default 45°
+      anglesList: [20, 35, 45, 60, 75],
+
+      // Projectiles & Particles
+      projectiles: [],
+      particles: [],
+      floatingTexts: [],
+
+      turnTimer: 40,
+      timerInterval: null,
+      isFiring: false,
+
+      init(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+
+        // Create offscreen buffer canvas for rock deformation with globalCompositeOperation
+        this.terrainCanvas = document.createElement('canvas');
+        this.tCtx = this.terrainCanvas.getContext('2d');
+
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      },
+
+      resize() {
+        if (!this.canvas) return;
+        const rect = this.canvas.parentElement.getBoundingClientRect();
+        this.width = rect.width || 800;
+        this.height = rect.height || 450;
+
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+
+        // Sync terrain canvas size
+        if (this.terrainCanvas) {
+          const oldData = this.tCtx.getImageData(0, 0, this.terrainCanvas.width, this.terrainCanvas.height);
+          this.terrainCanvas.width = this.width;
+          this.terrainCanvas.height = this.height;
+          // Redraw terrain if match is in progress
+          if (this.running) {
+            this.generateTerrain(GameApp.currentMap);
+          }
+        }
+      },
+
+      // Generate organic rocky terrain with jagged peaks and craters
+      generateTerrain(map) {
+        this.terrainCanvas.width = this.width;
+        this.terrainCanvas.height = this.height;
+
+        const ctx = this.tCtx;
+        ctx.clearRect(0, 0, this.width, this.height);
+
+        // Gradient for rocky earth
+        const rockGrad = ctx.createLinearGradient(0, this.height * 0.4, 0, this.height);
+        rockGrad.addColorStop(0, map.rockColor);
+        rockGrad.addColorStop(1, map.rockDark);
+
+        ctx.fillStyle = rockGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, this.height);
+
+        // Heightmap points count & chasm hazards according to level
+        const pointsCount = 44;
+        const step = this.width / pointsCount;
+        const baseHeight = this.height * 0.68;
+        const chasmFactor = map.chasmDanger || 0.15;
+
+        for (let i = 0; i <= pointsCount; i++) {
+          const x = i * step;
+          // Deeper chasms on higher levels
+          const chasmDip = (i > 16 && i < 24) ? (this.height * chasmFactor) : 0;
+          const wave1 = Math.sin(i * 0.28) * (this.height * 0.12);
+          const wave2 = Math.cos(i * 0.65) * (this.height * 0.07);
+          const wave3 = Math.sin(i * 1.3) * 10;
+          const y = baseHeight + wave1 + wave2 + wave3 + chasmDip;
+          if (i === 0) ctx.lineTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+
+        ctx.lineTo(this.width, this.height);
+        ctx.closePath();
+        ctx.fill();
+
+        // Add rocky texture lines & highlights
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Subsurface rock veins
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+        ctx.lineWidth = 2;
+        for (let j = 0; j < 16; j++) {
+          ctx.beginPath();
+          const rx = Math.random() * this.width;
+          const ry = this.height * 0.7 + Math.random() * (this.height * 0.25);
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(rx + 30 + Math.random() * 20, ry + 15 + Math.random() * 15);
+          ctx.stroke();
+        }
+      },
+
+      // Test collision with terrain buffer pixel data
+      getTerrainHeightAt(x) {
+        if (x < 0 || x >= this.width) return this.height + 100;
+        const imgData = this.tCtx.getImageData(Math.floor(x), 0, 1, this.height).data;
+        // Search top to bottom for first non-transparent alpha pixel
+        for (let y = 0; y < this.height; y++) {
+          const alpha = imgData[y * 4 + 3];
+          if (alpha > 40) {
+            return y;
+          }
+        }
+        return this.height + 50; // no ground found (abyss)
+      },
+
+      // Carve crater out of terrain with globalCompositeOperation
+      destroyTerrain(centerX, centerY, radius) {
+        this.tCtx.save();
+        this.tCtx.globalCompositeOperation = 'destination-out';
+        this.tCtx.beginPath();
+        this.tCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        this.tCtx.fill();
+        this.tCtx.restore();
+
+        // Spawn rock debris particles
+        for (let i = 0; i < 28; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 6 + 2;
+          this.particles.push({
+            x: centerX,
+            y: centerY,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 3,
+            radius: Math.random() * 4 + 2,
+            color: Math.random() > 0.5 ? '#78716c' : '#fb923c',
+            alpha: 1,
+            gravity: 0.25
+          });
+        }
+      },
+
+      // Start new battle match
+      startMatch(map, userVehicle, fighterCount = 2, difficulty = null) {
+        this.running = true;
+        this.isFiring = false;
+        this.projectiles = [];
+        this.particles = [];
+        this.floatingTexts = [];
+        this.currentPlayerIndex = 0;
+        this.activeTargetIndex = 1;
+
+        // Use map's configured difficulty and timer
+        const levelDifficulty = difficulty !== null ? difficulty : (map.difficulty || 0.45);
+        this.turnTimerMax = map.turnTime || 40;
+
+        // Update HUD Level Name
+        const mapNameEl = document.getElementById('hud-map-name');
+        if (mapNameEl) mapNameEl.innerText = `${map.name} (${this.turnTimerMax}s)`;
+
+        this.generateTerrain(map);
+
+        // Build roster of participants
+        this.players = [];
+
+        // 1. Human Player
+        this.players.push({
+          id: 'player',
+          name: GameApp.playerData.name || 'Cadete',
+          isAI: false,
+          vehicle: userVehicle,
+          hp: 100,
+          maxHp: 100,
+          x: this.width * 0.18,
+          y: 0,
+          elevationAngle: 45,
+          facingRight: true,
+          recoil: 0,
+          isDead: false
+        });
+
+        // AI Rivals pool
+        const aiNames = [
+          'Robot Milésimo', 'Capitán Decimal', 'Centella Artillera', 
+          'Doctor Centésimo', 'Comandante Redondeo', 'Turbo Matemático', 'General Arquímedes'
+        ];
+
+        const count = Math.max(2, fighterCount);
+        const spacing = this.width * 0.72 / (count - 1);
+        for (let i = 1; i < count; i++) {
+          const aiVehicle = VEHICLES[(i + map.id) % VEHICLES.length];
+          this.players.push({
+            id: `ai-${i}`,
+            name: aiNames[(i + map.id - 1) % aiNames.length],
+            isAI: true,
+            vehicle: aiVehicle,
+            hp: 100,
+            maxHp: 100,
+            x: this.width * 0.44 + (i - 1) * spacing,
+            y: 0,
+            elevationAngle: 45,
+            facingRight: false,
+            recoil: 0,
+            isDead: false,
+            aiAccuracy: levelDifficulty
+          });
+        }
+
+        // Settle vehicles on terrain
+        this.players.forEach(p => {
+          p.y = this.getTerrainHeightAt(p.x) - 16;
+        });
+
+        // Update UI
+        this.updateHUD();
+        this.nextTurn();
+
+        // Start animation loop
+        if (!this.animationFrameId) {
+          const loop = () => {
+            if (this.running) {
+              this.update();
+              this.render();
+            }
+            this.animationFrameId = requestAnimationFrame(loop);
+          };
+          this.animationFrameId = requestAnimationFrame(loop);
+        }
+      },
+
+      updateHUD() {
+        const container = document.getElementById('battle-players-hud');
+        if (!container) return;
+
+        let html = '';
+        this.players.forEach((p, idx) => {
+          const hpPct = Math.max(0, (p.hp / p.maxHp) * 100);
+          let hpColorClass = 'bg-emerald-500';
+          if (hpPct <= 30) hpColorClass = 'bg-red-500 animate-pulse';
+          else if (hpPct <= 60) hpColorClass = 'bg-amber-400';
+
+          const isCurrent = (idx === this.currentPlayerIndex);
+          const borderClass = isCurrent ? 'border-cyan-400 ring-2 ring-cyan-500/50' : 'border-slate-700';
+
+          html += `
+            <div class="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border ${borderClass} flex items-center space-x-2 text-xs">
+              <span class="w-3 h-3 rounded-full" style="background-color: ${p.vehicle.color}"></span>
+              <div>
+                <div class="font-black text-white flex items-center space-x-1">
+                  <span>${p.name}</span>
+                  ${p.isDead ? '<span class="text-red-400 text-[10px]">💀</span>' : ''}
+                </div>
+                <div class="w-20 md:w-28 bg-slate-800 h-2 rounded-full overflow-hidden mt-1 border border-slate-700">
+                  <div class="${hpColorClass} h-full transition-all duration-300" style="width: ${hpPct}%"></div>
+                </div>
+              </div>
+              <span class="font-mono text-[10px] text-slate-300 font-bold ml-1">${Math.ceil(p.hp)} HP</span>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+
+        // Update turn label
+        const turnLabel = document.getElementById('hud-turn-label');
+        if (turnLabel && this.players[this.currentPlayerIndex]) {
+          turnLabel.innerText = `Turno de: ${this.players[this.currentPlayerIndex].name}`;
+        }
+      },
+
+      nextTurn() {
+        if (!this.running) return;
+
+        // Check victory/loss
+        const alivePlayers = this.players.filter(p => !p.isDead);
+        const humanAlive = !this.players[0].isDead;
+
+        if (!humanAlive) {
+          this.endMatch(false);
+          return;
+        }
+
+        const livingEnemies = this.players.slice(1).filter(p => !p.isDead);
+        if (livingEnemies.length === 0) {
+          this.endMatch(true);
+          return;
+        }
+
+        // Advance to next living player
+        do {
+          this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+        } while (this.players[this.currentPlayerIndex].isDead);
+
+        const current = this.players[this.currentPlayerIndex];
+        this.updateHUD();
+
+        // Setup timer based on current map difficulty
+        clearInterval(this.timerInterval);
+        this.turnTimer = this.turnTimerMax || 40;
+        const timerEl = document.getElementById('hud-timer');
+        if (timerEl) {
+          timerEl.innerText = this.turnTimer;
+          timerEl.className = 'w-9 h-9 rounded-xl bg-slate-800 border-2 border-emerald-400 flex items-center justify-center font-black text-emerald-400 text-sm';
+        }
+
+        this.timerInterval = setInterval(() => {
+          this.turnTimer--;
+          if (timerEl) {
+            timerEl.innerText = this.turnTimer;
+            if (this.turnTimer <= 5) {
+              timerEl.className = 'w-9 h-9 rounded-xl bg-red-900 border-2 border-red-500 flex items-center justify-center font-black text-white text-sm animate-pulse';
+            }
+          }
+          if (this.turnTimer <= 0) {
+            clearInterval(this.timerInterval);
+            if (!this.isFiring) {
+              this.showBanner('¡TIEMPO AGOTADO!', 'Turno perdido por límite de tiempo.', 'bg-red-600');
+              setTimeout(() => this.nextTurn(), 1600);
+            }
+          }
+        }, 1000);
+
+        // Auto-fix active target for human
+        if (!current.isAI) {
+          if (this.players[this.activeTargetIndex]?.isDead || this.activeTargetIndex === 0) {
+            const firstAliveEnemy = this.players.findIndex((p, i) => i > 0 && !p.isDead);
+            this.activeTargetIndex = firstAliveEnemy > 0 ? firstAliveEnemy : 1;
+          }
+          this.setupTargetButtons();
+          this.prepareMathQuestion();
+          document.getElementById('battle-control-panel')?.classList.remove('opacity-40', 'pointer-events-none');
+        } else {
+          // AI turn
+          document.getElementById('battle-control-panel')?.classList.add('opacity-40', 'pointer-events-none');
+          this.executeAITurn(current);
+        }
+      },
+
+      setupTargetButtons() {
+        const bar = document.getElementById('target-selector-bar');
+        const container = document.getElementById('target-buttons');
+        if (!bar || !container) return;
+
+        const livingEnemies = this.players.filter((p, i) => i > 0 && !p.isDead);
+        if (livingEnemies.length <= 1) {
+          bar.classList.add('hidden');
+          return;
+        }
+
+        bar.classList.remove('hidden');
+        bar.classList.add('flex');
+        let html = '';
+        this.players.forEach((p, idx) => {
+          if (idx === 0 || p.isDead) return;
+          const isSelected = (idx === this.activeTargetIndex);
+          const btnClass = isSelected
+            ? 'bg-red-600 text-white border-red-400 shadow-md'
+            : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700';
+
+          html += `
+            <button onclick="BattleEngine.setTarget(${idx})" class="px-2.5 py-1 rounded-lg border text-xs font-bold ${btnClass} transition">
+              🎯 ${p.name}
+            </button>
+          `;
+        });
+        container.innerHTML = html;
+      },
+
+      setTarget(idx) {
+        this.activeTargetIndex = idx;
+        SoundFX.click();
+        this.setupTargetButtons();
+      },
+
+      prepareMathQuestion() {
+        const map = GameApp.currentMap || MAPS[0];
+        this.currentQuestion = MathEngine.generateQuestion(map.orderTarget);
+
+        const questionEl = document.getElementById('math-challenge-text');
+        if (questionEl) questionEl.innerText = this.currentQuestion.questionText;
+
+        // Distribute options over the 5 angle cards
+        this.anglesList = [20, 35, 45, 60, 75];
+        this.anglesList.forEach((ang, idx) => {
+          const card = document.getElementById(`angle-card-${idx}`);
+          if (card) {
+            const valEl = card.querySelector('.angle-val');
+            if (valEl) valEl.innerText = this.currentQuestion.options[idx];
+          }
+        });
+
+        this.selectAngleIndex(2); // default 45°
+      },
+
+      selectAngleIndex(index) {
+        if (this.isFiring) return;
+        this.selectedAngleIndex = index;
+        SoundFX.click();
+
+        // Update card highlights
+        for (let i = 0; i < 5; i++) {
+          const card = document.getElementById(`angle-card-${i}`);
+          if (card) {
+            if (i === index) card.classList.add('selected-angle-card');
+            else card.classList.remove('selected-angle-card');
+          }
+        }
+
+        // Adjust human vehicle cannon elevation
+        const chosenAngle = this.anglesList[index];
+        const human = this.players[0];
+        if (human) human.elevationAngle = chosenAngle;
+
+        const label = document.getElementById('label-selected-angle');
+        if (label) label.innerText = `${chosenAngle}° (${this.currentQuestion.options[index]})`;
+      },
+
+      playerFire() {
+        if (this.isFiring || this.players[this.currentPlayerIndex].isAI) return;
+        this.isFiring = true;
+        clearInterval(this.timerInterval);
+
+        const isCorrect = (this.selectedAngleIndex === this.currentQuestion.correctIndex);
+        const shooter = this.players[0];
+        const target = this.players[this.activeTargetIndex];
+
+        // Track stats
+        GameApp.playerData.totalShots++;
+        if (isCorrect) GameApp.playerData.correctShots++;
+        GameApp.saveState();
+
+        this.launchShot(shooter, target, isCorrect, this.currentQuestion.explanation);
+      },
+
+      executeAITurn(aiPlayer) {
+        // AI chooses target (player or another AI)
+        const livingOpponents = this.players.filter((p, i) => i !== this.currentPlayerIndex && !p.isDead);
+        const target = livingOpponents[Math.floor(Math.random() * livingOpponents.length)] || this.players[0];
+
+        // AI Math question
+        const map = GameApp.currentMap || MAPS[0];
+        const q = MathEngine.generateQuestion(map.orderTarget);
+
+        // Decide if AI hits based on accuracy
+        const doesHit = Math.random() < (aiPlayer.aiAccuracy || 0.5);
+
+        // AI simulated thinking time (1.5 seconds)
+        setTimeout(() => {
+          if (!this.running) return;
+          this.isFiring = true;
+          this.launchShot(aiPlayer, target, doesHit, `Rival ${aiPlayer.name} ${doesHit ? 'acertó' : 'falló'} su cálculo.`);
+        }, 1500);
+      },
+
+      // Physics parabola calculation & assisted artillery
+      launchShot(shooter, target, isCorrect, explanation) {
+        SoundFX.fire();
+        shooter.recoil = 12; // kickback animation
+
+        const angleDeg = shooter.elevationAngle;
+        const rad = (angleDeg * Math.PI) / 180;
+        const dx = target.x - shooter.x;
+        const dy = target.y - shooter.y;
+
+        // Compute assisted ballistic physics so correct hits target directly,
+        // while wrong shot misses (falls short or overshoots)
+        const gravity = 0.38;
+        const dir = shooter.x < target.x ? 1 : -1;
+        shooter.facingRight = (dir === 1);
+
+        // Cannon muzzle position
+        const startX = shooter.x + dir * 18;
+        const startY = shooter.y - 12;
+
+        let flightTicks = 55; // frames to target
+        let vx, vy;
+
+        if (isCorrect) {
+          vx = (target.x - startX) / flightTicks;
+          vy = ((target.y - startY) - 0.5 * gravity * Math.pow(flightTicks, 2)) / flightTicks;
+        } else {
+          // Intentional miss (undershoot or overshoot)
+          const missOffset = (Math.random() > 0.5 ? 90 : -90);
+          const fakeTargetX = target.x + missOffset;
+          flightTicks = 45;
+          vx = (fakeTargetX - startX) / flightTicks;
+          vy = ((target.y - startY) - 0.5 * gravity * Math.pow(flightTicks, 2)) / flightTicks;
+        }
+
+        this.projectiles.push({
+          x: startX,
+          y: startY,
+          vx,
+          vy,
+          gravity,
+          radius: 5,
+          color: shooter.vehicle.bulletColor,
+          isCorrect,
+          shooter,
+          target,
+          explanation
+        });
+      },
+
+      showBanner(title, sub, bgClass = 'bg-cyan-600') {
+        const banner = document.getElementById('battle-banner');
+        const badge = document.getElementById('battle-banner-badge');
+        const subEl = document.getElementById('battle-banner-sub');
+        if (!banner || !badge || !subEl) return;
+
+        badge.className = `px-6 py-3 rounded-2xl font-black text-lg md:text-2xl shadow-2xl ${bgClass} text-white`;
+        badge.innerText = title;
+        subEl.innerText = sub;
+        banner.classList.remove('hidden');
+
+        setTimeout(() => {
+          banner.classList.add('hidden');
+        }, 2200);
+      },
+
+      applyDamage(victim, amount, text = '-18 HP') {
+        victim.hp = Math.max(0, victim.hp - amount);
+        this.floatingTexts.push({
+          x: victim.x,
+          y: victim.y - 25,
+          text,
+          color: '#ef4444',
+          life: 45
+        });
+
+        if (victim.hp <= 0) {
+          victim.isDead = true;
+          this.destroyTerrain(victim.x, victim.y, 35);
+          SoundFX.explosion();
+        }
+        this.updateHUD();
+      },
+
+      update() {
+        // 1. Update Projectiles
+        for (let i = this.projectiles.length - 1; i >= 0; i--) {
+          const p = this.projectiles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+
+          // Smoke trail particle
+          this.particles.push({
+            x: p.x,
+            y: p.y,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: (Math.random() - 0.5) * 0.8,
+            radius: Math.random() * 3 + 1,
+            color: 'rgba(255, 255, 255, 0.4)',
+            alpha: 0.6,
+            gravity: -0.02
+          });
+
+          // Check hit with target vehicle
+          const distToTarget = Math.hypot(p.x - p.target.x, p.y - p.target.y);
+          const terrainY = this.getTerrainHeightAt(p.x);
+
+          let hitSomething = false;
+
+          // Direct Hit on Target
+          if (distToTarget < 24 && !p.target.isDead) {
+            hitSomething = true;
+            SoundFX.explosion();
+            this.destroyTerrain(p.x, p.y, 28);
+            const damage = Math.floor(Math.random() * 6) + 15; // 15-20 damage
+            this.applyDamage(p.target, damage, `-${damage} HP`);
+
+            if (p.isCorrect) {
+              SoundFX.correct();
+              this.showBanner('¡DISPARO PERFECTO!', p.explanation, 'bg-emerald-600');
+            }
+          } 
+          // Terrain impact or out of screen
+          else if (p.y >= terrainY || p.y > this.height + 20) {
+            hitSomething = true;
+            SoundFX.explosion();
+            this.destroyTerrain(p.x, Math.min(p.y, terrainY), 24);
+
+            if (!p.isCorrect && !p.shooter.isAI) {
+              SoundFX.wrong();
+              this.showBanner('¡DISPARO FALLIDO!', p.explanation, 'bg-red-600');
+            }
+          }
+
+          if (hitSomething) {
+            this.projectiles.splice(i, 1);
+            // Wait for smoke to settle, then advance turn
+            setTimeout(() => {
+              this.isFiring = false;
+              this.nextTurn();
+            }, 1200);
+          }
+        }
+
+        // 2. Vehicles Gravity & Fall check
+        this.players.forEach(p => {
+          if (p.isDead) return;
+          if (p.recoil > 0) p.recoil *= 0.82;
+
+          const groundY = this.getTerrainHeightAt(p.x);
+          // If ground was blasted below vehicle, fall
+          if (p.y < groundY - 16) {
+            p.y += 3.5; // gravity
+          } else if (p.y > groundY - 14) {
+            p.y = groundY - 16;
+          }
+
+          // Fall into bottom abyss -> Instant elimination!
+          if (p.y >= this.height - 5) {
+            p.hp = 0;
+            p.isDead = true;
+            this.floatingTexts.push({
+              x: p.x,
+              y: this.height - 30,
+              text: '¡CAÍDA AL VACÍO!',
+              color: '#f97316',
+              life: 50
+            });
+            this.updateHUD();
+          }
+        });
+
+        // 3. Particles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const pt = this.particles[i];
+          pt.x += pt.vx;
+          pt.y += pt.vy;
+          pt.vy += pt.gravity;
+          pt.alpha -= 0.02;
+          if (pt.alpha <= 0) {
+            this.particles.splice(i, 1);
+          }
+        }
+
+        // 4. Floating damage numbers
+        for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+          const ft = this.floatingTexts[i];
+          ft.y -= 0.8;
+          ft.life--;
+          if (ft.life <= 0) {
+            this.floatingTexts.splice(i, 1);
+          }
+        }
+      },
+
+      render() {
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.width, this.height);
+
+        const map = GameApp.currentMap || MAPS[0];
+
+        // 1. Sky & Atmospheric parallax backdrop
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, this.height);
+        skyGrad.addColorStop(0, map.skyGradient[0]);
+        skyGrad.addColorStop(0.5, map.skyGradient[1]);
+        skyGrad.addColorStop(1, map.skyGradient[2]);
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        // Distant mountain silhouettes
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.beginPath();
+        ctx.moveTo(0, this.height * 0.7);
+        for (let x = 0; x <= this.width; x += 60) {
+          ctx.lineTo(x, this.height * 0.55 + Math.sin(x * 0.01) * 35);
+        }
+        ctx.lineTo(this.width, this.height);
+        ctx.lineTo(0, this.height);
+        ctx.fill();
+
+        // 2. Draw Destructible Terrain Buffer Canvas
+        ctx.drawImage(this.terrainCanvas, 0, 0);
+
+        // 3. Render Vehicles
+        this.players.forEach((p, idx) => {
+          if (!p.isDead) {
+            this.drawVehicle(ctx, p, idx === this.currentPlayerIndex);
+          }
+        });
+
+        // 4. Render Projectiles
+        this.projectiles.forEach(p => {
+          ctx.save();
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // 5. Render Particles
+        this.particles.forEach(pt => {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, pt.alpha);
+          ctx.fillStyle = pt.color;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // 6. Floating Text / Damage Popups
+        this.floatingTexts.forEach(ft => {
+          ctx.save();
+          ctx.font = '900 16px Outfit, sans-serif';
+          ctx.fillStyle = ft.color;
+          ctx.shadowColor = 'black';
+          ctx.shadowBlur = 6;
+          ctx.textAlign = 'center';
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        });
+      },
+
+      // Render detailed cartoon artillery vehicle
+      drawVehicle(ctx, player, isTurn) {
+        ctx.save();
+        ctx.translate(player.x, player.y);
+
+        // Recoil kickback offset
+        const recoilDir = player.facingRight ? -1 : 1;
+        const kickX = recoilDir * (player.recoil || 0);
+        ctx.translate(kickX, 0);
+
+        // Flip if facing left
+        if (!player.facingRight) {
+          ctx.scale(-1, 1);
+        }
+
+        // Active player highlight beacon
+        if (isTurn) {
+          ctx.save();
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, -22, 18, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Little glowing turn indicator arrow above
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.moveTo(0, -42);
+          ctx.lineTo(-6, -50);
+          ctx.lineTo(6, -50);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // --- CANNON (rotates according to elevationAngle) ---
+        ctx.save();
+        ctx.translate(0, -8); // Pivot point on turret
+        const angleRad = -(player.elevationAngle * Math.PI) / 180;
+        ctx.rotate(angleRad);
+
+        // Cannon barrel
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(0, -4, 22, 8);
+        // Cannon nozzle ring
+        ctx.fillStyle = player.vehicle.bulletColor;
+        ctx.fillRect(18, -5, 4, 10);
+        ctx.restore();
+
+        // --- CHASSIS (Detailed body) ---
+        // Lower tracks / wheels
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.roundRect(-16, 2, 32, 10, 4);
+        ctx.fill();
+
+        // 3 Track Wheel Spokes
+        ctx.fillStyle = '#94a3b8';
+        [-9, 0, 9].forEach(wx => {
+          ctx.beginPath();
+          ctx.arc(wx, 7, 3, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Main cabin hull
+        ctx.fillStyle = player.vehicle.color;
+        ctx.beginPath();
+        ctx.roundRect(-14, -10, 28, 14, 5);
+        ctx.fill();
+
+        // Cabin accent shield
+        ctx.fillStyle = player.vehicle.accentColor;
+        ctx.beginPath();
+        ctx.roundRect(-8, -13, 16, 7, 3);
+        ctx.fill();
+
+        // Windshield visor with eye expression
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(2, -8, 8, 5);
+
+        // Friendly cartoon eye
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(6, -6, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      },
+
+      endMatch(humanWon) {
+        this.running = false;
+        clearInterval(this.timerInterval);
+
+        if (humanWon) {
+          SoundFX.victory();
+          GameApp.playerData.wins++;
+          GameApp.playerData.stars += 3;
+
+          const currentMapId = GameApp.currentMap?.id || 1;
+
+          // Unlock next level in sequential campaign
+          if (currentMapId < 7) {
+            const nextMap = MAPS.find(m => m.id === currentMapId + 1);
+            if (nextMap) nextMap.unlocked = true;
+
+            // Also unlock a warrior vehicle
+            const lockedVehicle = VEHICLES.find(v => !v.unlocked);
+            if (lockedVehicle) lockedVehicle.unlocked = true;
+
+            if (currentMapId >= GameApp.playerData.unlockedLevel) {
+              GameApp.playerData.unlockedLevel = currentMapId + 1;
+            }
+            GameApp.saveState();
+
+            this.showBanner(`🏆 ¡NIVEL ${currentMapId} COMPLETADO!`, '¡Has desbloqueado el siguiente nivel de campaña!', 'bg-emerald-600');
+
+            setTimeout(() => {
+              GameApp.switchScreen('title-screen');
+            }, 3000);
+
+          } else {
+            // BEAT LEVEL 7: GRAND MASTER VICTORY!
+            GameApp.playerData.unlockedLevel = 7;
+            GameApp.playerData.gameCompleted = true;
+            GameApp.saveState();
+
+            this.showBanner('🏆 ¡GRAN MAESTRO DECIMAL!', '¡Has conquistado los 7 niveles de batalla!', 'bg-amber-500');
+
+            setTimeout(() => {
+              GameApp.showGrandMasterVictory();
+            }, 2500);
+          }
+
+        } else {
+          SoundFX.wrong();
+          this.showBanner('💀 DERROTA TÁCTICA', 'Repasa tu puntería y vuelve a intentar el nivel.', 'bg-red-700');
+
+          setTimeout(() => {
+            GameApp.switchScreen('title-screen');
+          }, 3000);
+        }
+      }
+    };
+
+
+    /* ==========================================================================
+       7. APPLICATION CONTROLLER & STATE MANAGER
+       ========================================================================== */
+    const GameApp = {
+      playerData: {
+        name: 'Cadete',
+        academyPassed: false,
+        wins: 0,
+        stars: 0,
+        totalShots: 0,
+        correctShots: 0,
+        unlockedLevel: 1,
+        gameCompleted: false
+      },
+
+      currentVehicle: VEHICLES[0],
+      currentMap: MAPS[0],
+      difficulty: 0.45,
+      fighterCount: 2,
+      hintsEnabled: true,
+
+      init() {
+        this.loadState();
+        BattleEngine.init('battle-canvas');
+        this.initTitleBackground();
+        this.updateNavUI();
+      },
+
+      saveState() {
+        try {
+          localStorage.setItem('decimal_battle_save_v2', JSON.stringify(this.playerData));
+          this.updateNavUI();
+        } catch (e) {}
+      },
+
+      loadState() {
+        try {
+          const raw = localStorage.getItem('decimal_battle_save_v2');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            this.playerData = Object.assign(this.playerData, parsed);
+          }
+        } catch (e) {}
+
+        // Sync unlocked maps
+        MAPS.forEach(m => {
+          m.unlocked = (m.id <= this.playerData.unlockedLevel);
+        });
+
+        const nameInput = document.getElementById('input-player-name');
+        if (nameInput) nameInput.value = this.playerData.name;
+
+        // Set play button label
+        const playBtnLabel = document.getElementById('btn-play-label');
+        if (playBtnLabel) {
+          playBtnLabel.innerText = this.playerData.gameCompleted
+            ? 'VER DIPLOMA DE MAESTRO 🏆'
+            : `CAMPAÑA (NIVEL ${this.playerData.unlockedLevel})`;
+        }
+      },
+
+      savePlayerName() {
+        const input = document.getElementById('input-player-name');
+        if (input && input.value.trim() !== '') {
+          this.playerData.name = input.value.trim().slice(0, 16);
+          this.saveState();
+          SoundFX.click();
+          this.showToast('¡Nombre guardado exitosamente!');
+        }
+      },
+
+      updateNavUI() {
+        const nameEl = document.getElementById('nav-player-name');
+        if (nameEl) nameEl.innerText = this.playerData.name;
+
+        const starsEl = document.getElementById('nav-stars-count');
+        if (starsEl) starsEl.innerText = this.playerData.stars;
+      },
+
+      switchScreen(screenId) {
+        SoundFX.click();
+        const screens = [
+          'title-screen', 'academy-screen', 'vehicles-screen', 
+          'maps-screen', 'achievements-screen', 'settings-screen', 'battle-screen', 'victory-master-screen'
+        ];
+
+        screens.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            if (id === screenId) {
+              el.classList.remove('hidden');
+              el.classList.add('flex');
+            } else {
+              el.classList.remove('flex');
+              el.classList.add('hidden');
+            }
+          }
+        });
+
+        // Trigger resize on battle canvas if opened
+        if (screenId === 'battle-screen') {
+          setTimeout(() => BattleEngine.resize(), 100);
+        }
+      },
+
+      continueCampaign() {
+        if (this.playerData.gameCompleted) {
+          this.showGrandMasterVictory();
+          return;
+        }
+        // Load player's current unlocked level
+        const levelToPlay = MAPS.find(m => m.id === this.playerData.unlockedLevel) || MAPS[0];
+        this.currentMap = levelToPlay;
+        this.startBattleGame();
+      },
+
+      startBattleGame() {
+        SoundFX.init();
+        this.switchScreen('battle-screen');
+        // Progressive difficulty driven by current level configuration
+        BattleEngine.startMatch(this.currentMap, this.currentVehicle, this.fighterCount, this.currentMap.difficulty);
+      },
+
+      openAcademy() {
+        this.switchScreen('academy-screen');
+        Academy.showLesson(1);
+      },
+
+      openVehicleSelect() {
+        this.switchScreen('vehicles-screen');
+        this.renderVehicleList();
+      },
+
+      renderVehicleList() {
+        const container = document.getElementById('vehicles-grid');
+        if (!container) return;
+
+        let html = '';
+        VEHICLES.forEach(v => {
+          const isSelected = (v.id === this.currentVehicle.id);
+          const borderClass = isSelected ? 'border-cyan-400 ring-2 ring-cyan-500/50 bg-slate-800' : 'border-slate-700 bg-slate-900';
+
+          html += `
+            <div onclick="GameApp.selectVehicle('${v.id}')" class="p-4 rounded-2xl border ${borderClass} hover:border-cyan-500 cursor-pointer transition flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="w-5 h-5 rounded-full" style="background-color: ${v.color}"></span>
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">${v.type}</span>
+                </div>
+                <h3 class="font-black text-white text-base">${v.name}</h3>
+                <p class="text-xs text-slate-400 mt-1">${v.description}</p>
+              </div>
+              <div class="mt-4 pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+                <span class="${isSelected ? 'text-cyan-400 font-bold' : 'text-slate-500'}">
+                  ${isSelected ? '✔ Seleccionado' : 'Hacer clic para elegir'}
+                </span>
+                <span class="text-xl">🚀</span>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      },
+
+      selectVehicle(id) {
+        const found = VEHICLES.find(v => v.id === id);
+        if (found) {
+          this.currentVehicle = found;
+          SoundFX.click();
+          this.renderVehicleList();
+        }
+      },
+
+      openMapSelect() {
+        this.switchScreen('maps-screen');
+        this.renderMapList();
+      },
+
+      renderMapList() {
+        const container = document.getElementById('maps-grid');
+        if (!container) return;
+
+        let html = '';
+        MAPS.forEach(m => {
+          const isUnlocked = m.unlocked;
+          const isSelected = (m.id === this.currentMap.id);
+          
+          let cardStyle = 'border-slate-700 bg-slate-900 opacity-60 cursor-not-allowed';
+          if (isUnlocked) {
+            cardStyle = isSelected
+              ? 'border-amber-400 ring-2 ring-amber-500/50 bg-slate-800 cursor-pointer'
+              : 'border-slate-700 bg-slate-900 hover:border-amber-500 cursor-pointer';
+          }
+
+          html += `
+            <div ${isUnlocked ? `onclick="GameApp.selectMap(${m.id})"` : ''} 
+                 class="p-4 rounded-2xl border ${cardStyle} transition flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs bg-slate-800 text-amber-300 font-bold px-2 py-0.5 rounded border border-slate-700">
+                    Nivel ${m.id} ${!isUnlocked ? '🔒' : '🔓'}
+                  </span>
+                  <span class="text-xs text-cyan-400 font-bold">⏱️ ${m.turnTime}s &bull; ${Math.round(m.difficulty * 100)}% IA</span>
+                </div>
+                <h3 class="font-black text-white text-base">${m.name}</h3>
+                <p class="text-xs text-slate-400 mt-1">${m.subtitle}</p>
+              </div>
+              <div class="mt-4 pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+                <span class="${isSelected ? 'text-amber-400 font-bold' : (isUnlocked ? 'text-slate-400' : 'text-red-400')}">
+                  ${!isUnlocked ? '🔒 Bloqueado (Supera el Nivel ' + (m.id - 1) + ')' : (isSelected ? '✔ Seleccionado' : 'Elegir Nivel')}
+                </span>
+                <span class="text-xl">${isUnlocked ? '🏔️' : '⛔'}</span>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      },
+
+      selectMap(id) {
+        const found = MAPS.find(m => m.id === id);
+        if (found && found.unlocked) {
+          this.currentMap = found;
+          SoundFX.click();
+          this.renderMapList();
+        }
+      },
+
+      showGrandMasterVictory() {
+        this.switchScreen('victory-master-screen');
+        SoundFX.victory();
+
+        // Update diploma fields
+        const studentName = document.getElementById('diploma-student-name');
+        if (studentName) studentName.innerText = this.playerData.name || 'Cadete Maestro';
+
+        const acc = this.playerData.totalShots > 0
+          ? Math.round((this.playerData.correctShots / this.playerData.totalShots) * 100)
+          : 100;
+        const accEl = document.getElementById('diploma-accuracy');
+        if (accEl) accEl.innerText = `${acc}%`;
+
+        // Start confetti simulation on screen
+        this.startConfetti();
+      },
+
+      startConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+
+        const pieces = Array.from({ length: 90 }, () => ({
+          x: Math.random() * canvas.width,
+          y: Math.random() * -canvas.height,
+          size: Math.random() * 8 + 4,
+          color: ['#fbbf24', '#38bdf8', '#34d399', '#f43f5e', '#a855f7'][Math.floor(Math.random() * 5)],
+          speedY: Math.random() * 3 + 2,
+          speedX: Math.random() * 2 - 1,
+          rot: Math.random() * 360
+        }));
+
+        let animId;
+        const renderConfetti = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          pieces.forEach(p => {
+            p.y += p.speedY;
+            p.x += p.speedX;
+            p.rot += 3;
+            if (p.y > canvas.height) {
+              p.y = -10;
+              p.x = Math.random() * canvas.width;
+            }
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rot * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+          });
+          animId = requestAnimationFrame(renderConfetti);
+        };
+        renderConfetti();
+
+        // Stop heavy animation after 10s
+        setTimeout(() => cancelAnimationFrame(animId), 10000);
+      },
+
+      downloadDiplomaPNG() {
+        // Draw diploma on high-res canvas and trigger download
+        const dCanvas = document.createElement('canvas');
+        dCanvas.width = 1200;
+        dCanvas.height = 800;
+        const ctx = dCanvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(0, 0, 1200, 800);
+
+        // Gold border
+        ctx.lineWidth = 14;
+        ctx.strokeStyle = '#f59e0b';
+        ctx.strokeRect(30, 30, 1140, 740);
+
+        // Inner frame
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.strokeRect(50, 50, 1100, 700);
+
+        // Header
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 24px Outfit, sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText('REPÚBLICA DE LAS MATEMÁTICAS • ACADEMIA DECIMAL', 600, 110);
+
+        // Title
+        ctx.font = 'bold 44px serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('DIPLOMA DE MAESTRO DEL REDONDEO', 600, 180);
+
+        ctx.font = 'italic 20px Outfit, sans-serif';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText('Se otorga el presente reconocimiento oficial a:', 600, 240);
+
+        // Student Name
+        ctx.font = 'bold 52px Outfit, sans-serif';
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText(this.playerData.name || 'Cadete Matemático', 600, 320);
+
+        // Underline
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.moveTo(350, 340);
+        ctx.lineTo(850, 340);
+        ctx.stroke();
+
+        // Body
+        ctx.font = '22px Outfit, sans-serif';
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillText('Por haber superado victoriosamente los 7 Niveles de Campaña en el videojuego de artillería', 600, 420);
+        ctx.font = 'bold 24px Outfit, sans-serif';
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillText('DECIMAL BATTLE: GUERRA DE REDONDEO', 600, 460);
+        ctx.font = '20px Outfit, sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('Demostrando precisión táctica y dominio de décimos, centésimos, milésimos y situaciones con llevadas.', 600, 505);
+
+        // Footer signatures
+        ctx.font = 'italic 30px "Great Vibes", cursive, serif';
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText('Prof. Jhon Dewis', 400, 640);
+        ctx.font = 'bold 16px Outfit, sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('Instructor Especialista en Matemática', 400, 670);
+
+        ctx.font = 'bold 22px Outfit, sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('10 de Noviembre, 2026', 800, 640);
+        ctx.font = 'bold 16px Outfit, sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('Fecha de Emisión Oficial', 800, 670);
+
+        // Download PNG
+        const link = document.createElement('a');
+        link.download = `Diploma_Decimal_Battle_${(this.playerData.name || 'Cadete').replace(/\s+/g, '_')}.png`;
+        link.href = dCanvas.toDataURL('image/png');
+        link.click();
+        this.showToast('¡Diploma descargado en alta resolución!');
+      },
+
+      openAchievements() {
+        this.switchScreen('achievements-screen');
+        document.getElementById('stat-wins').innerText = this.playerData.wins;
+        document.getElementById('stat-shots').innerText = this.playerData.totalShots;
+        document.getElementById('stat-stars').innerText = this.playerData.stars;
+
+        const acc = this.playerData.totalShots > 0
+          ? Math.round((this.playerData.correctShots / this.playerData.totalShots) * 100)
+          : 0;
+        document.getElementById('stat-accuracy').innerText = `${acc}%`;
+
+        // Check diploma unlock (7 victories or game completed)
+        const dip = document.getElementById('diploma-container');
+        if (dip) {
+          if (this.playerData.gameCompleted || this.playerData.unlockedLevel >= 7) {
+            dip.classList.remove('hidden');
+          } else {
+            dip.classList.add('hidden');
+          }
+        }
+      },
+
+      openSettings() {
+        this.switchScreen('settings-screen');
+      },
+
+      updateSettings() {
+        const diff = document.getElementById('setting-difficulty');
+        if (diff) this.difficulty = parseFloat(diff.value);
+
+        const fighters = document.getElementById('setting-fighters');
+        if (fighters) this.fighterCount = parseInt(fighters.value, 10);
+
+        const hints = document.getElementById('setting-hints');
+        if (hints) this.hintsEnabled = hints.checked;
+
+        const snd = document.getElementById('setting-sound');
+        if (snd) SoundFX.enabled = snd.checked;
+
+        SoundFX.click();
+      },
+
+      surrenderMatch() {
+        BattleEngine.endMatch(false);
+      },
+
+      printDiploma() {
+        window.print();
+      },
+
+      resetProgress() {
+        localStorage.removeItem('decimal_battle_save_v2');
+        this.playerData = {
+          name: 'Cadete',
+          academyPassed: false,
+          wins: 0,
+          stars: 0,
+          totalShots: 0,
+          correctShots: 0,
+          unlockedLevel: 1,
+          gameCompleted: false
+        };
+        MAPS.forEach((m, idx) => m.unlocked = (idx === 0));
+        VEHICLES.forEach((v, idx) => v.unlocked = (idx < 2));
+        this.currentVehicle = VEHICLES[0];
+        this.saveState();
+        this.openAchievements();
+        this.showToast('Progreso reiniciado correctamente');
+      },
+
+      showToast(msg) {
+        // Simple non-blocking alert badge
+        const div = document.createElement('div');
+        div.className = 'fixed bottom-12 left-1/2 -translate-x-1/2 bg-cyan-600 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-2xl z-50 transition-all';
+        div.innerText = msg;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 2000);
+      },
+
+      // Animated Title Screen Background with floating mountains and shooting projectiles
+      initTitleBackground() {
+        const canvas = document.getElementById('title-bg-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const resizeTitle = () => {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        };
+        resizeTitle();
+        window.addEventListener('resize', resizeTitle);
+
+        // Ambient particles & flying meteors
+        const stars = Array.from({ length: 45 }, () => ({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * (window.innerHeight * 0.7),
+          radius: Math.random() * 2 + 0.5,
+          alpha: Math.random() * 0.8 + 0.2,
+          speed: Math.random() * 0.02 + 0.005
+        }));
+
+        let projectileAnimX = -50;
+        let projectileAnimY = 180;
+
+        const animateTitle = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Stars twinkling
+          stars.forEach(s => {
+            s.alpha += s.speed;
+            if (s.alpha > 1 || s.alpha < 0.2) s.speed = -s.speed;
+            ctx.fillStyle = `rgba(56, 189, 248, ${Math.abs(s.alpha)})`;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // Moving demo projectile across sky
+          projectileAnimX += 4;
+          projectileAnimY += Math.sin(projectileAnimX * 0.02) * 2;
+          if (projectileAnimX > canvas.width + 100) {
+            projectileAnimX = -60;
+            projectileAnimY = 120 + Math.random() * 100;
+          }
+
+          ctx.fillStyle = '#f59e0b';
+          ctx.shadowColor = '#f59e0b';
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(projectileAnimX, projectileAnimY, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          requestAnimationFrame(animateTitle);
+        };
+        animateTitle();
+      }
+    };
+
+    // Initialize application on page load
+    window.onload = function() {
+      GameApp.init();
+    };
+  </script>
+</body>
+</html>
