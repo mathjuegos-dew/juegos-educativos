@@ -1,0 +1,2771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Estadística City: Construye, Aprende y Conquista los Gráficos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Dancing+Script:wght@700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            fredoka: ['Fredoka', 'sans-serif'],
+            signature: ['"Dancing Script"', 'cursive'],
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            cityBlue: '#1a56db',
+            cityGold: '#f59e0b',
+            cityEmerald: '#10b981',
+            cityPurple: '#8b5cf6',
+            cityCyan: '#06b6d4',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom game animations & styling */
+    body {
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .signature-gradient {
+      background: linear-gradient(90deg, #2563eb, #06b6d4, #a855f7, #f59e0b, #2563eb);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientFlow 6s ease infinite;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+    }
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .iso-grid {
+      transform: rotateX(55deg) rotateZ(-45deg);
+      transform-style: preserve-3d;
+      transition: transform 0.4s ease;
+    }
+    .iso-tile {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .iso-tile:hover {
+      transform: translateZ(12px) scale(1.04);
+      box-shadow: 0 15px 25px rgba(0,0,0,0.25);
+    }
+    .bounce-gentle {
+      animation: bounceGentle 2.2s infinite ease-in-out;
+    }
+    @keyframes bounceGentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 2s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+      to { box-shadow: 0 0 25px rgba(245, 158, 11, 0.9); }
+    }
+    /* Hide scrollbars cleanly */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen flex flex-col justify-between transition-colors duration-300">
+
+  <!-- TOP HEADER / STATS BAR -->
+  <header class="bg-white/90 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 shadow-sm px-3 py-2 sm:px-6 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+      <!-- Title & Mayor -->
+      <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="Game.showScreen('welcome')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-cyan-500 to-emerald-400 flex items-center justify-center text-white text-2xl shadow-md shadow-blue-500/20">
+          🏙️
+        </div>
+        <div>
+          <h1 class="text-base sm:text-xl font-fredoka font-bold leading-tight text-blue-700 dark:text-blue-400">
+            Estadística City
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+            Alcalde: <span id="headerMayorName" class="font-bold text-slate-700 dark:text-slate-200">Invitado</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Counters -->
+      <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm font-fredoka">
+        <!-- Coins -->
+        <div class="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/60 px-2.5 py-1 rounded-full text-amber-700 dark:text-amber-300 font-bold shadow-sm">
+          <span class="text-base">🪙</span>
+          <span id="statCoins">0</span>
+        </div>
+        <!-- Stars -->
+        <div class="flex items-center gap-1.5 bg-yellow-50 dark:bg-yellow-950/60 border border-yellow-300 dark:border-yellow-700/60 px-2.5 py-1 rounded-full text-yellow-700 dark:text-yellow-300 font-bold shadow-sm">
+          <span class="text-base">⭐</span>
+          <span id="statStars">0/18</span>
+        </div>
+        <!-- Level Tag -->
+        <div class="hidden md:flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/60 border border-purple-300 dark:border-purple-700/60 px-2.5 py-1 rounded-full text-purple-700 dark:text-purple-300 font-bold shadow-sm">
+          <span>Nivel Máx:</span>
+          <span id="statMaxLevel">1</span>
+        </div>
+      </div>
+
+      <!-- Quick Toggles: Audio & Theme -->
+      <div class="flex items-center gap-1 sm:gap-2">
+        <button id="btnBgmToggle" onclick="AudioEngine.toggleBgm()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Música Fondo">
+          🎵
+        </button>
+        <button id="btnSfxToggle" onclick="AudioEngine.toggleSfx()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Efectos de Sonido">
+          🔊
+        </button>
+        <button onclick="Game.toggleTheme()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Modo Día/Noche">
+          🌓
+        </button>
+      </div>
+    </div>
+
+    <!-- Sub Navigation Tabs -->
+    <nav class="max-w-7xl mx-auto flex items-center justify-start sm:justify-center gap-1 sm:gap-3 overflow-x-auto no-scrollbar pt-2 mt-1 border-t border-slate-100 dark:border-slate-800/80 text-xs sm:text-sm font-fredoka font-semibold">
+      <button onclick="Game.showScreen('welcome')" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap" data-target="welcome">
+        <span>👋</span> Inicio
+      </button>
+      <button onclick="Game.showScreen('city')" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap" data-target="city">
+        <span>🏗️</span> Mi Ciudad
+      </button>
+      <button onclick="Game.showScreen('levels')" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap" data-target="levels">
+        <span>🎮</span> Niveles (1-6)
+      </button>
+      <button onclick="Game.showScreen('lab')" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap" data-target="lab">
+        <span>🔬</span> Laboratorio Libre
+      </button>
+      <button onclick="Game.showScreen('achievements')" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap" data-target="achievements">
+        <span>🏆</span> Logros & Diploma
+      </button>
+      <button onclick="Game.showScreen('settings')" class="nav-tab px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap" data-target="settings">
+        <span>⚙️</span> Opciones
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="flex-grow max-w-7xl mx-auto w-full p-3 sm:p-6 relative">
+    
+    <!-- ================= SCREEN 1: WELCOME & REGISTRATION ================= -->
+    <section id="screen-welcome" class="screen-view active max-w-4xl mx-auto space-y-6">
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-6 sm:p-12 shadow-2xl">
+        <div class="absolute -right-10 -bottom-10 opacity-20 text-[180px] pointer-events-none select-none">📊</div>
+        <div class="relative z-10 max-w-2xl space-y-4">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-xs font-semibold tracking-wide uppercase">
+            🚀 Videojuego Matemático para Primaria
+          </div>
+          <h2 class="text-3xl sm:text-5xl font-fredoka font-black tracking-tight leading-tight">
+            ESTADÍSTICA CITY
+          </h2>
+          <p class="text-blue-100 sm:text-xl font-medium">
+            ¡Cada gráfico que resuelves hace crecer y prosperar tu ciudad! Conviértete en el gran Alcalde de los Datos.
+          </p>
+
+          <!-- Player Registration Form -->
+          <div class="bg-white/10 dark:bg-slate-900/40 p-4 sm:p-6 rounded-2xl backdrop-blur-md border border-white/20 space-y-4 max-w-md mt-6">
+            <label class="block text-sm font-semibold text-white/90">
+              ¿Cómo te llamas, futuro alcalde de Estadística City?
+            </label>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="text" id="inputPlayerName" maxlength="24" placeholder="Escribe tu nombre aquí..." 
+                class="flex-1 px-4 py-3 rounded-xl bg-white text-slate-900 font-semibold focus:outline-none focus:ring-4 focus:ring-amber-400 placeholder-slate-400 shadow-inner">
+              <button onclick="Game.registerPlayer()" class="px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-fredoka font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition flex items-center justify-center gap-2">
+                <span>¡Entrar!</span> 🌟
+              </button>
+            </div>
+            <p id="welcomeGreeting" class="text-xs text-amber-200 font-medium hidden"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+          <div class="text-3xl mb-2">🏙️</div>
+          <h3 class="font-fredoka font-bold text-lg text-slate-800 dark:text-slate-100">Simulador de Ciudad</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Gana monedas resolviendo ejercicios para construir casas, colegios, parques, hospitales y la gran Torre Estadística.</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+          <div class="text-3xl mb-2">📊</div>
+          <h3 class="font-fredoka font-bold text-lg text-slate-800 dark:text-slate-100">6 Niveles de Dominio</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Desde reconocer partes de gráficos hasta comparar datos, construir barras con arrastre interactivo y reparar errores.</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+          <div class="text-3xl mb-2">🔬</div>
+          <h3 class="font-fredoka font-bold text-lg text-slate-800 dark:text-slate-100">Laboratorio Libre</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Crea tus propios gráficos verticales u horizontales con sincronización bidireccional y expórtalos en imagen PNG.</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex flex-wrap justify-center gap-3 pt-4">
+        <button onclick="Game.showScreen('city')" class="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-fredoka font-bold rounded-2xl shadow-lg shadow-emerald-600/30 hover:scale-105 active:scale-95 transition flex items-center gap-2">
+          <span>🏙️</span> Ir a Mi Ciudad
+        </button>
+        <button onclick="Game.showScreen('levels')" class="px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-fredoka font-bold rounded-2xl shadow-lg shadow-blue-600/30 hover:scale-105 active:scale-95 transition flex items-center gap-2">
+          <span>🎮</span> Jugar Niveles
+        </button>
+        <button onclick="Game.showScreen('lab')" class="px-6 py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-fredoka font-bold rounded-2xl shadow-lg shadow-purple-600/30 hover:scale-105 active:scale-95 transition flex items-center gap-2">
+          <span>🔬</span> Laboratorio
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN 2: CITY BUILDER (ISOMETRIC CANVAS/GRID) ================= -->
+    <section id="screen-city" class="screen-view hidden space-y-4">
+      <!-- City HUD -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-fredoka font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">
+            <span>🏙️</span> Vista General de Estadística City
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Haz clic en una parcela vacía para edificar. ¡Necesitas monedas para construir!
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-blue-700 dark:text-blue-300">
+            Población estimada: <strong id="cityPopulation">120</strong> hab.
+          </span>
+          <button onclick="Game.openBuildCatalog()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-fredoka font-bold rounded-xl shadow-md transition flex items-center gap-1.5 text-sm">
+            <span>🏗️</span> Catálogo de Obras
+          </button>
+        </div>
+      </div>
+
+      <!-- 2.5D Isometric World View Container -->
+      <div class="relative w-full h-[520px] rounded-3xl overflow-hidden bg-gradient-to-b from-sky-300 via-sky-200 to-emerald-200 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-900 border-2 border-slate-200 dark:border-slate-800 shadow-inner flex items-center justify-center p-4">
+        <!-- Floating Clouds / Sky effects -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden">
+          <div class="absolute top-4 left-10 text-white/70 dark:text-white/20 text-4xl animate-pulse">☁️</div>
+          <div class="absolute top-12 right-20 text-white/60 dark:text-white/10 text-5xl bounce-gentle">☁️</div>
+          <div class="absolute top-2 left-1/2 text-white/50 dark:text-white/20 text-3xl">☁️</div>
+        </div>
+
+        <!-- Isometric Stage Grid (4x4 = 16 plots) -->
+        <div class="relative iso-grid w-[380px] h-[380px] sm:w-[460px] sm:h-[460px] grid grid-cols-4 grid-rows-4 gap-3 p-3 bg-emerald-500/80 dark:bg-emerald-900/60 rounded-3xl border-4 border-emerald-600 dark:border-emerald-700 shadow-2xl">
+          <!-- 16 Plots generated dynamically by JS -->
+          <div id="cityGridContainer" class="contents"></div>
+        </div>
+
+        <!-- Help overlay on bottom of world -->
+        <div class="absolute bottom-3 left-3 right-3 sm:left-6 sm:right-auto bg-white/80 dark:bg-slate-900/90 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-xs flex items-center gap-2 shadow-lg">
+          <span class="text-amber-500 text-lg">💡</span>
+          <span>Toca cualquier parcela para construir o mejorar su nivel.</span>
+        </div>
+      </div>
+
+      <!-- Building Construction Catalog Modal / Drawer -->
+      <div id="modalCatalog" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+            <div>
+              <h3 class="text-xl font-fredoka font-bold text-slate-900 dark:text-slate-100">Catálogo de Construcciones</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Selecciona el edificio que deseas levantar en la parcela <span id="targetPlotLabel" class="font-bold text-blue-600">#0</span></p>
+            </div>
+            <button onclick="Game.closeBuildCatalog()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-bold flex items-center justify-center">✕</button>
+          </div>
+
+          <div id="catalogList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN 3: 6 LEARNING LEVELS ================= -->
+    <section id="screen-levels" class="screen-view hidden space-y-6">
+      <!-- Levels Hub Selection -->
+      <div id="levelsHub" class="space-y-6">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+          <h2 class="text-2xl sm:text-3xl font-fredoka font-bold text-blue-700 dark:text-blue-400">
+            Ruta de Aprendizaje Estadístico
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            Supera cada nivel con al menos 70% (2 estrellas) para desbloquear el siguiente. ¡Obtén 100 monedas extra y recompensas por cada meta alcanzada!
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Level Card 1 -->
+          <div class="level-card bg-white dark:bg-slate-900 border-2 border-blue-500/30 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between" data-lvl="1">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">Nivel 1</span>
+                <span class="text-sm font-fredoka text-yellow-500 lvl-stars">☆☆☆</span>
+              </div>
+              <h3 class="font-fredoka font-bold text-lg text-slate-900 dark:text-slate-100">Exploradores de Gráficos</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Identifica títulos, ejes (X e Y), categorías, escalas, frecuencia y orientación vertical vs horizontal.</p>
+            </div>
+            <button onclick="Game.startLevel(1)" class="mt-4 w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-fredoka font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 shadow">
+              <span>▶</span> Jugar Desafío
+            </button>
+          </div>
+
+          <!-- Level Card 2 -->
+          <div class="level-card bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-80" data-lvl="2">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Nivel 2</span>
+                <span class="text-sm font-fredoka text-yellow-500 lvl-stars">☆☆☆</span>
+              </div>
+              <h3 class="font-fredoka font-bold text-lg text-slate-900 dark:text-slate-100">Lectores de Barras</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Lectura precisa de valores, modas, mínimos y totales con tablas peruanas (platos típicos, lecturas).</p>
+            </div>
+            <button onclick="Game.startLevel(2)" class="mt-4 w-full py-2.5 bg-slate-400 text-white font-fredoka font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 cursor-not-allowed btn-start-lvl" disabled>
+              <span>🔒</span> Bloqueado
+            </button>
+          </div>
+
+          <!-- Level Card 3 -->
+          <div class="level-card bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-80" data-lvl="3">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Nivel 3</span>
+                <span class="text-sm font-fredoka text-yellow-500 lvl-stars">☆☆☆</span>
+              </div>
+              <h3 class="font-fredoka font-bold text-lg text-slate-900 dark:text-slate-100">Comparadores de Datos</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Calcula cuántos más/menos con comparador interactivo visual entre dos barras seleccionadas.</p>
+            </div>
+            <button onclick="Game.startLevel(3)" class="mt-4 w-full py-2.5 bg-slate-400 text-white font-fredoka font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 cursor-not-allowed btn-start-lvl" disabled>
+              <span>🔒</span> Bloqueado
+            </button>
+          </div>
+
+          <!-- Level Card 4 -->
+          <div class="level-card bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-80" data-lvl="4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Nivel 4</span>
+                <span class="text-sm font-fredoka text-yellow-500 lvl-stars">☆☆☆</span>
+              </div>
+              <h3 class="font-fredoka font-bold text-lg text-slate-900 dark:text-slate-100">Constructor de Gráficos</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">¡Manipulación pura! Arrastra el extremo de cada barra o ajusta con botones +/- para replicar la tabla.</p>
+            </div>
+            <button onclick="Game.startLevel(4)" class="mt-4 w-full py-2.5 bg-slate-400 text-white font-fredoka font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 cursor-not-allowed btn-start-lvl" disabled>
+              <span>🔒</span> Bloqueado
+            </button>
+          </div>
+
+          <!-- Level Card 5 -->
+          <div class="level-card bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-80" data-lvl="5">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Nivel 5</span>
+                <span class="text-sm font-fredoka text-yellow-500 lvl-stars">☆☆☆</span>
+              </div>
+              <h3 class="font-fredoka font-bold text-lg text-slate-900 dark:text-slate-100">Desafíos Estadísticos</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Problemas contextualizados escolares: sumas conjuntas (ej. "huaylas o marinera") y deducciones.</p>
+            </div>
+            <button onclick="Game.startLevel(5)" class="mt-4 w-full py-2.5 bg-slate-400 text-white font-fredoka font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 cursor-not-allowed btn-start-lvl" disabled>
+              <span>🔒</span> Bloqueado
+            </button>
+          </div>
+
+          <!-- Level Card 6 -->
+          <div class="level-card bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-80" data-lvl="6">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Nivel 6</span>
+                <span class="text-sm font-fredoka text-yellow-500 lvl-stars">☆☆☆</span>
+              </div>
+              <h3 class="font-fredoka font-bold text-lg text-slate-900 dark:text-slate-100">Maestro de las Barras</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Misión cumbre: ¡Repara el gráfico con errores, diagnóstica y levanta la Gran Torre Estadística!</p>
+            </div>
+            <button onclick="Game.startLevel(6)" class="mt-4 w-full py-2.5 bg-slate-400 text-white font-fredoka font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 cursor-not-allowed btn-start-lvl" disabled>
+              <span>🔒</span> Bloqueado
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Game Arena (Playing a 10-Question Session) -->
+      <div id="levelPlayArena" class="hidden space-y-4">
+        <!-- Level Progress & Navigation Header -->
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+          <div class="flex items-center gap-3">
+            <button onclick="Game.exitLevelToHub()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 transition" title="Salir al menú de niveles">
+              ⬅
+            </button>
+            <div>
+              <span id="arenaLevelBadge" class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Nivel 1</span>
+              <h3 id="arenaLevelTitle" class="font-fredoka font-bold text-lg text-slate-900 dark:text-slate-100">Exploradores de Gráficos</h3>
+            </div>
+          </div>
+
+          <!-- Question Counter and Score -->
+          <div class="flex items-center gap-4">
+            <div class="text-right">
+              <div class="text-xs text-slate-400">Reto actual</div>
+              <div class="font-fredoka font-bold text-blue-600 text-base">
+                <span id="arenaCurrentQIndex">1</span> de 10
+              </div>
+            </div>
+            <div class="w-28 sm:w-36 bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
+              <div id="arenaProgressBar" class="h-full bg-gradient-to-r from-blue-500 to-emerald-400 w-1/10 transition-all duration-300"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question Body Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- Graph / Visual Canvas Panel -->
+          <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between min-h-[380px]">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" id="arenaChartTypeLabel">Gráfico de Barras</span>
+              <span class="text-xs text-slate-400" id="arenaScaleInfo">Escala: 1 en 1</span>
+            </div>
+
+            <!-- Interactive SVG/Canvas Render Area -->
+            <div id="arenaChartContainer" class="w-full flex-grow flex items-center justify-center relative overflow-hidden py-2 min-h-[280px]">
+              <!-- Dynamic SVG Chart injected here -->
+            </div>
+
+            <!-- Optional Comparison Overlay or construction tool row -->
+            <div id="arenaExtraControls" class="pt-3 border-t border-slate-100 dark:border-slate-800 hidden">
+              <!-- Injected for Level 3/4/6 -->
+            </div>
+          </div>
+
+          <!-- Prompt & Interaction Answers Panel -->
+          <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-xs font-semibold">
+                <span>🎯</span> Misión Estadística
+              </div>
+              <h4 id="arenaQuestionText" class="font-fredoka text-lg sm:text-xl text-slate-900 dark:text-slate-100 leading-snug">
+                ¿Qué representa el eje horizontal en este gráfico?
+              </h4>
+              <p id="arenaContextSubtext" class="text-xs text-slate-500 dark:text-slate-400">
+                Observa los rótulos y la información del gráfico con atención.
+              </p>
+            </div>
+
+            <!-- Interactive Answers Container (Multiple choice, or confirmation button for construction) -->
+            <div id="arenaAnswerArea" class="space-y-2.5 py-2">
+              <!-- Dynamic Options -->
+            </div>
+
+            <!-- Intelligent Pedagogical Hint Box (Grafito companion box) -->
+            <div id="arenaHintBox" class="p-3.5 rounded-2xl bg-blue-50 dark:bg-slate-800/80 border border-blue-200 dark:border-blue-900/40 text-xs text-slate-700 dark:text-slate-200 hidden transition-all">
+              <div class="font-bold flex items-center gap-1.5 text-blue-600 dark:text-blue-400 mb-1">
+                <span>💡</span> Pista de Grafito:
+              </div>
+              <div id="arenaHintContent">Observa detenidamente la diferencia entre las barras.</div>
+            </div>
+
+            <!-- Next Question / Feedback Button -->
+            <div id="arenaActionFooter" class="pt-2 flex justify-end">
+              <button id="arenaBtnNext" onclick="Game.nextArenaQuestion()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-fredoka font-bold rounded-xl shadow-md transition hidden items-center justify-center gap-2">
+                <span>Siguiente Reto</span> ➡
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level Summary / Results Modal -->
+      <div id="modalLevelResult" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center space-y-4 shadow-2xl border border-slate-200 dark:border-slate-800">
+          <div id="resultModalIcon" class="text-6xl animate-bounce">🎉</div>
+          <h3 id="resultModalTitle" class="text-2xl font-fredoka font-bold text-slate-900 dark:text-slate-100">
+            ¡Nivel Superado!
+          </h3>
+          <div id="resultModalStars" class="text-3xl text-amber-400 font-fredoka tracking-widest">
+            ⭐⭐⭐
+          </div>
+          <p id="resultModalMsg" class="text-sm text-slate-600 dark:text-slate-300">
+            Obtuviste 9 de 10 aciertos (90%). ¡Tu ciudad celebra con júbilo este nuevo logro!
+          </p>
+          <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl flex justify-around text-xs font-semibold">
+            <div>Monedas Ganadas: <strong id="resultCoinsReward" class="text-amber-500 font-bold">+100 🪙</strong></div>
+            <div>Aciertos: <strong id="resultScoreRatio" class="text-emerald-500 font-bold">9/10</strong></div>
+          </div>
+          <div class="flex gap-2 pt-2">
+            <button onclick="Game.exitLevelToHub()" class="flex-1 py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-200 font-fredoka font-bold rounded-xl transition">
+              Ruta de Niveles
+            </button>
+            <button id="resultBtnRetryOrNext" onclick="Game.handleResultNextAction()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-fredoka font-bold rounded-xl shadow-lg transition">
+              Continuar
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN 4: FREE GRAPH LABORATORY ================= -->
+    <section id="screen-lab" class="screen-view hidden space-y-6">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-xs font-semibold">
+            <span>🔬</span> Entorno de Creación Libre
+          </div>
+          <h2 class="text-2xl font-fredoka font-bold text-slate-900 dark:text-slate-100 mt-1">
+            Laboratorio Estadístico
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Diseña gráficos personalizados con sincronización bidireccional inmediata. Cambia valores en la tabla o arrastra barras en el gráfico.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="Lab.generateRandomData()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5">
+            <span>🎲</span> Datos Aleatorios
+          </button>
+          <button onclick="Lab.downloadChartPNG()" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-purple-600/30">
+            <span>📥</span> Descargar PNG
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Controls & Table Editor (View 1) -->
+        <div class="lg:col-span-5 space-y-4">
+          <!-- Graph Configuration -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h3 class="font-fredoka font-bold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+              1. Configuración General
+            </h3>
+            
+            <div>
+              <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Título del Gráfico</label>
+              <input type="text" id="labGraphTitle" value="Frutas Favoritas en 5to Grado" oninput="Lab.onTitleChange(this.value)"
+                class="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Orientación</label>
+                <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                  <button id="btnOrientV" onclick="Lab.setOrientation('vertical')" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-purple-600 dark:text-purple-300">Vertical</button>
+                  <button id="btnOrientH" onclick="Lab.setOrientation('horizontal')" class="flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-500">Horizontal</button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Escala del Eje</label>
+                <select id="labScaleStep" onchange="Lab.setScaleStep(this.value)" class="w-full px-3 py-2 text-xs font-bold rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none">
+                  <option value="1">De 1 en 1</option>
+                  <option value="2">De 2 en 2</option>
+                  <option value="5" selected>De 5 en 5</option>
+                  <option value="10">De 10 en 10</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Synchronized Data Table (View 1) -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-fredoka font-bold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+                2. Tabla de Datos
+              </h3>
+              <button onclick="Lab.addRow()" class="text-xs bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-bold px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-800 hover:bg-purple-100">
+                + Agregar Categoría
+              </button>
+            </div>
+
+            <!-- Table Rows Container -->
+            <div id="labTableRows" class="space-y-2 max-h-[300px] overflow-y-auto no-scrollbar pr-1">
+              <!-- Dynamically populated rows -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Graph Canvas (View 2) -->
+        <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between min-h-[440px]">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-fredoka font-bold text-base text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <span>📊</span> Vista 2: Gráfico Interactivo Sincronizado
+            </h3>
+            <span class="text-xs text-purple-600 dark:text-purple-400 font-medium bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-md">
+              Arrastra o usa +/-
+            </span>
+          </div>
+
+          <div id="labChartRender" class="w-full flex-grow flex items-center justify-center relative min-h-[320px]">
+            <!-- Rendered SVG chart -->
+          </div>
+
+          <!-- Hidden canvas used for exporting clean PNG image -->
+          <canvas id="exportCanvas" class="hidden"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN 5: ACHIEVEMENTS & DIPLOMA ================= -->
+    <section id="screen-achievements" class="screen-view hidden space-y-6">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-fredoka font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <span>🏆</span> Panel de Logros & Reconocimiento
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Revisa las estadísticas de tu gestión como alcalde y descarga tu Diploma Oficial al completar los 6 niveles.
+          </p>
+        </div>
+        <button onclick="Game.generateDiplomaModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-fredoka font-bold text-sm shadow-md hover:scale-105 transition flex items-center gap-2">
+          <span>📜</span> Ver / Descargar Diploma
+        </button>
+      </div>
+
+      <!-- Real Metrics Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+          <div class="text-2xl mb-1">⭐</div>
+          <div class="text-xl font-fredoka font-bold text-amber-500" id="achStarsCount">0 / 18</div>
+          <div class="text-xs text-slate-400">Estrellas Totales</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+          <div class="text-2xl mb-1">🏙️</div>
+          <div class="text-xl font-fredoka font-bold text-blue-500" id="achBuildingsCount">0 / 16</div>
+          <div class="text-xs text-slate-400">Edificios Construidos</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+          <div class="text-2xl mb-1">🎯</div>
+          <div class="text-xl font-fredoka font-bold text-emerald-500" id="achAccuracyRate">0%</div>
+          <div class="text-xs text-slate-400">Precisión Matemática</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+          <div class="text-2xl mb-1">🪙</div>
+          <div class="text-xl font-fredoka font-bold text-yellow-500" id="achTotalCoins">0</div>
+          <div class="text-xs text-slate-400">Monedas Acumuladas</div>
+        </div>
+      </div>
+
+      <!-- 6 Badges Gallery -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+        <h3 class="font-fredoka font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <span>🎖️</span> Insignias Oficiales de Estadística City
+        </h3>
+        <div id="badgesGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Diploma Preview Modal -->
+      <div id="modalDiploma" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-6">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full p-4 sm:p-6 space-y-4 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[95vh] overflow-y-auto">
+          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+            <h3 class="font-fredoka font-bold text-xl text-slate-900 dark:text-slate-100">Diploma de Reconocimiento Oficial</h3>
+            <button onclick="Game.closeDiplomaModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold flex items-center justify-center">✕</button>
+          </div>
+
+          <div class="flex justify-center overflow-x-auto p-2">
+            <!-- Diploma Canvas Rendering -->
+            <canvas id="diplomaCanvas" width="900" height="600" class="max-w-full h-auto rounded-xl shadow-xl border-4 border-amber-300"></canvas>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button onclick="Game.closeDiplomaModal()" class="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-fredoka font-bold text-sm">Cerrar</button>
+            <button onclick="Game.downloadDiplomaPNG()" class="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-fredoka font-bold text-sm shadow-lg flex items-center gap-2">
+              <span>📥</span> Descargar Diploma en Imagen PNG
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN 6: SETTINGS & BACKUP ================= -->
+    <section id="screen-settings" class="screen-view hidden space-y-6 max-w-3xl mx-auto">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+        <h2 class="text-2xl font-fredoka font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <span>⚙️</span> Opciones & Gestión de Datos
+        </h2>
+
+        <!-- Profile Update -->
+        <div class="space-y-2 border-b pb-5 border-slate-100 dark:border-slate-800">
+          <label class="block text-xs font-bold uppercase text-slate-400">Nombre del Estudiante / Alcalde</label>
+          <div class="flex gap-2">
+            <input type="text" id="settingsMayorName" class="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold focus:outline-none">
+            <button onclick="Game.updateMayorNameFromSettings()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-fredoka font-bold text-sm">
+              Guardar
+            </button>
+          </div>
+        </div>
+
+        <!-- Audio Settings -->
+        <div class="space-y-4 border-b pb-5 border-slate-100 dark:border-slate-800">
+          <h3 class="text-sm font-bold uppercase text-slate-400">Ajustes de Sonido</h3>
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold">Música de fondo sintetizada</span>
+            <button id="btnSettingBgm" onclick="AudioEngine.toggleBgm()" class="px-4 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs">Activada</button>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold">Efectos de sonido (SFX)</span>
+            <button id="btnSettingSfx" onclick="AudioEngine.toggleSfx()" class="px-4 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs">Activados</button>
+          </div>
+        </div>
+
+        <!-- Data Backup & Restore (JSON LocalStorage) -->
+        <div class="space-y-4 border-b pb-5 border-slate-100 dark:border-slate-800">
+          <h3 class="text-sm font-bold uppercase text-slate-400">Copia de Seguridad (JSON)</h3>
+          <p class="text-xs text-slate-500">Exporta tu progreso para llevarlo a otra computadora o celular, o restaura un respaldo previo.</p>
+          <div class="flex flex-wrap gap-3">
+            <button onclick="StorageManager.exportToJSON()" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-fredoka font-bold text-xs flex items-center gap-1.5 shadow">
+              <span>📤</span> Exportar Partida (.json)
+            </button>
+            <label class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-fredoka font-bold text-xs cursor-pointer flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
+              <span>📥</span> Importar Partida (.json)
+              <input type="file" id="fileImportBackup" accept=".json" onchange="StorageManager.importFromJSON(event)" class="hidden">
+            </label>
+          </div>
+        </div>
+
+        <!-- Reset game danger zone -->
+        <div class="pt-2 flex items-center justify-between">
+          <div>
+            <div class="text-sm font-bold text-rose-600">Reiniciar Progreso</div>
+            <div class="text-xs text-slate-400">Borra todos los edificios y vuelve a comenzar desde cero.</div>
+          </div>
+          <button onclick="Game.promptResetGame()" class="px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-900 text-rose-600 dark:text-rose-400 font-fredoka font-bold text-xs hover:bg-rose-100">
+            Reiniciar Todo
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= GRAFITO MASCOT COMPANION FLOATER ================= -->
+  <div id="grafitoWidget" class="fixed bottom-20 right-4 sm:bottom-16 sm:right-8 z-40 flex items-end gap-3 pointer-events-none">
+    <!-- Dialogue Balloon -->
+    <div id="grafitoBubble" class="pointer-events-auto bg-white dark:bg-slate-900 border-2 border-amber-400 dark:border-amber-500 rounded-2xl p-3 shadow-xl max-w-xs text-xs text-slate-800 dark:text-slate-100 relative transition-all duration-300 transform scale-100 origin-bottom-right">
+      <div class="flex items-center justify-between border-b pb-1 mb-1 border-slate-100 dark:border-slate-800">
+        <span class="font-fredoka font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+          <span>📊</span> Grafito dice:
+        </span>
+        <button onclick="Grafito.toggleBubble()" class="text-[10px] text-slate-400 hover:text-slate-600 font-bold">Ocultar</button>
+      </div>
+      <p id="grafitoText" class="leading-relaxed font-medium">
+        ¡Hola! Soy Grafito. ¡Juntos convertiremos esta aldea en una mega metrópoli estadística!
+      </p>
+    </div>
+
+    <!-- Animated Grafito Mascot Avatar (SVG) -->
+    <div onclick="Grafito.onClickAvatar()" class="pointer-events-auto cursor-pointer w-14 h-16 sm:w-16 sm:h-20 bounce-gentle hover:scale-110 active:scale-95 transition-transform flex-shrink-0" title="Toca a Grafito para un consejo">
+      <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-lg">
+        <!-- Mascot Bar Body -->
+        <rect x="25" y="25" width="50" height="75" rx="14" fill="url(#grafitoBodyGrad)" stroke="#1e3a8a" stroke-width="3" />
+        <!-- Inner Statistical Grid Lines on Belly -->
+        <line x1="32" y1="45" x2="68" y2="45" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="32" y1="65" x2="68" y2="65" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="32" y1="85" x2="68" y2="85" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"/>
+        <!-- Eyes -->
+        <circle cx="40" cy="40" r="6" fill="#ffffff" />
+        <circle cx="60" cy="40" r="6" fill="#ffffff" />
+        <circle id="grafitoPupilL" cx="41" cy="40" r="3" fill="#1e1b4b" />
+        <circle id="grafitoPupilR" cx="61" cy="40" r="3" fill="#1e1b4b" />
+        <circle cx="39" cy="38" r="1.5" fill="#ffffff" />
+        <circle cx="59" cy="38" r="1.5" fill="#ffffff" />
+        <!-- Smile -->
+        <path id="grafitoMouth" d="M 42 52 Q 50 60 58 52" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round" />
+        <!-- Rosy Cheeks -->
+        <circle cx="33" cy="50" r="3" fill="#fb7185" opacity="0.6" />
+        <circle cx="67" cy="50" r="3" fill="#fb7185" opacity="0.6" />
+        <!-- Little Arms -->
+        <path d="M 24 60 Q 12 55 18 42" stroke="#1e3a8a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M 76 60 Q 88 55 82 42" stroke="#1e3a8a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- Little Feet -->
+        <ellipse cx="38" cy="102" rx="7" ry="4" fill="#f59e0b" stroke="#b45309" stroke-width="1.5"/>
+        <ellipse cx="62" cy="102" rx="7" ry="4" fill="#f59e0b" stroke="#b45309" stroke-width="1.5"/>
+        <!-- Cap / Little Star on top -->
+        <polygon points="50,6 54,16 64,16 56,22 59,32 50,26 41,32 44,22 36,16 46,16" fill="#facc15" stroke="#ca8a04" stroke-width="1"/>
+        <defs>
+          <linearGradient id="grafitoBodyGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#2563eb"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <!-- CELEBRATION FULLSCREEN CANVAS FOR CONFETTI PARTICLES -->
+  <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <!-- ================= MANDATORY SIGNATURE FOOTER ================= -->
+  <footer class="w-full py-4 text-center border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md relative z-30 transition-colors">
+    <div class="flex items-center justify-center gap-2">
+      <span class="text-amber-400 text-xs">✨</span>
+      <span class="font-signature text-xl sm:text-2xl font-bold signature-gradient tracking-wide hover:scale-105 transition-transform duration-300 inline-block cursor-default">
+        Diseñado por Prof. Jhon Dewis
+      </span>
+      <span class="text-amber-400 text-xs">✨</span>
+    </div>
+  </footer>
+
+  <!-- ================= LOGIC & SCRIPTS ================= -->
+  <script>
+    /**
+     * ESTADÍSTICA CITY: COMPLETE GAME ARCHITECTURE
+     * Modules:
+     * 1. AudioEngine (Web Audio API Synthesizer)
+     * 2. ParticleEngine (Canvas Confetti / Sparkles)
+     * 3. StorageManager (LocalStorage save/load/export/import)
+     * 4. Grafito (Mascot guidance & interactive emotions)
+     * 5. CityEngine (Isometric City, 16 Plots, Catalog, Upgrades)
+     * 6. LearningLevelsEngine (6 Levels, 25+ questions generator per level, Interactive dragging/bars)
+     * 7. FreeLabEngine (Bidirectional table <-> chart, PNG export)
+     * 8. GameController (Main hub & routing)
+     */
+
+    // --- 1. WEB AUDIO API SYNTHESIZER ---
+    const AudioEngine = {
+      ctx: null,
+      bgmNode: null,
+      bgmGain: null,
+      isBgmPlaying: false,
+      sfxEnabled: true,
+      bgmEnabled: true,
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+
+      playTone(freq, type = 'sine', duration = 0.2, gainVal = 0.15) {
+        if (!this.sfxEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {
+          console.warn("Audio playTone error", e);
+        }
+      },
+
+      playClick() {
+        this.playTone(520, 'sine', 0.08, 0.12);
+      },
+
+      playSuccess() {
+        if (!this.sfxEnabled) return;
+        this.init();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+        notes.forEach((n, idx) => {
+          setTimeout(() => this.playTone(n, 'triangle', 0.25, 0.18), idx * 75);
+        });
+      },
+
+      playError() {
+        if (!this.sfxEnabled) return;
+        this.playTone(220, 'sawtooth', 0.25, 0.12);
+        setTimeout(() => this.playTone(185, 'sawtooth', 0.3, 0.12), 120);
+      },
+
+      playCoins() {
+        if (!this.sfxEnabled) return;
+        [987.77, 1318.51, 1567.98].forEach((f, i) => {
+          setTimeout(() => this.playTone(f, 'sine', 0.18, 0.15), i * 60);
+        });
+      },
+
+      playBuild() {
+        if (!this.sfxEnabled) return;
+        this.playTone(240, 'triangle', 0.1, 0.2);
+        setTimeout(() => this.playTone(360, 'square', 0.15, 0.18), 100);
+        setTimeout(() => this.playTone(480, 'sine', 0.3, 0.25), 220);
+      },
+
+      playFanfare() {
+        if (!this.sfxEnabled) return;
+        const melody = [523.25, 523.25, 523.25, 659.25, 783.99, 1046.50];
+        const times = [0, 100, 200, 320, 440, 600];
+        melody.forEach((n, idx) => {
+          setTimeout(() => this.playTone(n, 'triangle', 0.35, 0.2), times[idx]);
+        });
+      },
+
+      toggleBgm() {
+        this.init();
+        this.bgmEnabled = !this.bgmEnabled;
+        const btnHeader = document.getElementById('btnBgmToggle');
+        const btnSetting = document.getElementById('btnSettingBgm');
+        if (this.bgmEnabled) {
+          if (btnHeader) btnHeader.innerText = '🎵';
+          if (btnSetting) btnSetting.innerText = 'Activada';
+          this.startBgmLoop();
+        } else {
+          if (btnHeader) btnHeader.innerText = '🔇';
+          if (btnSetting) btnSetting.innerText = 'Silenciada';
+          this.stopBgmLoop();
+        }
+        StorageManager.save();
+      },
+
+      toggleSfx() {
+        this.sfxEnabled = !this.sfxEnabled;
+        const btnHeader = document.getElementById('btnSfxToggle');
+        const btnSetting = document.getElementById('btnSettingSfx');
+        if (this.sfxEnabled) {
+          if (btnHeader) btnHeader.innerText = '🔊';
+          if (btnSetting) btnSetting.innerText = 'Activados';
+          this.playClick();
+        } else {
+          if (btnHeader) btnHeader.innerText = '🔈';
+          if (btnSetting) btnSetting.innerText = 'Silenciados';
+        }
+        StorageManager.save();
+      },
+
+      startBgmLoop() {
+        if (!this.bgmEnabled || this.isBgmPlaying || !this.ctx) return;
+        this.isBgmPlaying = true;
+        // Simple procedural calming background loop
+        let step = 0;
+        const notes = [261.63, 329.63, 392.00, 329.63, 293.66, 349.23, 440.00, 349.23];
+        this.bgmTimer = setInterval(() => {
+          if (!this.bgmEnabled) return;
+          try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(notes[step % notes.length], this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.025, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.45);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.5);
+            step++;
+          } catch (e) {}
+        }, 500);
+      },
+
+      stopBgmLoop() {
+        this.isBgmPlaying = false;
+        if (this.bgmTimer) {
+          clearInterval(this.bgmTimer);
+          this.bgmTimer = null;
+        }
+      }
+    };
+
+    // --- 2. PARTICLE ENGINE (CONFETTI / SPARKLES) ---
+    const ParticleEngine = {
+      canvas: null,
+      ctx: null,
+      particles: [],
+      animId: null,
+
+      init() {
+        this.canvas = document.getElementById('particleCanvas');
+        if (this.canvas) {
+          this.ctx = this.canvas.getContext('2d');
+          this.resize();
+          window.addEventListener('resize', () => this.resize());
+        }
+      },
+
+      resize() {
+        if (this.canvas) {
+          this.canvas.width = window.innerWidth;
+          this.canvas.height = window.innerHeight;
+        }
+      },
+
+      burst(x = window.innerWidth / 2, y = window.innerHeight / 2, count = 45) {
+        if (!this.ctx) this.init();
+        const colors = ['#f59e0b', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6', '#06b6d4'];
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 8 + 3;
+          this.particles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 3,
+            size: Math.random() * 8 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            rotSpeed: (Math.random() - 0.5) * 12,
+            life: 1,
+            decay: Math.random() * 0.02 + 0.012
+          });
+        }
+        if (!this.animId) {
+          this.loop();
+        }
+      },
+
+      loop() {
+        if (!this.ctx) return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.22; // gravity
+          p.rotation += p.rotSpeed;
+          p.life -= p.decay;
+
+          if (p.life <= 0) {
+            this.particles.splice(i, 1);
+            continue;
+          }
+
+          this.ctx.save();
+          this.ctx.translate(p.x, p.y);
+          this.ctx.rotate((p.rotation * Math.PI) / 180);
+          this.ctx.globalAlpha = Math.max(0, p.life);
+          this.ctx.fillStyle = p.color;
+          this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          this.ctx.restore();
+        }
+
+        if (this.particles.length > 0) {
+          this.animId = requestAnimationFrame(() => this.loop());
+        } else {
+          this.animId = null;
+        }
+      }
+    };
+
+    // --- 3. STORAGE MANAGER ---
+    const StorageManager = {
+      KEY: 'ESTADISTICA_CITY_V2_DATA',
+      defaultState: {
+        playerName: 'Estudiante',
+        coins: 100, // Starter funds
+        starsTotal: 0,
+        maxUnlockedLevel: 1,
+        levels: {
+          1: { stars: 0, bestScore: 0, completed: false },
+          2: { stars: 0, bestScore: 0, completed: false },
+          3: { stars: 0, bestScore: 0, completed: false },
+          4: { stars: 0, bestScore: 0, completed: false },
+          5: { stars: 0, bestScore: 0, completed: false },
+          6: { stars: 0, bestScore: 0, completed: false },
+        },
+        cityGrid: [
+          { type: 'house', level: 1 }, // Starter village house
+          { type: 'tree', level: 1 },  // Starter tree
+          { type: 'road', level: 1 },  // Starter path
+          { type: 'plaza', level: 1 }, // Starter square
+          // Remaining 12 empty plots
+          null, null, null, null,
+          null, null, null, null,
+          null, null, null, null
+        ],
+        stats: {
+          totalAnswers: 0,
+          correctAnswers: 0,
+          graphsConstructed: 0
+        },
+        theme: 'light',
+        audio: {
+          bgm: true,
+          sfx: true
+        }
+      },
+
+      data: null,
+
+      load() {
+        try {
+          const raw = localStorage.getItem(this.KEY);
+          if (raw) {
+            this.data = JSON.parse(raw);
+            // merge defaults for backward compatibility
+            this.data = Object.assign({}, this.defaultState, this.data);
+          } else {
+            this.data = JSON.parse(JSON.stringify(this.defaultState));
+          }
+        } catch (e) {
+          console.error("Storage load error:", e);
+          this.data = JSON.parse(JSON.stringify(this.defaultState));
+        }
+      },
+
+      save() {
+        try {
+          localStorage.setItem(this.KEY, JSON.stringify(this.data));
+          Game.updateHUD();
+        } catch (e) {
+          console.error("Storage save error:", e);
+        }
+      },
+
+      exportToJSON() {
+        const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.data, null, 2));
+        const a = document.createElement('a');
+        a.setAttribute("href", jsonStr);
+        a.setAttribute("download", `EstadisticaCity_Partida_${this.data.playerName || 'Alcalde'}.json`);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        Grafito.say("¡Partida exportada correctamente en un archivo JSON! Guárdalo bien.");
+      },
+
+      importFromJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const imported = JSON.parse(e.target.result);
+            if (imported && imported.levels && imported.cityGrid) {
+              this.data = imported;
+              this.save();
+              location.reload();
+            } else {
+              Grafito.say("El archivo seleccionado no tiene el formato de Estadística City.", "sad");
+            }
+          } catch (err) {
+            Grafito.say("Error al leer el archivo JSON.", "sad");
+          }
+        };
+        reader.readAsText(file);
+      },
+
+      resetAll() {
+        this.data = JSON.parse(JSON.stringify(this.defaultState));
+        this.save();
+        location.reload();
+      }
+    };
+
+    // --- 4. GRAFITO (THE MASCOT GUIDE) ---
+    const Grafito = {
+      isBubbleVisible: true,
+      quotes: [
+        "¡Recuerda que en un gráfico de barras, la altura o longitud indica la cantidad exacta!",
+        "¡Compara siempre qué barra es más larga antes de restar!",
+        "¡El eje horizontal suele indicar las categorías y el vertical las frecuencias!",
+        "¿Sabías que una escala de 5 en 5 es ideal para números medianos?",
+        "¡Cada edificio que construyes atrae más habitantes a Estadística City!"
+      ],
+
+      say(text, mood = 'happy') {
+        const bubble = document.getElementById('grafitoBubble');
+        const textElem = document.getElementById('grafitoText');
+        const mouth = document.getElementById('grafitoMouth');
+        if (textElem) textElem.innerText = text;
+        if (bubble) bubble.classList.remove('hidden', 'scale-0');
+
+        if (mouth) {
+          if (mood === 'sad') {
+            mouth.setAttribute('d', 'M 42 58 Q 50 50 58 58'); // Frown
+          } else if (mood === 'surprised') {
+            mouth.setAttribute('d', 'M 45 52 A 5 5 0 1 0 55 52 A 5 5 0 1 0 45 52'); // Open mouth
+          } else {
+            mouth.setAttribute('d', 'M 42 52 Q 50 60 58 52'); // Smile
+          }
+        }
+      },
+
+      toggleBubble() {
+        const bubble = document.getElementById('grafitoBubble');
+        if (bubble) {
+          bubble.classList.toggle('hidden');
+        }
+      },
+
+      onClickAvatar() {
+        AudioEngine.playClick();
+        const randomQuote = this.quotes[Math.floor(Math.random() * this.quotes.length)];
+        this.say(randomQuote, 'happy');
+      }
+    };
+
+    // --- 5. CITY BUILDER ENGINE ---
+    const CityEngine = {
+      selectedPlotIndex: null,
+      catalog: [
+        { id: 'house', name: 'Casa Pequeña', cost: 50, pop: 15, icon: '🏡', color: '#f59e0b', desc: 'Hogar cálido para nuevos vecinos.' },
+        { id: 'tree', name: 'Parque Verde', cost: 100, pop: 25, icon: '🌳', color: '#10b981', desc: 'Árboles y áreas de recreo.' },
+        { id: 'shop', name: 'Tienda de Abarrotes', cost: 150, pop: 40, icon: '🏪', color: '#06b6d4', desc: 'Comercio local con suministros.' },
+        { id: 'school', name: 'Colegio Matemático', cost: 200, pop: 70, icon: '🏫', color: '#3b82f6', desc: 'Donde nacen futuros estadísticos.' },
+        { id: 'library', name: 'Biblioteca Central', cost: 250, pop: 90, icon: '📚', color: '#8b5cf6', desc: 'Cientos de libros sobre gráficos.' },
+        { id: 'hospital', name: 'Hospital General', cost: 300, pop: 120, icon: '🏥', color: '#ef4444', desc: 'Cuidado médico de primera.' },
+        { id: 'stadium', name: 'Estadio Olímpico', cost: 400, pop: 180, icon: '🏟️', color: '#f97316', desc: 'Torneos y festejos ciudadanos.' },
+        { id: 'mall', name: 'Centro Comercial', cost: 500, pop: 240, icon: '🏬', color: '#ec4899', desc: 'Mega tiendas y entretenimiento.' },
+        { id: 'tower', name: 'Torre Estadística', cost: 700, pop: 400, icon: '🗼', color: '#eab308', desc: 'El monumento mayor de la ciudad.' }
+      ],
+
+      render() {
+        const container = document.getElementById('cityGridContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        let totalPop = 0;
+        StorageManager.data.cityGrid.forEach((plot, index) => {
+          const tile = document.createElement('div');
+          tile.className = "iso-tile relative rounded-2xl cursor-pointer flex flex-col items-center justify-center p-2 text-center select-none shadow-md border-2";
+          
+          if (plot) {
+            // Plot has a building
+            const info = this.catalog.find(c => c.id === plot.type) || { name: 'Plaza', icon: '⛲', pop: 20 };
+            totalPop += (info.pop || 20) * (plot.level || 1);
+            
+            tile.classList.add('bg-white', 'dark:bg-slate-800', 'border-slate-300', 'dark:border-slate-700');
+            tile.innerHTML = `
+              <div class="text-3xl sm:text-4xl drop-shadow filter">${info.icon}</div>
+              <div class="text-[10px] sm:text-xs font-fredoka font-bold text-slate-800 dark:text-slate-200 mt-1 truncate max-w-full">
+                ${info.name}
+              </div>
+              <div class="absolute top-1 right-1 text-[9px] font-bold bg-amber-400 text-slate-950 px-1 rounded">
+                Lvl ${plot.level || 1}
+              </div>
+            `;
+            tile.onclick = () => this.onPlotClick(index, plot);
+          } else {
+            // Empty plot
+            tile.classList.add('bg-emerald-300/40', 'dark:bg-emerald-950/40', 'border-dashed', 'border-emerald-500/60', 'hover:bg-emerald-300/80');
+            tile.innerHTML = `
+              <div class="text-emerald-700 dark:text-emerald-400 text-xl font-bold">+</div>
+              <div class="text-[9px] font-fredoka text-emerald-800 dark:text-emerald-300 font-semibold">Vacío</div>
+            `;
+            tile.onclick = () => this.onPlotClick(index, null);
+          }
+          container.appendChild(tile);
+        });
+
+        const popLabel = document.getElementById('cityPopulation');
+        if (popLabel) popLabel.innerText = totalPop;
+      },
+
+      onPlotClick(index, plot) {
+        AudioEngine.playClick();
+        this.selectedPlotIndex = index;
+        const targetLabel = document.getElementById('targetPlotLabel');
+        if (targetLabel) targetLabel.innerText = `#${index + 1} ${plot ? '(Mejorar)' : '(Construir)'}`;
+        this.populateCatalogModal(plot);
+        document.getElementById('modalCatalog').classList.remove('hidden');
+        document.getElementById('modalCatalog').classList.add('flex');
+      },
+
+      populateCatalogModal(currentPlot) {
+        const list = document.getElementById('catalogList');
+        if (!list) return;
+        list.innerHTML = '';
+
+        if (currentPlot) {
+          // Allow upgrade
+          const info = this.catalog.find(c => c.id === currentPlot.type);
+          const upgradeCost = Math.round((info ? info.cost : 100) * 0.8 * (currentPlot.level || 1));
+          const canAfford = StorageManager.data.coins >= upgradeCost;
+
+          const upDiv = document.createElement('div');
+          upDiv.className = "col-span-full p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 flex items-center justify-between";
+          upDiv.innerHTML = `
+            <div>
+              <h4 class="font-fredoka font-bold text-amber-900 dark:text-amber-200">Mejorar a Nivel ${(currentPlot.level || 1) + 1}</h4>
+              <p class="text-xs text-amber-700 dark:text-amber-300">Aumenta la población y estética de tu ${info ? info.name : 'construcción'}.</p>
+              <div class="text-xs font-bold mt-1">Costo: 🪙 ${upgradeCost}</div>
+            </div>
+            <button onclick="CityEngine.upgradePlot(${this.selectedPlotIndex}, ${upgradeCost})" 
+              class="px-4 py-2 rounded-xl font-fredoka font-bold text-xs ${canAfford ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}"
+              ${canAfford ? '' : 'disabled'}>
+              Mejorar
+            </button>
+          `;
+          list.appendChild(upDiv);
+        }
+
+        // Available buildings to build/replace
+        this.catalog.forEach(item => {
+          const canAfford = StorageManager.data.coins >= item.cost;
+          const card = document.createElement('div');
+          card.className = `p-3 rounded-2xl border transition flex items-center justify-between gap-2 ${canAfford ? 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-blue-400' : 'bg-slate-100/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 opacity-60'}`;
+          card.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <span class="text-3xl">${item.icon}</span>
+              <div>
+                <div class="font-fredoka font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">${item.name}</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400">${item.desc}</div>
+                <div class="text-xs font-bold text-amber-600 dark:text-amber-400">🪙 ${item.cost}</div>
+              </div>
+            </div>
+            <button onclick="CityEngine.buildPlot(${this.selectedPlotIndex}, '${item.id}', ${item.cost})" 
+              class="px-3 py-1.5 rounded-xl font-fredoka font-bold text-xs shadow-sm transition ${canAfford ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'}"
+              ${canAfford ? '' : 'disabled'}>
+              Edificar
+            </button>
+          `;
+          list.appendChild(card);
+        });
+      },
+
+      buildPlot(index, type, cost) {
+        if (StorageManager.data.coins < cost) {
+          Grafito.say("¡No tienes suficientes monedas! Resuelve más retos matemáticos.", "sad");
+          AudioEngine.playError();
+          return;
+        }
+
+        StorageManager.data.coins -= cost;
+        StorageManager.data.cityGrid[index] = { type: type, level: 1 };
+        StorageManager.save();
+        AudioEngine.playBuild();
+        ParticleEngine.burst(window.innerWidth / 2, window.innerHeight / 2, 60);
+
+        Grafito.say("¡Felicidades! Tu ciudad sigue creciendo con esta obra genial.");
+        Game.closeBuildCatalog();
+        this.render();
+      },
+
+      upgradePlot(index, cost) {
+        if (StorageManager.data.coins < cost) {
+          Grafito.say("Necesitas más monedas para esta mejora.", "sad");
+          AudioEngine.playError();
+          return;
+        }
+
+        StorageManager.data.coins -= cost;
+        StorageManager.data.cityGrid[index].level = (StorageManager.data.cityGrid[index].level || 1) + 1;
+        StorageManager.save();
+        AudioEngine.playBuild();
+        ParticleEngine.burst(window.innerWidth / 2, window.innerHeight / 2, 50);
+
+        Grafito.say("¡Edificio mejorado al siguiente nivel! La ciudad luce más moderna.");
+        Game.closeBuildCatalog();
+        this.render();
+      }
+    };
+
+    // --- 6. PEDAGOGICAL 6 LEARNING LEVELS ENGINE ---
+    const LearningLevelsEngine = {
+      currentLevel: 1,
+      qIndex: 0,
+      score: 0,
+      attemptsOnCurrentQ: 0,
+      selectedBarsForCompare: [],
+      currentQuestionData: null,
+      sessionQuestions: [],
+
+      // Generator of rich, randomized, pedagogy-grounded questions
+      generateQuestionBank(level) {
+        const bank = [];
+
+        // Contextual banks for Peruvian and school environments
+        const schoolSubjects = [
+          { title: "Frutas Preferidas", cats: ["Manzanas", "Plátanos", "Uvas", "Naranjas"] },
+          { title: "Platos Típicos Peruanos", cats: ["Ají de Gallina", "Cuy Saltado", "Juanes", "Causa Limeña"] },
+          { title: "Danzas Folclóricas", cats: ["Huaylas", "Marinera", "Festejo", "Cumbia"] },
+          { title: "Medios para Clases", cats: ["Televisor", "Laptop", "Tablet", "Celular"] },
+          { title: "Lecturas del Mes", cats: ["Fábulas", "Cuentos", "Historietas", "Poemas"] },
+          { title: "Deportes Favoritos", cats: ["Fútbol", "Vóley", "Básquet", "Natación"] },
+          { title: "Mascotas en Casa", cats: ["Perros", "Gatos", "Aves", "Conejos"] },
+          { title: "Instrumentos Musicales", cats: ["Guitarra", "Tambor", "Quena", "Trompeta"] }
+        ];
+
+        // Level 1: Recognition of parts (Title, X/Y axes, Categories, Frequencies, Scale, Orientation)
+        if (level === 1) {
+          schoolSubjects.forEach(topic => {
+            const vals = [Math.floor(Math.random()*8)+3, Math.floor(Math.random()*8)+3, Math.floor(Math.random()*8)+3, Math.floor(Math.random()*8)+3];
+            const isV = Math.random() > 0.4;
+            
+            // Subtype A: What represents the vertical axis?
+            bank.push({
+              title: topic.title,
+              categories: topic.cats,
+              values: vals,
+              orientation: isV ? 'vertical' : 'horizontal',
+              scale: 1,
+              prompt: isV ? "¿Qué indica el eje vertical en este gráfico?" : "¿Qué indica el eje horizontal en este gráfico?",
+              options: [
+                { text: "La cantidad o frecuencia de estudiantes", correct: true },
+                { text: "Los nombres de las opciones o categorías", correct: false },
+                { text: "El título general del documento", correct: false },
+                { text: "El día de la semana", correct: false }
+              ],
+              hint: "Observa los números y la graduación del eje numérico. Mide 'cuántos' hay.",
+              explanation: "El eje con números graduados representa la cantidad o frecuencia acumulada."
+            });
+
+            // Subtype B: Title identification
+            bank.push({
+              title: topic.title,
+              categories: topic.cats,
+              values: vals,
+              orientation: 'vertical',
+              scale: 1,
+              prompt: "¿Cuál es el título exacto de este gráfico estadístico?",
+              options: [
+                { text: topic.title, correct: true },
+                { text: topic.cats[0], correct: false },
+                { text: "Cantidad de Alumnos", correct: false },
+                { text: "Escala Numérica", correct: false }
+              ],
+              hint: "El título siempre se ubica en la parte superior del gráfico e informa el tema general.",
+              explanation: `El título describe el tema general: "${topic.title}".`
+            });
+
+            // Subtype C: Vertical vs Horizontal distinction
+            bank.push({
+              title: topic.title,
+              categories: topic.cats,
+              values: vals,
+              orientation: isV ? 'vertical' : 'horizontal',
+              scale: 1,
+              prompt: isV ? "¿Qué tipo de gráfico de barras estás observando?" : "¿Qué tipo de gráfico de barras estás observando?",
+              options: [
+                { text: isV ? "Gráfico de barras verticales" : "Gráfico de barras horizontales", correct: true },
+                { text: isV ? "Gráfico de barras horizontales" : "Gráfico de barras verticales", correct: false },
+                { text: "Gráfico circular o de pastel", correct: false },
+                { text: "Pictograma con dibujos", correct: false }
+              ],
+              hint: isV ? "Las columnas crecen de abajo hacia arriba de forma vertical." : "Las barras se extienden de izquierda a derecha de forma horizontal.",
+              explanation: isV ? "Las barras se elevan verticalmente." : "Las barras avanzan horizontalmente hacia la derecha."
+            });
+          });
+        }
+
+        // Level 2: Direct Reading & Simple Moda/Min/Total
+        else if (level === 2) {
+          schoolSubjects.forEach(topic => {
+            const vals = [10 + Math.floor(Math.random()*20), 10 + Math.floor(Math.random()*20), 10 + Math.floor(Math.random()*20), 10 + Math.floor(Math.random()*20)];
+            const isV = Math.random() > 0.5;
+            const maxVal = Math.max(...vals);
+            const minVal = Math.min(...vals);
+            const maxCat = topic.cats[vals.indexOf(maxVal)];
+            const minCat = topic.cats[vals.indexOf(minVal)];
+            const sumTotal = vals.reduce((a, b) => a + b, 0);
+
+            // Subtype A: Most chosen (Mode)
+            bank.push({
+              title: topic.title,
+              categories: topic.cats,
+              values: vals,
+              orientation: isV ? 'vertical' : 'horizontal',
+              scale: 5,
+              prompt: `Según el gráfico, ¿cuál es la categoría con MAYOR preferencia?`,
+              options: [
+                { text: maxCat, correct: true },
+                { text: minCat, correct: false },
+                { text: topic.cats[(vals.indexOf(maxVal)+1)%4], correct: false },
+                { text: topic.cats[(vals.indexOf(maxVal)+2)%4], correct: false }
+              ],
+              hint: "Busca la barra más alta (o más larga) en todo el gráfico.",
+              explanation: `La categoría con mayor frecuencia es ${maxCat} con ${maxVal}.`
+            });
+
+            // Subtype B: Direct value query
+            const targetIdx = Math.floor(Math.random()*4);
+            bank.push({
+              title: topic.title,
+              categories: topic.cats,
+              values: vals,
+              orientation: isV ? 'vertical' : 'horizontal',
+              scale: 5,
+              prompt: `¿Cuántos votos o registros obtuvo exactamente "${topic.cats[targetIdx]}"?`,
+              options: [
+                { text: `${vals[targetIdx]}`, correct: true },
+                { text: `${vals[(targetIdx+1)%4]}`, correct: false },
+                { text: `${vals[targetIdx] + 5}`, correct: false },
+                { text: `${Math.max(0, vals[targetIdx] - 5)}`, correct: false }
+              ],
+              hint: `Sigue la punta de la barra de "${topic.cats[targetIdx]}" con tu dedo hasta el eje con números.`,
+              explanation: `La barra de ${topic.cats[targetIdx]} coincide con el valor ${vals[targetIdx]}.`
+            });
+
+            // Subtype C: Total sum
+            bank.push({
+              title: topic.title,
+              categories: topic.cats,
+              values: vals,
+              orientation: isV ? 'vertical' : 'horizontal',
+              scale: 5,
+              prompt: `¿Cuántos datos o participantes se registraron en total en este estudio?`,
+              options: [
+                { text: `${sumTotal}`, correct: true },
+                { text: `${sumTotal + 10}`, correct: false },
+                { text: `${sumTotal - 5}`, correct: false },
+                { text: `${vals[0] + vals[1]}`, correct: false }
+              ],
+              hint: "Suma los valores de las 4 barras: " + vals.join(" + ") + ".",
+              explanation: `Sumando todas las frecuencias: ${vals.join(" + ")} = ${sumTotal}.`
+            });
+          });
+        }
+
+        // Level 3: Comparisons & Differences ("cuántos más que", visual selection)
+        else if (level === 3) {
+          schoolSubjects.forEach(topic => {
+            const vals = [4 + Math.floor(Math.random()*12), 4 + Math.floor(Math.random()*12), 4 + Math.floor(Math.random()*12), 4 + Math.floor(Math.random()*12)];
+            // Ensure first two are strictly different
+            if (vals[0] === vals[1]) vals[0] += 3;
+            const diff = Math.abs(vals[0] - vals[1]);
+            const higher = vals[0] > vals[1] ? topic.cats[0] : topic.cats[1];
+            const lower = vals[0] > vals[1] ? topic.cats[1] : topic.cats[0];
+
+            bank.push({
+              title: topic.title,
+              categories: topic.cats,
+              values: vals,
+              orientation: 'vertical',
+              scale: 2,
+              interactiveCompare: true,
+              prompt: `¿Cuántos votos MÁS tiene "${higher}" que "${lower}"?`,
+              options: [
+                { text: `${diff}`, correct: true },
+                { text: `${diff + 2}`, correct: false },
+                { text: `${Math.max(1, diff - 2)}`, correct: false },
+                { text: `${vals[0] + vals[1]}`, correct: false }
+              ],
+              hint: `Para saber cuántos más hay, resta la cantidad menor a la mayor: ${Math.max(vals[0], vals[1])} − ${Math.min(vals[0], vals[1])}.`,
+              explanation: `Restamos sus frecuencias: ${Math.max(vals[0], vals[1])} − ${Math.min(vals[0], vals[1])} = ${diff}.`
+            });
+          });
+        }
+
+        // Level 4: Interactive Graph Construction (student modifies bars with drag or +/-)
+        else if (level === 4) {
+          schoolSubjects.forEach(topic => {
+            const scale = [2, 5, 10][Math.floor(Math.random()*3)];
+            const targets = [scale * (Math.floor(Math.random()*5)+1), scale * (Math.floor(Math.random()*5)+1), scale * (Math.floor(Math.random()*5)+1), scale * (Math.floor(Math.random()*5)+1)];
+            // Initial bars start at 0
+            bank.push({
+              title: topic.title,
+              categories: topic.cats,
+              values: [0, 0, 0, 0], // initial
+              targetValues: targets,
+              orientation: Math.random() > 0.5 ? 'vertical' : 'horizontal',
+              scale: scale,
+              isConstructMode: true,
+              prompt: `Construye el gráfico para que coincida exactamente con la tabla de datos mostrada.`,
+              hint: `Usa los botones + y − (o arrastra el extremo de cada barra) hasta alcanzar el valor de la tabla. La escala va de ${scale} en ${scale}.`,
+              explanation: `Cada barra debe levantarse hasta el número indicado en la tabla.`
+            });
+          });
+        }
+
+        // Level 5: Statistical Context Reasoning & Compound operations
+        else if (level === 5) {
+          const contextProblems = [
+            {
+              title: "Danzas en el Festival Escolar",
+              cats: ["Marinera", "Huaylas", "Festejo", "Cumbia"],
+              vals: [30, 28, 36, 24],
+              prompt: "¿Cuántos padres de familia prefieren que sus hijos bailen Huaylas o Marinera?",
+              correct: 58,
+              hint: "Suma la frecuencia de Huaylas (28) con la de Marinera (30)."
+            },
+            {
+              title: "Medios Tecnológicos en Casa",
+              cats: ["Laptop", "Celular", "Televisor", "Tablet"],
+              vals: [22, 18, 24, 16],
+              prompt: "¿Cuántos alumnos usan Laptop o Celular en conjunto?",
+              correct: 40,
+              hint: "Suma Laptop (22) + Celular (18)."
+            },
+            {
+              title: "Platos en el Almuerzo de Primaria",
+              cats: ["Ají de Gallina", "Cuy Saltado", "Juanes", "Seco de Res"],
+              vals: [35, 20, 25, 40],
+              prompt: "¿Cuántos platos más de Seco de Res que de Cuy Saltado se consumieron?",
+              correct: 20,
+              hint: "Resta: 40 (Seco de Res) menos 20 (Cuy Saltado)."
+            },
+            {
+              title: "Venta de Útiles en la Librería",
+              cats: ["Cuadernos", "Plumones", "Reglas", "Colores"],
+              vals: [50, 30, 20, 45],
+              prompt: "Si cada cuaderno cuesta 5 monedas, ¿cuántos cuadernos se vendieron?",
+              correct: 50,
+              hint: "Observa directamente la barra de cuadernos en el eje vertical."
+            }
+          ];
+
+          contextProblems.forEach(cp => {
+            const wrong1 = cp.correct + 10;
+            const wrong2 = Math.max(5, cp.correct - 8);
+            const wrong3 = cp.correct + 5;
+            bank.push({
+              title: cp.title,
+              categories: cp.cats,
+              values: cp.vals,
+              orientation: 'vertical',
+              scale: 5,
+              prompt: cp.prompt,
+              options: [
+                { text: `${cp.correct}`, correct: true },
+                { text: `${wrong1}`, correct: false },
+                { text: `${wrong2}`, correct: false },
+                { text: `${wrong3}`, correct: false }
+              ],
+              hint: cp.hint,
+              explanation: `El cálculo correcto es: ${cp.hint}`
+            });
+          });
+        }
+
+        // Level 6: Master Level ("Repair the chart" + multi-step problems)
+        else if (level === 6) {
+          schoolSubjects.forEach(topic => {
+            const trueVals = [20, 35, 15, 40];
+            const corruptedVals = [...trueVals];
+            const errorIdx = Math.floor(Math.random()*4);
+            corruptedVals[errorIdx] += 15; // Intentional error
+
+            bank.push({
+              title: topic.title,
+              categories: topic.cats,
+              values: corruptedVals,
+              targetValues: trueVals,
+              errorIndex: errorIdx,
+              orientation: 'vertical',
+              scale: 5,
+              isRepairMode: true,
+              prompt: `¡ALERTA DE ERROR! La tabla dice que "${topic.cats[errorIdx]}" debe tener ${trueVals[errorIdx]}, pero el gráfico muestra ${corruptedVals[errorIdx]}. ¿Cuál es la barra defectuosa?`,
+              options: [
+                { text: `La barra de "${topic.cats[errorIdx]}"`, correct: true },
+                { text: `La barra de "${topic.cats[(errorIdx+1)%4]}"`, correct: false },
+                { text: `La escala numérica`, correct: false },
+                { text: `El título general`, correct: false }
+              ],
+              hint: `Compara la tabla de valores reales con la altura dibujada de cada barra. Una barra está 15 unidades más alta.`,
+              explanation: `Efectivamente, la barra de "${topic.cats[errorIdx]}" tenía un valor incorrecto.`
+            });
+          });
+        }
+
+        // Return shuffled subset or padded bank (minimum 25 items generated)
+        while (bank.length < 25) {
+          bank.push(Object.assign({}, bank[Math.floor(Math.random() * bank.length)]));
+        }
+
+        // Shuffle questions and randomize options order so the correct answer is not fixed on A
+        const preparedBank = bank.map(item => {
+          const clone = JSON.parse(JSON.stringify(item));
+          if (clone.options && Array.isArray(clone.options) && clone.options.length > 1) {
+            // Fisher-Yates shuffle for multiple choice options
+            for (let i = clone.options.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [clone.options[i], clone.options[j]] = [clone.options[j], clone.options[i]];
+            }
+          }
+          return clone;
+        });
+
+        return preparedBank.sort(() => Math.random() - 0.5);
+      },
+
+      startLevel(lvl) {
+        this.currentLevel = lvl;
+        this.qIndex = 0;
+        this.score = 0;
+        this.attemptsOnCurrentQ = 0;
+        this.selectedBarsForCompare = [];
+        
+        // Select 10 random questions from the generator
+        const fullBank = this.generateQuestionBank(lvl);
+        this.sessionQuestions = fullBank.slice(0, 10);
+
+        // Update Arena Header
+        document.getElementById('levelsHub').classList.add('hidden');
+        document.getElementById('levelPlayArena').classList.remove('hidden');
+        document.getElementById('arenaLevelBadge').innerText = `Nivel ${lvl}`;
+        
+        const titles = [
+          "", "Exploradores de Gráficos", "Lectores de Barras", "Comparadores de Datos", 
+          "Constructor de Gráficos", "Desafíos Estadísticos", "Maestro de las Barras"
+        ];
+        document.getElementById('arenaLevelTitle').innerText = titles[lvl];
+
+        Grafito.say(`¡Iniciando Nivel ${lvl}! Resuelve los 10 retos para hacer crecer la ciudad.`);
+        this.loadCurrentQuestion();
+      },
+
+      loadCurrentQuestion() {
+        this.attemptsOnCurrentQ = 0;
+        this.selectedBarsForCompare = [];
+        this.currentQuestionData = this.sessionQuestions[this.qIndex];
+
+        // Update Progress UI
+        document.getElementById('arenaCurrentQIndex').innerText = this.qIndex + 1;
+        const progressPct = ((this.qIndex) / 10) * 100;
+        document.getElementById('arenaProgressBar').style.width = `${progressPct}%`;
+
+        document.getElementById('arenaQuestionText').innerText = this.currentQuestionData.prompt;
+        document.getElementById('arenaScaleInfo').innerText = `Escala: de ${this.currentQuestionData.scale} en ${this.currentQuestionData.scale}`;
+        document.getElementById('arenaChartTypeLabel').innerText = this.currentQuestionData.orientation === 'horizontal' ? 'Barras Horizontales' : 'Barras Verticales';
+
+        // Render Chart
+        this.renderArenaChart();
+
+        // Render Answer Controls
+        this.renderArenaAnswers();
+
+        // Hide hints and next button
+        document.getElementById('arenaHintBox').classList.add('hidden');
+        document.getElementById('arenaBtnNext').classList.add('hidden');
+        document.getElementById('arenaBtnNext').classList.remove('flex');
+      },
+
+      renderArenaChart() {
+        const container = document.getElementById('arenaChartContainer');
+        if (!container) return;
+        const q = this.currentQuestionData;
+        const isH = q.orientation === 'horizontal';
+
+        const maxVal = Math.max(...(q.targetValues || q.values), 10);
+        // Round to clean ceiling
+        const maxScale = Math.ceil(maxVal / (q.scale * 2)) * (q.scale * 2);
+
+        // Build clean responsive SVG
+        const w = 480;
+        const h = 280;
+        const padL = isH ? 100 : 45;
+        const padB = isH ? 40 : 50;
+        const padT = 30;
+        const padR = 25;
+
+        const plotW = w - padL - padR;
+        const plotH = h - padT - padB;
+
+        let svgHtml = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-full max-h-[300px] select-none">`;
+        
+        // Chart Title
+        svgHtml += `<text x="${w/2}" y="18" text-anchor="middle" font-weight="bold" font-size="13" class="fill-slate-800 dark:fill-slate-100 font-fredoka">${q.title}</text>`;
+
+        if (!isH) {
+          // Vertical Layout: Grid & Y-Ticks
+          const steps = 5;
+          for (let i = 0; i <= steps; i++) {
+            const val = Math.round((maxScale / steps) * i);
+            const y = padT + plotH - (i / steps) * plotH;
+            svgHtml += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="currentColor" stroke-opacity="0.15" stroke-dasharray="3,3"/>`;
+            svgHtml += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="10" class="fill-slate-400 font-bold">${val}</text>`;
+          }
+
+          // X and Y Axes
+          svgHtml += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="currentColor" stroke-width="2" class="stroke-slate-400"/>`;
+          svgHtml += `<line x1="${padL}" y1="${padT + plotH}" x2="${w - padR}" y2="${padT + plotH}" stroke="currentColor" stroke-width="2" class="stroke-slate-400"/>`;
+
+          // Bars
+          const barCount = q.categories.length;
+          const barSlotW = plotW / barCount;
+          const barW = Math.min(45, barSlotW * 0.65);
+
+          q.categories.forEach((cat, idx) => {
+            const val = q.values[idx] || 0;
+            const barH = (val / maxScale) * plotH;
+            const x = padL + idx * barSlotW + (barSlotW - barW) / 2;
+            const y = padT + plotH - barH;
+
+            const isSelected = this.selectedBarsForCompare.includes(idx);
+            const strokeAttr = isSelected ? 'stroke="#f59e0b" stroke-width="4"' : 'stroke="#1e3a8a" stroke-width="1"';
+
+            svgHtml += `
+              <g class="cursor-pointer transition-all duration-300" onclick="LearningLevelsEngine.onBarClick(${idx})">
+                <rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="5" fill="url(#arenaBarGrad${idx % 4})" ${strokeAttr}/>
+                <text x="${x + barW/2}" y="${Math.max(y - 4, padT + 12)}" text-anchor="middle" font-size="11" font-weight="bold" class="fill-slate-700 dark:fill-slate-200">${val}</text>
+                <text x="${x + barW/2}" y="${padT + plotH + 16}" text-anchor="middle" font-size="10" font-weight="600" class="fill-slate-500 dark:fill-slate-400">
+                  ${cat.length > 7 ? cat.substring(0, 6) + '..' : cat}
+                </text>
+              </g>
+            `;
+          });
+        } else {
+          // Horizontal Layout
+          const steps = 5;
+          for (let i = 0; i <= steps; i++) {
+            const val = Math.round((maxScale / steps) * i);
+            const x = padL + (i / steps) * plotW;
+            svgHtml += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT + plotH}" stroke="currentColor" stroke-opacity="0.15" stroke-dasharray="3,3"/>`;
+            svgHtml += `<text x="${x}" y="${padT + plotH + 16}" text-anchor="middle" font-size="10" class="fill-slate-400 font-bold">${val}</text>`;
+          }
+
+          svgHtml += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="currentColor" stroke-width="2" class="stroke-slate-400"/>`;
+          svgHtml += `<line x1="${padL}" y1="${padT + plotH}" x2="${w - padR}" y2="${padT + plotH}" stroke="currentColor" stroke-width="2" class="stroke-slate-400"/>`;
+
+          const barCount = q.categories.length;
+          const barSlotH = plotH / barCount;
+          const barH = Math.min(32, barSlotH * 0.65);
+
+          q.categories.forEach((cat, idx) => {
+            const val = q.values[idx] || 0;
+            const barW = (val / maxScale) * plotW;
+            const y = padT + idx * barSlotH + (barSlotH - barH) / 2;
+            const x = padL;
+
+            svgHtml += `
+              <g class="cursor-pointer transition-all duration-300" onclick="LearningLevelsEngine.onBarClick(${idx})">
+                <rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="5" fill="url(#arenaBarGrad${idx % 4})" stroke="#1e3a8a" stroke-width="1"/>
+                <text x="${x + barW + 8}" y="${y + barH/2 + 4}" text-anchor="start" font-size="11" font-weight="bold" class="fill-slate-700 dark:fill-slate-200">${val}</text>
+                <text x="${padL - 8}" y="${y + barH/2 + 3}" text-anchor="end" font-size="10" font-weight="600" class="fill-slate-500 dark:fill-slate-400">
+                  ${cat.length > 9 ? cat.substring(0, 8) + '..' : cat}
+                </text>
+              </g>
+            `;
+          });
+        }
+
+        // Gradients
+        svgHtml += `
+          <defs>
+            <linearGradient id="arenaBarGrad0" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient>
+            <linearGradient id="arenaBarGrad1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#047857"/></linearGradient>
+            <linearGradient id="arenaBarGrad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/></linearGradient>
+            <linearGradient id="arenaBarGrad3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#6d28d9"/></linearGradient>
+          </defs>
+        </svg>`;
+
+        container.innerHTML = svgHtml;
+
+        // Extra Construction Controls for Level 4
+        const extraCtrl = document.getElementById('arenaExtraControls');
+        if (q.isConstructMode) {
+          extraCtrl.classList.remove('hidden');
+          let ctrlHtml = `
+            <div class="space-y-2">
+              <div class="text-xs font-bold text-slate-700 dark:text-slate-300">Tabla objetivo a construir:</div>
+              <div class="grid grid-cols-4 gap-2 text-center text-xs">
+          `;
+          q.categories.forEach((cat, idx) => {
+            ctrlHtml += `
+              <div class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                <div class="text-slate-500 font-semibold truncate">${cat}</div>
+                <div class="font-fredoka font-bold text-blue-600 text-sm">${q.targetValues[idx]}</div>
+                <div class="flex items-center justify-center gap-1 mt-1">
+                  <button onclick="LearningLevelsEngine.adjustArenaBar(${idx}, -${q.scale})" class="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 font-bold text-xs">-</button>
+                  <button onclick="LearningLevelsEngine.adjustArenaBar(${idx}, ${q.scale})" class="w-6 h-6 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs">+</button>
+                </div>
+              </div>
+            `;
+          });
+          ctrlHtml += `
+              </div>
+              <button onclick="LearningLevelsEngine.checkConstructedGraph()" class="w-full mt-2 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-fredoka font-bold text-xs rounded-xl shadow">
+                COMPROBAR GRÁFICO
+              </button>
+            </div>
+          `;
+          extraCtrl.innerHTML = ctrlHtml;
+        } else {
+          extraCtrl.classList.add('hidden');
+        }
+      },
+
+      adjustArenaBar(index, delta) {
+        AudioEngine.playClick();
+        const current = this.currentQuestionData.values[index] || 0;
+        const maxAllowed = 80;
+        this.currentQuestionData.values[index] = Math.max(0, Math.min(maxAllowed, current + delta));
+        this.renderArenaChart();
+      },
+
+      checkConstructedGraph() {
+        const q = this.currentQuestionData;
+        let isPerfect = true;
+        for (let i = 0; i < q.categories.length; i++) {
+          if (q.values[i] !== q.targetValues[i]) {
+            isPerfect = false;
+            break;
+          }
+        }
+
+        if (isPerfect) {
+          AudioEngine.playSuccess();
+          ParticleEngine.burst(window.innerWidth / 2, window.innerHeight / 2, 40);
+          this.score++;
+          StorageManager.data.coins += 25; // Bonus for building graph
+          StorageManager.data.stats.correctAnswers++;
+          StorageManager.data.stats.totalAnswers++;
+          StorageManager.data.stats.graphsConstructed++;
+          StorageManager.save();
+          Grafito.say("¡EXCELENTE! ¡Eres un gran constructor de gráficos!");
+          this.showArenaNext();
+        } else {
+          AudioEngine.playError();
+          this.attemptsOnCurrentQ++;
+          StorageManager.data.stats.totalAnswers++;
+          StorageManager.save();
+          Grafito.say("Una o más barras no coinciden exactamente con la tabla. Revisa los valores.", "sad");
+          document.getElementById('arenaHintBox').classList.remove('hidden');
+          document.getElementById('arenaHintContent').innerText = q.hint;
+        }
+      },
+
+      onBarClick(idx) {
+        AudioEngine.playClick();
+        if (this.currentQuestionData.interactiveCompare) {
+          // Compare two bars
+          if (this.selectedBarsForCompare.includes(idx)) {
+            this.selectedBarsForCompare = this.selectedBarsForCompare.filter(i => i !== idx);
+          } else {
+            if (this.selectedBarsForCompare.length >= 2) this.selectedBarsForCompare.shift();
+            this.selectedBarsForCompare.push(idx);
+          }
+          this.renderArenaChart();
+
+          if (this.selectedBarsForCompare.length === 2) {
+            const b1 = this.selectedBarsForCompare[0];
+            const b2 = this.selectedBarsForCompare[1];
+            const v1 = this.currentQuestionData.values[b1];
+            const v2 = this.currentQuestionData.values[b2];
+            const diff = Math.abs(v1 - v2);
+            Grafito.say(`Comparando: ${Math.max(v1, v2)} − ${Math.min(v1, v2)} = ${diff} de diferencia.`);
+          }
+        }
+      },
+
+      renderArenaAnswers() {
+        const area = document.getElementById('arenaAnswerArea');
+        area.innerHTML = '';
+        const q = this.currentQuestionData;
+
+        if (q.isConstructMode) {
+          // Handled in extra controls
+          area.innerHTML = `<p class="text-xs text-slate-500 italic">Ajusta las 4 barras con los botones + y − en el panel inferior del gráfico y presiona Comprobar.</p>`;
+          return;
+        }
+
+        q.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = "w-full text-left p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-100 transition flex items-center justify-between group";
+          btn.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-lg bg-blue-100 dark:bg-slate-700 text-blue-700 dark:text-blue-300 font-fredoka font-bold text-xs flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition">
+                ${String.fromCharCode(65 + idx)}
+              </span>
+              <span>${opt.text}</span>
+            </div>
+            <span class="text-slate-300 group-hover:text-blue-500 font-bold">➜</span>
+          `;
+          btn.onclick = () => this.handleOptionSelect(opt, btn);
+          area.appendChild(btn);
+        });
+      },
+
+      handleOptionSelect(option, btnElem) {
+        const q = this.currentQuestionData;
+        StorageManager.data.stats.totalAnswers++;
+
+        if (option.correct) {
+          AudioEngine.playSuccess();
+          ParticleEngine.burst(window.innerWidth / 2, window.innerHeight / 2, 35);
+          btnElem.classList.remove('bg-slate-50', 'dark:bg-slate-800');
+          btnElem.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+
+          // Disable remaining buttons
+          const allBtns = document.getElementById('arenaAnswerArea').querySelectorAll('button');
+          allBtns.forEach(b => b.disabled = true);
+
+          // Calculate reward
+          let coinsEarned = 10;
+          if (this.attemptsOnCurrentQ === 0) {
+            coinsEarned += 5; // First try bonus
+            this.score++;
+            StorageManager.data.stats.correctAnswers++;
+          }
+          StorageManager.data.coins += coinsEarned;
+          StorageManager.save();
+
+          Grafito.say("¡Excelente respuesta! Sigue así, futuro alcalde.", "happy");
+          this.showArenaNext();
+        } else {
+          AudioEngine.playError();
+          this.attemptsOnCurrentQ++;
+          btnElem.classList.add('bg-rose-100', 'dark:bg-rose-950/60', 'border-rose-300', 'text-rose-700');
+
+          if (this.attemptsOnCurrentQ === 1) {
+            Grafito.say("¡Casi! Revisa la pista que te he dejado abajo.", "sad");
+            document.getElementById('arenaHintBox').classList.remove('hidden');
+            document.getElementById('arenaHintContent').innerText = q.hint;
+          } else {
+            Grafito.say(`Paso a paso: ${q.explanation}`, "surprised");
+            document.getElementById('arenaHintBox').classList.remove('hidden');
+            document.getElementById('arenaHintContent').innerText = q.explanation;
+          }
+        }
+      },
+
+      showArenaNext() {
+        const nextBtn = document.getElementById('arenaBtnNext');
+        nextBtn.classList.remove('hidden');
+        nextBtn.classList.add('flex');
+      },
+
+      nextQuestion() {
+        AudioEngine.playClick();
+        this.qIndex++;
+        if (this.qIndex < 10) {
+          this.loadCurrentQuestion();
+        } else {
+          this.finishLevelSession();
+        }
+      },
+
+      finishLevelSession() {
+        const pct = (this.score / 10) * 100;
+        let stars = 0;
+        if (pct >= 90) stars = 3;
+        else if (pct >= 70) stars = 2;
+        else if (pct >= 50) stars = 1;
+
+        const passed = pct >= 70;
+        const lvlData = StorageManager.data.levels[this.currentLevel];
+        if (stars > lvlData.stars) lvlData.stars = stars;
+        if (this.score > lvlData.bestScore) lvlData.bestScore = this.score;
+
+        let bonusReward = 0;
+        if (passed) {
+          lvlData.completed = true;
+          bonusReward = 100;
+          StorageManager.data.coins += bonusReward;
+          if (this.currentLevel === StorageManager.data.maxUnlockedLevel && this.currentLevel < 6) {
+            StorageManager.data.maxUnlockedLevel = this.currentLevel + 1;
+          }
+          AudioEngine.playFanfare();
+          ParticleEngine.burst(window.innerWidth / 2, window.innerHeight / 2, 70);
+        } else {
+          AudioEngine.playError();
+        }
+
+        // Recalculate total stars
+        let totalStars = 0;
+        for (let i = 1; i <= 6; i++) {
+          totalStars += StorageManager.data.levels[i].stars;
+        }
+        StorageManager.data.starsTotal = totalStars;
+        StorageManager.save();
+
+        // Populate Result Modal
+        const modal = document.getElementById('modalLevelResult');
+        const icon = document.getElementById('resultModalIcon');
+        const title = document.getElementById('resultModalTitle');
+        const starsLabel = document.getElementById('resultModalStars');
+        const msg = document.getElementById('resultModalMsg');
+        const coinsReward = document.getElementById('resultCoinsReward');
+        const ratio = document.getElementById('resultScoreRatio');
+        const nextActionBtn = document.getElementById('resultBtnRetryOrNext');
+
+        ratio.innerText = `${this.score}/10 (${pct}%)`;
+        coinsReward.innerText = `+${bonusReward} 🪙`;
+
+        let starsStr = '';
+        for (let s = 1; s <= 3; s++) starsStr += (s <= stars) ? '⭐' : '☆';
+        starsLabel.innerText = starsStr;
+
+        if (passed) {
+          icon.innerText = stars === 3 ? '🏆' : '🎉';
+          title.innerText = '¡Nivel Superado con Éxito!';
+          msg.innerText = `Obtuviste un ${pct}% de aciertos. Tu ciudad festeja tu gran dominio matemático.`;
+          nextActionBtn.innerText = this.currentLevel < 6 ? 'Siguiente Nivel' : 'Ver Logros';
+          nextActionBtn.onclick = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (this.currentLevel < 6) {
+              this.startLevel(this.currentLevel + 1);
+            } else {
+              Game.showScreen('achievements');
+            }
+          };
+        } else {
+          icon.innerText = '💪';
+          title.innerText = '¡Buen intento! Puedes lograrlo';
+          msg.innerText = `Obtuviste ${pct}%. Necesitas al menos 70% (2 estrellas) para avanzar. ¡Vuelve a intentarlo!`;
+          nextActionBtn.innerText = 'Reintentar Reto';
+          nextActionBtn.onclick = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            this.startLevel(this.currentLevel);
+          };
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    };
+
+    // --- 7. FREE LABORATORY ENGINE (BIDIRECTIONAL) ---
+    const Lab = {
+      title: "Frutas Favoritas en 5to Grado",
+      orientation: "vertical",
+      scaleStep: 5,
+      data: [
+        { label: "Manzanas", value: 25, color: "#3b82f6" },
+        { label: "Plátanos", value: 30, color: "#f59e0b" },
+        { label: "Uvas", value: 15, color: "#8b5cf6" },
+        { label: "Naranjas", value: 20, color: "#10b981" }
+      ],
+
+      init() {
+        this.renderTable();
+        this.renderChart();
+      },
+
+      setOrientation(orient) {
+        AudioEngine.playClick();
+        this.orientation = orient;
+        const btnV = document.getElementById('btnOrientV');
+        const btnH = document.getElementById('btnOrientH');
+        if (orient === 'vertical') {
+          btnV.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-purple-600 dark:text-purple-300";
+          btnH.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-500";
+        } else {
+          btnH.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-purple-600 dark:text-purple-300";
+          btnV.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-500";
+        }
+        this.renderChart();
+      },
+
+      setScaleStep(step) {
+        this.scaleStep = parseInt(step) || 5;
+        this.renderChart();
+      },
+
+      onTitleChange(newTitle) {
+        this.title = newTitle;
+        this.renderChart();
+      },
+
+      addRow() {
+        if (this.data.length >= 8) {
+          Grafito.say("El laboratorio permite hasta 8 categorías para mantener una visualización clara.");
+          return;
+        }
+        AudioEngine.playClick();
+        const colors = ["#ec4899", "#06b6d4", "#f97316", "#eab308"];
+        this.data.push({
+          label: `Categoría ${this.data.length + 1}`,
+          value: this.scaleStep * 2,
+          color: colors[this.data.length % colors.length]
+        });
+        this.renderTable();
+        this.renderChart();
+      },
+
+      removeRow(index) {
+        if (this.data.length <= 2) {
+          Grafito.say("Debes conservar al menos 2 categorías para que sea un gráfico de barras.");
+          return;
+        }
+        AudioEngine.playClick();
+        this.data.splice(index, 1);
+        this.renderTable();
+        this.renderChart();
+      },
+
+      updateValue(index, newVal) {
+        const v = Math.max(0, parseInt(newVal) || 0);
+        this.data[index].value = v;
+        this.renderChart();
+      },
+
+      updateLabel(index, newLabel) {
+        this.data[index].label = newLabel;
+        this.renderChart();
+      },
+
+      adjustBar(index, delta) {
+        AudioEngine.playClick();
+        const cur = this.data[index].value;
+        this.data[index].value = Math.max(0, cur + delta);
+        this.renderTable();
+        this.renderChart();
+      },
+
+      generateRandomData() {
+        AudioEngine.playClick();
+        const themes = [
+          { t: "Mascotas Preferidas", cats: ["Perros", "Gatos", "Peces", "Aves"] },
+          { t: "Deportes en Educación Física", cats: ["Fútbol", "Vóley", "Básquet", "Atletismo", "Natación"] },
+          { t: "Cursos Preferidos", cats: ["Matemática", "Ciencia", "Arte", "Historia"] }
+        ];
+        const pick = themes[Math.floor(Math.random() * themes.length)];
+        this.title = pick.t;
+        document.getElementById('labGraphTitle').value = pick.t;
+
+        const colors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"];
+        this.data = pick.cats.map((c, i) => ({
+          label: c,
+          value: this.scaleStep * (Math.floor(Math.random() * 6) + 1),
+          color: colors[i % colors.length]
+        }));
+
+        this.renderTable();
+        this.renderChart();
+        Grafito.say("¡Nuevos datos generados al azar! Puedes modificarlos libremente.");
+      },
+
+      renderTable() {
+        const container = document.getElementById('labTableRows');
+        if (!container) return;
+        container.innerHTML = '';
+
+        this.data.forEach((row, idx) => {
+          const item = document.createElement('div');
+          item.className = "flex items-center gap-2 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs";
+          item.innerHTML = `
+            <input type="color" value="${row.color}" onchange="Lab.data[${idx}].color=this.value; Lab.renderChart();" class="w-6 h-6 rounded cursor-pointer border-none bg-transparent">
+            <input type="text" value="${row.label}" oninput="Lab.updateLabel(${idx}, this.value)" class="flex-1 px-2 py-1 bg-white dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600 font-semibold text-slate-800 dark:text-slate-100">
+            <div class="flex items-center gap-1">
+              <button onclick="Lab.adjustBar(${idx}, -${this.scaleStep})" class="w-6 h-6 bg-slate-200 dark:bg-slate-700 rounded font-bold hover:bg-slate-300">-</button>
+              <input type="number" min="0" value="${row.value}" oninput="Lab.updateValue(${idx}, this.value)" class="w-12 px-1 py-1 text-center bg-white dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600 font-bold text-slate-800 dark:text-slate-100">
+              <button onclick="Lab.adjustBar(${idx}, ${this.scaleStep})" class="w-6 h-6 bg-purple-600 text-white rounded font-bold hover:bg-purple-500">+</button>
+            </div>
+            <button onclick="Lab.removeRow(${idx})" class="text-rose-500 hover:text-rose-700 font-bold px-1" title="Eliminar fila">✕</button>
+          `;
+          container.appendChild(item);
+        });
+      },
+
+      renderChart() {
+        const container = document.getElementById('labChartRender');
+        if (!container) return;
+        const isH = this.orientation === 'horizontal';
+
+        const maxVal = Math.max(...this.data.map(d => d.value), this.scaleStep * 3);
+        const maxScale = Math.ceil(maxVal / (this.scaleStep * 2)) * (this.scaleStep * 2);
+
+        const w = 500;
+        const h = 320;
+        const padL = isH ? 110 : 45;
+        const padB = isH ? 40 : 50;
+        const padT = 35;
+        const padR = 30;
+
+        const plotW = w - padL - padR;
+        const plotH = h - padT - padB;
+
+        let svgHtml = `<svg id="labSvgChart" viewBox="0 0 ${w} ${h}" class="w-full h-full max-h-[340px] select-none">`;
+        svgHtml += `<text x="${w/2}" y="20" text-anchor="middle" font-weight="bold" font-size="14" class="fill-slate-800 dark:fill-slate-100 font-fredoka">${this.title}</text>`;
+
+        if (!isH) {
+          // Vertical
+          const steps = 5;
+          for (let i = 0; i <= steps; i++) {
+            const val = Math.round((maxScale / steps) * i);
+            const y = padT + plotH - (i / steps) * plotH;
+            svgHtml += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="currentColor" stroke-opacity="0.15" stroke-dasharray="3,3"/>`;
+            svgHtml += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="10" class="fill-slate-400 font-bold">${val}</text>`;
+          }
+
+          svgHtml += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="currentColor" stroke-width="2" class="stroke-slate-400"/>`;
+          svgHtml += `<line x1="${padL}" y1="${padT + plotH}" x2="${w - padR}" y2="${padT + plotH}" stroke="currentColor" stroke-width="2" class="stroke-slate-400"/>`;
+
+          const barCount = this.data.length;
+          const barSlotW = plotW / barCount;
+          const barW = Math.min(48, barSlotW * 0.7);
+
+          this.data.forEach((row, idx) => {
+            const barH = (row.value / maxScale) * plotH;
+            const x = padL + idx * barSlotW + (barSlotW - barW) / 2;
+            const y = padT + plotH - barH;
+
+            svgHtml += `
+              <g class="cursor-ns-resize group" onmousedown="Lab.startDrag(${idx})" ontouchstart="Lab.startDrag(${idx})">
+                <rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="6" fill="${row.color}" stroke="#1e293b" stroke-width="1.5"/>
+                <text x="${x + barW/2}" y="${Math.max(y - 4, padT + 12)}" text-anchor="middle" font-size="11" font-weight="bold" class="fill-slate-800 dark:fill-slate-100">${row.value}</text>
+                <text x="${x + barW/2}" y="${padT + plotH + 16}" text-anchor="middle" font-size="10" font-weight="600" class="fill-slate-600 dark:fill-slate-300">
+                  ${row.label.length > 8 ? row.label.substring(0, 7) + '..' : row.label}
+                </text>
+              </g>
+            `;
+          });
+        } else {
+          // Horizontal
+          const steps = 5;
+          for (let i = 0; i <= steps; i++) {
+            const val = Math.round((maxScale / steps) * i);
+            const x = padL + (i / steps) * plotW;
+            svgHtml += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT + plotH}" stroke="currentColor" stroke-opacity="0.15" stroke-dasharray="3,3"/>`;
+            svgHtml += `<text x="${x}" y="${padT + plotH + 16}" text-anchor="middle" font-size="10" class="fill-slate-400 font-bold">${val}</text>`;
+          }
+
+          svgHtml += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="currentColor" stroke-width="2" class="stroke-slate-400"/>`;
+          svgHtml += `<line x1="${padL}" y1="${padT + plotH}" x2="${w - padR}" y2="${padT + plotH}" stroke="currentColor" stroke-width="2" class="stroke-slate-400"/>`;
+
+          const barCount = this.data.length;
+          const barSlotH = plotH / barCount;
+          const barH = Math.min(32, barSlotH * 0.7);
+
+          this.data.forEach((row, idx) => {
+            const barW = (row.value / maxScale) * plotW;
+            const y = padT + idx * barSlotH + (barSlotH - barH) / 2;
+            const x = padL;
+
+            svgHtml += `
+              <g class="cursor-ew-resize group" onmousedown="Lab.startDrag(${idx})" ontouchstart="Lab.startDrag(${idx})">
+                <rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="6" fill="${row.color}" stroke="#1e293b" stroke-width="1.5"/>
+                <text x="${x + barW + 8}" y="${y + barH/2 + 4}" text-anchor="start" font-size="11" font-weight="bold" class="fill-slate-800 dark:fill-slate-100">${row.value}</text>
+                <text x="${padL - 8}" y="${y + barH/2 + 3}" text-anchor="end" font-size="10" font-weight="600" class="fill-slate-600 dark:fill-slate-300">
+                  ${row.label.length > 10 ? row.label.substring(0, 9) + '..' : row.label}
+                </text>
+              </g>
+            `;
+          });
+        }
+
+        svgHtml += `</svg>`;
+        container.innerHTML = svgHtml;
+      },
+
+      startDrag(index) {
+        // Quick interactive drag booster: increments by step on click or tap
+        this.adjustBar(index, this.scaleStep);
+      },
+
+      downloadChartPNG() {
+        AudioEngine.playCoins();
+        const canvas = document.getElementById('exportCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 900;
+        canvas.height = 600;
+
+        // Background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Frame border
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+        // Title
+        ctx.fillStyle = "#1e293b";
+        ctx.font = "bold 28px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(this.title, canvas.width / 2, 70);
+
+        // Draw Bars onto 2D Canvas
+        const maxVal = Math.max(...this.data.map(d => d.value), this.scaleStep * 2);
+        const maxScale = Math.ceil(maxVal / (this.scaleStep * 2)) * (this.scaleStep * 2);
+
+        const padL = 100;
+        const padB = 90;
+        const padT = 110;
+        const padR = 60;
+        const pW = canvas.width - padL - padR;
+        const pH = canvas.height - padT - padB;
+
+        // Axes
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(padL, padT);
+        ctx.lineTo(padL, padT + pH);
+        ctx.lineTo(padL + pW, padT + pH);
+        ctx.stroke();
+
+        const slotW = pW / this.data.length;
+        const barW = Math.min(70, slotW * 0.65);
+
+        this.data.forEach((row, i) => {
+          const barH = (row.value / maxScale) * pH;
+          const x = padL + i * slotW + (slotW - barW) / 2;
+          const y = padT + pH - barH;
+
+          ctx.fillStyle = row.color;
+          ctx.fillRect(x, y, barW, barH);
+          ctx.strokeStyle = "#0f172a";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(x, y, barW, barH);
+
+          // Value
+          ctx.fillStyle = "#0f172a";
+          ctx.font = "bold 18px Inter, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(row.value.toString(), x + barW / 2, y - 8);
+
+          // Label
+          ctx.font = "14px Inter, sans-serif";
+          ctx.fillText(row.label, x + barW / 2, padT + pH + 24);
+        });
+
+        // Watermark Signature
+        ctx.fillStyle = "#2563eb";
+        ctx.font = "bold 16px Inter, sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText("Estadística City — Diseñado por Prof. Jhon Dewis", canvas.width - 40, canvas.height - 35);
+
+        // Trigger Download
+        const a = document.createElement('a');
+        a.download = `Grafico_${this.title.replace(/\s+/g, '_')}.png`;
+        a.href = canvas.toDataURL('image/png');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        Grafito.say("¡Gráfico exportado en PNG con éxito!");
+      }
+    };
+
+    // --- 8. GAME CONTROLLER & UI ROUTING ---
+    const Game = {
+      init() {
+        StorageManager.load();
+        AudioEngine.sfxEnabled = StorageManager.data.audio.sfx;
+        AudioEngine.bgmEnabled = StorageManager.data.audio.bgm;
+        
+        // Theme init
+        if (StorageManager.data.theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+
+        // DOM Setup
+        this.updateHUD();
+        CityEngine.render();
+        Lab.init();
+        this.renderBadges();
+
+        // Welcome input sync
+        const inputName = document.getElementById('inputPlayerName');
+        if (inputName) inputName.value = StorageManager.data.playerName || '';
+
+        // Audio Unlock Listener (First click on page)
+        const unlockAudio = () => {
+          AudioEngine.init();
+          if (AudioEngine.bgmEnabled) AudioEngine.startBgmLoop();
+          window.removeEventListener('click', unlockAudio);
+          window.removeEventListener('touchstart', unlockAudio);
+        };
+        window.addEventListener('click', unlockAudio);
+        window.addEventListener('touchstart', unlockAudio);
+
+        Grafito.say(`¡Bienvenido alcalde ${StorageManager.data.playerName}! ¿Listo para conquistar los gráficos?`);
+      },
+
+      showScreen(screenId) {
+        AudioEngine.playClick();
+        const views = document.querySelectorAll('.screen-view');
+        views.forEach(v => {
+          v.classList.add('hidden');
+          v.classList.remove('active');
+        });
+
+        const target = document.getElementById(`screen-${screenId}`);
+        if (target) {
+          target.classList.remove('hidden');
+          target.classList.add('active');
+        }
+
+        // Active tab styling
+        const tabs = document.querySelectorAll('.nav-tab');
+        tabs.forEach(t => {
+          if (t.dataset.target === screenId) {
+            t.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+            t.classList.remove('text-slate-600', 'dark:text-slate-300');
+          } else {
+            t.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+            t.classList.add('text-slate-600', 'dark:text-slate-300');
+          }
+        });
+
+        // Trigger screen specific refresh
+        if (screenId === 'city') CityEngine.render();
+        if (screenId === 'levels') this.refreshLevelsHub();
+        if (screenId === 'achievements') this.refreshAchievements();
+        if (screenId === 'lab') Lab.renderChart();
+      },
+
+      registerPlayer() {
+        AudioEngine.playCoins();
+        const input = document.getElementById('inputPlayerName');
+        const name = input.value.trim();
+        if (name) {
+          StorageManager.data.playerName = name;
+          StorageManager.save();
+          this.updateHUD();
+          ParticleEngine.burst(window.innerWidth / 2, window.innerHeight / 2, 40);
+
+          const greeting = document.getElementById('welcomeGreeting');
+          greeting.innerText = `¡Excelente, Alcalde ${name}! Tu ciudad te espera.`;
+          greeting.classList.remove('hidden');
+
+          setTimeout(() => {
+            this.showScreen('city');
+          }, 800);
+        }
+      },
+
+      updateMayorNameFromSettings() {
+        const input = document.getElementById('settingsMayorName');
+        if (input && input.value.trim()) {
+          AudioEngine.playClick();
+          StorageManager.data.playerName = input.value.trim();
+          StorageManager.save();
+          this.updateHUD();
+          Grafito.say("Nombre de alcalde actualizado correctamente.");
+        }
+      },
+
+      updateHUD() {
+        const d = StorageManager.data;
+        const mayorName = document.getElementById('headerMayorName');
+        const coins = document.getElementById('statCoins');
+        const stars = document.getElementById('statStars');
+        const maxLvl = document.getElementById('statMaxLevel');
+        const settingsName = document.getElementById('settingsMayorName');
+
+        if (mayorName) mayorName.innerText = d.playerName || 'Alcalde';
+        if (coins) coins.innerText = d.coins || 0;
+        if (stars) stars.innerText = `${d.starsTotal || 0}/18`;
+        if (maxLvl) maxLvl.innerText = d.maxUnlockedLevel || 1;
+        if (settingsName) settingsName.value = d.playerName || '';
+
+        // Audio buttons sync
+        const btnBgmH = document.getElementById('btnBgmToggle');
+        const btnSfxH = document.getElementById('btnSfxToggle');
+        if (btnBgmH) btnBgmH.innerText = AudioEngine.bgmEnabled ? '🎵' : '🔇';
+        if (btnSfxH) btnSfxH.innerText = AudioEngine.sfxEnabled ? '🔊' : '🔈';
+      },
+
+      toggleTheme() {
+        AudioEngine.playClick();
+        const isDark = document.documentElement.classList.toggle('dark');
+        StorageManager.data.theme = isDark ? 'dark' : 'light';
+        StorageManager.save();
+        if (Lab) Lab.renderChart();
+      },
+
+      refreshLevelsHub() {
+        document.getElementById('levelPlayArena').classList.add('hidden');
+        document.getElementById('levelsHub').classList.remove('hidden');
+
+        const maxUnlocked = StorageManager.data.maxUnlockedLevel || 1;
+        for (let i = 1; i <= 6; i++) {
+          const card = document.querySelector(`.level-card[data-lvl="${i}"]`);
+          if (!card) continue;
+          const starsSpan = card.querySelector('.lvl-stars');
+          const btn = card.querySelector('button');
+
+          const lvlData = StorageManager.data.levels[i];
+          let starStr = '';
+          for (let s = 1; s <= 3; s++) starStr += (s <= lvlData.stars) ? '⭐' : '☆';
+          if (starsSpan) starsSpan.innerText = starStr;
+
+          if (i <= maxUnlocked) {
+            card.classList.remove('opacity-80');
+            card.classList.add('border-blue-500/40');
+            if (btn) {
+              btn.disabled = false;
+              btn.classList.remove('bg-slate-400', 'cursor-not-allowed');
+              btn.classList.add('bg-blue-600', 'hover:bg-blue-500');
+              btn.innerHTML = `<span>▶</span> Jugar Desafío`;
+            }
+          } else {
+            card.classList.add('opacity-80');
+            if (btn) {
+              btn.disabled = true;
+              btn.classList.add('bg-slate-400', 'cursor-not-allowed');
+              btn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
+              btn.innerHTML = `<span>🔒</span> Bloqueado`;
+            }
+          }
+        }
+      },
+
+      startLevel(lvl) {
+        AudioEngine.playClick();
+        LearningLevelsEngine.startLevel(lvl);
+      },
+
+      exitLevelToHub() {
+        AudioEngine.playClick();
+        document.getElementById('levelPlayArena').classList.add('hidden');
+        document.getElementById('modalLevelResult').classList.add('hidden');
+        document.getElementById('levelsHub').classList.remove('hidden');
+        this.refreshLevelsHub();
+      },
+
+      nextArenaQuestion() {
+        LearningLevelsEngine.nextQuestion();
+      },
+
+      openBuildCatalog() {
+        CityEngine.onPlotClick(0, StorageManager.data.cityGrid[0]);
+      },
+
+      closeBuildCatalog() {
+        document.getElementById('modalCatalog').classList.add('hidden');
+        document.getElementById('modalCatalog').classList.remove('flex');
+      },
+
+      refreshAchievements() {
+        const d = StorageManager.data;
+        document.getElementById('achStarsCount').innerText = `${d.starsTotal || 0} / 18`;
+        
+        const builtCount = d.cityGrid.filter(p => p !== null).length;
+        document.getElementById('achBuildingsCount').innerText = `${builtCount} / 16`;
+        
+        const acc = d.stats.totalAnswers > 0 ? Math.round((d.stats.correctAnswers / d.stats.totalAnswers) * 100) : 0;
+        document.getElementById('achAccuracyRate').innerText = `${acc}%`;
+        document.getElementById('achTotalCoins').innerText = d.coins;
+
+        this.renderBadges();
+      },
+
+      renderBadges() {
+        const container = document.getElementById('badgesGrid');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const badgeList = [
+          { lvl: 1, name: "Explorador de Gráficos", icon: "🧭" },
+          { lvl: 2, name: "Lector Estadístico", icon: "📖" },
+          { lvl: 3, name: "Comparador Experto", icon: "⚖️" },
+          { lvl: 4, name: "Constructor de Gráficos", icon: "🏗️" },
+          { lvl: 5, name: "Analista de Datos", icon: "💡" },
+          { lvl: 6, name: "Maestro de las Barras", icon: "👑" },
+        ];
+
+        badgeList.forEach(b => {
+          const unlocked = StorageManager.data.levels[b.lvl].completed;
+          const div = document.createElement('div');
+          div.className = `p-3 rounded-2xl border text-center transition ${unlocked ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 shadow-sm' : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 opacity-50'}`;
+          div.innerHTML = `
+            <div class="text-3xl mb-1 filter ${unlocked ? 'drop-shadow' : 'grayscale'}">${b.icon}</div>
+            <div class="font-fredoka font-bold text-xs text-slate-800 dark:text-slate-100">${b.name}</div>
+            <div class="text-[9px] font-semibold mt-1 ${unlocked ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'}">
+              ${unlocked ? '¡Conquistado!' : `Nivel ${b.lvl}`}
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      },
+
+      generateDiplomaModal() {
+        AudioEngine.playCoins();
+        const canvas = document.getElementById('diplomaCanvas');
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+
+        // Elegant Diploma Background
+        ctx.fillStyle = "#fffdf7";
+        ctx.fillRect(0, 0, w, h);
+
+        // Ornate Golden Borders
+        ctx.strokeStyle = "#d97706";
+        ctx.lineWidth = 14;
+        ctx.strokeRect(20, 20, w - 40, h - 40);
+
+        ctx.strokeStyle = "#f59e0b";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(32, 32, w - 64, h - 64);
+
+        // Header
+        ctx.fillStyle = "#1e3a8a";
+        ctx.font = "bold 34px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("DIPLOMA DE RECONOCIMIENTO", w / 2, 95);
+
+        ctx.fillStyle = "#b45309";
+        ctx.font = "bold 16px Inter, sans-serif";
+        ctx.fillText("★ ESTADÍSTICA CITY: CIUDAD DE LOS GRÁFICOS ★", w / 2, 125);
+
+        // Body Text
+        ctx.fillStyle = "#475569";
+        ctx.font = "16px Inter, sans-serif";
+        ctx.fillText("Se otorga con honor y distinción al estudiante:", w / 2, 175);
+
+        // Student Mayor Name
+        ctx.fillStyle = "#1e293b";
+        ctx.font = "bold 38px 'Fredoka', cursive, sans-serif";
+        const student = StorageManager.data.playerName || "Estudiante Destacado";
+        ctx.fillText(student.toUpperCase(), w / 2, 230);
+
+        // Underline
+        ctx.strokeStyle = "#f59e0b";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(w / 2 - 200, 245);
+        ctx.lineTo(w / 2 + 200, 245);
+        ctx.stroke();
+
+        // Merit description
+        ctx.fillStyle = "#334155";
+        ctx.font = "15px Inter, sans-serif";
+        const text1 = "Por haber completado exitosamente los retos de Estadística City y demostrado sus habilidades";
+        const text2 = "en la interpretación, comparación y construcción interactiva de gráficos de barras verticales y horizontales.";
+        ctx.fillText(text1, w / 2, 285);
+        ctx.fillText(text2, w / 2, 310);
+
+        ctx.fillStyle = "#047857";
+        ctx.font = "bold 22px 'Fredoka', sans-serif";
+        ctx.fillText("¡Felicitaciones, Maestro de las Barras!", w / 2, 360);
+
+        // Date from user device
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' });
+        ctx.fillStyle = "#64748b";
+        ctx.font = "13px Inter, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(`Fecha de emisión: ${dateStr}`, 60, 520);
+
+        // Professor Signature Area
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#1e3a8a";
+        ctx.font = "bold 24px 'Dancing Script', cursive";
+        ctx.fillText("Diseñado por Prof. Jhon Dewis", w - 60, 510);
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(w - 320, 520);
+        ctx.lineTo(w - 60, 520);
+        ctx.stroke();
+        ctx.font = "12px Inter, sans-serif";
+        ctx.fillStyle = "#64748b";
+        ctx.fillText("Especialista en Matemática y Gamificación Educativa", w - 60, 538);
+
+        // Show Modal
+        document.getElementById('modalDiploma').classList.remove('hidden');
+        document.getElementById('modalDiploma').classList.add('flex');
+      },
+
+      closeDiplomaModal() {
+        document.getElementById('modalDiploma').classList.add('hidden');
+        document.getElementById('modalDiploma').classList.remove('flex');
+      },
+
+      downloadDiplomaPNG() {
+        AudioEngine.playCoins();
+        const canvas = document.getElementById('diplomaCanvas');
+        const a = document.createElement('a');
+        a.download = `Diploma_EstadisticaCity_${StorageManager.data.playerName || 'Alcalde'}.png`;
+        a.href = canvas.toDataURL('image/png');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        Grafito.say("¡Diploma descargado! Enhorabuena por tu dedicación matemática.");
+      },
+
+      promptResetGame() {
+        const ok = confirm("¿Estás seguro de reiniciar todo el progreso de Estadística City? Se borrarán tus monedas y edificios.");
+        if (ok) {
+          StorageManager.resetAll();
+        }
+      }
+    };
+
+    // Initialize application on DOM load
+    window.onload = function() {
+      Game.init();
+      ParticleEngine.init();
+    };
+  </script>
+</body>
+</html>
