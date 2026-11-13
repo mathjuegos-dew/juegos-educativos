@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoÁreas Lab — Regiones Notables (Triangulares y Cuadrangulares)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Estilos personalizados para barras de desplazamiento y fracciones matemáticas */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.7);
+    }
+
+    .math-frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1.1;
+      margin: 0 0.2rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .math-frac > span:first-child {
+      border-bottom: 1.5px solid currentColor;
+      padding: 0 0.25rem 0.1rem;
+    }
+    .math-frac > span:last-child {
+      padding: 0.1rem 0.25rem 0;
+    }
+
+    input[type="range"] {
+      accent-color: #6366f1;
+    }
+
+    .canvas-grid-light {
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .canvas-grid-dark {
+      background-color: #0f172a;
+      background-image: radial-gradient(#334155 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased transition-colors duration-300 min-h-screen flex flex-col">
+
+  <!-- BARRA SUPERIOR (HEADER) -->
+  <header class="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <!-- Logo y Título -->
+      <div class="flex items-center gap-3">
+        <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-indigo-500 hover:text-white transition" title="Abrir menú de propiedades">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+          <i class="fa-solid fa-draw-polygon text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-500 dark:from-indigo-400 dark:via-cyan-300 dark:to-emerald-400 bg-clip-text text-transparent">
+              REGIONES NOTABLES
+            </h1>
+            <span class="hidden sm:inline-block text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+              Simulador de Demostraciones
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
+            Laboratorio interactivo de relaciones de áreas en regiones triangulares y cuadrangulares
+          </p>
+        </div>
+      </div>
+
+      <!-- Acciones Rápidas y Modo Día/Noche -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Botón de vista rápida de fórmulas -->
+        <button id="openCheatSheetBtn" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition flex items-center gap-2">
+          <i class="fa-solid fa-book-open"></i>
+          <span class="hidden md:inline">Resumen de las 8 Diapositivas</span>
+        </button>
+
+        <!-- Toggle Día / Noche -->
+        <button id="themeToggleBtn" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-400 transition flex items-center gap-2 shadow-sm" title="Cambiar entre Modo Día y Modo Noche">
+          <i id="themeIcon" class="fa-solid fa-sun text-amber-400"></i>
+          <span id="themeText">Modo Día</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="max-w-[1600px] w-full mx-auto flex-1 flex relative">
+
+    <!-- SIDEBAR DE NAVEGACIÓN (10 PROPIEDADES EN 2 BLOQUES) -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col h-[calc(100vh-4rem)] top-16">
+      <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div>
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Índice de Diapositivas</h2>
+          <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">Selecciona una propiedad para demostrar</p>
+        </div>
+        <button id="closeSidebarBtn" class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Lista de propiedades -->
+      <nav id="propertyNav" class="flex-1 overflow-y-auto p-3 space-y-5">
+        <!-- Se llena dinámicamente desde JS -->
+      </nav>
+
+      <!-- Pie del Sidebar -->
+      <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+        <span><i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> 10 Propiedades Activas</span>
+        <span class="font-mono">Geometría Plana</span>
+      </div>
+    </aside>
+
+    <!-- Fondo oscuro móvil cuando el sidebar está abierto -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-slate-950/60 z-30 hidden lg:hidden backdrop-blur-xs"></div>
+
+    <!-- ÁREA DE TRABAJO PRINCIPAL -->
+    <main class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6">
+
+      <!-- CABECERA DE LA PROPIEDAD SELECCIONADA -->
+      <section class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="propBadgeSlide" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-600 text-white">
+              Diapositiva 1A
+            </span>
+            <span id="propBadgeCategory" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              Regiones Triangulares
+            </span>
+          </div>
+          <h2 id="propTitle" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Relación de Áreas con una Ceviana
+          </h2>
+          <p id="propSubtitle" class="text-sm text-slate-600 dark:text-slate-300 max-w-3xl">
+            En todo triángulo, una ceviana divide a la región triangular en dos regiones cuyas áreas son proporcionales a los segmentos determinados en su base.
+          </p>
+        </div>
+
+        <!-- Recuadro de la Fórmula Roja (Estilo Diapositiva Original) -->
+        <div class="flex items-center gap-3 self-start lg:self-center">
+          <div id="formulaBox" class="px-5 py-3 rounded-xl bg-rose-100/90 dark:bg-rose-950/80 border-2 border-rose-600 dark:border-rose-500 text-rose-950 dark:text-rose-100 shadow-sm min-w-[180px] text-center">
+            <!-- HTML de la fórmula inyectado dinámicamente -->
+          </div>
+        </div>
+      </section>
+
+      <!-- GRILLA PRINCIPAL: LIENZO INTERACTIVO + CONTROLES Y DEMOSTRACIÓN -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+
+        <!-- COLUMNA IZQUIERDA (7 cols): CANVAS GEOMÉTRICO + BARRA DE HERRAMIENTAS DEL LIENZO -->
+        <div class="xl:col-span-7 flex flex-col gap-4">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+            <!-- Barra superior del lienzo -->
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 bg-slate-50/70 dark:bg-slate-800/40">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                  Lienzo Geométrico Dinámico
+                </span>
+                <!-- Selector de sub-modo si la diapositiva tiene 2 figuras (ej. Diapositiva 3, 4, 5) -->
+                <div id="subModeContainer" class="hidden ml-2 inline-flex rounded-lg p-0.5 bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
+                  <!-- Botones de sub-modo inyectados por JS -->
+                </div>
+              </div>
+
+              <!-- Botones de Trazos Auxiliares, Etiquetas y Reinicio -->
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button id="toggleAuxBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500 transition flex items-center gap-1.5 shadow-xs">
+                  <i class="fa-solid fa-compass-drafting"></i>
+                  <span>Trazos Auxiliares: ON</span>
+                </button>
+                <button id="toggleValuesBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-hashtag"></i>
+                  <span>Valores</span>
+                </button>
+                <button id="resetParamsBtn" class="p-1.5 rounded-lg text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-500 hover:text-white transition" title="Restaurar dimensiones iniciales">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Contenedor del Canvas -->
+            <div id="canvasWrapper" class="relative w-full h-[380px] sm:h-[450px] canvas-grid-dark select-none overflow-hidden">
+              <canvas id="geoCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+
+              <!-- Leyenda flotante en esquina superior izquierda -->
+              <div id="canvasOverlayBadge" class="absolute top-3 left-3 pointer-events-none bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 shadow-sm text-xs space-y-1">
+                <!-- Información en vivo de áreas -->
+              </div>
+
+              <!-- Pista interactiva en esquina inferior -->
+              <div class="absolute bottom-2.5 right-3 pointer-events-none bg-slate-900/75 text-slate-200 text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-xs">
+                <i class="fa-solid fa-sliders text-indigo-400"></i>
+                <span>Usa los deslizadores o pasos para animar la demostración</span>
+              </div>
+            </div>
+
+            <!-- Tarjetas de Métricas en Vivo debajo del Canvas -->
+            <div id="liveMetricsBar" class="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-slate-800 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/80">
+              <!-- Métricas inyectadas dinámicamente -->
+            </div>
+          </div>
+
+          <!-- TABLA DE COMPROBACIÓN NUMÉRICA EN TIEMPO REAL -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <i class="fa-solid fa-table-list text-indigo-500"></i>
+                  <span>Laboratorio de Comprobación Numérica</span>
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  Cambia las dimensiones con los deslizadores y captura mediciones para verificar que la propiedad siempre se cumple.
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="recordRowBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-xs">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Registrar Medición</span>
+                </button>
+                <button id="clearTableBtn" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-rose-500 hover:text-white transition">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 uppercase">
+                  <tr>
+                    <th class="py-2.5 px-3 font-bold">#</th>
+                    <th class="py-2.5 px-3 font-bold">Propiedad</th>
+                    <th class="py-2.5 px-3 font-bold">Parámetros Geométricos</th>
+                    <th class="py-2.5 px-3 font-bold">Área Total / Base</th>
+                    <th class="py-2.5 px-3 font-bold">Región Calculada</th>
+                    <th class="py-2.5 px-3 font-bold text-right">Verificación de Razón</th>
+                  </tr>
+                </thead>
+                <tbody id="logTableBody" class="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
+                  <!-- Filas registradas -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA (5 cols): CONTROLES INTERACTIVOS + DEMOSTRACIÓN PASO A PASO -->
+        <div class="xl:col-span-5 flex flex-col gap-5">
+
+          <!-- PANEL DE DESLIZADORES DINÁMICOS -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-indigo-500"></i>
+                <span>Parámetros Interactivos de la Figura</span>
+              </h3>
+              <span class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">
+                Tiempo Real
+              </span>
+            </div>
+
+            <!-- Contenedor de Sliders Generados Según la Propiedad -->
+            <div id="slidersContainer" class="space-y-3.5">
+              <!-- Inyectado por JS -->
+            </div>
+          </div>
+
+          <!-- PANEL DE DEMOSTRACIÓN PASO A PASO -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-4">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                  <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-emerald-500"></i>
+                    <span>Demostración Geométrica Paso a Paso</span>
+                  </h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Haz clic en cada paso para resaltar los trazos y ecuaciones en el lienzo
+                  </p>
+                </div>
+                <span id="stepCounterBadge" class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  Paso 1 / 4
+                </span>
+              </div>
+
+              <!-- Botones numerados de pasos -->
+              <div id="stepPillsContainer" class="flex flex-wrap gap-1.5">
+                <!-- Pastillas Paso 1, Paso 2, etc. -->
+              </div>
+
+              <!-- Tarjeta activa de explicación del paso -->
+              <div id="activeStepCard" class="p-4 rounded-xl bg-gradient-to-br from-indigo-50/90 via-white to-slate-50 dark:from-slate-800/90 dark:via-slate-900 dark:to-slate-800/60 border border-indigo-200/80 dark:border-indigo-500/30 space-y-3 transition-all">
+                <div class="flex items-center gap-2">
+                  <span id="stepNumberCircle" class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                    1
+                  </span>
+                  <h4 id="stepTitle" class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+                    Título del paso
+                  </h4>
+                </div>
+                <div id="stepBody" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed space-y-2">
+                  <!-- Explicación detallada del paso -->
+                </div>
+                <div id="stepMathHighlight" class="p-3 rounded-lg bg-white/90 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 font-mono text-xs sm:text-sm text-indigo-700 dark:text-indigo-300 text-center shadow-inner">
+                  <!-- Ecuación clave del paso -->
+                </div>
+              </div>
+
+              <!-- Lista completa de pasos colapsada / vista rápida -->
+              <div id="allStepsList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                <!-- Resumen de todos los pasos -->
+              </div>
+            </div>
+
+            <!-- Controles Anterior / Siguiente Paso -->
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+              <button id="prevStepBtn" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-indigo-600 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Paso Anterior</span>
+              </button>
+              <button id="nextStepBtn" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500 transition flex items-center gap-1.5 shadow-sm shadow-indigo-500/20">
+                <span>Siguiente Paso</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL DE RESUMEN DE LAS 8 DIAPOSITIVAS (CHEAT SHEET) -->
+  <div id="cheatSheetModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-5xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500 flex items-center justify-center">
+            <i class="fa-solid fa-table-cells-large"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Formulario General — Las 10 Propiedades de las Diapositivas</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Haz clic en cualquier tarjeta para ir directamente a su simulador interactivo</p>
+          </div>
+        </div>
+        <button id="closeCheatSheetBtn" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-rose-500 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div id="cheatSheetGrid" class="p-4 sm:p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Generado dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT PRINCIPAL DEL SIMULADOR -->
+  <script>
+    /*************************************************************************
+     * 1. BASE DE DATOS DE LAS 10 PROPIEDADES (CUBRIENDO LAS 8 DIAPOSITIVAS)
+     *************************************************************************/
+    const PROPERTIES = [
+      // ==================== BLOQUE I: REGIONES TRIANGULARES ====================
+      {
+        id: 'tri-1',
+        block: 'BLOQUE I: REGIONES TRIANGULARES',
+        slideLabel: 'Diapositiva 1 (Fig. 1)',
+        shortTitle: '1. Ceviana y Razón de Bases',
+        title: 'Relación de Áreas con una Ceviana (S₁ / S₂ = AE / EC)',
+        category: 'Regiones Triangulares',
+        subtitle: 'Al trazar una ceviana BE en el triángulo ABC, ambos triángulos parciales comparten el mismo vértice B y, por lo tanto, la misma altura h respecto a la base AC.',
+        formulaHTML: `
+          <div class="text-sm sm:text-base font-bold font-mono flex items-center justify-center gap-1">
+            <span class="math-frac"><span>S₁</span><span>S₂</span></span>
+            <span class="text-rose-600 dark:text-rose-400">=</span>
+            <span class="math-frac"><span>AE</span><span>EC</span></span>
+          </div>
+        `,
+        subModes: null,
+        sliders: [
+          { key: 'AE', label: 'Segmento AE (Base izquierda)', min: 2, max: 16, step: 0.5, unit: 'u', default: 9 },
+          { key: 'EC', label: 'Segmento EC (Base derecha)', min: 2, max: 16, step: 0.5, unit: 'u', default: 5 },
+          { key: 'h',  label: 'Altura común (h)', min: 4, max: 16, step: 0.5, unit: 'u', default: 10 },
+          { key: 'bx', label: 'Desplazamiento horizontal de B', min: -4, max: 14, step: 0.5, unit: 'u', default: 4 }
+        ],
+        steps: [
+          {
+            title: 'Identificar la altura común h desde el vértice B',
+            body: 'Observa los triángulos parciales <b>△ABE</b> (región S₁) y <b>△EBC</b> (región S₂). Como las bases AE y EC están sobre la misma recta AC y comparten el vértice superior B, la distancia perpendicular desde B hasta la recta AC es la <b>misma altura h</b> para ambos.',
+            math: 'Altura(△ABE) = Altura(△EBC) = h'
+          },
+          {
+            title: 'Expresar el área S₁ y S₂ con la fórmula básica',
+            body: 'El área de cualquier región triangular es igual al semiproducto de su base por su altura correspondiente:',
+            math: 'S₁ = (AE · h) / 2     y     S₂ = (EC · h) / 2'
+          },
+          {
+            title: 'Dividir ambas expresiones miembro a miembro',
+            body: 'Al dividir S₁ entre S₂, el factor común <b>h / 2</b> en el numerador y en el denominador se simplifica automáticamente:',
+            math: 'S₁ / S₂ = [ (AE · h) / 2 ] / [ (EC · h) / 2 ] = AE / EC'
+          },
+          {
+            title: 'Conclusión: Proporcionalidad directa con las bases',
+            body: 'Queda demostrado que la razón entre las áreas de dos triángulos que comparten la misma altura es igual a la razón de sus bases respectivas, sin importar la inclinación del vértice B.',
+            math: '∴   S₁ / S₂ = AE / EC'
+          }
+        ]
+      },
+      {
+        id: 'tri-2',
+        block: 'BLOQUE I: REGIONES TRIANGULARES',
+        slideLabel: 'Diapositiva 1 (Fig. 2)',
+        shortTitle: '2. Propiedad de la Mediana',
+        title: 'La Mediana Divide al Triángulo en Dos Áreas Equivalentes (S₁ = S₂)',
+        category: 'Regiones Triangulares',
+        subtitle: 'Si BE es mediana relativa al lado AC, entonces E es punto medio (AE = EC, marcados con •). Por ello, las dos regiones triangulares determinadas tienen igual área.',
+        formulaHTML: `
+          <div class="text-base sm:text-lg font-extrabold font-mono tracking-wide">
+            S₁ <span class="text-rose-600 dark:text-rose-400">=</span> S₂
+          </div>
+        `,
+        subModes: null,
+        sliders: [
+          { key: 'halfBase', label: 'Longitud de cada mitad (AE = EC)', min: 3, max: 14, step: 0.5, unit: 'u', default: 7 },
+          { key: 'h', label: 'Altura común (h)', min: 4, max: 16, step: 0.5, unit: 'u', default: 10 },
+          { key: 'bx', label: 'Posición horizontal del vértice B', min: -3, max: 15, step: 0.5, unit: 'u', default: 4.5 }
+        ],
+        steps: [
+          {
+            title: 'Definición de Mediana BE',
+            body: 'En el triángulo ABC, el segmento <b>BE</b> une el vértice B con el punto medio E del lado opuesto AC. Los puntos negros (•) en la diapositiva indican que los segmentos son congruentes:',
+            math: 'AE = EC = m'
+          },
+          {
+            title: 'Aplicar la propiedad de la ceviana',
+            body: 'Por la Propiedad 1 demostrada anteriormente, sabemos que la razón de las áreas S₁ y S₂ es igual a la razón de sus bases AE y EC:',
+            math: 'S₁ / S₂ = AE / EC = m / m = 1'
+          },
+          {
+            title: 'Cálculo directo con altura común h',
+            body: 'Ambos triángulos tienen base <b>m</b> y la misma altura <b>h</b> trazada desde B:',
+            math: 'S₁ = (m · h) / 2     y     S₂ = (m · h) / 2   ⇒   S₁ = S₂ = A_ABC / 2'
+          }
+        ]
+      },
+      {
+        id: 'tri-3',
+        block: 'BLOQUE I: REGIONES TRIANGULARES',
+        slideLabel: 'Diapositiva 1 (Fig. 3)',
+        shortTitle: '3. Baricentro y las 3 Medianas (6S)',
+        title: 'Las Tres Medianas y el Baricentro Dividen al Triángulo en 6 Áreas Iguales (S)',
+        category: 'Regiones Triangulares',
+        subtitle: 'Al trazar las tres medianas AN, BM y CP que concurren en el baricentro G, la región triangular ABC queda dividida en 6 triángulos equivalentes de área S = A_ABC / 6.',
+        formulaHTML: `
+          <div class="text-sm sm:text-base font-extrabold font-mono">
+            S = <span class="math-frac"><span>1</span><span>6</span></span> · A<sub>ABC</sub>
+          </div>
+        `,
+        subModes: null,
+        sliders: [
+          { key: 'totalArea', label: 'Área Total del Triángulo (A_ABC)', min: 12, max: 240, step: 6, unit: 'u²', default: 60 },
+          { key: 'skew', label: 'Asimetría del vértice superior B', min: 0.25, max: 0.75, step: 0.05, unit: '', default: 0.42 }
+        ],
+        steps: [
+          {
+            title: 'Asignar áreas a los pares con base en los puntos medios',
+            body: 'En el triángulo inferior <b>△AGC</b>, el segmento GM es mediana porque M es punto medio de AC (•). Por lo tanto, los dos triángulos inferiores tienen igual área <b>x</b>. Análogamente, en △AGB ambos valen <b>y</b>, y en △BGC ambos valen <b>z</b>.',
+            math: 'Áreas en △AGC: (x, x)  |  En △AGB: (y, y)  |  En △BGC: (z, z)'
+          },
+          {
+            title: 'Aplicar la propiedad de la mediana BM en el triángulo total ABC',
+            body: 'La mediana completa <b>BM</b> divide al triángulo total ABC en dos regiones equivalentes: Área(△ABM) = Área(△CBM). Sumando las regiones internas de cada lado:',
+            math: '(2y + x) = (2z + x)   ⇒   2y = 2z   ⇒   y = z'
+          },
+          {
+            title: 'Aplicar la propiedad de la mediana AN en el triángulo total ABC',
+            body: 'De igual forma, la mediana completa <b>AN</b> divide al triángulo ABC en dos mitades de igual área: Área(△ABN) = Área(△ACN):',
+            math: '(2y + z) = (2x + z)   ⇒   2y = 2x   ⇒   x = y'
+          },
+          {
+            title: 'Conclusión: Las 6 regiones son exactamente iguales a S',
+            body: 'Como <b>x = y = z = S</b>, las 6 regiones triangulares determinadas por las tres medianas tienen exactamente la misma área S, que equivale a la sexta parte del área total:',
+            math: 'x = y = z = S   ⇒   6S = A_ABC   ⇒   S = A_ABC / 6'
+          }
+        ]
+      },
+      {
+        id: 'tri-4',
+        block: 'BLOQUE I: REGIONES TRIANGULARES',
+        slideLabel: 'Diapositiva 2',
+        shortTitle: '4. Semejanza entre Paralelas (a²/b²)',
+        title: 'Relación de Áreas en Triángulos Semejantes entre Paralelas (AB // CD)',
+        category: 'Regiones Triangulares',
+        subtitle: 'Si AB // CD y las secantes CB y AD se cortan en E, se cumple que △AEB ~ △CED en razón a : b, y sus áreas están en la razón de los cuadrados de sus lados homólogos.',
+        formulaHTML: `
+          <div class="text-sm sm:text-base font-bold font-mono flex items-center justify-center gap-1">
+            <span class="math-frac"><span>S₁</span><span>S₂</span></span>
+            <span class="text-rose-600 dark:text-rose-400">=</span>
+            <span class="math-frac"><span>a²</span><span>b²</span></span>
+          </div>
+        `,
+        subModes: null,
+        sliders: [
+          { key: 'a', label: 'Parámetro de base inferior (a)', min: 2, max: 12, step: 0.5, unit: '', default: 8 },
+          { key: 'b', label: 'Parámetro de base superior (b)', min: 2, max: 12, step: 0.5, unit: '', default: 5 },
+          { key: 'k', label: 'Constante de escala (k)', min: 1, max: 3, step: 0.5, unit: '', default: 1 },
+          { key: 'H', label: 'Altura total entre paralelas', min: 6, max: 16, step: 1, unit: 'u', default: 10 }
+        ],
+        steps: [
+          {
+            title: 'Demostrar que △AEB ~ △CED por ángulos alternos internos',
+            body: 'Como las rectas <b>AB y CD son paralelas</b> (AB // CD), los ángulos alternos internos son congruentes: ∠EAB = ∠EDC y ∠EBA = ∠ECD. Además, ∠AEB = ∠DEC por ser opuestos por el vértice E. Por el criterio AA, ambos triángulos son semejantes:',
+            math: '△AEB ≈ △CED   (Razón de semejanza = AB / CD = ak / bk = a / b)'
+          },
+          {
+            title: 'Relación de las alturas homólogas h₁ y h₂',
+            body: 'En dos triángulos semejantes, no solo los lados están en razón <b>a / b</b>, sino también sus alturas respectivas trazadas desde E hacia las bases paralelas:',
+            math: 'h₁ / h₂ = a / b   ⇒   h₁ = a · m   y   h₂ = b · m'
+          },
+          {
+            title: 'Calcular el cociente de las áreas S₁ y S₂',
+            body: 'Multiplicamos base por altura sobre 2 para cada triángulo y dividimos miembro a miembro:',
+            math: 'S₁ / S₂ = [ (ak · h₁) / 2 ] / [ (bk · h₂) / 2 ] = (a / b) · (h₁ / h₂)'
+          },
+          {
+            title: 'Sustituir la razón de alturas para obtener a² / b²',
+            body: 'Como <b>h₁ / h₂ = a / b</b>, el producto de razones nos da el cuadrado de la razón de semejanza:',
+            math: 'S₁ / S₂ = (a / b) · (a / b) = a² / b²'
+          }
+        ]
+      },
+
+      // ==================== BLOQUE II: REGIONES CUADRANGULARES ====================
+      {
+        id: 'cuad-5',
+        block: 'BLOQUE II: REGIONES CUADRANGULARES',
+        slideLabel: 'Diapositiva 3',
+        shortTitle: '5. Paralelogramo: S = 1/4 y S = 1/6',
+        title: 'En el Paralelogramo ABCD: Cuartas Partes (Diagonales) y Sextas Partes (S = 1/6 A_ABCD)',
+        category: 'Regiones Cuadrangulares',
+        subtitle: 'Izquierda: Las diagonales dividen al paralelogramo en 4 regiones de igual área (1/4). Derecha: Los segmentos desde B a los puntos medios de AD y CD trisecan la diagonal AC y forman 3 regiones de área S = 1/6 A_ABCD.',
+        formulaHTML: `
+          <div class="text-sm sm:text-base font-extrabold font-mono">
+            S = <span class="math-frac"><span>1</span><span>6</span></span> · A<sub>ABCD</sub>
+          </div>
+        `,
+        subModes: [
+          { key: 'sixth', label: 'Fig. Derecha (S = 1/6)' },
+          { key: 'fourth', label: 'Fig. Izquierda (4 × S)' }
+        ],
+        sliders: [
+          { key: 'areaTotal', label: 'Área del Paralelogramo (A_ABCD)', min: 24, max: 240, step: 12, unit: 'u²', default: 120 },
+          { key: 'skew', label: 'Inclinación del Paralelogramo', min: 0, max: 0.45, step: 0.05, unit: 'rad', default: 0.25 }
+        ],
+        steps: [
+          {
+            title: 'Figura Izquierda: Las diagonales se bisecan mutuamente (4S)',
+            body: 'En todo paralelogramo ABCD, las diagonales AC y BD se cortan en su punto medio O (AO = OC y BO = OD). Así, BO es mediana en △ABC y DO es mediana en △ADC, determinando <b>4 triángulos de igual área</b>:',
+            math: 'S_izq = A_ABCD / 4'
+          },
+          {
+            title: 'Figura Derecha: Trazar la segunda diagonal auxiliar BD',
+            body: 'Para demostrar la figura de la derecha, trazamos la diagonal auxiliar <b>BD</b> que corta a AC en su punto medio O. Observa que el paralelogramo queda dividido en dos grandes triángulos: <b>△ABD</b> (mitad inferior izquierda) y <b>△BCD</b> (mitad superior derecha).',
+            math: 'Área(△ABD) = Área(△BCD) = (1/2) · A_ABCD'
+          },
+          {
+            title: 'P y Q son baricentros de △ABD y △BCD (Trisección de AC)',
+            body: 'En <b>△ABD</b>, AO es mediana y BM (hacia el punto medio de AD) también es mediana; por tanto, su intersección <b>P es el baricentro de △ABD</b>, cumpliéndose AP = 2·PO. Análogamente, en <b>△BCD</b>, Q es baricentro y QC = 2·QO. Como AO = OC = 3t, resulta:',
+            math: 'AP = 2t,   PQ = PO + OQ = t + t = 2t,   QC = 2t   ⇒   AP = PQ = QC'
+          },
+          {
+            title: 'Las tres regiones superiores comparten altura desde B',
+            body: 'En el triángulo superior <b>△ABC</b> (cuya área es <b>1/2 de A_ABCD</b>), los segmentos BP y BQ dividen la base AC en 3 partes iguales (marcadas con zigzag rojo en la diapositiva). Por ello, las 3 regiones triangulares tienen igual área S:',
+            math: '3S = Área(△ABC) = (1/2) · A_ABCD   ⇒   S = (1/6) · A_ABCD'
+          }
+        ]
+      },
+      {
+        id: 'cuad-6',
+        block: 'BLOQUE II: REGIONES CUADRANGULARES',
+        slideLabel: 'Diapositiva 4',
+        shortTitle: '6. Paralelogramo: Punto Medio (S = 1/4)',
+        title: 'En el Paralelogramo ABCD: Triángulos sobre la Mitad de la Base (S = 1/4 A_ABCD)',
+        category: 'Regiones Cuadrangulares',
+        subtitle: 'Si M es punto medio de AD (AM = MD, marcados con •), tanto el triángulo lateral △ABM como el triángulo interior △BMD tienen un área igual a la cuarta parte del paralelogramo.',
+        formulaHTML: `
+          <div class="text-sm sm:text-base font-extrabold font-mono">
+            S = <span class="math-frac"><span>1</span><span>4</span></span> · A<sub>ABCD</sub>
+          </div>
+        `,
+        subModes: [
+          { key: 'both', label: 'Ambos Casos' },
+          { key: 'left', label: 'Caso 1 (△ABM)' },
+          { key: 'right', label: 'Caso 2 (△BMD)' }
+        ],
+        sliders: [
+          { key: 'b', label: 'Base AD del paralelogramo (b)', min: 6, max: 20, step: 1, unit: 'u', default: 12 },
+          { key: 'h', label: 'Altura del paralelogramo (h)', min: 4, max: 14, step: 1, unit: 'u', default: 8 },
+          { key: 'skew', label: 'Inclinación horizontal', min: 0.1, max: 0.45, step: 0.05, unit: '', default: 0.25 }
+        ],
+        steps: [
+          {
+            title: 'Área total del paralelogramo ABCD',
+            body: 'Sea <b>b</b> la longitud de la base AD y <b>h</b> la distancia perpendicular (altura) entre los lados paralelos AD y BC. El área del paralelogramo es:',
+            math: 'A_ABCD = b · h'
+          },
+          {
+            title: 'Demostración de la Figura Izquierda (△ABM)',
+            body: 'Como M es punto medio de AD, la base del triángulo △ABM mide <b>AM = b / 2</b> y su altura desde B hasta AD es la misma altura <b>h</b> del paralelogramo:',
+            math: 'S(△ABM) = (Base · Altura) / 2 = [ (b / 2) · h ] / 2 = (1/4) · b · h = (1/4) · A_ABCD'
+          },
+          {
+            title: 'Demostración de la Figura Derecha (△BMD)',
+            body: 'El triángulo sombreado <b>△BMD</b> tiene como base el otro segmento igual <b>MD = b / 2</b> y comparte exactamente el mismo vértice superior B (altura <b>h</b>). Además, en △ABD (que vale 1/2 de ABCD), BM es mediana, por lo que divide a △ABD en dos partes iguales de 1/4:',
+            math: 'S(△BMD) = S(△ABM) = (1/2) · Área(△ABD) = (1/4) · A_ABCD'
+          }
+        ]
+      },
+      {
+        id: 'cuad-7',
+        block: 'BLOQUE II: REGIONES CUADRANGULARES',
+        slideLabel: 'Diapositiva 5',
+        shortTitle: '7. Paralelogramo: S = 1/8 y S = 1/2',
+        title: 'En el Paralelogramo ABCD: Octava Parte (S = 1/8) y Mitad Inscrita (S = 1/2)',
+        category: 'Regiones Cuadrangulares',
+        subtitle: 'Izquierda: Al unir A con el punto medio de BC y B con el punto medio de AD, se forma un triángulo de área S = 1/8 A_ABCD. Derecha: Todo triángulo inscrito con base AD y vértice en BC tiene área S = 1/2 A_ABCD.',
+        formulaHTML: `
+          <div class="text-xs sm:text-sm font-extrabold font-mono flex items-center gap-3">
+            <span>S = <span class="math-frac"><span>1</span><span>8</span></span>A</span>
+            <span class="text-rose-500">|</span>
+            <span>S = <span class="math-frac"><span>1</span><span>2</span></span>A</span>
+          </div>
+        `,
+        subModes: [
+          { key: 'eighth', label: 'Fig. Izquierda (S = 1/8)' },
+          { key: 'half', label: 'Fig. Derecha (S = 1/2)' }
+        ],
+        sliders: [
+          { key: 'areaTotal', label: 'Área del Paralelogramo (A_ABCD)', min: 32, max: 240, step: 8, unit: 'u²', default: 80 },
+          { key: 'pRatio', label: 'Posición del vértice superior en BC (Fig. Derecha)', min: 0.15, max: 0.85, step: 0.05, unit: '', default: 0.5 },
+          { key: 'skew', label: 'Inclinación del Paralelogramo', min: 0.1, max: 0.45, step: 0.05, unit: '', default: 0.25 }
+        ],
+        steps: [
+          {
+            title: 'Figura Izquierda: Trazar la paralela media MN que une los puntos medios',
+            body: 'Sean <b>M</b> el punto medio de AD y <b>N</b> el punto medio de BC. Como BN = AM y BN // AM, el cuadrilátero izquierdo <b>ABNM es un paralelogramo</b> cuya área es exactamente la mitad del paralelogramo total ABCD:',
+            math: 'Área(Paralelogramo ABNM) = (1/2) · A_ABCD'
+          },
+          {
+            title: 'Las diagonales AN y BM dividen a ABNM en 4 partes iguales',
+            body: 'Observa que los segmentos trazados en la diapositiva (<b>AN</b> y <b>BM</b>) son precisamente las <b>dos diagonales del sub-paralelogramo ABNM</b>. Como las diagonales de un paralelogramo lo dividen en 4 triángulos equivalentes, la región verde S es la cuarta parte de la mitad:',
+            math: 'S = (1/4) · Área(ABNM) = (1/4) · (1/2) · A_ABCD = (1/8) · A_ABCD'
+          },
+          {
+            title: 'Figura Derecha: Triángulo inscrito con base AD y altura h',
+            body: 'En la figura de la derecha, el triángulo amarillo tiene como base el lado completo <b>AD = b</b> y su tercer vértice se ubica sobre el lado paralelo BC. Por lo tanto, su altura es igual a la altura <b>h</b> del paralelogramo:',
+            math: 'S = (Base · Altura) / 2 = (b · h) / 2 = (1/2) · A_ABCD'
+          }
+        ]
+      },
+      {
+        id: 'cuad-8',
+        block: 'BLOQUE II: REGIONES CUADRANGULARES',
+        slideLabel: 'Diapositiva 6',
+        shortTitle: '8. Rectángulo: Diagonal y Mediana (1/12)',
+        title: 'En el Rectángulo ABCD: Diagonal AC y Mediana BE (S = 1/12 A_ABCD)',
+        category: 'Regiones Cuadrangulares',
+        subtitle: 'Si AC es diagonal y BE es mediana (E punto medio de AD), el triángulo determinado sobre AE tiene área igual a la doceava parte del área del rectángulo.',
+        formulaHTML: `
+          <div class="text-sm sm:text-base font-extrabold font-mono">
+            S = <span class="math-frac"><span>1</span><span>12</span></span> · A<sub>ABCD</sub>
+          </div>
+        `,
+        subModes: null,
+        sliders: [
+          { key: 'b', label: 'Base AD del rectángulo (b)', min: 6, max: 24, step: 1, unit: 'u', default: 12 },
+          { key: 'h', label: 'Altura AB del rectángulo (h)', min: 4, max: 16, step: 1, unit: 'u', default: 8 }
+        ],
+        steps: [
+          {
+            title: 'Método 1 (Por Semejanza): △APE ~ △CPB en razón 1 : 2',
+            body: 'Como <b>AE // BC</b> y E es punto medio de AD, tenemos que <b>AE = b/2</b> mientras que <b>BC = b</b>. Los triángulos <b>△APE</b> y <b>△CPB</b> forman una mariposa entre paralelas con razón de bases <b>1 : 2</b>:',
+            math: 'AE / BC = (b / 2) / b = 1 / 2   ⇒   h₁ / h₂ = 1 / 2'
+          },
+          {
+            title: 'Calcular la altura h₁ del triángulo sombreado △APE',
+            body: 'Como la suma de las alturas de ambos triángulos es la altura total del rectángulo (<b>h₁ + h₂ = h</b>) y h₂ = 2·h₁, resulta que 3·h₁ = h, es decir:',
+            math: 'h₁ = (1/3) · h'
+          },
+          {
+            title: 'Sustituir base (b/2) y altura (h/3) en la fórmula del área',
+            body: 'Calculamos el área S del triángulo △APE multiplicando su base AE por su altura h₁ entre 2:',
+            math: 'S = (1/2) · AE · h₁ = (1/2) · (b / 2) · (h / 3) = (1/12) · (b · h) = (1/12) · A_ABCD'
+          },
+          {
+            title: 'Método 2 (Por Baricentro): Trazando la otra diagonal BD',
+            body: 'Si trazamos la diagonal BD (que corta a AC en su punto medio O), en el triángulo <b>△ABD</b> (cuya área es 1/2 del rectángulo) los segmentos AO y BE son dos medianas. Por tanto, su intersección P es el <b>baricentro de △ABD</b>, por lo que S es 1/6 de △ABD:',
+            math: 'S = (1/6) · Área(△ABD) = (1/6) · (1/2 · A_ABCD) = (1/12) · A_ABCD'
+          }
+        ]
+      },
+      {
+        id: 'cuad-9',
+        block: 'BLOQUE II: REGIONES CUADRANGULARES',
+        slideLabel: 'Diapositiva 7',
+        shortTitle: '9. Rectángulo: Dos Medianas (1/20)',
+        title: 'En el Rectángulo ABCD: Intersección de las Medianas AE y BF (S = 1/20 A_ABCD)',
+        category: 'Regiones Cuadrangulares',
+        subtitle: 'Si AE (E punto medio de CD) y BF (F punto medio de AD) son medianas que se cortan en P, la región triangular △APF equivale a la veinteava parte del rectángulo.',
+        formulaHTML: `
+          <div class="text-sm sm:text-base font-extrabold font-mono">
+            S = <span class="math-frac"><span>1</span><span>20</span></span> · A<sub>ABCD</sub>
+          </div>
+        `,
+        subModes: null,
+        sliders: [
+          { key: 'b', label: 'Base AD del rectángulo (b)', min: 6, max: 20, step: 1, unit: 'u', default: 12 },
+          { key: 'h', label: 'Altura AB del rectángulo (h)', min: 5, max: 15, step: 1, unit: 'u', default: 10 }
+        ],
+        steps: [
+          {
+            title: 'El triángulo rectángulo △ABF equivale a 1/4 del rectángulo',
+            body: 'Como F es punto medio de AD, el segmento AF mide <b>b / 2</b> y la altura AB mide <b>h</b>. Por lo tanto, el área del triángulo rectángulo △ABF es la cuarta parte del rectángulo total:',
+            math: 'Área(△ABF) = (1/2) · (b / 2) · h = (1/4) · A_ABCD'
+          },
+          {
+            title: 'Prolongar AE hasta cortar la prolongación de BC (o usar semejanza 1 : 4)',
+            body: 'En el caso particular de un cuadrado (y por invarianza afín en cualquier rectángulo), los triángulos rectángulos <b>△ABF</b> y <b>△DAE</b> tienen catetos en relación <b>1 : 2</b>. Al cortarse perpendicularmente en P, los triángulos <b>△APF</b> y <b>△BPA</b> son semejantes con catetos en razón <b>1 : 2</b>:',
+            math: 'Razón de lados(△APF : △BPA) = 1 : 2   ⇒   Razón de áreas = 1² : 2² = 1k : 4k'
+          },
+          {
+            title: 'Verificación analítica exacta de la altura de P (h_P = h / 5)',
+            body: 'Ubicando A en el origen (0,0), la recta AE tiene ecuación <b>y = (h / 2b)·x</b> y la recta BF tiene ecuación <b>y = h·(1 − 2x/b)</b>. Igualando ambas ecuaciones obtenemos el punto de intersección P:',
+            math: '(h / 2b)·x = h·(1 − 2x/b)   ⇒   x / (2b) + 2x / b = 1   ⇒   x = (2/5)·b  ;   y = (1/5)·h'
+          },
+          {
+            title: 'Cálculo final del área S = (1/20) · A_ABCD',
+            body: 'Como el triángulo △APF equivale a <b>1k de un total de 5k</b> dentro de △ABF (o directamente con base AF = b/2 y altura y = h/5), concluimos:',
+            math: 'S = (1/5) · Área(△ABF) = (1/5) · (1/4 · A_ABCD) = (1/20) · A_ABCD'
+          }
+        ]
+      },
+      {
+        id: 'cuad-10',
+        block: 'BLOQUE II: REGIONES CUADRANGULARES',
+        slideLabel: 'Diapositiva 8',
+        shortTitle: '10. Cuadrado Central 4k de 20k (1/5)',
+        title: 'Descomposición Notable 20k: Cuadrado Central = 4k = 1/5 (A_ABCD)',
+        category: 'Regiones Cuadrangulares',
+        subtitle: 'Al trazar los 4 segmentos desde los vértices hacia los puntos medios en una región cuadrangular de área 20k, se forman 4 esquinas de área k, 4 trapecios de área 3k y una región central de área 4k = 1/5(20k).',
+        formulaHTML: `
+          <div class="text-sm sm:text-base font-extrabold font-mono">
+            A<sub>central</sub> = 4k = <span class="math-frac"><span>1</span><span>5</span></span>(20k)
+          </div>
+        `,
+        subModes: [
+          { key: 'all', label: 'Todas las Zonas (20k)' },
+          { key: 'center', label: 'Centro (4k)' },
+          { key: 'traps', label: 'Trapecios (3k)' },
+          { key: 'corners', label: 'Esquinas (k)' }
+        ],
+        sliders: [
+          { key: 'kVal', label: 'Valor de la constante unitaria (k)', min: 1, max: 25, step: 1, unit: 'u²', default: 5 }
+        ],
+        steps: [
+          {
+            title: 'Paso 1: Las 4 esquinas celestes valen k cada una (1/20 del total)',
+            body: 'Sea el área total del cuadrado ABCD igual a <b>20k</b>. Por la <b>Propiedad 9 (Diapositiva 7)</b> que acabamos de demostrar, cada triángulo rectángulo pequeño en las esquinas (formado por dos medianas perpendiculares) vale exactamente <b>1/20 del área total</b>:',
+            math: 'Área de cada esquina celeste = (1/20) · (20k) = k     (Total 4 esquinas = 4k)'
+          },
+          {
+            title: 'Paso 2: Cada triángulo grande de mediana vale 5k (1/4 del total)',
+            body: 'Observa cualquiera de los 4 triángulos rectángulos grandes que van de un vértice al punto medio (por ejemplo, el que une A, B y el punto medio de AD). Su área es <b>1/4 del área total</b>:',
+            math: 'Área(Triángulo grande de mediana) = (1/4) · (20k) = 5k'
+          },
+          {
+            title: 'Paso 3: Los 4 trapecios blancos valen 3k cada uno',
+            body: 'Cada triángulo grande de área <b>5k</b> está compuesto por <b>dos esquinas celestes de área k</b> y <b>un trapecio blanco</b>. Restando las dos esquinas obtenemos el área de cada trapecio blanco:',
+            math: 'Área(Trapecio blanco) = 5k − k − k = 3k     (Total 4 trapecios = 12k)'
+          },
+          {
+            title: 'Paso 4: El cuadrado central amarillo vale 4k = 1/5 (20k)',
+            body: 'Restando del área total <b>20k</b> las 4 esquinas celestes (4k) y los 4 trapecios blancos (12k), obtenemos el área del cuadrado central amarillo:',
+            math: 'A_central = 20k − 4(k) − 4(3k) = 20k − 16k = 4k = (1/5) · (20k)'
+          }
+        ]
+      }
+    ];
+
+    /*************************************************************************
+     * 2. ESTADO GLOBAL DE LA APLICACIÓN
+     *************************************************************************/
+    const state = {
+      currentPropIndex: 0,
+      currentStepIndex: 0,
+      subMode: null,
+      showAux: true,
+      showValues: true,
+      isDark: true,
+      params: {},
+      logs: []
+    };
+
+    // Inicializar parámetros por defecto para todas las propiedades
+    PROPERTIES.forEach(prop => {
+      state.params[prop.id] = {};
+      prop.sliders.forEach(s => {
+        state.params[prop.id][s.key] = s.default;
+      });
+    });
+
+    /*************************************************************************
+     * 3. REFERENCIAS DEL DOM Y TEMA DÍA / NOCHE
+     *************************************************************************/
+    const canvas = document.getElementById('geoCanvas');
+    const ctx = canvas.getContext('2d');
+    const canvasWrapper = document.getElementById('canvasWrapper');
+
+    function updateThemeUI() {
+      const htmlEl = document.documentElement;
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('themeText');
+
+      if (state.isDark) {
+        htmlEl.classList.add('dark');
+        themeIcon.className = 'fa-solid fa-sun text-amber-400';
+        themeText.textContent = 'Modo Día';
+        canvasWrapper.classList.remove('canvas-grid-light');
+        canvasWrapper.classList.add('canvas-grid-dark');
+      } else {
+        htmlEl.classList.remove('dark');
+        themeIcon.className = 'fa-solid fa-moon text-indigo-600';
+        themeText.textContent = 'Modo Noche';
+        canvasWrapper.classList.remove('canvas-grid-dark');
+        canvasWrapper.classList.add('canvas-grid-light');
+      }
+      drawScene();
+    }
+
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      state.isDark = !state.isDark;
+      updateThemeUI();
+    });
+
+    // Menú móvil
+    const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    function toggleMobileSidebar(show) {
+      if (show) {
+        sidebar.classList.remove('-translate-x-full');
+        sidebarBackdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        sidebarBackdrop.classList.add('hidden');
+      }
+    }
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => toggleMobileSidebar(true));
+    document.getElementById('closeSidebarBtn').addEventListener('click', () => toggleMobileSidebar(false));
+    sidebarBackdrop.addEventListener('click', () => toggleMobileSidebar(false));
+
+    /*************************************************************************
+     * 4. RENDERIZADO DE LA NAVEGACIÓN Y CAMBIO DE PROPIEDAD
+     *************************************************************************/
+    function renderSidebarNav() {
+      const navEl = document.getElementById('propertyNav');
+      navEl.innerHTML = '';
+
+      const blocks = {};
+      PROPERTIES.forEach((p, idx) => {
+        if (!blocks[p.block]) blocks[p.block] = [];
+        blocks[p.block].push({ prop: p, idx });
+      });
+
+      Object.keys(blocks).forEach(blockName => {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'space-y-1.5';
+
+        const header = document.createElement('div');
+        header.className = 'px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5';
+        header.innerHTML = `<i class="fa-solid ${blockName.includes('TRIANGULARES') ? 'fa-play fa-rotate-270' : 'fa-vector-square'} text-[10px]"></i><span>${blockName}</span>`;
+        groupDiv.appendChild(header);
+
+        blocks[blockName].forEach(({ prop, idx }) => {
+          const isActive = idx === state.currentPropIndex;
+          const btn = document.createElement('button');
+          btn.className = `w-full text-left px-3 py-2.5 rounded-xl text-xs transition flex items-center justify-between gap-2 ${
+            isActive
+              ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/20'
+              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 font-medium'
+          }`;
+          btn.innerHTML = `
+            <div class="truncate">
+              <div class="truncate">${prop.shortTitle}</div>
+              <div class="text-[10px] ${isActive ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-500'}">${prop.slideLabel}</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-[10px] ${isActive ? 'opacity-100' : 'opacity-30'}"></i>
+          `;
+          btn.addEventListener('click', () => {
+            selectProperty(idx);
+            toggleMobileSidebar(false);
+          });
+          groupDiv.appendChild(btn);
+        });
+
+        navEl.appendChild(groupDiv);
+      });
+    }
+
+    function selectProperty(index) {
+      state.currentPropIndex = index;
+      state.currentStepIndex = 0;
+      const prop = PROPERTIES[index];
+      state.subMode = prop.subModes ? prop.subModes[0].key : null;
+
+      // Actualizar encabezado
+      document.getElementById('propBadgeSlide').textContent = prop.slideLabel;
+      document.getElementById('propBadgeCategory').textContent = prop.category;
+      document.getElementById('propTitle').textContent = prop.title;
+      document.getElementById('propSubtitle').textContent = prop.subtitle;
+      document.getElementById('formulaBox').innerHTML = prop.formulaHTML;
+
+      // Sub-modos si existen
+      renderSubModes(prop);
+
+      // Sliders
+      renderSliders(prop);
+
+      // Pasos de demostración
+      renderSteps(prop);
+
+      // Sidebar activo
+      renderSidebarNav();
+
+      // Dibujar escena
+      drawScene();
+    }
+
+    function renderSubModes(prop) {
+      const container = document.getElementById('subModeContainer');
+      if (!prop.subModes) {
+        container.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+      }
+      container.classList.remove('hidden');
+      container.innerHTML = '';
+      prop.subModes.forEach(sm => {
+        const active = state.subMode === sm.key;
+        const btn = document.createElement('button');
+        btn.className = `px-2.5 py-1 rounded-md text-xs font-semibold transition ${
+          active
+            ? 'bg-indigo-600 text-white shadow-xs'
+            : 'text-slate-600 dark:text-slate-300 hover:text-indigo-500'
+        }`;
+        btn.textContent = sm.label;
+        btn.addEventListener('click', () => {
+          state.subMode = sm.key;
+          renderSubModes(prop);
+          drawScene();
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function renderSliders(prop) {
+      const container = document.getElementById('slidersContainer');
+      container.innerHTML = '';
+      const currentParams = state.params[prop.id];
+
+      prop.sliders.forEach(slider => {
+        const val = currentParams[slider.key];
+        const wrapper = document.createElement('div');
+        wrapper.className = 'space-y-1';
+
+        wrapper.innerHTML = `
+          <div class="flex items-center justify-between text-xs">
+            <label class="font-semibold text-slate-700 dark:text-slate-200">${slider.label}</label>
+            <span id="val-${slider.key}" class="font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+              ${val}${slider.unit ? ' ' + slider.unit : ''}
+            </span>
+          </div>
+          <input
+            type="range"
+            min="${slider.min}"
+            max="${slider.max}"
+            step="${slider.step}"
+            value="${val}"
+            class="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg cursor-pointer"
+          />
+        `;
+
+        const input = wrapper.querySelector('input');
+        const valSpan = wrapper.querySelector(`#val-${slider.key}`);
+        input.addEventListener('input', (e) => {
+          const num = parseFloat(e.target.value);
+          currentParams[slider.key] = num;
+          valSpan.textContent = `${num}${slider.unit ? ' ' + slider.unit : ''}`;
+          drawScene();
+        });
+
+        container.appendChild(wrapper);
+      });
+    }
+
+    function renderSteps(prop) {
+      const total = prop.steps.length;
+      const stepIdx = state.currentStepIndex;
+      const currentStep = prop.steps[stepIdx];
+
+      document.getElementById('stepCounterBadge').textContent = `Paso ${stepIdx + 1} / ${total}`;
+      document.getElementById('stepNumberCircle').textContent = stepIdx + 1;
+      document.getElementById('stepTitle').textContent = currentStep.title;
+      document.getElementById('stepBody').innerHTML = currentStep.body;
+      document.getElementById('stepMathHighlight').textContent = currentStep.math;
+
+      // Pastillas superiores
+      const pillsEl = document.getElementById('stepPillsContainer');
+      pillsEl.innerHTML = '';
+      prop.steps.forEach((st, idx) => {
+        const active = idx === stepIdx;
+        const btn = document.createElement('button');
+        btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+          active
+            ? 'bg-indigo-600 text-white shadow-sm'
+            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-500/20'
+        }`;
+        btn.innerHTML = `<span>Paso ${idx + 1}</span>`;
+        btn.addEventListener('click', () => {
+          state.currentStepIndex = idx;
+          renderSteps(prop);
+          drawScene();
+        });
+        pillsEl.appendChild(btn);
+      });
+
+      // Lista resumen de todos los pasos
+      const allListEl = document.getElementById('allStepsList');
+      allListEl.innerHTML = '';
+      prop.steps.forEach((st, idx) => {
+        const active = idx === stepIdx;
+        const item = document.createElement('div');
+        item.className = `p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-start gap-2.5 ${
+          active
+            ? 'bg-indigo-50/60 dark:bg-indigo-950/40 border-indigo-400 dark:border-indigo-500 font-semibold text-slate-900 dark:text-white'
+            : 'bg-slate-50/50 dark:bg-slate-800/30 border-slate-200/70 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300'
+        }`;
+        item.innerHTML = `
+          <span class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5 ${
+            active ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+          }">${idx + 1}</span>
+          <div class="flex-1">
+            <div>${st.title}</div>
+            <div class="font-mono text-[11px] text-indigo-600 dark:text-indigo-400 mt-0.5">${st.math}</div>
+          </div>
+        `;
+        item.addEventListener('click', () => {
+          state.currentStepIndex = idx;
+          renderSteps(prop);
+          drawScene();
+        });
+        allListEl.appendChild(item);
+      });
+
+      // Estado botones Anterior / Siguiente
+      document.getElementById('prevStepBtn').disabled = stepIdx === 0;
+      document.getElementById('prevStepBtn').classList.toggle('opacity-40', stepIdx === 0);
+    }
+
+    document.getElementById('prevStepBtn').addEventListener('click', () => {
+      const prop = PROPERTIES[state.currentPropIndex];
+      if (state.currentStepIndex > 0) {
+        state.currentStepIndex--;
+        renderSteps(prop);
+        drawScene();
+      }
+    });
+
+    document.getElementById('nextStepBtn').addEventListener('click', () => {
+      const prop = PROPERTIES[state.currentPropIndex];
+      if (state.currentStepIndex < prop.steps.length - 1) {
+        state.currentStepIndex++;
+      } else {
+        state.currentStepIndex = 0;
+      }
+      renderSteps(prop);
+      drawScene();
+    });
+
+    // Toggles de barra del lienzo
+    document.getElementById('toggleAuxBtn').addEventListener('click', (e) => {
+      state.showAux = !state.showAux;
+      const btn = e.currentTarget;
+      btn.querySelector('span').textContent = `Trazos Auxiliares: ${state.showAux ? 'ON' : 'OFF'}`;
+      btn.className = state.showAux
+        ? 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500 transition flex items-center gap-1.5 shadow-xs'
+        : 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition flex items-center gap-1.5';
+      drawScene();
+    });
+
+    document.getElementById('toggleValuesBtn').addEventListener('click', (e) => {
+      state.showValues = !state.showValues;
+      const btn = e.currentTarget;
+      btn.classList.toggle('bg-indigo-600', state.showValues);
+      btn.classList.toggle('text-white', state.showValues);
+      drawScene();
+    });
+
+    document.getElementById('resetParamsBtn').addEventListener('click', () => {
+      const prop = PROPERTIES[state.currentPropIndex];
+      prop.sliders.forEach(s => {
+        state.params[prop.id][s.key] = s.default;
+      });
+      state.currentStepIndex = 0;
+      renderSliders(prop);
+      renderSteps(prop);
+      drawScene();
+    });
+
+    /*************************************************************************
+     * 5. UTILIDADES DE DIBUJO GEOMÉTRICO EN CANVAS
+     *************************************************************************/
+    function getPalette() {
+      if (state.isDark) {
+        return {
+          stroke: '#f8fafc',
+          mutedStroke: '#94a3b8',
+          auxStroke: '#fbbf24',
+          text: '#f8fafc',
+          subText: '#cbd5e1',
+          redLabel: '#fb7185',
+          grayFill: 'rgba(226, 232, 240, 0.16)',
+          yellowFill: 'rgba(251, 191, 36, 0.42)',
+          cyanFill: 'rgba(34, 211, 238, 0.42)',
+          greenFill: 'rgba(52, 211, 153, 0.42)',
+          brightYellow: 'rgba(250, 204, 21, 0.78)',
+          cardBg: 'rgba(15, 23, 42, 0.85)'
+        };
+      } else {
+        return {
+          stroke: '#0f172a',
+          mutedStroke: '#64748b',
+          auxStroke: '#d97706',
+          text: '#0f172a',
+          subText: '#334155',
+          redLabel: '#be123c',
+          grayFill: 'rgba(226, 232, 240, 0.7)',
+          yellowFill: 'rgba(253, 224, 71, 0.65)',
+          cyanFill: 'rgba(34, 211, 238, 0.65)',
+          greenFill: 'rgba(110, 231, 183, 0.68)',
+          brightYellow: 'rgba(250, 204, 21, 0.92)',
+          cardBg: 'rgba(255, 255, 255, 0.9)'
+        };
+      }
+    }
+
+    function fillPolygon(pts, fillStyle, strokeStyle = null, lineWidth = 2.2) {
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x, pts[i].y);
+      }
+      ctx.closePath();
+      if (fillStyle) {
+        ctx.fillStyle = fillStyle;
+        ctx.fill();
+      }
+      if (strokeStyle) {
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = lineWidth;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      }
+    }
+
+    function drawLine(p1, p2, color, width = 2.2, dash = []) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash(dash);
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawVertex(p, label, offset = { x: 0, y: -12 }, pal) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = pal.stroke;
+      ctx.fill();
+
+      ctx.font = 'italic bold 16px Georgia, serif';
+      ctx.fillStyle = pal.text;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, p.x + offset.x, p.y + offset.y);
+      ctx.restore();
+    }
+
+    // Marca de congruencia: punto negro (•) como en las diapositivas
+    function drawDotMark(p1, p2, pal) {
+      const mx = (p1.x + p2.x) / 2;
+      const my = (p1.y + p2.y) / 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(mx, my, 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = pal.stroke;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Marca de congruencia: barra gruesa negra (▬) como en las diapositivas
+    function drawBarMark(p1, p2, pal) {
+      const mx = (p1.x + p2.x) / 2;
+      const my = (p1.y + p2.y) / 2;
+      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+      ctx.save();
+      ctx.translate(mx, my);
+      ctx.rotate(angle);
+      ctx.fillStyle = pal.stroke;
+      ctx.fillRect(-14, -4, 28, 8);
+      ctx.restore();
+    }
+
+    // Marca de congruencia: zigzag rojo (como en Diapositiva 1c y 3b)
+    function drawZigZagMark(p1, p2) {
+      const mx = (p1.x + p2.x) / 2;
+      const my = (p1.y + p2.y) / 2;
+      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+      ctx.save();
+      ctx.translate(mx, my);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      const len = 18;
+      const peaks = 5;
+      ctx.moveTo(-len, 0);
+      for (let i = 0; i <= peaks; i++) {
+        const x = -len + (i / peaks) * (len * 2);
+        const y = i % 2 === 0 ? -5 : 5;
+        ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Etiqueta de área estilo diapositiva (S, S₁, S₂, k, 3k, 4k)
+    function drawAreaLabel(p, mainText, subText = '', pal, scale = 1) {
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const fontSize = Math.round(24 * scale);
+      ctx.font = `900 ${fontSize}px Inter, sans-serif`;
+      ctx.fillStyle = pal.redLabel;
+      ctx.fillText(mainText, p.x - (subText ? 5 : 0), p.y);
+
+      if (subText) {
+        ctx.font = `800 ${Math.round(15 * scale)}px Inter, sans-serif`;
+        ctx.fillText(subText, p.x + fontSize * 0.48, p.y + 7 * scale);
+      }
+      ctx.restore();
+    }
+
+    function centroid(pts) {
+      let sx = 0, sy = 0;
+      pts.forEach(p => { sx += p.x; sy += p.y; });
+      return { x: sx / pts.length, y: sy / pts.length };
+    }
+
+    function lineIntersection(p1, p2, p3, p4) {
+      const d = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
+      if (Math.abs(d) < 1e-8) return { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+      const t = ((p1.x - p3.x) * (p3.y - p4.y) - (p1.y - p3.y) * (p3.x - p4.x)) / d;
+      return {
+        x: p1.x + t * (p2.x - p1.x),
+        y: p1.y + t * (p2.y - p1.y)
+      };
+    }
+
+    function drawRightAngle(foot, dirVec, upVec, size, color) {
+      ctx.save();
+      const p1 = { x: foot.x + dirVec.x * size, y: foot.y + dirVec.y * size };
+      const p2 = { x: p1.x + upVec.x * size, y: p1.y + upVec.y * size };
+      const p3 = { x: foot.x + upVec.x * size, y: foot.y + upVec.y * size };
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function updateMetricsAndOverlay(overlayLines, metricsArray) {
+      const overlay = document.getElementById('canvasOverlayBadge');
+      overlay.innerHTML = overlayLines.map(line => `<div>${line}</div>`).join('');
+
+      const bar = document.getElementById('liveMetricsBar');
+      bar.innerHTML = metricsArray.map(m => `
+        <div class="p-3 text-center">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">${m.label}</div>
+          <div class="text-sm sm:text-base font-extrabold font-mono ${m.highlight ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-100'} mt-0.5">${m.value}</div>
+        </div>
+      `).join('');
+    }
+
+    /*************************************************************************
+     * 6. MOTOR DE RENDERIZADO DE LAS 10 PROPIEDADES
+     *************************************************************************/
+    function resizeCanvas() {
+      const rect = canvasWrapper.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawScene();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawScene() {
+      const rect = canvasWrapper.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const prop = PROPERTIES[state.currentPropIndex];
+      const p = state.params[prop.id];
+      const pal = getPalette();
+
+      switch (prop.id) {
+        case 'tri-1': drawProp1(W, H, p, pal); break;
+        case 'tri-2': drawProp2(W, H, p, pal); break;
+        case 'tri-3': drawProp3(W, H, p, pal); break;
+        case 'tri-4': drawProp4(W, H, p, pal); break;
+        case 'cuad-5': drawProp5(W, H, p, pal); break;
+        case 'cuad-6': drawProp6(W, H, p, pal); break;
+        case 'cuad-7': drawProp7(W, H, p, pal); break;
+        case 'cuad-8': drawProp8(W, H, p, pal); break;
+        case 'cuad-9': drawProp9(W, H, p, pal); break;
+        case 'cuad-10': drawProp10(W, H, p, pal); break;
+      }
+    }
+
+    // ---------------- PROPIEDAD 1: CEVIANA BE (S1 / S2 = AE / EC) ----------------
+    function drawProp1(W, H, p, pal) {
+      const totalBase = p.AE + p.EC;
+      const drawW = Math.min(W * 0.68, 430);
+      const scaleX = drawW / totalBase;
+      const drawH = Math.min(H * 0.62, 230) * (p.h / 12);
+
+      const startX = (W - drawW) / 2;
+      const baseY = H * 0.78;
+
+      const A = { x: startX, y: baseY };
+      const C = { x: startX + drawW, y: baseY };
+      const E = { x: startX + p.AE * scaleX, y: baseY };
+      const B = { x: startX + (p.bx + 4) / 18 * drawW, y: baseY - Math.max(90, drawH) };
+
+      // Regiones S1 y S2 como en la diapositiva 1a
+      fillPolygon([A, B, E], pal.grayFill, pal.stroke, 2.5);
+      fillPolygon([E, B, C], pal.yellowFill, pal.stroke, 2.5);
+
+      // Altura auxiliar h desde B
+      if (state.showAux) {
+        const foot = { x: B.x, y: baseY };
+        drawLine(A, foot, pal.mutedStroke, 1.4, [4, 4]);
+        drawLine(B, foot, pal.auxStroke, 2.2, [6, 4]);
+        drawRightAngle(foot, { x: 1, y: 0 }, { x: 0, y: -1 }, 10, pal.auxStroke);
+
+        ctx.font = 'bold 13px JetBrains Mono, monospace';
+        ctx.fillStyle = pal.auxStroke;
+        ctx.fillText(`h = ${p.h}`, foot.x + 8, (B.y + baseY) / 2);
+      }
+
+      // Cotas de base AE y EC
+      if (state.showValues) {
+        ctx.font = 'bold 12px JetBrains Mono, monospace';
+        ctx.fillStyle = pal.subText;
+        ctx.textAlign = 'center';
+        ctx.fillText(`AE = ${p.AE}`, (A.x + E.x) / 2, baseY + 24);
+        ctx.fillText(`EC = ${p.EC}`, (E.x + C.x) / 2, baseY + 24);
+      }
+
+      // Etiquetas S1 y S2
+      drawAreaLabel(centroid([A, B, E]), 'S', '1', pal);
+      drawAreaLabel(centroid([E, B, C]), 'S', '2', pal);
+
+      // Vértices
+      drawVertex(A, 'A', { x: -12, y: 12 }, pal);
+      drawVertex(B, 'B', { x: 0, y: -14 }, pal);
+      drawVertex(C, 'C', { x: 14, y: 12 }, pal);
+      drawVertex(E, 'E', { x: 0, y: 15 }, pal);
+
+      const S1 = (p.AE * p.h) / 2;
+      const S2 = (p.EC * p.h) / 2;
+      const ratio = (S1 / S2).toFixed(3);
+
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-indigo-500">S₁ (△ABE):</span> <span class="font-mono">${S1.toFixed(2)} u²</span>`,
+          `<span class="font-bold text-amber-500">S₂ (△EBC):</span> <span class="font-mono">${S2.toFixed(2)} u²</span>`,
+          `<span class="font-bold text-rose-500">S₁ / S₂ = AE / EC:</span> <span class="font-mono">${ratio}</span>`
+        ],
+        [
+          { label: 'Área S₁ = (AE·h)/2', value: `${S1.toFixed(2)} u²`, highlight: false },
+          { label: 'Área S₂ = (EC·h)/2', value: `${S2.toFixed(2)} u²`, highlight: false },
+          { label: 'Razón de Bases (AE/EC)', value: `${(p.AE / p.EC).toFixed(3)}`, highlight: true },
+          { label: 'Razón de Áreas (S₁/S₂)', value: `${ratio}`, highlight: true }
+        ]
+      );
+    }
+
+    // ---------------- PROPIEDAD 2: MEDIANA BE (S1 = S2) ----------------
+    function drawProp2(W, H, p, pal) {
+      const drawW = Math.min(W * 0.66, 420);
+      const drawH = Math.min(H * 0.62, 230) * (p.h / 12);
+      const startX = (W - drawW) / 2;
+      const baseY = H * 0.78;
+
+      const A = { x: startX, y: baseY };
+      const C = { x: startX + drawW, y: baseY };
+      const E = { x: startX + drawW / 2, y: baseY };
+      const B = { x: startX + (p.bx + 4) / 18 * drawW, y: baseY - Math.max(95, drawH) };
+
+      fillPolygon([A, B, E], pal.grayFill, pal.stroke, 2.5);
+      fillPolygon([E, B, C], pal.cyanFill, pal.stroke, 2.5);
+
+      // Puntos negros de congruencia en AE y EC como en la diapositiva 1b
+      drawDotMark(A, E, pal);
+      drawDotMark(E, C, pal);
+
+      if (state.showAux) {
+        const foot = { x: B.x, y: baseY };
+        drawLine(B, foot, pal.auxStroke, 2.0, [5, 4]);
+        drawRightAngle(foot, { x: 1, y: 0 }, { x: 0, y: -1 }, 9, pal.auxStroke);
+      }
+
+      if (state.showValues) {
+        ctx.font = 'bold 12px JetBrains Mono, monospace';
+        ctx.fillStyle = pal.subText;
+        ctx.textAlign = 'center';
+        ctx.fillText(`AE = ${p.halfBase}`, (A.x + E.x) / 2, baseY + 26);
+        ctx.fillText(`EC = ${p.halfBase}`, (E.x + C.x) / 2, baseY + 26);
+      }
+
+      drawAreaLabel(centroid([A, B, E]), 'S', '1', pal);
+      drawAreaLabel(centroid([E, B, C]), 'S', '2', pal);
+
+      drawVertex(A, 'A', { x: -12, y: 12 }, pal);
+      drawVertex(B, 'B', { x: 0, y: -14 }, pal);
+      drawVertex(C, 'C', { x: 14, y: 12 }, pal);
+      drawVertex(E, 'E', { x: 0, y: 16 }, pal);
+
+      const S = (p.halfBase * p.h) / 2;
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-indigo-500">Mediana BE:</span> <span class="font-mono">AE = EC = ${p.halfBase} u</span>`,
+          `<span class="font-bold text-cyan-500">Igualdad:</span> <span class="font-mono">S₁ = S₂ = ${S.toFixed(2)} u²</span>`
+        ],
+        [
+          { label: 'Mitad de Base (AE = EC)', value: `${p.halfBase} u`, highlight: false },
+          { label: 'Área Izquierda (S₁)', value: `${S.toFixed(2)} u²`, highlight: true },
+          { label: 'Área Derecha (S₂)', value: `${S.toFixed(2)} u²`, highlight: true },
+          { label: 'Área Total (A_ABC)', value: `${(2 * S).toFixed(2)} u²`, highlight: false }
+        ]
+      );
+    }
+
+    // ---------------- PROPIEDAD 3: BARICENTRO Y LAS 3 MEDIANAS (6S) ----------------
+    function drawProp3(W, H, p, pal) {
+      const drawW = Math.min(W * 0.68, 430);
+      const drawH = Math.min(H * 0.66, 240);
+      const startX = (W - drawW) / 2;
+      const baseY = H * 0.80;
+
+      const A = { x: startX, y: baseY };
+      const C = { x: startX + drawW, y: baseY };
+      const B = { x: startX + drawW * p.skew, y: baseY - drawH };
+
+      // Puntos medios M (en AC), P (en AB), N (en BC)
+      const M = { x: (A.x + C.x) / 2, y: (A.y + C.y) / 2 };
+      const P = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
+      const N = { x: (B.x + C.x) / 2, y: (B.y + C.y) / 2 };
+      const G = centroid([A, B, C]);
+
+      const subTriangles = [
+        { pts: [A, P, G], stepLabel: state.currentStepIndex === 0 ? 'y' : 'S' },
+        { pts: [P, B, G], stepLabel: state.currentStepIndex === 0 ? 'y' : 'S' },
+        { pts: [B, N, G], stepLabel: state.currentStepIndex === 0 ? 'z' : 'S' },
+        { pts: [N, C, G], stepLabel: state.currentStepIndex === 0 ? 'z' : 'S' },
+        { pts: [C, M, G], stepLabel: state.currentStepIndex === 0 ? 'x' : 'S' },
+        { pts: [M, A, G], stepLabel: state.currentStepIndex === 0 ? 'x' : 'S' }
+      ];
+
+      subTriangles.forEach((t, idx) => {
+        let fill = pal.grayFill;
+        if (state.currentStepIndex === 1 && (idx === 0 || idx === 1 || idx === 5)) fill = pal.cyanFill;
+        if (state.currentStepIndex === 1 && (idx === 2 || idx === 3 || idx === 4)) fill = pal.yellowFill;
+        if (state.currentStepIndex === 2 && (idx === 0 || idx === 1 || idx === 2)) fill = pal.greenFill;
+        fillPolygon(t.pts, fill, pal.stroke, 2.2);
+        drawAreaLabel(centroid(t.pts), t.stepLabel, '', pal, 0.9);
+      });
+
+      // Marcas exactas de la diapositiva 1c:
+      // Barras en AB, zig-zag rojo en BC, puntos negros en AC
+      drawBarMark(A, P, pal);
+      drawBarMark(P, B, pal);
+      drawZigZagMark(B, N);
+      drawZigZagMark(N, C);
+      drawDotMark(A, M, pal);
+      drawDotMark(M, C, pal);
+
+      // Punto Baricentro G
+      if (state.showAux) {
+        ctx.beginPath();
+        ctx.arc(G.x, G.y, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ef4444';
+        ctx.fill();
+      }
+
+      drawVertex(A, 'A', { x: -14, y: 12 }, pal);
+      drawVertex(B, 'B', { x: 0, y: -15 }, pal);
+      drawVertex(C, 'C', { x: 14, y: 12 }, pal);
+
+      const S = p.totalArea / 6;
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-indigo-500">Área Total (A_ABC):</span> <span class="font-mono">${p.totalArea} u²</span>`,
+          `<span class="font-bold text-rose-500">Cada Región (S = A/6):</span> <span class="font-mono">${S.toFixed(2)} u²</span>`
+        ],
+        [
+          { label: 'Área Total A_ABC', value: `${p.totalArea} u²`, highlight: false },
+          { label: 'N° de Regiones Iguales', value: '6 regiones (S)', highlight: false },
+          { label: 'Valor de cada S', value: `${S.toFixed(2)} u²`, highlight: true },
+          { label: 'Comprobación 6 × S', value: `${(6 * S).toFixed(2)} u²`, highlight: true }
+        ]
+      );
+    }
+
+    // ---------------- PROPIEDAD 4: SEMEJANZA ENTRE PARALELAS (a²/b²) ----------------
+    function drawProp4(W, H, p, pal) {
+      const maxSpan = Math.max(p.a, p.b);
+      const scaleX = Math.min(W * 0.65, 390) / maxSpan;
+      const topY = H * 0.20;
+      const botY = H * 0.80;
+      const totalH = botY - topY;
+
+      const topW = p.b * scaleX;
+      const botW = p.a * scaleX;
+
+      const C = { x: W / 2 - topW / 2 - 20, y: topY };
+      const D = { x: W / 2 + topW / 2 - 20, y: topY };
+      const A = { x: W / 2 - botW / 2 + 10, y: botY };
+      const B = { x: W / 2 + botW / 2 + 10, y: botY };
+
+      const E = lineIntersection(C, B, A, D);
+
+      // Triángulo superior S2 (gris) y triángulo inferior S1 (celeste) como en la diapositiva 2
+      fillPolygon([C, D, E], pal.grayFill, pal.stroke, 2.5);
+      fillPolygon([A, B, E], pal.cyanFill, pal.stroke, 2.5);
+
+      // Alturas h1 y h2 desde E
+      if (state.showAux) {
+        const footTop = { x: E.x, y: topY };
+        const footBot = { x: E.x, y: botY };
+        drawLine(E, footTop, pal.auxStroke, 2, [5, 4]);
+        drawLine(E, footBot, pal.auxStroke, 2, [5, 4]);
+        drawRightAngle(footTop, { x: 1, y: 0 }, { x: 0, y: 1 }, 8, pal.auxStroke);
+        drawRightAngle(footBot, { x: 1, y: 0 }, { x: 0, y: -1 }, 8, pal.auxStroke);
+      }
+
+      // Etiquetas bk arriba y ak abajo en azul como en la diapositiva 2
+      ctx.save();
+      ctx.font = 'italic bold 19px Georgia, serif';
+      ctx.fillStyle = state.isDark ? '#38bdf8' : '#0284c7';
+      ctx.textAlign = 'center';
+      ctx.fillText(state.showValues ? `bk = ${(p.b * p.k).toFixed(1)}` : 'bk', (C.x + D.x) / 2, topY - 16);
+      ctx.fillText(state.showValues ? `ak = ${(p.a * p.k).toFixed(1)}` : 'ak', (A.x + B.x) / 2, botY + 24);
+      ctx.restore();
+
+      drawAreaLabel(centroid([C, D, E]), 'S', '2', pal);
+      drawAreaLabel(centroid([A, B, E]), 'S', '1', pal);
+
+      drawVertex(C, 'C', { x: -14, y: -4 }, pal);
+      drawVertex(D, 'D', { x: 14, y: -4 }, pal);
+      drawVertex(A, 'A', { x: -14, y: 10 }, pal);
+      drawVertex(B, 'B', { x: 14, y: 10 }, pal);
+      drawVertex(E, 'E', { x: 18, y: 2 }, pal);
+
+      // Cálculos reales
+      const h1 = p.H * (p.a / (p.a + p.b));
+      const h2 = p.H * (p.b / (p.a + p.b));
+      const S1 = 0.5 * (p.a * p.k) * h1;
+      const S2 = 0.5 * (p.b * p.k) * h2;
+      const ratioAreas = S1 / S2;
+      const ratioSq = (p.a * p.a) / (p.b * p.b);
+
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-cyan-500">S₁ (△AEB):</span> <span class="font-mono">${S1.toFixed(2)} u²</span>`,
+          `<span class="font-bold text-slate-400">S₂ (△CED):</span> <span class="font-mono">${S2.toFixed(2)} u²</span>`,
+          `<span class="font-bold text-rose-500">S₁/S₂ = a²/b²:</span> <span class="font-mono">${ratioSq.toFixed(3)}</span>`
+        ],
+        [
+          { label: 'Razón Lineal (a / b)', value: `${(p.a / p.b).toFixed(3)}`, highlight: false },
+          { label: 'Área S₁ (Inferior)', value: `${S1.toFixed(2)} u²`, highlight: false },
+          { label: 'Área S₂ (Superior)', value: `${S2.toFixed(2)} u²`, highlight: false },
+          { label: 'S₁ / S₂ = a² / b²', value: `${ratioAreas.toFixed(3)}`, highlight: true }
+        ]
+      );
+    }
+
+    // ---------------- PROPIEDAD 5: PARALELOGRAMO S = 1/4 Y S = 1/6 ----------------
+    function drawProp5(W, H, p, pal) {
+      const mode = state.subMode || 'sixth';
+      const drawW = Math.min(W * 0.60, 380);
+      const drawH = Math.min(H * 0.58, 220);
+      const offsetSkew = mode === 'fourth' ? 0 : drawH * p.skew * 1.4;
+
+      const startX = (W - drawW - offsetSkew) / 2;
+      const topY = (H - drawH) / 2;
+      const botY = topY + drawH;
+
+      const B = { x: startX + offsetSkew, y: topY };
+      const C = { x: startX + offsetSkew + drawW, y: topY };
+      const A = { x: startX, y: botY };
+      const D = { x: startX + drawW, y: botY };
+
+      if (mode === 'fourth') {
+        // Figura izquierda de la Diapositiva 3: 4 áreas S iguales por las dos diagonales
+        const O = lineIntersection(A, C, B, D);
+        fillPolygon([A, B, O], pal.grayFill, pal.stroke, 2.4);
+        fillPolygon([B, C, O], pal.yellowFill, pal.stroke, 2.4);
+        fillPolygon([C, D, O], pal.grayFill, pal.stroke, 2.4);
+        fillPolygon([D, A, O], pal.yellowFill, pal.stroke, 2.4);
+
+        drawAreaLabel(centroid([A, B, O]), 'S', '', pal);
+        drawAreaLabel(centroid([B, C, O]), 'S', '', pal);
+        drawAreaLabel(centroid([C, D, O]), 'S', '', pal);
+        drawAreaLabel(centroid([D, A, O]), 'S', '', pal);
+      } else {
+        // Figura derecha de la Diapositiva 3: S = 1/6 A_ABCD
+        fillPolygon([A, B, C, D], null, pal.stroke, 2.5);
+
+        const M = { x: (A.x + D.x) / 2, y: (A.y + D.y) / 2 }; // Punto medio AD
+        const N = { x: (C.x + D.x) / 2, y: (C.y + D.y) / 2 }; // Punto medio CD
+
+        const P = lineIntersection(A, C, B, M);
+        const Q = lineIntersection(A, C, B, N);
+
+        // Las 3 regiones superiores S
+        fillPolygon([A, B, P], pal.grayFill, pal.stroke, 2.2);
+        fillPolygon([P, B, Q], pal.grayFill, pal.stroke, 2.2);
+        fillPolygon([Q, B, C], pal.yellowFill, pal.stroke, 2.2);
+
+        // Trazos hacia los puntos medios M y N
+        drawLine(B, M, pal.stroke, 2.2);
+        drawLine(B, N, pal.stroke, 2.2);
+        drawLine(A, C, pal.stroke, 2.2);
+
+        // Diagonal auxiliar BD para explicar por qué P y Q son baricentros
+        if (state.showAux) {
+          drawLine(B, D, pal.auxStroke, 2.0, [6, 4]);
+        }
+
+        // Marcas de la diapositiva 3b:
+        drawDotMark(A, M, pal);
+        drawDotMark(M, D, pal);
+        drawBarMark(C, N, pal);
+        drawBarMark(N, D, pal);
+        drawZigZagMark(A, P);
+        drawZigZagMark(P, Q);
+        drawZigZagMark(Q, C);
+
+        drawAreaLabel(centroid([A, B, P]), 'S', '', pal);
+        drawAreaLabel(centroid([P, B, Q]), 'S', '', pal);
+        drawAreaLabel(centroid([Q, B, C]), 'S', '', pal);
+      }
+
+      drawVertex(A, 'A', { x: -14, y: 10 }, pal);
+      drawVertex(B, 'B', { x: -12, y: -12 }, pal);
+      drawVertex(C, 'C', { x: 14, y: -12 }, pal);
+      drawVertex(D, 'D', { x: 14, y: 10 }, pal);
+
+      const S6 = p.areaTotal / 6;
+      const S4 = p.areaTotal / 4;
+
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-indigo-500">Área ABCD:</span> <span class="font-mono">${p.areaTotal} u²</span>`,
+          `<span class="font-bold text-rose-500">S = 1/6 · A_ABCD:</span> <span class="font-mono">${S6.toFixed(2)} u²</span>`,
+          `<span class="font-bold text-amber-500">S (Diagonales 1/4):</span> <span class="font-mono">${S4.toFixed(2)} u²</span>`
+        ],
+        [
+          { label: 'Área Paralelogramo', value: `${p.areaTotal} u²`, highlight: false },
+          { label: 'Mitad △ABC (1/2)', value: `${(p.areaTotal / 2).toFixed(2)} u²`, highlight: false },
+          { label: 'Fig. Izq (1/4 ABCD)', value: `${S4.toFixed(2)} u²`, highlight: mode === 'fourth' },
+          { label: 'Fig. Der (1/6 ABCD)', value: `${S6.toFixed(2)} u²`, highlight: mode !== 'fourth' }
+        ]
+      );
+    }
+
+    // ---------------- PROPIEDAD 6: PARALELOGRAMO PUNTO MEDIO S = 1/4 ----------------
+    function drawProp6(W, H, p, pal) {
+      const mode = state.subMode || 'both';
+      const drawW = Math.min(W * 0.58, 370);
+      const drawH = Math.min(H * 0.56, 215);
+      const offsetSkew = drawH * p.skew * 1.4;
+
+      const startX = (W - drawW - offsetSkew) / 2;
+      const topY = (H - drawH) / 2;
+      const botY = topY + drawH;
+
+      const B = { x: startX + offsetSkew, y: topY };
+      const C = { x: startX + offsetSkew + drawW, y: topY };
+      const A = { x: startX, y: botY };
+      const D = { x: startX + drawW, y: botY };
+      const M = { x: (A.x + D.x) / 2, y: botY };
+
+      fillPolygon([A, B, C, D], null, pal.stroke, 2.5);
+
+      if (mode === 'left' || mode === 'both') {
+        fillPolygon([A, B, M], pal.grayFill, pal.stroke, 2.4);
+        drawAreaLabel(centroid([A, B, M]), 'S', '', pal);
+      }
+      if (mode === 'right' || mode === 'both') {
+        fillPolygon([B, M, D], pal.yellowFill, pal.stroke, 2.4);
+        drawAreaLabel(centroid([B, M, D]), 'S', '', pal);
+      }
+
+      if (state.showAux) {
+        const N = { x: (B.x + C.x) / 2, y: topY };
+        drawLine(M, N, pal.auxStroke, 1.8, [5, 4]);
+        drawLine(B, D, pal.auxStroke, 1.8, [5, 4]);
+      }
+
+      drawDotMark(A, M, pal);
+      drawDotMark(M, D, pal);
+
+      drawVertex(A, 'A', { x: -14, y: 10 }, pal);
+      drawVertex(B, 'B', { x: -12, y: -12 }, pal);
+      drawVertex(C, 'C', { x: 14, y: -12 }, pal);
+      drawVertex(D, 'D', { x: 14, y: 10 }, pal);
+
+      const areaTotal = p.b * p.h;
+      const S = areaTotal / 4;
+
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-indigo-500">A_ABCD = b · h:</span> <span class="font-mono">${areaTotal.toFixed(1)} u²</span>`,
+          `<span class="font-bold text-rose-500">S = (1/4) · A_ABCD:</span> <span class="font-mono">${S.toFixed(2)} u²</span>`
+        ],
+        [
+          { label: 'Base Total (b)', value: `${p.b} u`, highlight: false },
+          { label: 'Mitad AM = MD', value: `${(p.b / 2).toFixed(1)} u`, highlight: false },
+          { label: 'Área Total (b·h)', value: `${areaTotal.toFixed(1)} u²`, highlight: false },
+          { label: 'Área S = 1/4 · A_ABCD', value: `${S.toFixed(2)} u²`, highlight: true }
+        ]
+      );
+    }
+
+    // ---------------- PROPIEDAD 7: PARALELOGRAMO S = 1/8 Y S = 1/2 ----------------
+    function drawProp7(W, H, p, pal) {
+      const mode = state.subMode || 'eighth';
+      const drawW = Math.min(W * 0.58, 370);
+      const drawH = Math.min(H * 0.56, 215);
+      const offsetSkew = drawH * p.skew * 1.4;
+
+      const startX = (W - drawW - offsetSkew) / 2;
+      const topY = (H - drawH) / 2;
+      const botY = topY + drawH;
+
+      const B = { x: startX + offsetSkew, y: topY };
+      const C = { x: startX + offsetSkew + drawW, y: topY };
+      const A = { x: startX, y: botY };
+      const D = { x: startX + drawW, y: botY };
+
+      const M = { x: (A.x + D.x) / 2, y: botY };
+      const N = { x: (B.x + C.x) / 2, y: topY };
+
+      fillPolygon([A, B, C, D], null, pal.stroke, 2.5);
+
+      if (mode === 'eighth') {
+        // Figura izquierda de la Diapositiva 5: S = 1/8 A_ABCD
+        const P = lineIntersection(A, N, B, M);
+        fillPolygon([A, P, M], pal.greenFill, pal.stroke, 2.4);
+        drawLine(A, N, pal.stroke, 2.3);
+        drawLine(B, M, pal.stroke, 2.3);
+
+        if (state.showAux) {
+          // Paralela media MN que cierra el sub-paralelogramo ABNM
+          drawLine(M, N, pal.auxStroke, 2.2, [6, 4]);
+        }
+
+        drawDotMark(A, M, pal);
+        drawDotMark(M, D, pal);
+        drawDotMark(B, N, pal);
+        drawDotMark(N, C, pal);
+
+        drawAreaLabel(centroid([A, P, M]), 'S', '', pal);
+      } else {
+        // Figura derecha de la Diapositiva 5: S = 1/2 A_ABCD
+        const Ptop = {
+          x: B.x + (C.x - B.x) * p.pRatio,
+          y: topY
+        };
+        fillPolygon([A, Ptop, D], pal.yellowFill, pal.stroke, 2.5);
+
+        if (state.showAux) {
+          const foot = { x: Ptop.x, y: botY };
+          drawLine(Ptop, foot, pal.auxStroke, 2.0, [5, 4]);
+          drawRightAngle(foot, { x: 1, y: 0 }, { x: 0, y: -1 }, 9, pal.auxStroke);
+        }
+
+        drawAreaLabel(centroid([A, Ptop, D]), 'S', '', pal);
+      }
+
+      drawVertex(A, 'A', { x: -14, y: 10 }, pal);
+      drawVertex(B, 'B', { x: -12, y: -12 }, pal);
+      drawVertex(C, 'C', { x: 14, y: -12 }, pal);
+      drawVertex(D, 'D', { x: 14, y: 10 }, pal);
+
+      const S8 = p.areaTotal / 8;
+      const S2 = p.areaTotal / 2;
+
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-indigo-500">Área ABCD:</span> <span class="font-mono">${p.areaTotal} u²</span>`,
+          `<span class="font-bold text-emerald-500">Fig. Izq (1/8 · A):</span> <span class="font-mono">${S8.toFixed(2)} u²</span>`,
+          `<span class="font-bold text-amber-500">Fig. Der (1/2 · A):</span> <span class="font-mono">${S2.toFixed(2)} u²</span>`
+        ],
+        [
+          { label: 'Área Paralelogramo', value: `${p.areaTotal} u²`, highlight: false },
+          { label: 'Sub-paralelogramo ABNM', value: `${S2.toFixed(2)} u²`, highlight: false },
+          { label: 'S = 1/8 · A_ABCD', value: `${S8.toFixed(2)} u²`, highlight: mode === 'eighth' },
+          { label: 'S = 1/2 · A_ABCD', value: `${S2.toFixed(2)} u²`, highlight: mode !== 'eighth' }
+        ]
+      );
+    }
+
+    // ---------------- PROPIEDAD 8: RECTÁNGULO DIAGONAL Y MEDIANA (S = 1/12) ----------------
+    function drawProp8(W, H, p, pal) {
+      const drawW = Math.min(W * 0.62, 390);
+      const drawH = Math.min(H * 0.56, 215);
+      const startX = (W - drawW) / 2;
+      const topY = (H - drawH) / 2;
+      const botY = topY + drawH;
+
+      const B = { x: startX, y: topY };
+      const C = { x: startX + drawW, y: topY };
+      const A = { x: startX, y: botY };
+      const D = { x: startX + drawW, y: botY };
+      const E = { x: startX + drawW / 2, y: botY };
+
+      const P = lineIntersection(A, C, B, E);
+
+      fillPolygon([A, B, C, D], null, pal.stroke, 2.5);
+      fillPolygon([A, P, E], pal.yellowFill, pal.stroke, 2.4);
+
+      if (state.currentStepIndex === 0) {
+        fillPolygon([B, C, P], pal.cyanFill, pal.stroke, 2.0);
+      }
+
+      drawLine(A, C, pal.stroke, 2.3);
+      drawLine(B, E, pal.stroke, 2.3);
+
+      // Trazos auxiliares: altura h/3 y 2h/3 o diagonal BD
+      if (state.showAux) {
+        const footBot = { x: P.x, y: botY };
+        const footTop = { x: P.x, y: topY };
+        drawLine(P, footBot, pal.auxStroke, 2.0, [5, 4]);
+        drawLine(P, footTop, pal.auxStroke, 2.0, [5, 4]);
+        drawRightAngle(footBot, { x: 1, y: 0 }, { x: 0, y: -1 }, 8, pal.auxStroke);
+
+        if (state.currentStepIndex === 3) {
+          drawLine(B, D, '#10b981', 2.0, [6, 4]);
+        }
+
+        ctx.font = 'bold 11px JetBrains Mono, monospace';
+        ctx.fillStyle = pal.auxStroke;
+        ctx.fillText('h/3', footBot.x + 18, (P.y + botY) / 2 + 4);
+        ctx.fillText('2h/3', footTop.x + 22, (P.y + topY) / 2);
+      }
+
+      drawDotMark(A, E, pal);
+      drawDotMark(E, D, pal);
+
+      drawAreaLabel(centroid([A, P, E]), 'S', '', pal, 0.92);
+
+      drawVertex(A, 'A', { x: -14, y: 10 }, pal);
+      drawVertex(B, 'B', { x: -14, y: -10 }, pal);
+      drawVertex(C, 'C', { x: 14, y: -10 }, pal);
+      drawVertex(D, 'D', { x: 14, y: 10 }, pal);
+      drawVertex(E, 'E', { x: 0, y: 18 }, pal);
+
+      const areaTotal = p.b * p.h;
+      const S = areaTotal / 12;
+
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-indigo-500">Rectángulo ABCD:</span> <span class="font-mono">${areaTotal.toFixed(1)} u²</span>`,
+          `<span class="font-bold text-amber-500">Altura de P (h/3):</span> <span class="font-mono">${(p.h / 3).toFixed(2)} u</span>`,
+          `<span class="font-bold text-rose-500">S = 1/12 · A_ABCD:</span> <span class="font-mono">${S.toFixed(2)} u²</span>`
+        ],
+        [
+          { label: 'Área Rectángulo (b·h)', value: `${areaTotal.toFixed(1)} u²`, highlight: false },
+          { label: 'Base AE = b / 2', value: `${(p.b / 2).toFixed(1)} u`, highlight: false },
+          { label: 'Altura h₁ = h / 3', value: `${(p.h / 3).toFixed(2)} u`, highlight: false },
+          { label: 'Área S = 1/12 · A_ABCD', value: `${S.toFixed(2)} u²`, highlight: true }
+        ]
+      );
+    }
+
+    // ---------------- PROPIEDAD 9: RECTÁNGULO DOS MEDIANAS (S = 1/20) ----------------
+    function drawProp9(W, H, p, pal) {
+      const drawW = Math.min(W * 0.62, 390);
+      const drawH = Math.min(H * 0.56, 215);
+      const startX = (W - drawW) / 2;
+      const topY = (H - drawH) / 2;
+      const botY = topY + drawH;
+
+      const B = { x: startX, y: topY };
+      const C = { x: startX + drawW, y: topY };
+      const A = { x: startX, y: botY };
+      const D = { x: startX + drawW, y: botY };
+
+      const F = { x: startX + drawW / 2, y: botY }; // Punto medio AD
+      const E = { x: startX + drawW, y: (topY + botY) / 2 }; // Punto medio CD
+
+      const P = lineIntersection(A, E, B, F);
+
+      fillPolygon([A, B, C, D], null, pal.stroke, 2.5);
+
+      if (state.currentStepIndex === 1) {
+        fillPolygon([A, B, P], pal.cyanFill, pal.stroke, 1.8);
+      }
+
+      fillPolygon([A, P, F], pal.yellowFill, pal.stroke, 2.4);
+
+      drawLine(A, E, pal.stroke, 2.3);
+      drawLine(B, F, pal.stroke, 2.3);
+
+      if (state.showAux) {
+        const foot = { x: P.x, y: botY };
+        drawLine(P, foot, pal.auxStroke, 2.0, [4, 4]);
+        drawRightAngle(foot, { x: 1, y: 0 }, { x: 0, y: -1 }, 7, pal.auxStroke);
+
+        ctx.font = 'bold 11px JetBrains Mono, monospace';
+        ctx.fillStyle = pal.auxStroke;
+        ctx.fillText('h/5', foot.x + 16, (P.y + botY) / 2 + 3);
+      }
+
+      // Marcas de la Diapositiva 7: puntos en AF y FD, barras verticales en CE y ED
+      drawDotMark(A, F, pal);
+      drawDotMark(F, D, pal);
+      drawBarMark(C, E, pal);
+      drawBarMark(E, D, pal);
+
+      drawAreaLabel(centroid([A, P, F]), 'S', '', pal, 0.85);
+      if (state.currentStepIndex === 1) {
+        drawAreaLabel(centroid([A, B, P]), '4S', '', pal, 0.85);
+      }
+
+      drawVertex(A, 'A', { x: -14, y: 10 }, pal);
+      drawVertex(B, 'B', { x: -14, y: -10 }, pal);
+      drawVertex(C, 'C', { x: 14, y: -10 }, pal);
+      drawVertex(D, 'D', { x: 14, y: 10 }, pal);
+      drawVertex(F, 'F', { x: 0, y: 18 }, pal);
+      drawVertex(E, 'E', { x: 16, y: 0 }, pal);
+
+      const areaTotal = p.b * p.h;
+      const S = areaTotal / 20;
+
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-indigo-500">Rectángulo ABCD:</span> <span class="font-mono">${areaTotal.toFixed(1)} u²</span>`,
+          `<span class="font-bold text-amber-500">Altura de P (h/5):</span> <span class="font-mono">${(p.h / 5).toFixed(2)} u</span>`,
+          `<span class="font-bold text-rose-500">S = 1/20 · A_ABCD:</span> <span class="font-mono">${S.toFixed(2)} u²</span>`
+        ],
+        [
+          { label: 'Área Rectángulo (b·h)', value: `${areaTotal.toFixed(1)} u²`, highlight: false },
+          { label: 'Área △ABF (1/4)', value: `${(areaTotal / 4).toFixed(2)} u²`, highlight: false },
+          { label: 'Altura de P (h / 5)', value: `${(p.h / 5).toFixed(2)} u`, highlight: false },
+          { label: 'Área S = 1/20 · A_ABCD', value: `${S.toFixed(2)} u²`, highlight: true }
+        ]
+      );
+    }
+
+    // ---------------- PROPIEDAD 10: DESCOMPOSICIÓN 20k (CUADRADO CENTRAL 4k) ----------------
+    function drawProp10(W, H, p, pal) {
+      const mode = state.subMode || 'all';
+      const side = Math.min(W * 0.65, H * 0.74, 310);
+      const startX = (W - side) / 2;
+      const topY = (H - side) / 2;
+      const botY = topY + side;
+
+      // Coordenadas normalizadas (u, v) en [0, 1] x [0, 1] con origen en A(bottom-left)
+      function toCanvas(u, v) {
+        return {
+          x: startX + u * side,
+          y: botY - v * side
+        };
+      }
+
+      const A = toCanvas(0, 0);
+      const B = toCanvas(0, 1);
+      const C = toCanvas(1, 1);
+      const D = toCanvas(1, 0);
+
+      // Puntos medios de los 4 lados
+      const M_top = toCanvas(0.5, 1);
+      const M_bot = toCanvas(0.5, 0);
+      const M_left = toCanvas(0, 0.5);
+      const M_right = toCanvas(1, 0.5);
+
+      // Las 4 rectas de la Diapositiva 8:
+      // L1: B(0,1) -> M_top? No, en la diapositiva 8 los segmentos son:
+      // 1) Desde B(0,1) hasta M_top? Miremos la diapositiva 8:
+      //    - Esquina superior izquierda celeste k: entre B(0,1), M_top(0.5,1) y la recta que sube de A(0,0) a M_top(0.5,1)
+      //    - Esquina superior derecha celeste k: entre C(1,1), M_right(1,0.5) y la recta de B(0,1) a M_right(1,0.5)
+      //    - Esquina inferior derecha celeste k: entre D(1,0), M_bot(0.5,0) y la recta de C(1,1) a M_bot(0.5,0)
+      //    - Esquina inferior izquierda celeste k: entre A(0,0), M_left(0,0.5) y la recta de D(1,0) a M_left(0,0.5)
+      // ¡Exactamente el molinete simétrico rotacional!
+      // Intersecciones exactas en coordenadas normalizadas (u,v):
+      const P_tl = toCanvas(0.2, 0.9); // Intersección de A->M_top (v=2u) y B->M_right (v=1-0.5u) -> 2u = 1-0.5u => u=0.4, v=0.8
+      // Calculemos las intersecciones con lineIntersection directamente para precisión absoluta:
+      const Q1 = lineIntersection(A, M_top, B, M_right);   // Vértice sup-izq del cuadrado central
+      const Q2 = lineIntersection(B, M_right, C, M_bot);   // Vértice sup-der del cuadrado central
+      const Q3 = lineIntersection(C, M_bot, D, M_left);    // Vértice inf-der del cuadrado central
+      const Q4 = lineIntersection(D, M_left, A, M_top);    // Vértice inf-izq del cuadrado central
+
+      // 4 Esquinas celestes de área k (como en Diapositiva 8):
+      const corners = [
+        [B, M_top, Q1],    // Superior izquierda
+        [C, M_right, Q2],  // Superior derecha
+        [D, M_bot, Q3],    // Inferior derecha
+        [A, M_left, Q4]    // Inferior izquierda
+      ];
+
+      // 4 Trapecios blancos de área 3k:
+      const traps = [
+        [B, Q1, Q4, M_left],   // Izquierdo
+        [M_top, C, Q2, Q1],    // Superior
+        [Q2, M_right, D, Q3],  // Derecho
+        [Q4, Q3, M_bot, A]     // Inferior
+      ];
+
+      // Dibujar trapecios (3k)
+      traps.forEach(poly => {
+        const fill = (mode === 'traps')
+          ? pal.greenFill
+          : (state.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.92)');
+        fillPolygon(poly, fill, pal.stroke, 2.2);
+        const c = centroid(poly);
+        drawAreaLabel(c, state.showValues ? `${3 * p.kVal}` : '3k', '', pal, 0.85);
+      });
+
+      // Dibujar 4 esquinas celestes (k)
+      corners.forEach(poly => {
+        const fill = (mode === 'all' || mode === 'corners') ? pal.cyanFill : pal.grayFill;
+        fillPolygon(poly, fill, pal.stroke, 2.2);
+        const c = centroid(poly);
+        drawAreaLabel(c, state.showValues ? `${p.kVal}` : 'k', '', pal, 0.82);
+      });
+
+      // Dibujar cuadrado central amarillo con borde rojo (4k) como en la Diapositiva 8
+      fillPolygon([Q1, Q2, Q3, Q4], pal.brightYellow, '#ef4444', 3.4);
+      drawAreaLabel(
+        centroid([Q1, Q2, Q3, Q4]),
+        state.showValues ? `4k = ${4 * p.kVal}` : '4k',
+        '',
+        { ...pal, redLabel: '#991b1b' },
+        0.95
+      );
+
+      // Puntos negros de punto medio en los 4 lados como en la Diapositiva 8
+      drawDotMark(B, M_top, pal);
+      drawDotMark(M_top, C, pal);
+      drawDotMark(C, M_right, pal);
+      drawDotMark(M_right, D, pal);
+      drawDotMark(A, M_bot, pal);
+      drawDotMark(M_bot, D, pal);
+      drawDotMark(B, M_left, pal);
+      drawDotMark(M_left, A, pal);
+
+      drawVertex(A, 'A', { x: -14, y: 10 }, pal);
+      drawVertex(B, 'B', { x: -14, y: -10 }, pal);
+      drawVertex(C, 'C', { x: 14, y: -10 }, pal);
+      drawVertex(D, 'D', { x: 14, y: 10 }, pal);
+
+      const total20k = 20 * p.kVal;
+      const center4k = 4 * p.kVal;
+
+      updateMetricsAndOverlay(
+        [
+          `<span class="font-bold text-indigo-500">Área Total (20k):</span> <span class="font-mono">${total20k} u²</span>`,
+          `<span class="font-bold text-cyan-500">4 Esquinas (4 × k):</span> <span class="font-mono">${4 * p.kVal} u²</span>`,
+          `<span class="font-bold text-emerald-500">4 Trapecios (4 × 3k):</span> <span class="font-mono">${12 * p.kVal} u²</span>`,
+          `<span class="font-bold text-rose-500">Centro (4k = 1/5 Total):</span> <span class="font-mono">${center4k} u²</span>`
+        ],
+        [
+          { label: 'Esquina Celeste (1k)', value: `${p.kVal} u²`, highlight: false },
+          { label: 'Trapecio Lateral (3k)', value: `${3 * p.kVal} u²`, highlight: false },
+          { label: 'Cuadrado Central (4k)', value: `${center4k} u²`, highlight: true },
+          { label: 'Total ABCD (20k)', value: `${total20k} u²`, highlight: true }
+        ]
+      );
+    }
+
+    /*************************************************************************
+     * 7. TABLA DE COMPROBACIÓN NUMÉRICA EN TIEMPO REAL
+     *************************************************************************/
+    function getSnapshotForTable() {
+      const prop = PROPERTIES[state.currentPropIndex];
+      const p = state.params[prop.id];
+
+      switch (prop.id) {
+        case 'tri-1': {
+          const s1 = (p.AE * p.h) / 2;
+          const s2 = (p.EC * p.h) / 2;
+          return {
+            name: prop.shortTitle,
+            params: `AE=${p.AE}, EC=${p.EC}, h=${p.h}`,
+            total: `S₁+S₂ = ${(s1 + s2).toFixed(1)} u²`,
+            calc: `S₁=${s1.toFixed(1)}, S₂=${s2.toFixed(1)}`,
+            ratio: `S₁/S₂ = ${(s1 / s2).toFixed(3)} = AE/EC`
+          };
+        }
+        case 'tri-2': {
+          const s = (p.halfBase * p.h) / 2;
+          return {
+            name: prop.shortTitle,
+            params: `AE=EC=${p.halfBase}, h=${p.h}`,
+            total: `A_ABC = ${(2 * s).toFixed(1)} u²`,
+            calc: `S₁ = S₂ = ${s.toFixed(1)} u²`,
+            ratio: `S₁ / S₂ = 1.000`
+          };
+        }
+        case 'tri-3':
+          return {
+            name: prop.shortTitle,
+            params: `3 Medianas (Baricentro G)`,
+            total: `A_ABC = ${p.totalArea} u²`,
+            calc: `S = ${(p.totalArea / 6).toFixed(2)} u²`,
+            ratio: `S / A_ABC = 1 / 6`
+          };
+        case 'tri-4': {
+          const ratioSq = ((p.a * p.a) / (p.b * p.b)).toFixed(3);
+          return {
+            name: prop.shortTitle,
+            params: `a=${p.a}, b=${p.b}, k=${p.k}`,
+            total: `H=${p.H} u`,
+            calc: `a²/b² = ${p.a * p.a}/${p.b * p.b}`,
+            ratio: `S₁/S₂ = ${ratioSq}`
+          };
+        }
+        case 'cuad-5':
+          return {
+            name: prop.shortTitle,
+            params: `Paralelogramo ABCD`,
+            total: `A = ${p.areaTotal} u²`,
+            calc: `S = ${(p.areaTotal / 6).toFixed(2)} u²`,
+            ratio: `S / A_ABCD = 1 / 6`
+          };
+        case 'cuad-6': {
+          const tot = p.b * p.h;
+          return {
+            name: prop.shortTitle,
+            params: `b=${p.b}, h=${p.h}`,
+            total: `A = ${tot.toFixed(1)} u²`,
+            calc: `S = ${(tot / 4).toFixed(2)} u²`,
+            ratio: `S / A_ABCD = 1 / 4`
+          };
+        }
+        case 'cuad-7':
+          return {
+            name: prop.shortTitle,
+            params: `Puntos medios M y N`,
+            total: `A = ${p.areaTotal} u²`,
+            calc: `S₁/₈=${(p.areaTotal / 8).toFixed(1)} | S₁/₂=${(p.areaTotal / 2).toFixed(1)}`,
+            ratio: `1/8 y 1/2 verificados`
+          };
+        case 'cuad-8': {
+          const tot = p.b * p.h;
+          return {
+            name: prop.shortTitle,
+            params: `b=${p.b}, h=${p.h}`,
+            total: `A = ${tot.toFixed(1)} u²`,
+            calc: `S = ${(tot / 12).toFixed(2)} u²`,
+            ratio: `S / A_ABCD = 1 / 12`
+          };
+        }
+        case 'cuad-9': {
+          const tot = p.b * p.h;
+          return {
+            name: prop.shortTitle,
+            params: `b=${p.b}, h=${p.h}`,
+            total: `A = ${tot.toFixed(1)} u²`,
+            calc: `S = ${(tot / 20).toFixed(2)} u²`,
+            ratio: `S / A_ABCD = 1 / 20`
+          };
+        }
+        case 'cuad-10':
+          return {
+            name: prop.shortTitle,
+            params: `k = ${p.kVal} u²`,
+            total: `20k = ${20 * p.kVal} u²`,
+            calc: `Centro 4k = ${4 * p.kVal} u²`,
+            ratio: `4k / 20k = 1 / 5 (20%)`
+          };
+      }
+    }
+
+    function renderLogTable() {
+      const tbody = document.getElementById('logTableBody');
+      if (state.logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-4 text-center text-slate-400 dark:text-slate-500 font-sans">
+              Haz clic en <b>"Registrar Medición"</b> para guardar comprobaciones numéricas de las propiedades.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = state.logs.map((row, i) => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+          <td class="py-2 px-3 font-bold text-indigo-500">${i + 1}</td>
+          <td class="py-2 px-3 font-sans font-semibold text-slate-800 dark:text-slate-200">${row.name}</td>
+          <td class="py-2 px-3 text-slate-600 dark:text-slate-400">${row.params}</td>
+          <td class="py-2 px-3 text-slate-700 dark:text-slate-300">${row.total}</td>
+          <td class="py-2 px-3 font-bold text-emerald-600 dark:text-emerald-400">${row.calc}</td>
+          <td class="py-2 px-3 text-right font-bold text-rose-600 dark:text-rose-400">${row.ratio}</td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('recordRowBtn').addEventListener('click', () => {
+      state.logs.unshift(getSnapshotForTable());
+      if (state.logs.length > 8) state.logs.pop();
+      renderLogTable();
+    });
+
+    document.getElementById('clearTableBtn').addEventListener('click', () => {
+      state.logs = [];
+      renderLogTable();
+    });
+
+    /*************************************************************************
+     * 8. MODAL DE RESUMEN DE LAS 8 DIAPOSITIVAS (CHEAT SHEET)
+     *************************************************************************/
+    const cheatSheetModal = document.getElementById('cheatSheetModal');
+    function renderCheatSheet() {
+      const grid = document.getElementById('cheatSheetGrid');
+      grid.innerHTML = '';
+      PROPERTIES.forEach((prop, idx) => {
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:border-indigo-500 dark:hover:border-indigo-400 transition cursor-pointer flex flex-col justify-between gap-3';
+        card.innerHTML = `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">${prop.slideLabel}</span>
+              <span class="text-[10px] text-slate-400">${prop.category}</span>
+            </div>
+            <h4 class="font-bold text-sm text-slate-900 dark:text-white">${prop.shortTitle}</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">${prop.subtitle}</p>
+          </div>
+          <div class="p-2.5 rounded-lg bg-rose-100/80 dark:bg-rose-950/60 border border-rose-400/50 text-center text-rose-900 dark:text-rose-200">
+            ${prop.formulaHTML}
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          selectProperty(idx);
+          cheatSheetModal.classList.add('hidden');
+          cheatSheetModal.classList.remove('flex');
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    document.getElementById('openCheatSheetBtn').addEventListener('click', () => {
+      renderCheatSheet();
+      cheatSheetModal.classList.remove('hidden');
+      cheatSheetModal.classList.add('flex');
+    });
+
+    document.getElementById('closeCheatSheetBtn').addEventListener('click', () => {
+      cheatSheetModal.classList.add('hidden');
+      cheatSheetModal.classList.remove('flex');
+    });
+
+    cheatSheetModal.addEventListener('click', (e) => {
+      if (e.target === cheatSheetModal) {
+        cheatSheetModal.classList.add('hidden');
+        cheatSheetModal.classList.remove('flex');
+      }
+    });
+
+    /*************************************************************************
+     * 9. INICIALIZACIÓN AL CARGAR LA PÁGINA
+     *************************************************************************/
+    window.onload = function () {
+      selectProperty(0);
+      state.logs.push(getSnapshotForTable());
+      renderLogTable();
+      updateThemeUI();
+      resizeCanvas();
+    };
+  </script>
+</body>
+</html>
