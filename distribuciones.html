@@ -1,0 +1,3053 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distribuciones Numéricas — Plataforma Educativa Interactiva</title>
+
+  <!-- Google Fonts: Outfit, Plus Jakarta Sans, JetBrains Mono & Playfair Display (Italic) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Outfit', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            serif: ['Playfair Display', 'Georgia', 'serif'],
+          },
+          colors: {
+            obsidian: {
+              950: '#070b14',
+              900: '#0b1120',
+              800: '#0f172a',
+              700: '#1e293b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ==========================================================================
+       ESTILOS PERSONALIZADOS — MODO NOCTURNO ACADÉMICO Y GLASSMORPHISM
+       ========================================================================== */
+    :root {
+      color-scheme: dark;
+    }
+
+    body {
+      background-color: #070b14;
+      color: #e2e8f0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 12% 10%, rgba(34, 211, 238, 0.08), transparent 36%),
+        radial-gradient(circle at 88% 15%, rgba(99, 102, 241, 0.09), transparent 38%),
+        radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.06), transparent 42%),
+        radial-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
+    }
+
+    /* Tarjetas Glassmorphism */
+    .glass-card {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.78), rgba(11, 17, 32, 0.88));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-card-cyan {
+      border-color: rgba(34, 211, 238, 0.25);
+      box-shadow: 0 12px 40px -12px rgba(6, 182, 212, 0.14), inset 0 1px 0 rgba(34, 211, 238, 0.1);
+    }
+
+    .glass-card-indigo {
+      border-color: rgba(129, 140, 248, 0.28);
+      box-shadow: 0 12px 40px -12px rgba(99, 102, 241, 0.16), inset 0 1px 0 rgba(129, 140, 248, 0.1);
+    }
+
+    .glass-card-emerald {
+      border-color: rgba(52, 211, 153, 0.28);
+      box-shadow: 0 12px 40px -12px rgba(16, 185, 129, 0.16), inset 0 1px 0 rgba(52, 211, 153, 0.1);
+    }
+
+    .glass-card-amber {
+      border-color: rgba(251, 191, 36, 0.3);
+      box-shadow: 0 12px 40px -12px rgba(245, 158, 11, 0.16), inset 0 1px 0 rgba(251, 191, 36, 0.12);
+    }
+
+    /* Tablero Matemático 3x3 */
+    .matrix-board {
+      background: linear-gradient(160deg, rgba(7, 11, 20, 0.92), rgba(15, 23, 42, 0.85));
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: inset 0 2px 14px rgba(0, 0, 0, 0.65), 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .matrix-cell {
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    /* Celda de incógnita "x" con brillo especial */
+    .matrix-cell-unknown {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(217, 119, 6, 0.08));
+      border: 1.5px solid rgba(251, 191, 36, 0.72);
+      color: #fbbf24;
+      text-shadow: 0 0 14px rgba(251, 191, 36, 0.65);
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.22), inset 0 0 12px rgba(251, 191, 36, 0.12);
+      animation: unknownPulse 2.6s ease-in-out infinite;
+    }
+
+    /* Celda resuelta correctamente */
+    .matrix-cell-solved {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.12));
+      border: 1.5px solid rgba(52, 211, 153, 0.85);
+      color: #6ee7b7;
+      text-shadow: 0 0 12px rgba(52, 211, 153, 0.65);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      animation: none;
+    }
+
+    /* Resaltado de filas y columnas involucradas */
+    .matrix-cell-hl-row {
+      background: rgba(34, 211, 238, 0.14);
+      border-color: rgba(34, 211, 238, 0.55);
+      box-shadow: 0 0 14px rgba(34, 211, 238, 0.22);
+      color: #cffafe;
+      transform: scale(1.03);
+    }
+
+    .matrix-cell-hl-col {
+      background: rgba(129, 140, 248, 0.16);
+      border-color: rgba(129, 140, 248, 0.6);
+      box-shadow: 0 0 14px rgba(129, 140, 248, 0.25);
+      color: #e0e7ff;
+      transform: scale(1.03);
+    }
+
+    /* Bandas sutiles cuando se muestra orientación general */
+    .matrix-band-row-0 { border-color: rgba(34, 211, 238, 0.45); background: rgba(34, 211, 238, 0.08); }
+    .matrix-band-row-1 { border-color: rgba(129, 140, 248, 0.45); background: rgba(129, 140, 248, 0.08); }
+    .matrix-band-row-2 { border-color: rgba(52, 211, 153, 0.45); background: rgba(52, 211, 153, 0.08); }
+
+    .matrix-band-col-0 { border-color: rgba(34, 211, 238, 0.45); background: rgba(34, 211, 238, 0.08); }
+    .matrix-band-col-1 { border-color: rgba(129, 140, 248, 0.45); background: rgba(129, 140, 248, 0.08); }
+    .matrix-band-col-2 { border-color: rgba(52, 211, 153, 0.45); background: rgba(52, 211, 153, 0.08); }
+
+    @keyframes unknownPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(245, 158, 11, 0.2), inset 0 0 10px rgba(251, 191, 36, 0.1); }
+      50% { box-shadow: 0 0 24px rgba(251, 191, 36, 0.42), inset 0 0 16px rgba(251, 191, 36, 0.2); }
+    }
+
+    /* Animación suave de aparición */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Firma elegante Prof. Jhon Dewis en cursiva con degradado animado continuo y resplandor */
+    @keyframes signatureFlow {
+      0% { background-position: 0% 50%; filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.42)); }
+      25% { background-position: 50% 50%; filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.48)); }
+      50% { background-position: 100% 50%; filter: drop-shadow(0 0 14px rgba(167, 139, 250, 0.5)); }
+      75% { background-position: 50% 50%; filter: drop-shadow(0 0 14px rgba(52, 211, 153, 0.48)); }
+      100% { background-position: 0% 50%; filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.44)); }
+    }
+
+    .prof-signature {
+      font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 700;
+      display: inline-block;
+      padding: 0.12em 0.45em;
+      background: linear-gradient(
+        90deg,
+        #fbbf24,
+        #22d3ee,
+        #a78bfa,
+        #34d399,
+        #f472b6,
+        #fbbf24
+      );
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: signatureFlow 7s ease-in-out infinite;
+      letter-spacing: 0.04em;
+    }
+
+    /* Partículas de celebración para el Reto Excelencia */
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+      100% { transform: translateY(260px) rotate(520deg) scale(0.6); opacity: 0; }
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      pointer-events: none;
+      animation: confettiFall 2.1s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+    }
+
+    /* Quitar flechas por defecto de input number */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    /* Scrollbar refinada en modo nocturno */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070b14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- ========================================================================
+       ENCABEZADO SUPERIOR: MARCA, PROGRESO GLOBAL, PUNTAJE Y AUDIO
+       ======================================================================== -->
+  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-[#070b14]/85 backdrop-blur-xl">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- Identidad Matemática -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/25 border border-cyan-400/35 flex items-center justify-center shadow-lg shadow-cyan-950/50">
+            <!-- Icono geométrico matriz 3x3 -->
+            <svg class="w-5 h-5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="4.5" height="4.5" rx="1" />
+              <rect x="9.75" y="3" width="4.5" height="4.5" rx="1" />
+              <rect x="16.5" y="3" width="4.5" height="4.5" rx="1" />
+              <rect x="3" y="9.75" width="4.5" height="4.5" rx="1" />
+              <rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1" class="fill-amber-400/30 stroke-amber-400" />
+              <rect x="16.5" y="9.75" width="4.5" height="4.5" rx="1" />
+              <rect x="3" y="16.5" width="4.5" height="4.5" rx="1" />
+              <rect x="9.75" y="16.5" width="4.5" height="4.5" rx="1" />
+              <rect x="16.5" y="16.5" width="4.5" height="4.5" rx="1" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="font-display font-bold text-lg sm:text-xl tracking-tight text-white leading-tight">
+              Distribuciones <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">Numéricas</span>
+            </h1>
+            <p class="text-[11px] sm:text-xs text-slate-400 font-medium tracking-wide">Razonamiento Matemático Interactivo</p>
+          </div>
+        </div>
+
+        <!-- Indicadores de Progreso, Puntaje y Control de Sonido -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Progreso Global -->
+          <div class="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800">
+            <div class="text-right">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Progreso</div>
+              <div class="font-mono text-xs font-bold text-emerald-300"><span id="global-progress-count">0</span> / 29</div>
+            </div>
+            <div class="w-20 h-2 rounded-full bg-slate-800 overflow-hidden">
+              <div id="global-progress-bar" class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Puntaje Global -->
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-amber-500/25">
+            <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>
+            </svg>
+            <span id="global-score" class="font-mono text-sm font-bold text-amber-300">0</span>
+            <span class="text-[11px] text-slate-400 hidden xs:inline">pts</span>
+          </div>
+
+          <!-- Botón de Sonido -->
+          <button id="btn-sound-toggle" type="button" title="Activar o silenciar efectos de sonido"
+            class="p-2 rounded-xl bg-slate-900/90 border border-slate-700/70 hover:border-cyan-400/50 text-cyan-300 hover:bg-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400/40">
+            <!-- Icono Audio Activo -->
+            <svg id="icon-sound-on" class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <!-- Icono Silenciado -->
+            <svg id="icon-sound-off" class="w-4 h-4 sm:w-5 sm:h-5 hidden text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Progreso móvil compacta -->
+      <div class="sm:hidden mt-2.5 flex items-center gap-2">
+        <span class="text-[11px] text-slate-400 font-medium">Progreso:</span>
+        <div class="flex-1 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+          <div id="global-progress-bar-mobile" class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <span id="global-progress-count-mobile" class="font-mono text-[11px] font-bold text-emerald-300">0/29</span>
+      </div>
+
+      <!-- Navegación Principal por Pestañas -->
+      <nav aria-label="Secciones principales" class="mt-3.5 grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button data-tab="teoria" class="nav-tab active-tab group flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 border">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+          <span>1. Teoría</span>
+        </button>
+
+        <button data-tab="practica" class="nav-tab group flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 border">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+          <span>2. Práctica Guiada</span>
+        </button>
+
+        <button data-tab="niveles" class="nav-tab group flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 border">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>3. Niveles con Tiempo</span>
+        </button>
+
+        <button data-tab="retos" class="nav-tab group flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 border">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>4. Retos</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       CONTENIDO PRINCIPAL
+       ======================================================================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-7 sm:py-9">
+
+    <!-- ======================================================================
+         SECCIÓN 1: TEORÍA
+         ====================================================================== -->
+    <section id="section-teoria" class="tab-section space-y-8 animate-fade-in">
+      <!-- Tarjeta Definición Principal -->
+      <div class="glass-card glass-card-cyan rounded-2xl p-6 sm:p-8 relative overflow-hidden">
+        <div class="absolute -top-16 -right-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-4">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          Fundamento Conceptual
+        </div>
+        <h2 class="font-display text-2xl sm:text-3xl font-bold text-white mb-3">
+          ¿Qué son las Distribuciones Numéricas?
+        </h2>
+        <p class="text-slate-200 text-base sm:text-lg leading-relaxed max-w-4xl">
+          Las <strong class="text-cyan-300 font-semibold">distribuciones numéricas</strong> son arreglos de números en filas y columnas en las que se establecen relaciones entre los números que las conforman.
+        </p>
+      </div>
+
+      <!-- Estrategias de Resolución -->
+      <div>
+        <div class="flex items-center gap-2.5 mb-4">
+          <div class="h-6 w-1 rounded-full bg-gradient-to-b from-cyan-400 to-indigo-500"></div>
+          <h3 class="font-display text-xl font-bold text-white">Estrategias Clave de Resolución</h3>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Estrategia 1: Filas -->
+          <div class="glass-card rounded-2xl p-5 hover:border-cyan-400/40 transition-all duration-300">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-300 text-xs font-bold border border-cyan-400/25">Horizontal</span>
+              <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="8" x2="19" y2="8"></line>
+                <polyline points="15 4 19 8 15 12"></polyline>
+                <line x1="5" y1="16" x2="19" y2="16"></line>
+                <polyline points="15 12 19 16 15 20"></polyline>
+              </svg>
+            </div>
+            <h4 class="font-display font-bold text-white text-base mb-1.5">Relación por Filas</h4>
+            <p class="text-slate-400 text-sm leading-relaxed">
+              Los números de una misma fila se operan entre sí siguiendo la misma regla para todas las filas.
+            </p>
+            <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-center gap-1.5 font-mono text-xs text-cyan-300">
+              <span class="px-2 py-0.5 rounded bg-slate-800">a</span>
+              <span>∘</span>
+              <span class="px-2 py-0.5 rounded bg-slate-800">b</span>
+              <span>=</span>
+              <span class="px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/40">c</span>
+            </div>
+          </div>
+
+          <!-- Estrategia 2: Columnas -->
+          <div class="glass-card rounded-2xl p-5 hover:border-indigo-400/40 transition-all duration-300">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 text-xs font-bold border border-indigo-400/25">Vertical</span>
+              <svg class="w-5 h-5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="5" x2="8" y2="19"></line>
+                <polyline points="4 15 8 19 12 15"></polyline>
+                <line x1="16" y1="5" x2="16" y2="19"></line>
+                <polyline points="12 15 16 19 20 15"></polyline>
+              </svg>
+            </div>
+            <h4 class="font-display font-bold text-white text-base mb-1.5">Relación por Columnas</h4>
+            <p class="text-slate-400 text-sm leading-relaxed">
+              Se relacionan los elementos de arriba hacia abajo (o extremos con el centro) en cada columna.
+            </p>
+            <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-center gap-2 font-mono text-xs text-indigo-300">
+              <span class="px-2 py-0.5 rounded bg-slate-800">C1 ↓</span>
+              <span class="px-2 py-0.5 rounded bg-slate-800">C2 ↓</span>
+              <span class="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-400/40">C3 ↓</span>
+            </div>
+          </div>
+          <!-- Estrategia 3: Operaciones Combinadas -->
+          <div class="glass-card rounded-2xl p-5 hover:border-emerald-400/40 transition-all duration-300">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 text-xs font-bold border border-emerald-400/25">Aritmética</span>
+              <svg class="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+            <h4 class="font-display font-bold text-white text-base mb-1.5">Operaciones Combinadas</h4>
+            <p class="text-slate-400 text-sm leading-relaxed">
+              Combina adición, sustracción, multiplicación, división y constantes numéricas en una misma regla.
+            </p>
+            <div class="mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-center gap-1.5 font-mono text-xs text-emerald-300">
+              <span class="px-2 py-0.5 rounded bg-slate-800">+</span>
+              <span class="px-2 py-0.5 rounded bg-slate-800">−</span>
+              <span class="px-2 py-0.5 rounded bg-slate-800">×</span>
+              <span class="px-2 py-0.5 rounded bg-slate-800">÷</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/40">(a ± b) × k</span>
+            </div>
+          </div>
+
+          <!-- Estrategia 4: Potencias y Patrones -->
+          <div class="glass-card rounded-2xl p-5 hover:border-amber-400/40 transition-all duration-300">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-300 text-xs font-bold border border-amber-400/25">Patrón Global</span>
+              <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 4H6l6 8-6 8h12"></path>
+              </svg>
+            </div>
+            <h4 class="font-display font-bold text-white text-base mb-1.5">Potencias y Patrones</h4>
+            <p class="text-slate-400 text-sm leading-relaxed">
+              Incluye exponentes, cuadrados perfectos o sumas totales constantes en cada fila o columna.
+            </p>
+            <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-center gap-1.5 font-mono text-xs text-amber-300">
+              <span class="px-2 py-0.5 rounded bg-slate-800">aⁿ</span>
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/40">Σ F₁ = Σ F₂ = Σ F₃</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 Ejemplos Resueltos Interactivos -->
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="h-6 w-1 rounded-full bg-gradient-to-b from-amber-400 to-cyan-400"></div>
+            <h3 class="font-display text-xl font-bold text-white">Ejemplos Resueltos Paso a Paso</h3>
+          </div>
+          <span class="text-xs text-slate-400">Haz clic en <strong class="text-cyan-300">Ver paso a paso</strong> para observar cómo se ilumina cada relación</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Ejemplo 1: Por Columnas -->
+          <div class="glass-card glass-card-indigo rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-bold">
+                  Ejemplo 1 · Por Columnas
+                </span>
+                <span id="ex1-status" class="text-xs font-mono text-slate-400">Paso 0 / 3</span>
+              </div>
+
+              <p class="text-sm text-slate-300 mb-5">
+                Observa la distribución planteada y determina el valor de <strong class="text-amber-300 font-mono">"x"</strong>:
+              </p>
+
+              <!-- Matriz Ejemplo 1 -->
+              <div id="ex1-matrix" class="mb-6 flex justify-center"></div>
+
+              <!-- Caja de Resolución Dinámica Ejemplo 1 -->
+              <div class="rounded-xl bg-[#070b14]/80 border border-slate-800 p-4 min-h-[146px]">
+                <div class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2.5">Resolución:</div>
+                <div id="ex1-steps" class="space-y-2 font-mono text-sm">
+                  <p class="text-slate-500 italic text-xs font-sans">Pulsa "Ver paso a paso" para revelar el análisis de cada columna.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 flex items-center gap-2.5">
+              <button id="ex1-btn-step" type="button"
+                class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold text-sm shadow-lg shadow-indigo-950/50 transition-all active:scale-[0.98]">
+                Ver paso a paso
+              </button>
+              <button id="ex1-btn-reset" type="button" title="Reiniciar ejemplo"
+                class="py-2.5 px-3.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-medium transition-all">
+                Reiniciar
+              </button>
+            </div>
+          </div>
+
+          <!-- Ejemplo 2: Por Filas -->
+          <div class="glass-card glass-card-cyan rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 text-xs font-bold">
+                  Ejemplo 2 · Por Filas
+                </span>
+                <span id="ex2-status" class="text-xs font-mono text-slate-400">Paso 0 / 3</span>
+              </div>
+
+              <p class="text-sm text-slate-300 mb-5">
+                Relaciona los números con las operaciones adecuadas. Luego, determina el valor de <strong class="text-amber-300 font-mono">"x"</strong>:
+              </p>
+
+              <!-- Matriz Ejemplo 2 -->
+              <div id="ex2-matrix" class="mb-6 flex justify-center"></div>
+
+              <!-- Caja de Resolución Dinámica Ejemplo 2 -->
+              <div class="rounded-xl bg-[#070b14]/80 border border-slate-800 p-4 min-h-[146px]">
+                <div class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2.5">Resolución:</div>
+                <div id="ex2-steps" class="space-y-2 font-mono text-sm">
+                  <p class="text-slate-500 italic text-xs font-sans">Pulsa "Ver paso a paso" para revelar el análisis de cada fila.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 flex items-center gap-2.5">
+              <button id="ex2-btn-step" type="button"
+                class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-semibold text-sm shadow-lg shadow-cyan-950/50 transition-all active:scale-[0.98]">
+                Ver paso a paso
+              </button>
+              <button id="ex2-btn-reset" type="button" title="Reiniciar ejemplo"
+                class="py-2.5 px-3.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-medium transition-all">
+                Reiniciar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Llamado a la acción hacia Práctica -->
+      <div class="glass-card rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 border-emerald-500/20">
+        <div>
+          <h4 class="font-display font-bold text-white text-base">¿Listo para poner en práctica lo aprendido?</h4>
+          <p class="text-sm text-slate-400">Empieza sin límite de tiempo y con pistas progresivas en la sección de Práctica Guiada.</p>
+        </div>
+        <button type="button" onclick="switchTab('practica')"
+          class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 font-semibold text-sm transition-all">
+          Ir a Práctica Guiada →
+        </button>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECCIÓN 2: PRÁCTICA GUIADA (6 ejercicios sin límite de tiempo)
+         ====================================================================== -->
+    <section id="section-practica" class="tab-section hidden space-y-6 animate-fade-in">
+      <!-- Encabezado y Selector de Ejercicios -->
+      <div class="glass-card glass-card-emerald rounded-2xl p-5 sm:p-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2">
+              Sin límite de tiempo · Aprendizaje Activo
+            </div>
+            <h2 class="font-display text-2xl font-bold text-white">Práctica Guiada</h2>
+            <p class="text-sm text-slate-400 mt-0.5">Descubre el patrón en cada distribución. Usa las pistas progresivas si necesitas orientación.</p>
+          </div>
+
+          <!-- Navegador numérico 1 al 6 -->
+          <div id="practice-pills" class="flex flex-wrap items-center gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Área Principal del Ejercicio de Práctica -->
+      <div class="glass-card rounded-2xl p-6 sm:p-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- Columna Izquierda: Enunciado y Matriz -->
+          <div class="lg:col-span-5 flex flex-col items-center">
+            <div class="w-full flex items-center justify-between mb-4">
+              <span id="practice-badge" class="px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 font-mono text-xs font-bold text-emerald-300">
+                Ejercicio 1 de 6
+              </span>
+              <span id="practice-orientation-tag" class="hidden px-2.5 py-1 rounded-lg text-xs font-semibold"></span>
+            </div>
+
+            <p class="text-sm text-slate-300 text-center mb-5">
+              Relaciona los números con las operaciones adecuadas y determina el valor de <strong class="text-amber-300 font-mono">"x"</strong>:
+            </p>
+
+            <!-- Matriz 3x3 -->
+            <div id="practice-matrix" class="w-full flex justify-center mb-4"></div>
+          </div>
+
+          <!-- Columna Derecha: Respuesta, Pistas y Retroalimentación -->
+          <div class="lg:col-span-7 space-y-5">
+            <!-- Formulario de Respuesta -->
+            <div class="p-5 rounded-2xl bg-[#070b14]/75 border border-slate-800">
+              <label for="practice-input" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">
+                Ingresa el valor de x:
+              </label>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 font-mono font-bold text-amber-400 text-base">x =</span>
+                  <input id="practice-input" type="number" inputmode="numeric" placeholder="Tu respuesta"
+                    class="w-full pl-14 pr-4 py-3 rounded-xl bg-slate-900 border border-slate-700 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/25 font-mono text-lg font-bold text-white outline-none transition-all" />
+                </div>
+                <button id="practice-btn-check" type="button"
+                  class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-semibold text-sm shadow-lg shadow-emerald-950/50 transition-all active:scale-[0.98]">
+                  Comprobar
+                </button>
+              </div>
+              <p id="practice-input-warn" class="hidden mt-2 text-xs text-amber-400">Por favor, escribe un valor numérico antes de comprobar.</p>
+            </div>
+
+            <!-- Botones de Pistas Progresivas y Ver Resolución -->
+            <div class="flex flex-wrap gap-2.5">
+              <button id="practice-btn-hint1" type="button"
+                class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs sm:text-sm font-semibold transition-all">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Pista 1: Orientación
+              </button>
+
+              <button id="practice-btn-hint2" type="button"
+                class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs sm:text-sm font-semibold transition-all">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                Pista 2: Regla
+              </button>
+
+              <button id="practice-btn-solution" type="button"
+                class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs sm:text-sm font-semibold transition-all">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Ver Resolución
+              </button>
+            </div>
+
+            <!-- Contenedor de Pistas Desplegadas -->
+            <div id="practice-hints-box" class="hidden space-y-2.5 animate-fade-in"></div>
+
+            <!-- Retroalimentación Inmediata -->
+            <div id="practice-feedback-box" class="hidden rounded-2xl p-5 border animate-fade-in"></div>
+
+            <!-- Controles Anterior / Siguiente -->
+            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-3">
+              <button id="practice-btn-prev" type="button"
+                class="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                ← Anterior
+              </button>
+              <button id="practice-btn-next" type="button"
+                class="px-5 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-emerald-500/35 text-emerald-300 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                Siguiente →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECCIÓN 3: NIVELES CON TIEMPO (Nivel 1 y Nivel 2)
+         ====================================================================== -->
+    <section id="section-niveles" class="tab-section hidden space-y-6 animate-fade-in">
+
+      <!-- Vista A: Selector de Niveles -->
+      <div id="levels-selector" class="space-y-6">
+        <div class="glass-card glass-card-indigo rounded-2xl p-6 sm:p-8">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-3">
+            Evaluación Cronometrada
+          </div>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold text-white mb-2">Niveles con Tiempo</h2>
+          <p class="text-slate-400 text-sm sm:text-base max-w-2xl">
+            Pon a prueba tu agilidad matemática bajo presión. Cada ejercicio cuenta con cronómetro regresivo, pistas disponibles y retroalimentación detallada si cometes un error o se agota el tiempo.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Tarjeta Nivel 1 -->
+          <div class="glass-card glass-card-cyan rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <span class="px-3 py-1 rounded-lg bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 font-display font-bold text-sm">
+                  NIVEL 1
+                </span>
+                <!-- Indicador de dificultad (1 de 3 barras) -->
+                <div class="flex items-end gap-1" title="Dificultad: Fundamentos">
+                  <span class="w-2 h-3 rounded-sm bg-cyan-400"></span>
+                  <span class="w-2 h-4.5 rounded-sm bg-slate-700 h-4"></span>
+                  <span class="w-2 h-6 rounded-sm bg-slate-700"></span>
+                </div>
+              </div>
+              <h3 class="font-display text-xl font-bold text-white mb-2">Fundamentos</h3>
+              <p class="text-sm text-slate-400 mb-5">
+                Operaciones directas por filas y columnas, sumas constantes y relaciones básicas combinadas.
+              </p>
+
+              <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <div class="text-[11px] text-slate-400 uppercase font-semibold">Ejercicios</div>
+                  <div class="font-mono text-base font-bold text-white">6 matrices</div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <div class="text-[11px] text-slate-400 uppercase font-semibold">Tiempo c/u</div>
+                  <div class="font-mono text-base font-bold text-cyan-300">60 segundos</div>
+                </div>
+              </div>
+              <div id="lvl1-best-badge" class="hidden mb-4 text-xs font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1.5 rounded-lg inline-block"></div>
+            </div>
+
+            <button type="button" onclick="startTimedLevel(1)"
+              class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-cyan-950/50 transition-all active:scale-[0.98]">
+              Iniciar Nivel 1
+            </button>
+          </div>
+
+          <!-- Tarjeta Nivel 2 -->
+          <div class="glass-card glass-card-indigo rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <span class="px-3 py-1 rounded-lg bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 font-display font-bold text-sm">
+                  NIVEL 2
+                </span>
+                <!-- Indicador de dificultad (2 de 3 barras) -->
+                <div class="flex items-end gap-1" title="Dificultad: Intermedio">
+                  <span class="w-2 h-3 rounded-sm bg-indigo-400"></span>
+                  <span class="w-2 h-4 rounded-sm bg-indigo-400"></span>
+                  <span class="w-2 h-6 rounded-sm bg-slate-700"></span>
+                </div>
+              </div>
+              <h3 class="font-display text-xl font-bold text-white mb-2">Intermedio</h3>
+              <p class="text-sm text-slate-400 mb-5">
+                Patrones de doble operación, constantes aditivas/sustractivas, divisiones y potencias.
+              </p>
+
+              <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <div class="text-[11px] text-slate-400 uppercase font-semibold">Ejercicios</div>
+                  <div class="font-mono text-base font-bold text-white">5 matrices</div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <div class="text-[11px] text-slate-400 uppercase font-semibold">Tiempo c/u</div>
+                  <div class="font-mono text-base font-bold text-indigo-300">75 segundos</div>
+                </div>
+              </div>
+              <div id="lvl2-best-badge" class="hidden mb-4 text-xs font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1.5 rounded-lg inline-block"></div>
+            </div>
+
+            <button type="button" onclick="startTimedLevel(2)"
+              class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm shadow-lg shadow-indigo-950/50 transition-all active:scale-[0.98]">
+              Iniciar Nivel 2
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista B: Partida Activa de Nivel -->
+      <div id="levels-active" class="hidden space-y-5 animate-fade-in">
+        <!-- Barra de estado superior del Nivel -->
+        <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <button type="button" onclick="exitTimedLevel()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 transition-all">
+                ← Niveles
+              </button>
+              <span id="lvl-title-badge" class="font-display font-bold text-white text-base">Nivel 1 · Fundamentos</span>
+              <span id="lvl-counter" class="px-2.5 py-0.5 rounded-md bg-slate-800 font-mono text-xs text-cyan-300 font-bold">1 / 6</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <!-- Racha -->
+              <div class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono">
+                <span class="text-slate-400">Racha:</span>
+                <span id="lvl-streak" class="font-bold text-amber-400">0</span>
+              </div>
+              <!-- Puntaje del nivel -->
+              <div class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono">
+                <span class="text-slate-400">Pts:</span>
+                <span id="lvl-score" class="font-bold text-emerald-300">0</span>
+              </div>
+              <!-- Cronómetro -->
+              <div id="lvl-timer-pill" class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-500/15 border border-cyan-400/35 font-mono text-sm font-bold text-cyan-300 transition-colors">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="lvl-timer-text">60s</span>
+              </div>
+              <!-- Botón Pausa -->
+              <button id="lvl-btn-pause" type="button" onclick="toggleLevelPause()"
+                class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-all">
+                Pausar
+              </button>
+            </div>
+          </div>
+
+          <!-- Barra de progreso de tiempo -->
+          <div class="w-full h-2 rounded-full bg-slate-800/90 overflow-hidden">
+            <div id="lvl-timer-bar" class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-400 transition-all duration-1000 ease-linear" style="width: 100%"></div>
+          </div>
+        </div>
+
+        <!-- Tarjeta del Ejercicio con Overlay de Pausa -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 relative">
+          <!-- Overlay de Pausa -->
+          <div id="lvl-pause-overlay" class="hidden absolute inset-0 z-20 rounded-2xl bg-[#070b14]/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-400/30 flex items-center justify-center mb-4">
+              <svg class="w-7 h-7 text-indigo-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            </div>
+            <h3 class="font-display text-2xl font-bold text-white mb-2">Cronómetro en Pausa</h3>
+            <p class="text-sm text-slate-400 mb-6 max-w-sm">La matriz se oculta temporalmente mientras el tiempo está detenido.</p>
+            <button type="button" onclick="toggleLevelPause()"
+              class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 text-white font-semibold text-sm hover:from-indigo-500 hover:to-cyan-500 transition-all">
+              Reanudar Nivel
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Matriz -->
+            <div class="lg:col-span-5 flex flex-col items-center">
+              <p class="text-sm text-slate-300 text-center mb-5">
+                Calcula el valor de <strong class="text-amber-300 font-mono">"x"</strong> antes de que termine el tiempo:
+              </p>
+              <div id="lvl-matrix" class="w-full flex justify-center mb-3"></div>
+            </div>
+
+            <!-- Controles de Respuesta y Pistas -->
+            <div class="lg:col-span-7 space-y-5">
+              <div class="p-5 rounded-2xl bg-[#070b14]/75 border border-slate-800">
+                <label for="lvl-input" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">
+                  Tu respuesta:
+                </label>
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <div class="relative flex-1">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 font-mono font-bold text-amber-400 text-base">x =</span>
+                    <input id="lvl-input" type="number" inputmode="numeric" placeholder="Escribe el valor"
+                      class="w-full pl-14 pr-4 py-3 rounded-xl bg-slate-900 border border-slate-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-lg font-bold text-white outline-none transition-all disabled:opacity-50" />
+                  </div>
+                  <button id="lvl-btn-submit" type="button"
+                    class="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold text-sm shadow-lg transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed">
+                    Comprobar
+                  </button>
+                </div>
+                <p id="lvl-input-warn" class="hidden mt-2 text-xs text-amber-400">Ingresa un número válido para comprobar.</p>
+              </div>
+
+              <!-- Sistema de Pistas en Niveles -->
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex flex-wrap gap-2">
+                  <button id="lvl-btn-hint1" type="button"
+                    class="px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-semibold transition-all disabled:opacity-40">
+                    Pista 1
+                  </button>
+                  <button id="lvl-btn-hint2" type="button"
+                    class="px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold transition-all disabled:opacity-40">
+                    Pista 2
+                  </button>
+                </div>
+                <span id="lvl-hint-indicator" class="text-[11px] text-slate-400 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                  2 pistas disponibles para ayudarte
+                </span>
+              </div>
+
+              <!-- Contenedor de pistas -->
+              <div id="lvl-hints-box" class="hidden space-y-2 animate-fade-in"></div>
+
+              <!-- Retroalimentación detallada -->
+              <div id="lvl-feedback-box" class="hidden rounded-2xl p-5 border animate-fade-in"></div>
+
+              <!-- Botón Siguiente Ejercicio -->
+              <div id="lvl-next-wrap" class="hidden pt-2 flex justify-end">
+                <button id="lvl-btn-next" type="button"
+                  class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-semibold text-sm shadow-lg transition-all active:scale-[0.98]">
+                  Siguiente Ejercicio →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista C: Resultados del Nivel -->
+      <div id="levels-results" class="hidden animate-fade-in">
+        <div class="glass-card glass-card-emerald rounded-2xl p-6 sm:p-10 max-w-2xl mx-auto text-center">
+          <div id="lvl-res-medal" class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-5 border"></div>
+          <h3 id="lvl-res-title" class="font-display text-2xl sm:text-3xl font-bold text-white mb-2">¡Nivel Completado!</h3>
+          <p id="lvl-res-subtitle" class="text-slate-400 text-sm mb-7"></p>
+
+          <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
+            <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Aciertos</div>
+              <div id="lvl-res-hits" class="font-mono text-xl sm:text-2xl font-bold text-emerald-300 mt-1">0/6</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Puntaje</div>
+              <div id="lvl-res-score" class="font-mono text-xl sm:text-2xl font-bold text-amber-300 mt-1">0</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Tiempo</div>
+              <div id="lvl-res-time" class="font-mono text-xl sm:text-2xl font-bold text-cyan-300 mt-1">0s</div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button id="lvl-res-retry" type="button"
+              class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold text-sm transition-all">
+              Reintentar Nivel
+            </button>
+            <button id="lvl-res-next-level" type="button"
+              class="hidden px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold text-sm shadow-lg transition-all">
+              Pasar al Nivel 2 →
+            </button>
+            <button type="button" onclick="exitTimedLevel()"
+              class="px-5 py-2.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 font-semibold text-sm transition-all">
+              Volver a Niveles
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECCIÓN 4: RETOS (Reto Excelencia + Desafío Contrarreloj)
+         ====================================================================== -->
+    <section id="section-retos" class="tab-section hidden space-y-6 animate-fade-in">
+      <!-- Selector de Modalidad de Retos -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <button id="reto-mode-excelencia-btn" type="button" onclick="selectRetoMode('excelencia')"
+          class="glass-card glass-card-amber rounded-2xl p-5 text-left transition-all hover:scale-[1.01] border-2">
+          <div class="flex items-center justify-between mb-2">
+            <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold uppercase tracking-wider">
+              Reto Especial
+            </span>
+            <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>
+            </svg>
+          </div>
+          <h3 class="font-display text-lg font-bold text-white">Asume el RETO · Excelencia</h3>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">Problema estrella de alto nivel con cronómetro de 90s y medalla de excelencia.</p>
+        </button>
+
+        <button id="reto-mode-contrarreloj-btn" type="button" onclick="selectRetoMode('contrarreloj')"
+          class="glass-card rounded-2xl p-5 text-left transition-all hover:scale-[1.01] border-2 border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <span class="px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-400/35 text-cyan-300 text-xs font-bold uppercase tracking-wider">
+              11 Retos · 45s c/u
+            </span>
+            <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <h3 class="font-display text-lg font-bold text-white">Desafío Contrarreloj</h3>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">11 distribuciones rápidas con alternativas (a, b, c, d), racha de aciertos y pistas.</p>
+        </button>
+      </div>
+
+      <!-- ====================================================================
+           MODALIDAD 1: RETO EXCELENCIA ("Asume el RETO")
+           ==================================================================== -->
+      <div id="reto-excelencia-panel" class="glass-card glass-card-amber rounded-2xl p-6 sm:p-8 relative overflow-hidden">
+        <!-- Capa de celebración confetti -->
+        <div id="excelencia-confetti" class="absolute inset-0 pointer-events-none overflow-hidden z-10"></div>
+
+        <!-- Encabezado Reto Excelencia -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-slate-800/80 mb-6">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
+              Nivel Excelencia · Problema Estrella
+            </div>
+            <h2 class="font-display text-2xl font-bold text-white">Asume el RETO</h2>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div id="exc-timer-pill" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/35 font-mono text-base font-bold text-amber-300">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span id="exc-timer-text">90s</span>
+            </div>
+            <button id="exc-btn-start" type="button" onclick="startExcelencia()"
+              class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-sm shadow-lg shadow-amber-950/50 transition-all">
+              Iniciar Reto (90s)
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de tiempo Excelencia -->
+        <div class="w-full h-1.5 rounded-full bg-slate-800/90 overflow-hidden mb-6">
+          <div id="exc-timer-bar" class="h-full rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 transition-all duration-1000 ease-linear" style="width: 100%"></div>
+        </div>
+
+        <!-- Cuerpo Reto Excelencia -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div class="lg:col-span-5 flex flex-col items-center">
+            <p class="text-sm text-slate-300 text-center mb-5">
+              Observa detenidamente el arreglo y calcula el valor de <strong class="text-amber-300 font-mono">"x"</strong>:
+            </p>
+            <div id="exc-matrix" class="w-full flex justify-center"></div>
+          </div>
+
+          <div class="lg:col-span-7 space-y-5">
+            <!-- Estado previo al inicio -->
+            <div id="exc-prestart-msg" class="p-5 rounded-2xl bg-amber-500/10 border border-amber-400/25 text-sm text-amber-200">
+              Pulsa <strong>"Iniciar Reto (90s)"</strong> para activar el cronómetro y desbloquear la caja de respuesta. También puedes analizar la matriz antes de empezar.
+            </div>
+
+            <!-- Input y Comprobación -->
+            <div class="p-5 rounded-2xl bg-[#070b14]/75 border border-slate-800">
+              <label for="exc-input" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">
+                Respuesta del Reto Excelencia:
+              </label>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 font-mono font-bold text-amber-400 text-base">x =</span>
+                  <input id="exc-input" type="number" inputmode="numeric" placeholder="Valor de x" disabled
+                    class="w-full pl-14 pr-4 py-3 rounded-xl bg-slate-900 border border-slate-700 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/25 font-mono text-lg font-bold text-white outline-none transition-all disabled:opacity-45" />
+                </div>
+                <button id="exc-btn-submit" type="button" disabled
+                  class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-sm shadow-lg transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed">
+                  Comprobar
+                </button>
+              </div>
+              <p id="exc-input-warn" class="hidden mt-2 text-xs text-amber-400">Escribe un número antes de comprobar.</p>
+            </div>
+
+            <!-- Pistas Reto Excelencia -->
+            <div class="flex flex-wrap gap-2.5">
+              <button id="exc-btn-hint1" type="button" disabled
+                class="px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-semibold transition-all disabled:opacity-40">
+                Pista 1
+              </button>
+              <button id="exc-btn-hint2" type="button" disabled
+                class="px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold transition-all disabled:opacity-40">
+                Pista 2
+              </button>
+            </div>
+
+            <div id="exc-hints-box" class="hidden space-y-2 animate-fade-in"></div>
+            <div id="exc-feedback-box" class="hidden rounded-2xl p-5 border animate-fade-in"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           MODALIDAD 2: DESAFÍO CONTRARRELOJ (11 Retos con alternativas a,b,c,d)
+           ==================================================================== -->
+      <div id="reto-contrarreloj-panel" class="hidden space-y-5">
+        <!-- Pantalla de Inicio Contrarreloj -->
+        <div id="cr-intro" class="glass-card glass-card-cyan rounded-2xl p-6 sm:p-10 text-center">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-cyan-500/15 border border-cyan-400/35 flex items-center justify-center mb-5">
+            <svg class="w-8 h-8 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold text-white mb-2">Desafío Contrarreloj</h2>
+          <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto mb-6">
+            Resuelve <strong class="text-white">11 distribuciones numéricas</strong> seleccionando la alternativa correcta (<span class="font-mono text-cyan-300">a, b, c, d</span>). Tienes <strong class="text-cyan-300">45 segundos</strong> por reto. Si te equivocas, verás la explicación paso a paso al instante.
+          </p>
+          <div id="cr-best-badge" class="hidden mb-6 text-xs font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-4 py-1.5 rounded-full inline-block"></div>
+          <div>
+            <button type="button" onclick="startContrarreloj()"
+              class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-base shadow-xl shadow-cyan-950/50 transition-all active:scale-[0.98]">
+              Comenzar Desafío Contrarreloj
+            </button>
+          </div>
+        </div>
+
+        <!-- Juego Activo Contrarreloj -->
+        <div id="cr-active" class="hidden space-y-5 animate-fade-in">
+          <!-- Barra superior Contrarreloj -->
+          <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="font-display font-bold text-white text-base">Desafío Contrarreloj</span>
+                <span id="cr-counter" class="px-2.5 py-0.5 rounded-md bg-slate-800 font-mono text-xs text-cyan-300 font-bold">Reto 1 / 11</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono">
+                  <span class="text-slate-400">Racha:</span>
+                  <span id="cr-streak" class="font-bold text-amber-400">0</span>
+                </div>
+                <div class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono">
+                  <span class="text-slate-400">Pts:</span>
+                  <span id="cr-score" class="font-bold text-emerald-300">0</span>
+                </div>
+                <div id="cr-timer-pill" class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-500/15 border border-cyan-400/35 font-mono text-sm font-bold text-cyan-300">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <span id="cr-timer-text">45s</span>
+                </div>
+              </div>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-800/90 overflow-hidden">
+              <div id="cr-timer-bar" class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-400 transition-all duration-1000 ease-linear" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- Tarjeta de Reto con Alternativas -->
+          <div class="glass-card rounded-2xl p-6 sm:p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div class="lg:col-span-5 flex flex-col items-center">
+                <p id="cr-prompt" class="text-sm text-slate-300 text-center mb-5">
+                  Encuentra el valor de <strong class="text-amber-300 font-mono">"x"</strong> en la distribución:
+                </p>
+                <div id="cr-matrix" class="w-full flex justify-center"></div>
+              </div>
+
+              <div class="lg:col-span-7 space-y-5">
+                <!-- Cuadrícula de Alternativas a, b, c, d -->
+                <div>
+                  <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Selecciona la alternativa correcta:</div>
+                  <div id="cr-options" class="grid grid-cols-2 gap-3"></div>
+                </div>
+
+                <!-- Pistas -->
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex gap-2">
+                    <button id="cr-btn-hint1" type="button"
+                      class="px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-semibold transition-all disabled:opacity-40">
+                      Pista 1
+                    </button>
+                    <button id="cr-btn-hint2" type="button"
+                      class="px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold transition-all disabled:opacity-40">
+                      Pista 2
+                    </button>
+                  </div>
+                  <span id="cr-hint-indicator" class="text-[11px] text-slate-400">Pistas disponibles</span>
+                </div>
+
+                <div id="cr-hints-box" class="hidden space-y-2 animate-fade-in"></div>
+                <div id="cr-feedback-box" class="hidden rounded-2xl p-5 border animate-fade-in"></div>
+
+                <div id="cr-next-wrap" class="hidden pt-2 flex justify-end">
+                  <button id="cr-btn-next" type="button"
+                    class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg transition-all">
+                    Siguiente Reto →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultados Contrarreloj -->
+        <div id="cr-results" class="hidden animate-fade-in">
+          <div class="glass-card glass-card-cyan rounded-2xl p-6 sm:p-10 max-w-2xl mx-auto text-center">
+            <div id="cr-res-medal" class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-5 border"></div>
+            <h3 id="cr-res-title" class="font-display text-2xl sm:text-3xl font-bold text-white mb-2">¡Desafío Finalizado!</h3>
+            <p id="cr-res-subtitle" class="text-slate-400 text-sm mb-7"></p>
+
+            <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
+              <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+                <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Aciertos</div>
+                <div id="cr-res-hits" class="font-mono text-xl sm:text-2xl font-bold text-emerald-300 mt-1">0/11</div>
+              </div>
+              <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+                <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Puntaje</div>
+                <div id="cr-res-score" class="font-mono text-xl sm:text-2xl font-bold text-amber-300 mt-1">0</div>
+              </div>
+              <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+                <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Mejor Racha</div>
+                <div id="cr-res-streak" class="font-mono text-xl sm:text-2xl font-bold text-cyan-300 mt-1">0</div>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-3">
+              <button type="button" onclick="startContrarreloj()"
+                class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg transition-all">
+                Volver a Jugar
+              </button>
+              <button type="button" onclick="selectRetoMode('excelencia')"
+                class="px-5 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/35 text-amber-300 font-semibold text-sm transition-all">
+                Ir al Reto Excelencia
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       PIE DE PÁGINA CON FIRMA ELEGANTE EN CURSIVA ANIMADA: Prof. Jhon Dewis
+       ======================================================================== -->
+  <footer class="mt-auto border-t border-slate-800/80 bg-[#050810]/90 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-col items-center justify-center gap-1.5 text-center">
+      <div class="w-28 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent mb-1"></div>
+      <div class="prof-signature text-2xl sm:text-3xl italic select-none">
+        Prof. Jhon Dewis
+      </div>
+      <p class="text-[11px] text-slate-500 tracking-wide">
+        Plataforma Interactiva de Razonamiento Matemático · Distribuciones Numéricas
+      </p>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       LÓGICA JAVASCRIPT PURA (AUDIO, DATOS, RENDERIZADO Y CRONÓMETROS)
+       ======================================================================== -->
+  <script>
+    /* ========================================================================
+       1. MOTOR DE SONIDO SUAVE (WEB AUDIO API - SIN ARCHIVOS EXTERNOS)
+       ======================================================================== */
+    const SoundFX = (() => {
+      let ctx = null;
+      let enabled = true;
+
+      function ensureContext() {
+        if (!enabled) return null;
+        try {
+          if (!ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) ctx = new AudioCtx();
+          }
+          if (ctx && ctx.state === 'suspended') {
+            ctx.resume();
+          }
+          return ctx;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function playTone(freq, duration, type = 'sine', volume = 0.08, delay = 0) {
+        const audio = ensureContext();
+        if (!audio) return;
+        try {
+          const now = audio.currentTime + delay;
+          const osc = audio.createOscillator();
+          const gain = audio.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(volume, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          osc.connect(gain);
+          gain.connect(audio.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.02);
+        } catch (e) {
+          // Silencioso en caso de bloqueo del navegador
+        }
+      }
+
+      return {
+        isEnabled: () => enabled,
+        toggle: () => {
+          enabled = !enabled;
+          if (enabled) playTone(523.25, 0.09, 'sine', 0.06);
+          return enabled;
+        },
+        click: () => playTone(440, 0.05, 'sine', 0.04),
+        hint: () => {
+          playTone(587.33, 0.11, 'triangle', 0.06, 0);
+          playTone(783.99, 0.14, 'triangle', 0.06, 0.08);
+        },
+        correct: () => {
+          playTone(523.25, 0.12, 'sine', 0.08, 0);
+          playTone(659.25, 0.12, 'sine', 0.08, 0.09);
+          playTone(783.99, 0.22, 'sine', 0.09, 0.18);
+        },
+        wrong: () => {
+          playTone(260, 0.16, 'triangle', 0.08, 0);
+          playTone(196, 0.24, 'triangle', 0.08, 0.13);
+        },
+        tick: () => playTone(880, 0.04, 'sine', 0.03),
+        fanfare: () => {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((n, idx) => playTone(n, 0.28, 'sine', 0.09, idx * 0.1));
+        }
+      };
+    })();
+
+    /* ========================================================================
+       2. BANCO DE DATOS EXACTOS (TEORÍA, PRÁCTICA, NIVELES Y RETOS)
+       ======================================================================== */
+    const THEORY_EXAMPLES = {
+      ex1: {
+        matrix: [[12, 6, 8], [4, 7, 6], [48, 42, 'x']],
+        orientation: 'columnas',
+        answer: 48,
+        steps: [
+          { index: 0, text: 'Columna 1: 12 × 4 = 48' },
+          { index: 1, text: 'Columna 2: 6 × 7 = 42' },
+          { index: 2, text: 'Columna 3: 8 × 6 = 48  →  Rpta.: El número de estudiantes es 48.' }
+        ]
+      },
+      ex2: {
+        matrix: [[4, 8, 20], [8, 5, 28], [6, 7, 'x']],
+        orientation: 'filas',
+        answer: 30,
+        steps: [
+          { index: 0, text: 'Fila 1: 4 × 8 − 12 = 20' },
+          { index: 1, text: 'Fila 2: 8 × 5 − 12 = 28' },
+          { index: 2, text: 'Fila 3: 6 × 7 − 12 = 30  →  Rpta.: El valor de "x" es 30.' }
+        ]
+      }
+    };
+
+    const PRACTICE_DATA = [
+      {
+        id: 'prac-1',
+        matrix: [[12, 8, 4], [25, 12, 13], [19, 'x', 11]],
+        answer: 8,
+        orientation: 'filas',
+        hint1: 'Analiza cada fila de forma horizontal.',
+        hint2: 'Resta el tercer número al primero para obtener el número central.',
+        resolution: 'Fila 1: 12 − 4 = 8 | Fila 2: 25 − 13 = 12 | Fila 3: 19 − 11 = 8 → El valor de x es 8.'
+      },
+      {
+        id: 'prac-2',
+        matrix: [[36, 28, 24], [4, 7, 8], [9, 'x', 3]],
+        answer: 4,
+        orientation: 'columnas',
+        hint1: 'Analiza el arreglo en sentido vertical (por columnas).',
+        hint2: 'Divide el primer número entre el segundo en cada columna.',
+        resolution: 'Columna 1: 36 ÷ 4 = 9 | Columna 3: 24 ÷ 8 = 3 | Columna 2: 28 ÷ 7 = 4 → El valor de x es 4.'
+      },
+      {
+        id: 'prac-3',
+        matrix: [[9, 14, 2], [10, 8, 6], [7, 'x', 1]],
+        answer: 12,
+        orientation: 'filas',
+        hint1: 'Trabaja por filas usando los extremos para hallar el centro.',
+        hint2: 'Resta los extremos de cada fila y multiplica el resultado por 2.',
+        resolution: 'Fila 1: (9 − 2) × 2 = 14 | Fila 2: (10 − 6) × 2 = 8 | Fila 3: (7 − 1) × 2 = 12 → El valor de x es 12.'
+      },
+      {
+        id: 'prac-4',
+        matrix: [[4, 6, 5], [18, 24, 'x'], [9, 8, 6]],
+        answer: 15,
+        orientation: 'columnas',
+        hint1: 'Analiza cada columna usando el número superior y el inferior.',
+        hint2: 'Multiplica el número superior por el inferior y divide entre 2.',
+        resolution: 'Columna 1: 4 × 9 ÷ 2 = 18 | Columna 2: 6 × 8 ÷ 2 = 24 | Columna 3: 5 × 6 ÷ 2 = 15 → El valor de x es 15.'
+      },
+      {
+        id: 'prac-5',
+        matrix: [[3, 16, 5], [4, 12, 2], [7, 'x', 3]],
+        answer: 20,
+        orientation: 'filas',
+        hint1: 'Trabaja por filas combinando el primer y último número.',
+        hint2: 'Suma los extremos de cada fila y multiplica el resultado por 2.',
+        resolution: 'Fila 1: (3 + 5) × 2 = 16 | Fila 2: (4 + 2) × 2 = 12 | Fila 3: (7 + 3) × 2 = 20 → El valor de x es 20.'
+      },
+      {
+        id: 'prac-6',
+        matrix: [[6, 36, 2], [4, 64, 3], [3, 'x', 3]],
+        answer: 27,
+        orientation: 'filas',
+        hint1: 'Trabaja por filas; observa que el número central crece muy rápido.',
+        hint2: 'Eleva el primer número a la potencia indicada por el tercer número.',
+        resolution: 'Fila 1: 6² = 36 | Fila 2: 4³ = 64 | Fila 3: 3³ = 27 → El valor de x es 27.'
+      }
+    ];
+
+    const LEVELS_DATA = {
+      1: {
+        name: 'Nivel 1 · Fundamentos',
+        timePerExercise: 60,
+        exercises: [
+          {
+            id: 'lvl1-1',
+            matrix: [[17, 9, 8], [34, 17, 17], [27, 11, 'x']],
+            answer: 16,
+            orientation: 'filas',
+            hint1: 'Analiza horizontalmente por filas.',
+            hint2: 'Resta el segundo número al primero (17 − 9 = 8).',
+            resolution: 'Fila 1: 17 − 9 = 8 | Fila 2: 34 − 17 = 17 | Fila 3: 27 − 11 = 16 → x = 16.'
+          },
+          {
+            id: 'lvl1-2',
+            matrix: [[12, 60, 5], [6, 54, 9], [3, 'x', 8]],
+            answer: 24,
+            orientation: 'filas',
+            hint1: 'Analiza por filas buscando cómo obtener el número del centro.',
+            hint2: 'Multiplica los extremos de cada fila.',
+            resolution: 'Fila 1: 12 × 5 = 60 | Fila 2: 6 × 9 = 54 | Fila 3: 3 × 8 = 24 → x = 24.'
+          },
+          {
+            id: 'lvl1-3',
+            matrix: [[28, 4, 7], [32, 8, 4], [48, 8, 'x']],
+            answer: 6,
+            orientation: 'filas',
+            hint1: 'Analiza por filas de izquierda a derecha.',
+            hint2: 'Divide el primer número entre el segundo.',
+            resolution: 'Fila 1: 28 ÷ 4 = 7 | Fila 2: 32 ÷ 8 = 4 | Fila 3: 48 ÷ 8 = 6 → x = 6.'
+          },
+          {
+            id: 'lvl1-4',
+            matrix: [[22, 44, 18], [11, 4, 3], [2, 11, 'x']],
+            answer: 6,
+            orientation: 'columnas',
+            hint1: 'Observa las columnas de arriba hacia abajo.',
+            hint2: 'Divide el número superior entre el número del medio.',
+            resolution: 'Columna 1: 22 ÷ 11 = 2 | Columna 2: 44 ÷ 4 = 11 | Columna 3: 18 ÷ 3 = 6 → x = 6.'
+          },
+          {
+            id: 'lvl1-5',
+            matrix: [[23, 16, 24], [18, 35, 17], [14, 'x', 14]],
+            answer: 4,
+            orientation: 'columnas',
+            hint1: 'Suma todos los números de la primera columna y compáralo con la tercera.',
+            hint2: 'La suma de cada columna es constante e igual a 55.',
+            resolution: 'Columna 1: 23 + 18 + 14 = 55 | Columna 3: 24 + 17 + 14 = 55 | Columna 2: 16 + 35 + x = 55 → x = 4.'
+          },
+          {
+            id: 'lvl1-6',
+            matrix: [[8, 9, 1], [36, 45, 'x'], [4, 6, 3]],
+            answer: 12,
+            orientation: 'columnas',
+            hint1: 'Analiza cada columna usando los extremos para hallar el centro.',
+            hint2: 'Suma el número superior con el inferior y multiplica por 3.',
+            resolution: 'Columna 1: (8 + 4) × 3 = 36 | Columna 2: (9 + 6) × 3 = 45 | Columna 3: (1 + 3) × 3 = 12 → x = 12.'
+          }
+        ]
+      },
+      2: {
+        name: 'Nivel 2 · Intermedio',
+        timePerExercise: 75,
+        exercises: [
+          {
+            id: 'lvl2-1',
+            matrix: [[19, 16, 11], [16, 8, 12], [13, 'x', 10]],
+            answer: 6,
+            orientation: 'filas',
+            hint1: 'Trabaja por filas usando los extremos.',
+            hint2: 'Resta los extremos de cada fila y multiplica por 2.',
+            resolution: 'Fila 1: (19 − 11) × 2 = 16 | Fila 2: (16 − 12) × 2 = 8 | Fila 3: (13 − 10) × 2 = 6 → x = 6.'
+          },
+          {
+            id: 'lvl2-2',
+            matrix: [[3, 6, 4], [8, 5, 7], [29, 'x', 33]],
+            answer: 35,
+            orientation: 'columnas',
+            hint1: 'Analiza verticalmente por columnas.',
+            hint2: 'Multiplica los dos primeros números de cada columna y súmale 5.',
+            resolution: 'Columna 1: 3 × 8 + 5 = 29 | Columna 3: 4 × 7 + 5 = 33 | Columna 2: 6 × 5 + 5 = 35 → x = 35.'
+          },
+          {
+            id: 'lvl2-3',
+            matrix: [[2, 20, 4], [3, 31, 3], [4, 'x', 2]],
+            answer: 20,
+            orientation: 'filas',
+            hint1: 'Trabaja por filas; la operación incluye potenciación.',
+            hint2: 'Eleva el primer número al tercero y suma 4.',
+            resolution: 'Fila 1: 2⁴ + 4 = 20 | Fila 2: 3³ + 4 = 31 | Fila 3: 4² + 4 = 20 → x = 20.'
+          },
+          {
+            id: 'lvl2-4',
+            matrix: [[6, 8, 34], [9, 3, 13], [7, 5, 'x']],
+            answer: 21,
+            orientation: 'filas',
+            hint1: 'Trabaja por filas multiplicando los dos primeros números.',
+            hint2: 'Multiplica los dos primeros números y réstale 14.',
+            resolution: 'Fila 1: 6 × 8 − 14 = 34 | Fila 2: 9 × 3 − 14 = 13 | Fila 3: 7 × 5 − 14 = 21 → x = 21.'
+          },
+          {
+            id: 'lvl2-5',
+            matrix: [[12, 30, 13], [16, 18, 23], [7, 12, 'x']],
+            answer: 9,
+            orientation: 'columnas',
+            hint1: 'Analiza por columnas de arriba hacia abajo.',
+            hint2: 'Suma los dos primeros números de cada columna y divide entre 4.',
+            resolution: 'Columna 1: (12 + 16) ÷ 4 = 7 | Columna 2: (30 + 18) ÷ 4 = 12 | Columna 3: (13 + 23) ÷ 4 = 9 → x = 9.'
+          }
+        ]
+      }
+    };
+
+    const RETO_EXCELENCIA = {
+      id: 'reto-exc',
+      matrix: [[3, 25, 2], [4, 49, 3], [5, 'x', 4]],
+      answer: 81,
+      orientation: 'filas',
+      timeLimit: 90,
+      hint1: 'Fíjate en los números centrales: 25 y 49 son cuadrados perfectos.',
+      hint2: 'Suma los extremos de cada fila y eleva el resultado al cuadrado.',
+      resolution: 'Fila 1: (3 + 2)² = 5² = 25 | Fila 2: (4 + 3)² = 7² = 49 | Fila 3: (5 + 4)² = 9² = 81 → x = 81.'
+    };
+
+    const CONTRARRELOJ_DATA = [
+      {
+        id: 'cr-1',
+        matrix: [[4, 9, 8], [5, 7, 6], [9, 'x', 14]],
+        options: [18, 12, 16, 20],
+        answer: 16,
+        orientation: 'columnas',
+        hint1: 'Observa por columnas.',
+        hint2: 'Suma los dos primeros números de cada columna.',
+        resolution: 'Columna 1: 4 + 5 = 9 | Columna 3: 8 + 6 = 14 | Columna 2: 9 + 7 = 16 → x = 16.'
+      },
+      {
+        id: 'cr-2',
+        matrix: [[6, 8, 3], [5, 9, 'x'], [7, 7, 3]],
+        options: [1, 2, 3, 4],
+        answer: 3,
+        orientation: 'filas',
+        hint1: 'Suma los tres números de cada fila.',
+        hint2: 'Todas las filas suman 17.',
+        resolution: 'Fila 1: 6 + 8 + 3 = 17 | Fila 3: 7 + 7 + 3 = 17 | Fila 2: 5 + 9 + x = 17 → x = 3.'
+      },
+      {
+        id: 'cr-3',
+        matrix: [[8, 9, 17], ['x', 6, 12], [16, 12, 28]],
+        options: [2, 4, 6, 8],
+        answer: 6,
+        orientation: 'filas',
+        hint1: 'Analiza por filas.',
+        hint2: 'El primer número más el segundo da el tercero.',
+        resolution: 'Fila 1: 8 + 9 = 17 | Fila 3: 16 + 12 = 28 | Fila 2: x + 6 = 12 → x = 6.'
+      },
+      {
+        id: 'cr-4',
+        matrix: [[7, 5, 10], [8, 6, 12], [12, 8, 'x']],
+        options: [18, 14, 12, 16],
+        answer: 18,
+        orientation: 'filas',
+        hint1: 'Analiza por filas sumando los dos primeros números.',
+        hint2: 'Suma los dos primeros números y réstale 2.',
+        resolution: 'Fila 1: 7 + 5 − 2 = 10 | Fila 2: 8 + 6 − 2 = 12 | Fila 3: 12 + 8 − 2 = 18 → x = 18.'
+      },
+      {
+        id: 'cr-5',
+        matrix: [[8, 12, 4], [6, 10, 5], [13, 21, 'x']],
+        options: [8, 5, 4, 6],
+        answer: 8,
+        orientation: 'columnas',
+        hint1: 'Analiza cada columna de arriba hacia abajo.',
+        hint2: 'Suma los dos primeros números de la columna y réstale 1.',
+        resolution: 'Columna 1: 8 + 6 − 1 = 13 | Columna 2: 12 + 10 − 1 = 21 | Columna 3: 4 + 5 − 1 = 8 → x = 8.'
+      },
+      {
+        id: 'cr-6',
+        matrix: [[5, 4, 3], [10, 8, 6], [20, 7, 'x']],
+        options: [5, 6, 8, 9],
+        answer: 9,
+        orientation: 'filas',
+        hint1: 'Trabaja por filas sumando los dos primeros elementos.',
+        hint2: 'Suma los dos primeros números y divide entre 3.',
+        resolution: 'Fila 1: (5 + 4) ÷ 3 = 3 | Fila 2: (10 + 8) ÷ 3 = 6 | Fila 3: (20 + 7) ÷ 3 = 9 → x = 9.'
+      },
+      {
+        id: 'cr-7',
+        matrix: [[3, 6, 18], [10, 4, 28], [12, 3, 'x']],
+        options: [30, 32, 28, 42],
+        answer: 30,
+        orientation: 'filas',
+        hint1: 'Analiza cada fila con los dos primeros números.',
+        hint2: 'Suma los dos primeros números y multiplica por 2.',
+        resolution: 'Fila 1: (3 + 6) × 2 = 18 | Fila 2: (10 + 4) × 2 = 28 | Fila 3: (12 + 3) × 2 = 30 → x = 30.'
+      },
+      {
+        id: 'cr-8',
+        matrix: [[5, 1, 1], [16, 4, 3], [18, 2, 'x']],
+        options: [2, 1, 6, 7],
+        answer: 7,
+        orientation: 'filas',
+        hint1: 'Analiza horizontalmente por filas.',
+        hint2: 'Resta 4 al primer número y divide el resultado entre el segundo número (o verifica: centro × derecha + 4 = izquierda).',
+        resolution: 'Fila 1: (5 − 4) ÷ 1 = 1 | Fila 2: (16 − 4) ÷ 4 = 3 | Fila 3: (18 − 4) ÷ 2 = 7 → x = 7.'
+      },
+      {
+        id: 'cr-9',
+        matrix: [[7, 36, 5], [3, 13, 4], [2, 3, 'x']],
+        options: [4, 3, 2, 1],
+        answer: 1,
+        orientation: 'filas',
+        hint1: 'Trabaja por filas; la respuesta es el número central.',
+        hint2: 'Multiplica los extremos de la fila y suma 1.',
+        resolution: 'Fila 1: 7 × 5 + 1 = 36 | Fila 2: 3 × 4 + 1 = 13 | Fila 3: 2 × x + 1 = 3 → x = 1.'
+      },
+      {
+        id: 'cr-10',
+        matrix: [[3, 2, 10], [5, 1, 12], [7, 3, 'x']],
+        options: [20, 10, 4, 16],
+        answer: 20,
+        orientation: 'filas',
+        hint1: 'Trabaja por filas combinando los dos primeros números.',
+        hint2: 'Suma los dos primeros números y multiplica por 2.',
+        resolution: 'Fila 1: (3 + 2) × 2 = 10 | Fila 2: (5 + 1) × 2 = 12 | Fila 3: (7 + 3) × 2 = 20 → x = 20.'
+      },
+      {
+        id: 'cr-11',
+        matrix: [[5, 3, 6], [7, 4, 9], [3, 1, 'x']],
+        options: [10, 8, 2, 4],
+        answer: 2,
+        orientation: 'filas',
+        hint1: 'Analiza horizontalmente por filas.',
+        hint2: 'Suma los dos primeros números y réstale 2.',
+        resolution: 'Fila 1: 5 + 3 − 2 = 6 | Fila 2: 7 + 4 − 2 = 9 | Fila 3: 3 + 1 − 2 = 2 → x = 2.'
+      }
+    ];
+
+    /* ========================================================================
+       3. ESTADO GLOBAL Y PERSISTENCIA SEGURA
+       ======================================================================== */
+    const TOTAL_EXERCISES = 29; // 6 práctica + 6 lvl1 + 5 lvl2 + 1 excelencia + 11 contrarreloj
+    const AppState = {
+      solvedIds: new Set(),
+      totalScore: 0,
+      bestLevel1: null,
+      bestLevel2: null,
+      bestContrarreloj: null,
+      activeTab: 'teoria'
+    };
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem('dist_num_jhon_dewis_v1');
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.solvedIds)) {
+          AppState.solvedIds = new Set(parsed.solvedIds);
+        }
+        AppState.totalScore = Number(parsed.totalScore) || 0;
+        AppState.bestLevel1 = parsed.bestLevel1 || null;
+        AppState.bestLevel2 = parsed.bestLevel2 || null;
+        AppState.bestContrarreloj = parsed.bestContrarreloj || null;
+      } catch (e) {
+        // Ignorar si localStorage no está disponible
+      }
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem('dist_num_jhon_dewis_v1', JSON.stringify({
+          solvedIds: Array.from(AppState.solvedIds),
+          totalScore: AppState.totalScore,
+          bestLevel1: AppState.bestLevel1,
+          bestLevel2: AppState.bestLevel2,
+          bestContrarreloj: AppState.bestContrarreloj
+        }));
+      } catch (e) {
+        // Ignorar en entornos sin almacenamiento
+      }
+    }
+
+    function registerSolve(exerciseId, points) {
+      if (!AppState.solvedIds.has(exerciseId)) {
+        AppState.solvedIds.add(exerciseId);
+        AppState.totalScore += points;
+      } else {
+        // Otorga un pequeño bono de repaso si ya lo resolvió antes en modos cronometrados
+        if (points > 0 && !exerciseId.startsWith('prac-')) {
+          AppState.totalScore += Math.round(points * 0.25);
+        }
+      }
+      saveProgress();
+      updateGlobalUI();
+    }
+
+    function updateGlobalUI() {
+      const count = AppState.solvedIds.size;
+      const pct = Math.min(100, Math.round((count / TOTAL_EXERCISES) * 100));
+
+      document.getElementById('global-score').textContent = AppState.totalScore;
+      document.getElementById('global-progress-count').textContent = count;
+      document.getElementById('global-progress-bar').style.width = pct + '%';
+
+      document.getElementById('global-progress-count-mobile').textContent = `${count}/${TOTAL_EXERCISES}`;
+      document.getElementById('global-progress-bar-mobile').style.width = pct + '%';
+
+      // Actualizar mejores marcas en tarjetas
+      const b1 = document.getElementById('lvl1-best-badge');
+      if (AppState.bestLevel1) {
+        b1.classList.remove('hidden');
+        b1.textContent = `Mejor marca: ${AppState.bestLevel1.hits}/6 · ${AppState.bestLevel1.score} pts`;
+      }
+      const b2 = document.getElementById('lvl2-best-badge');
+      if (AppState.bestLevel2) {
+        b2.classList.remove('hidden');
+        b2.textContent = `Mejor marca: ${AppState.bestLevel2.hits}/5 · ${AppState.bestLevel2.score} pts`;
+      }
+      const bcr = document.getElementById('cr-best-badge');
+      if (AppState.bestContrarreloj) {
+        bcr.classList.remove('hidden');
+        bcr.textContent = `Mejor marca: ${AppState.bestContrarreloj.hits}/11 · ${AppState.bestContrarreloj.score} pts`;
+      }
+    }
+
+    /* ========================================================================
+       4. RENDERIZADOR DE MATRICES 3x3 CON RESALTADO DE FILAS/COLUMNAS
+       ======================================================================== */
+    /**
+     * Genera el HTML impecable de una matriz matemática 3x3.
+     * @param {Array<Array<number|string>>} matrix - Arreglo 3x3
+     * @param {Object} opts - Opciones de resaltado visual
+     *   - orientation: 'filas' | 'columnas' | null
+     *   - highlightMode: 'none' | 'bands' | 'step'
+     *   - activeIndex: 0 | 1 | 2 (índice de fila o columna activa cuando highlightMode === 'step')
+     *   - solvedValue: number | null (si está resuelta, reemplaza 'x' con el valor en verde)
+     */
+    function renderMatrixHTML(matrix, opts = {}) {
+      const {
+        orientation = null,
+        highlightMode = 'none',
+        activeIndex = -1,
+        solvedValue = null
+      } = opts;
+
+      const showColHeaders = highlightMode !== 'none' && orientation === 'columnas';
+      const showRowHeaders = highlightMode !== 'none' && orientation === 'filas';
+
+      let html = `<div class="matrix-board rounded-2xl p-4 sm:p-5 inline-block">`;
+
+      // Etiquetas de columna (C1, C2, C3) si se resaltan columnas
+      if (showColHeaders) {
+        html += `<div class="grid grid-cols-3 gap-2.5 sm:gap-3 mb-2">`;
+        for (let c = 0; c < 3; c++) {
+          const isActive = highlightMode === 'step' && activeIndex === c;
+          const badgeClass = isActive
+            ? 'text-indigo-300 bg-indigo-500/25 border-indigo-400/50'
+            : 'text-slate-400 bg-slate-800/70 border-slate-700/60';
+          html += `<div class="text-center text-[10px] font-mono font-bold py-0.5 rounded-md border ${badgeClass}">C${c + 1} ↓</div>`;
+        }
+        html += `</div>`;
+      }
+
+      html += `<div class="flex flex-col gap-2.5 sm:gap-3">`;
+
+      for (let r = 0; r < 3; r++) {
+        html += `<div class="flex items-center gap-2.5 sm:gap-3">`;
+
+        // Etiqueta de fila (F1, F2, F3) si se resaltan filas
+        if (showRowHeaders) {
+          const isActive = highlightMode === 'step' && activeIndex === r;
+          const badgeClass = isActive
+            ? 'text-cyan-300 bg-cyan-500/25 border-cyan-400/50'
+            : 'text-slate-400 bg-slate-800/70 border-slate-700/60';
+          html += `<div class="w-9 text-center text-[10px] font-mono font-bold py-1 rounded-md border shrink-0 ${badgeClass}">F${r + 1} →</div>`;
+        }
+
+        for (let c = 0; c < 3; c++) {
+          const val = matrix[r][c];
+          const isUnknown = val === 'x';
+          let cellClasses = 'matrix-cell w-16 h-14 sm:w-[74px] sm:h-16 rounded-xl flex items-center justify-center text-xl sm:text-2xl font-bold select-none ';
+
+          if (isUnknown) {
+            if (solvedValue !== null) {
+              cellClasses += 'matrix-cell-solved ';
+            } else {
+              cellClasses += 'matrix-cell-unknown ';
+            }
+          } else {
+            cellClasses += 'text-slate-100 ';
+          }
+
+          // Aplicar resaltado visual según orientación y modo
+          if (highlightMode === 'step') {
+            if (orientation === 'filas' && r === activeIndex) {
+              cellClasses += isUnknown ? 'scale-105 ' : 'matrix-cell-hl-row ';
+            } else if (orientation === 'columnas' && c === activeIndex) {
+              cellClasses += isUnknown ? 'scale-105 ' : 'matrix-cell-hl-col ';
+            } else {
+              cellClasses += 'opacity-45 ';
+            }
+          } else if (highlightMode === 'bands') {
+            if (orientation === 'filas' && !isUnknown) {
+              cellClasses += `matrix-band-row-${r} `;
+            } else if (orientation === 'columnas' && !isUnknown) {
+              cellClasses += `matrix-band-col-${c} `;
+            }
+          }
+
+          const displayVal = isUnknown
+            ? (solvedValue !== null ? `<span class="flex flex-col items-center leading-none"><span class="text-[9px] uppercase tracking-wider text-emerald-300/80 mb-0.5">x =</span><span>${solvedValue}</span></span>` : 'x')
+            : val;
+
+          html += `<div class="${cellClasses}">${displayVal}</div>`;
+        }
+
+        html += `</div>`;
+      }
+
+      html += `</div></div>`;
+      return html;
+    }
+
+    /**
+     * Formatea una cadena de resolución separada por '|' en pasos limpios y legibles.
+     */
+    function formatResolutionSteps(resolutionStr) {
+      const parts = resolutionStr.split('|').map(s => s.trim());
+      return parts.map((part, idx) => {
+        const isLast = idx === parts.length - 1;
+        return `
+          <div class="flex items-start gap-2.5 px-3 py-2 rounded-lg ${isLast ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-200' : 'bg-slate-900/80 border border-slate-800 text-slate-200'}">
+            <span class="font-mono text-xs font-bold px-1.5 py-0.5 rounded ${isLast ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-cyan-300'}">${idx + 1}</span>
+            <span class="font-mono text-xs sm:text-sm leading-relaxed">${part}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ========================================================================
+       5. NAVEGACIÓN POR PESTAÑAS Y CONTROL DE CRONÓMETROS
+       ======================================================================== */
+    function stopAllTimers() {
+      if (LevelState.timerId) {
+        clearInterval(LevelState.timerId);
+        LevelState.timerId = null;
+      }
+      if (ExcelenciaState.timerId) {
+        clearInterval(ExcelenciaState.timerId);
+        ExcelenciaState.timerId = null;
+      }
+      if (ContrarrelojState.timerId) {
+        clearInterval(ContrarrelojState.timerId);
+        ContrarrelojState.timerId = null;
+      }
+    }
+
+    function switchTab(tabName) {
+      if (AppState.activeTab === tabName) return;
+      SoundFX.click();
+
+      // Si hay un nivel activo y cambia de pestaña, pausamos de manera segura
+      if (AppState.activeTab === 'niveles' && LevelState.active && !LevelState.paused && !LevelState.answered) {
+        toggleLevelPause();
+      }
+      if (AppState.activeTab === 'retos') {
+        if (ExcelenciaState.timerId) {
+          clearInterval(ExcelenciaState.timerId);
+          ExcelenciaState.timerId = null;
+          if (!ExcelenciaState.finished) {
+            document.getElementById('exc-btn-start').textContent = 'Reanudar Reto';
+            document.getElementById('exc-btn-start').disabled = false;
+          }
+        }
+        if (ContrarrelojState.timerId) {
+          clearInterval(ContrarrelojState.timerId);
+          ContrarrelojState.timerId = null;
+        }
+      }
+
+      AppState.activeTab = tabName;
+
+      // Ocultar todas las secciones y mostrar la elegida
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+      const target = document.getElementById(`section-${tabName}`);
+      if (target) {
+        target.classList.remove('hidden');
+        target.classList.remove('animate-fade-in');
+        void target.offsetWidth; // Reiniciar animación CSS
+        target.classList.add('animate-fade-in');
+      }
+
+      // Actualizar estilo de botones de pestaña
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        const isCurrent = btn.dataset.tab === tabName;
+        if (isCurrent) {
+          btn.className = 'nav-tab active-tab group flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 border bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 border-cyan-400/45 text-white shadow-lg shadow-cyan-950/40';
+        } else {
+          btn.className = 'nav-tab group flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 border bg-slate-900/70 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700 hover:bg-slate-800/70';
+        }
+      });
+
+      // Reanudar contrarreloj si estaba en curso al regresar
+      if (tabName === 'retos' && ContrarrelojState.active && !ContrarrelojState.answered) {
+        startContrarrelojTick();
+      }
+    }
+
+    /* ========================================================================
+       6. SECCIÓN 1: TEORÍA — EJEMPLOS INTERACTIVOS PASO A PASO
+       ======================================================================== */
+    const TheoryState = { ex1Step: 0, ex2Step: 0 };
+
+    function renderTheoryExample(key) {
+      const data = THEORY_EXAMPLES[key];
+      const currentStep = TheoryState[`${key}Step`];
+      const matrixEl = document.getElementById(`${key}-matrix`);
+      const stepsEl = document.getElementById(`${key}-steps`);
+      const statusEl = document.getElementById(`${key}-status`);
+      const btnStep = document.getElementById(`${key}-btn-step`);
+
+      statusEl.textContent = `Paso ${currentStep} / ${data.steps.length}`;
+
+      if (currentStep === 0) {
+        matrixEl.innerHTML = renderMatrixHTML(data.matrix);
+        stepsEl.innerHTML = `<p class="text-slate-500 italic text-xs font-sans">Pulsa "Ver paso a paso" para revelar el análisis de cada ${data.orientation === 'columnas' ? 'columna' : 'fila'}.</p>`;
+        btnStep.textContent = 'Ver paso a paso';
+        btnStep.disabled = false;
+        btnStep.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+        const activeIdx = data.steps[currentStep - 1].index;
+        const solvedVal = currentStep === data.steps.length ? data.answer : null;
+        matrixEl.innerHTML = renderMatrixHTML(data.matrix, {
+          orientation: data.orientation,
+          highlightMode: 'step',
+          activeIndex: activeIdx,
+          solvedValue: solvedVal
+        });
+
+        let stepsHTML = '';
+        for (let i = 0; i < currentStep; i++) {
+          const isCurrent = i === currentStep - 1;
+          const isFinal = i === data.steps.length - 1;
+          const accent = key === 'ex1' ? 'indigo' : 'cyan';
+          stepsHTML += `
+            <div class="px-3 py-2 rounded-lg border animate-fade-in ${
+              isFinal
+                ? 'bg-emerald-500/15 border-emerald-400/40 text-emerald-200 font-bold'
+                : isCurrent
+                  ? `bg-${accent}-500/15 border-${accent}-400/40 text-white`
+                  : 'bg-slate-900/70 border-slate-800 text-slate-400'
+            }">
+              ${data.steps[i].text}
+            </div>
+          `;
+        }
+        stepsEl.innerHTML = stepsHTML;
+
+        if (currentStep < data.steps.length) {
+          btnStep.textContent = `Siguiente paso (${currentStep + 1}/${data.steps.length})`;
+        } else {
+          btnStep.textContent = 'Resolución completa ✓';
+          btnStep.disabled = true;
+          btnStep.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+      }
+    }
+
+    function setupTheoryExamples() {
+      ['ex1', 'ex2'].forEach(key => {
+        renderTheoryExample(key);
+        document.getElementById(`${key}-btn-step`).addEventListener('click', () => {
+          if (TheoryState[`${key}Step`] < THEORY_EXAMPLES[key].steps.length) {
+            TheoryState[`${key}Step`]++;
+            if (TheoryState[`${key}Step`] === THEORY_EXAMPLES[key].steps.length) {
+              SoundFX.correct();
+            } else {
+              SoundFX.click();
+            }
+            renderTheoryExample(key);
+          }
+        });
+        document.getElementById(`${key}-btn-reset`).addEventListener('click', () => {
+          SoundFX.click();
+          TheoryState[`${key}Step`] = 0;
+          renderTheoryExample(key);
+        });
+      });
+    }
+
+    /* ========================================================================
+       7. SECCIÓN 2: PRÁCTICA GUIADA (6 EJERCICIOS CON PISTAS Y RETROALIMENTACIÓN)
+       ======================================================================== */
+    const PracticeState = {
+      index: 0,
+      hintLevel: 0, // 0, 1, 2
+      showSolution: false,
+      status: 'idle' // 'idle' | 'correct' | 'wrong'
+    };
+
+    function renderPracticePills() {
+      const container = document.getElementById('practice-pills');
+      container.innerHTML = PRACTICE_DATA.map((item, idx) => {
+        const isCurrent = idx === PracticeState.index;
+        const isSolved = AppState.solvedIds.has(item.id);
+        let cls = 'w-9 h-9 rounded-xl font-mono text-sm font-bold transition-all border flex items-center justify-center ';
+        if (isCurrent) {
+          cls += 'bg-emerald-500/25 border-emerald-400 text-white shadow-md shadow-emerald-950/60 scale-105';
+        } else if (isSolved) {
+          cls += 'bg-emerald-500/10 border-emerald-500/35 text-emerald-300 hover:bg-emerald-500/20';
+        } else {
+          cls += 'bg-slate-900 border-slate-700 text-slate-400 hover:text-white hover:border-slate-500';
+        }
+        return `<button type="button" onclick="goToPractice(${idx})" class="${cls}" title="Ejercicio ${idx + 1}">${isSolved && !isCurrent ? '✓' : idx + 1}</button>`;
+      }).join('');
+    }
+
+    function renderPracticeExercise() {
+      const item = PRACTICE_DATA[PracticeState.index];
+      renderPracticePills();
+
+      document.getElementById('practice-badge').textContent = `Ejercicio ${PracticeState.index + 1} de ${PRACTICE_DATA.length}`;
+
+      const orientTag = document.getElementById('practice-orientation-tag');
+      if (PracticeState.hintLevel >= 1 || PracticeState.showSolution || PracticeState.status !== 'idle') {
+        orientTag.classList.remove('hidden');
+        if (item.orientation === 'filas') {
+          orientTag.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-cyan-500/15 border border-cyan-400/35 text-cyan-300';
+          orientTag.textContent = 'Orientación: Filas →';
+        } else {
+          orientTag.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-500/15 border border-indigo-400/35 text-indigo-300';
+          orientTag.textContent = 'Orientación: Columnas ↓';
+        }
+      } else {
+        orientTag.classList.add('hidden');
+      }
+
+      // Renderizar matriz con resaltado si ya vio pista 1, solución o respondió
+      const showHighlight = PracticeState.hintLevel >= 1 || PracticeState.showSolution || PracticeState.status !== 'idle';
+      const solvedVal = (PracticeState.status === 'correct' || PracticeState.showSolution) ? item.answer : null;
+
+      document.getElementById('practice-matrix').innerHTML = renderMatrixHTML(item.matrix, {
+        orientation: item.orientation,
+        highlightMode: showHighlight ? 'bands' : 'none',
+        solvedValue: solvedVal
+      });
+
+      // Renderizar pistas desplegadas
+      const hintsBox = document.getElementById('practice-hints-box');
+      if (PracticeState.hintLevel > 0) {
+        hintsBox.classList.remove('hidden');
+        let hHTML = '';
+        if (PracticeState.hintLevel >= 1) {
+          hHTML += `
+            <div class="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-400/30 text-sm text-cyan-100">
+              <strong class="text-cyan-300 font-semibold">Pista 1 (Orientación):</strong> ${item.hint1}
+            </div>
+          `;
+        }
+        if (PracticeState.hintLevel >= 2) {
+          hHTML += `
+            <div class="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-400/30 text-sm text-indigo-100">
+              <strong class="text-indigo-300 font-semibold">Pista 2 (Regla):</strong> ${item.hint2}
+            </div>
+          `;
+        }
+        hintsBox.innerHTML = hHTML;
+      } else {
+        hintsBox.classList.add('hidden');
+        hintsBox.innerHTML = '';
+      }
+
+      // Botones Prev / Next
+      document.getElementById('practice-btn-prev').disabled = PracticeState.index === 0;
+      document.getElementById('practice-btn-next').disabled = PracticeState.index === PRACTICE_DATA.length - 1;
+    }
+
+    function goToPractice(idx) {
+      SoundFX.click();
+      PracticeState.index = idx;
+      PracticeState.hintLevel = 0;
+      PracticeState.showSolution = false;
+      PracticeState.status = 'idle';
+
+      const input = document.getElementById('practice-input');
+      input.value = '';
+      input.disabled = false;
+      document.getElementById('practice-input-warn').classList.add('hidden');
+
+      const fb = document.getElementById('practice-feedback-box');
+      fb.classList.add('hidden');
+      fb.innerHTML = '';
+
+      renderPracticeExercise();
+    }
+
+    function checkPracticeAnswer() {
+      const input = document.getElementById('practice-input');
+      const warn = document.getElementById('practice-input-warn');
+      const valStr = input.value.trim();
+
+      if (valStr === '' || isNaN(Number(valStr))) {
+        warn.classList.remove('hidden');
+        input.focus();
+        return;
+      }
+      warn.classList.add('hidden');
+
+      const userVal = Number(valStr);
+      const item = PRACTICE_DATA[PracticeState.index];
+      const fb = document.getElementById('practice-feedback-box');
+      fb.classList.remove('hidden');
+
+      if (userVal === item.answer) {
+        PracticeState.status = 'correct';
+        SoundFX.correct();
+        const pts = PracticeState.showSolution ? 5 : (PracticeState.hintLevel === 0 ? 20 : PracticeState.hintLevel === 1 ? 15 : 10);
+        registerSolve(item.id, pts);
+
+        fb.className = 'rounded-2xl p-5 border bg-emerald-500/10 border-emerald-400/40 animate-fade-in space-y-3';
+        fb.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 text-emerald-300 font-display font-bold text-base">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ¡Excelente trabajo! Respuesta correcta
+            </div>
+            <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300">+${pts} pts</span>
+          </div>
+          <p class="text-sm text-slate-300">Identificaste correctamente el patrón matemático de esta distribución:</p>
+          <div class="space-y-2">${formatResolutionSteps(item.resolution)}</div>
+        `;
+      } else {
+        PracticeState.status = 'wrong';
+        SoundFX.wrong();
+
+        fb.className = 'rounded-2xl p-5 border bg-rose-500/10 border-rose-400/35 animate-fade-in space-y-3';
+        fb.innerHTML = `
+          <div class="flex items-center gap-2 text-rose-300 font-display font-bold text-base">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            Aún no es correcto (ingresaste x = ${userVal})
+          </div>
+          <p class="text-sm text-slate-300">
+            No te preocupes, aprender del análisis paso a paso te ayudará a dominar el patrón. Revisa cómo se relacionan los números:
+          </p>
+          <div class="space-y-2">${formatResolutionSteps(item.resolution)}</div>
+          <div class="pt-2 flex flex-wrap gap-2">
+            <button type="button" onclick="retryPracticeCurrent()"
+              class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold text-white transition-all">
+              Reintentar ejercicio
+            </button>
+            ${PracticeState.index < PRACTICE_DATA.length - 1
+              ? `<button type="button" onclick="goToPractice(${PracticeState.index + 1})" class="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-xs font-semibold text-cyan-200 transition-all">Pasar al siguiente →</button>`
+              : ''}
+          </div>
+        `;
+      }
+
+      renderPracticeExercise();
+    }
+
+    function retryPracticeCurrent() {
+      SoundFX.click();
+      PracticeState.status = 'idle';
+      const input = document.getElementById('practice-input');
+      input.value = '';
+      input.focus();
+      document.getElementById('practice-feedback-box').classList.add('hidden');
+      renderPracticeExercise();
+    }
+
+    function setupPractice() {
+      renderPracticeExercise();
+
+      document.getElementById('practice-btn-check').addEventListener('click', checkPracticeAnswer);
+      document.getElementById('practice-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') checkPracticeAnswer();
+      });
+
+      document.getElementById('practice-btn-hint1').addEventListener('click', () => {
+        if (PracticeState.hintLevel < 1) PracticeState.hintLevel = 1;
+        SoundFX.hint();
+        renderPracticeExercise();
+      });
+
+      document.getElementById('practice-btn-hint2').addEventListener('click', () => {
+        if (PracticeState.hintLevel < 2) PracticeState.hintLevel = 2;
+        SoundFX.hint();
+        renderPracticeExercise();
+      });
+
+      document.getElementById('practice-btn-solution').addEventListener('click', () => {
+        PracticeState.showSolution = true;
+        SoundFX.hint();
+        const item = PRACTICE_DATA[PracticeState.index];
+        const fb = document.getElementById('practice-feedback-box');
+        fb.classList.remove('hidden');
+        fb.className = 'rounded-2xl p-5 border bg-amber-500/10 border-amber-400/35 animate-fade-in space-y-3';
+        fb.innerHTML = `
+          <div class="text-amber-300 font-display font-bold text-base">Resolución Paso a Paso</div>
+          <div class="space-y-2">${formatResolutionSteps(item.resolution)}</div>
+        `;
+        renderPracticeExercise();
+      });
+
+      document.getElementById('practice-btn-prev').addEventListener('click', () => {
+        if (PracticeState.index > 0) goToPractice(PracticeState.index - 1);
+      });
+      document.getElementById('practice-btn-next').addEventListener('click', () => {
+        if (PracticeState.index < PRACTICE_DATA.length - 1) goToPractice(PracticeState.index + 1);
+      });
+    }
+
+    /* ========================================================================
+       8. SECCIÓN 3: NIVELES CON TIEMPO (NIVEL 1 Y NIVEL 2)
+       ======================================================================== */
+    const LevelState = {
+      active: false,
+      levelNum: 1,
+      index: 0,
+      timeLeft: 60,
+      maxTime: 60,
+      totalElapsed: 0,
+      score: 0,
+      hits: 0,
+      streak: 0,
+      hintLevel: 0,
+      answered: false,
+      paused: false,
+      timerId: null
+    };
+
+    function startTimedLevel(levelNum) {
+      SoundFX.click();
+      stopAllTimers();
+
+      const cfg = LEVELS_DATA[levelNum];
+      LevelState.active = true;
+      LevelState.levelNum = levelNum;
+      LevelState.index = 0;
+      LevelState.maxTime = cfg.timePerExercise;
+      LevelState.totalElapsed = 0;
+      LevelState.score = 0;
+      LevelState.hits = 0;
+      LevelState.streak = 0;
+      LevelState.paused = false;
+
+      document.getElementById('levels-selector').classList.add('hidden');
+      document.getElementById('levels-results').classList.add('hidden');
+      document.getElementById('levels-active').classList.remove('hidden');
+      document.getElementById('lvl-pause-overlay').classList.add('hidden');
+      document.getElementById('lvl-title-badge').textContent = cfg.name;
+
+      loadLevelExercise();
+    }
+
+    function loadLevelExercise() {
+      const cfg = LEVELS_DATA[LevelState.levelNum];
+      const item = cfg.exercises[LevelState.index];
+
+      LevelState.timeLeft = cfg.timePerExercise;
+      LevelState.hintLevel = 0;
+      LevelState.answered = false;
+      LevelState.paused = false;
+
+      document.getElementById('lvl-counter').textContent = `${LevelState.index + 1} / ${cfg.exercises.length}`;
+      document.getElementById('lvl-streak').textContent = LevelState.streak;
+      document.getElementById('lvl-score').textContent = LevelState.score;
+
+      const input = document.getElementById('lvl-input');
+      input.value = '';
+      input.disabled = false;
+      document.getElementById('lvl-btn-submit').disabled = false;
+      document.getElementById('lvl-btn-hint1').disabled = false;
+      document.getElementById('lvl-btn-hint2').disabled = false;
+      document.getElementById('lvl-input-warn').classList.add('hidden');
+      document.getElementById('lvl-hint-indicator').innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> 2 pistas disponibles para ayudarte';
+
+      document.getElementById('lvl-hints-box').classList.add('hidden');
+      document.getElementById('lvl-hints-box').innerHTML = '';
+      document.getElementById('lvl-feedback-box').classList.add('hidden');
+      document.getElementById('lvl-next-wrap').classList.add('hidden');
+
+      document.getElementById('lvl-matrix').innerHTML = renderMatrixHTML(item.matrix);
+
+      updateLevelTimerUI();
+      startLevelTick();
+      setTimeout(() => input.focus(), 60);
+    }
+
+    function startLevelTick() {
+      if (LevelState.timerId) clearInterval(LevelState.timerId);
+      LevelState.timerId = setInterval(() => {
+        if (LevelState.paused || LevelState.answered) return;
+        LevelState.timeLeft--;
+        LevelState.totalElapsed++;
+        updateLevelTimerUI();
+
+        if (LevelState.timeLeft <= 10 && LevelState.timeLeft > 0) {
+          SoundFX.tick();
+        }
+        if (LevelState.timeLeft <= 0) {
+          clearInterval(LevelState.timerId);
+          LevelState.timerId = null;
+          handleLevelEvaluation(null, true);
+        }
+      }, 1000);
+    }
+
+    function updateLevelTimerUI() {
+      const pct = Math.max(0, (LevelState.timeLeft / LevelState.maxTime) * 100);
+      const pill = document.getElementById('lvl-timer-pill');
+      const bar = document.getElementById('lvl-timer-bar');
+      document.getElementById('lvl-timer-text').textContent = `${LevelState.timeLeft}s`;
+      bar.style.width = `${pct}%`;
+
+      if (LevelState.timeLeft <= 15) {
+        pill.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-500/20 border border-rose-400/60 font-mono text-sm font-bold text-rose-300 animate-pulse';
+        bar.className = 'h-full rounded-full bg-gradient-to-r from-rose-500 to-amber-400 transition-all duration-1000 ease-linear';
+      } else {
+        pill.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-500/15 border border-cyan-400/35 font-mono text-sm font-bold text-cyan-300 transition-colors';
+        bar.className = 'h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-400 transition-all duration-1000 ease-linear';
+      }
+    }
+
+    function toggleLevelPause() {
+      if (!LevelState.active || LevelState.answered) return;
+      SoundFX.click();
+      LevelState.paused = !LevelState.paused;
+      const overlay = document.getElementById('lvl-pause-overlay');
+      const btn = document.getElementById('lvl-btn-pause');
+      if (LevelState.paused) {
+        overlay.classList.remove('hidden');
+        btn.textContent = 'Reanudar';
+      } else {
+        overlay.classList.add('hidden');
+        btn.textContent = 'Pausar';
+        document.getElementById('lvl-input').focus();
+      }
+    }
+
+    function showLevelHint(num) {
+      if (LevelState.answered || LevelState.paused) return;
+      const item = LEVELS_DATA[LevelState.levelNum].exercises[LevelState.index];
+      if (LevelState.hintLevel < num) LevelState.hintLevel = num;
+      SoundFX.hint();
+
+      const hintsBox = document.getElementById('lvl-hints-box');
+      hintsBox.classList.remove('hidden');
+      let hHTML = '';
+      if (LevelState.hintLevel >= 1) {
+        hHTML += `<div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-400/30 text-xs sm:text-sm text-cyan-100"><strong class="text-cyan-300">Pista 1:</strong> ${item.hint1}</div>`;
+      }
+      if (LevelState.hintLevel >= 2) {
+        hHTML += `<div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-400/30 text-xs sm:text-sm text-indigo-100"><strong class="text-indigo-300">Pista 2:</strong> ${item.hint2}</div>`;
+      }
+      hintsBox.innerHTML = hHTML;
+
+      const remaining = Math.max(0, 2 - LevelState.hintLevel);
+      document.getElementById('lvl-hint-indicator').innerHTML = remaining > 0
+        ? `<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> Queda ${remaining} pista disponible`
+        : `<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Todas las pistas mostradas`;
+
+      // Resaltar bandas en la matriz al usar pista
+      document.getElementById('lvl-matrix').innerHTML = renderMatrixHTML(item.matrix, {
+        orientation: item.orientation,
+        highlightMode: 'bands'
+      });
+    }
+
+    function submitLevelAnswer() {
+      if (LevelState.answered || LevelState.paused) return;
+      const input = document.getElementById('lvl-input');
+      const warn = document.getElementById('lvl-input-warn');
+      const raw = input.value.trim();
+
+      if (raw === '' || isNaN(Number(raw))) {
+        warn.classList.remove('hidden');
+        input.focus();
+        return;
+      }
+      warn.classList.add('hidden');
+      handleLevelEvaluation(Number(raw), false);
+    }
+
+    function handleLevelEvaluation(userVal, timedOut) {
+      LevelState.answered = true;
+      if (LevelState.timerId) {
+        clearInterval(LevelState.timerId);
+        LevelState.timerId = null;
+      }
+
+      const cfg = LEVELS_DATA[LevelState.levelNum];
+      const item = cfg.exercises[LevelState.index];
+      const isCorrect = !timedOut && userVal === item.answer;
+
+      document.getElementById('lvl-input').disabled = true;
+      document.getElementById('lvl-btn-submit').disabled = true;
+      document.getElementById('lvl-btn-hint1').disabled = true;
+      document.getElementById('lvl-btn-hint2').disabled = true;
+
+      // Actualizar matriz con bandas y respuesta verificada
+      document.getElementById('lvl-matrix').innerHTML = renderMatrixHTML(item.matrix, {
+        orientation: item.orientation,
+        highlightMode: 'bands',
+        solvedValue: item.answer
+      });
+
+      const fb = document.getElementById('lvl-feedback-box');
+      fb.classList.remove('hidden');
+
+      if (isCorrect) {
+        SoundFX.correct();
+        LevelState.hits++;
+        LevelState.streak++;
+        const basePts = LevelState.levelNum === 1 ? 30 : 40;
+        const speedBonus = Math.round(LevelState.timeLeft * 0.4);
+        const hintPenalty = LevelState.hintLevel * 5;
+        const earned = Math.max(15, basePts + speedBonus - hintPenalty);
+        LevelState.score += earned;
+        registerSolve(item.id, earned);
+
+        fb.className = 'rounded-2xl p-5 border bg-emerald-500/10 border-emerald-400/40 animate-fade-in space-y-3';
+        fb.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-emerald-300 font-display font-bold text-base">¡Correcto! x = ${item.answer}</span>
+            <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300">+${earned} pts</span>
+          </div>
+          <div class="space-y-2">${formatResolutionSteps(item.resolution)}</div>
+        `;
+      } else {
+        SoundFX.wrong();
+        LevelState.streak = 0;
+        const headline = timedOut
+          ? `¡Se agotó el tiempo! La respuesta correcta era x = ${item.answer}`
+          : `Incorrecto (ingresaste ${userVal}). La respuesta correcta es x = ${item.answer}`;
+
+        fb.className = 'rounded-2xl p-5 border bg-rose-500/10 border-rose-400/40 animate-fade-in space-y-3';
+        fb.innerHTML = `
+          <div class="text-rose-300 font-display font-bold text-base">${headline}</div>
+          <p class="text-xs sm:text-sm text-slate-300">Analiza paso a paso cómo se obtiene el resultado:</p>
+          <div class="space-y-2">${formatResolutionSteps(item.resolution)}</div>
+        `;
+      }
+
+      document.getElementById('lvl-streak').textContent = LevelState.streak;
+      document.getElementById('lvl-score').textContent = LevelState.score;
+
+      const nextWrap = document.getElementById('lvl-next-wrap');
+      const nextBtn = document.getElementById('lvl-btn-next');
+      nextWrap.classList.remove('hidden');
+      nextBtn.textContent = LevelState.index < cfg.exercises.length - 1
+        ? 'Siguiente Ejercicio →'
+        : 'Ver Resultados del Nivel →';
+    }
+
+    function nextLevelExercise() {
+      SoundFX.click();
+      const cfg = LEVELS_DATA[LevelState.levelNum];
+      if (LevelState.index < cfg.exercises.length - 1) {
+        LevelState.index++;
+        loadLevelExercise();
+      } else {
+        finishTimedLevel();
+      }
+    }
+
+    function finishTimedLevel() {
+      LevelState.active = false;
+      stopAllTimers();
+      SoundFX.fanfare();
+
+      const cfg = LEVELS_DATA[LevelState.levelNum];
+      const total = cfg.exercises.length;
+      const ratio = LevelState.hits / total;
+
+      // Guardar mejor marca
+      const bestKey = LevelState.levelNum === 1 ? 'bestLevel1' : 'bestLevel2';
+      if (!AppState[bestKey] || LevelState.score > AppState[bestKey].score) {
+        AppState[bestKey] = { hits: LevelState.hits, score: LevelState.score };
+        saveProgress();
+        updateGlobalUI();
+      }
+
+      document.getElementById('levels-active').classList.add('hidden');
+      document.getElementById('levels-results').classList.remove('hidden');
+
+      const medalEl = document.getElementById('lvl-res-medal');
+      const titleEl = document.getElementById('lvl-res-title');
+      const subEl = document.getElementById('lvl-res-subtitle');
+
+      if (ratio >= 0.85) {
+        medalEl.className = 'w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-5 border bg-amber-500/20 border-amber-400/50 text-amber-300';
+        medalEl.innerHTML = `<svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/></svg>`;
+        titleEl.textContent = '¡Medalla de Oro! Dominio Sobresaliente';
+        subEl.textContent = `Excelente precisión y rapidez en ${cfg.name}.`;
+      } else if (ratio >= 0.6) {
+        medalEl.className = 'w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-5 border bg-cyan-500/20 border-cyan-400/50 text-cyan-300';
+        medalEl.innerHTML = `<svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
+        titleEl.textContent = '¡Medalla de Plata! Muy Buen Trabajo';
+        subEl.textContent = `Has superado ${cfg.name} con sólido razonamiento.`;
+      } else {
+        medalEl.className = 'w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-5 border bg-indigo-500/20 border-indigo-400/50 text-indigo-300';
+        medalEl.innerHTML = `<svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>`;
+        titleEl.textContent = '¡Nivel Completado! Sigue Practicando';
+        subEl.textContent = 'Revisa las resoluciones y vuelve a intentarlo para mejorar tu marca.';
+      }
+
+      document.getElementById('lvl-res-hits').textContent = `${LevelState.hits}/${total}`;
+      document.getElementById('lvl-res-score').textContent = LevelState.score;
+      document.getElementById('lvl-res-time').textContent = `${LevelState.totalElapsed}s`;
+
+      document.getElementById('lvl-res-retry').onclick = () => startTimedLevel(LevelState.levelNum);
+      const nextLvlBtn = document.getElementById('lvl-res-next-level');
+      if (LevelState.levelNum === 1) {
+        nextLvlBtn.classList.remove('hidden');
+        nextLvlBtn.onclick = () => startTimedLevel(2);
+      } else {
+        nextLvlBtn.classList.add('hidden');
+      }
+    }
+
+    function exitTimedLevel() {
+      SoundFX.click();
+      LevelState.active = false;
+      stopAllTimers();
+      document.getElementById('levels-active').classList.add('hidden');
+      document.getElementById('levels-results').classList.add('hidden');
+      document.getElementById('levels-selector').classList.remove('hidden');
+    }
+
+    function setupTimedLevels() {
+      document.getElementById('lvl-btn-submit').addEventListener('click', submitLevelAnswer);
+      document.getElementById('lvl-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitLevelAnswer();
+      });
+      document.getElementById('lvl-btn-hint1').addEventListener('click', () => showLevelHint(1));
+      document.getElementById('lvl-btn-hint2').addEventListener('click', () => showLevelHint(2));
+      document.getElementById('lvl-btn-next').addEventListener('click', nextLevelExercise);
+    }
+
+    /* ========================================================================
+       9. SECCIÓN 4: RETOS (MODO EXCELENCIA + DESAFÍO CONTRARRELOJ)
+       ======================================================================== */
+    function selectRetoMode(mode) {
+      SoundFX.click();
+      const btnExc = document.getElementById('reto-mode-excelencia-btn');
+      const btnCr = document.getElementById('reto-mode-contrarreloj-btn');
+      const panelExc = document.getElementById('reto-excelencia-panel');
+      const panelCr = document.getElementById('reto-contrarreloj-panel');
+
+      if (mode === 'excelencia') {
+        if (ContrarrelojState.timerId) {
+          clearInterval(ContrarrelojState.timerId);
+          ContrarrelojState.timerId = null;
+        }
+        panelExc.classList.remove('hidden');
+        panelCr.classList.add('hidden');
+        btnExc.className = 'glass-card glass-card-amber rounded-2xl p-5 text-left transition-all hover:scale-[1.01] border-2 border-amber-400/70';
+        btnCr.className = 'glass-card rounded-2xl p-5 text-left transition-all hover:scale-[1.01] border-2 border-slate-800 opacity-80 hover:opacity-100';
+      } else {
+        if (ExcelenciaState.timerId) {
+          clearInterval(ExcelenciaState.timerId);
+          ExcelenciaState.timerId = null;
+          if (!ExcelenciaState.finished) {
+            document.getElementById('exc-btn-start').textContent = 'Reanudar Reto';
+            document.getElementById('exc-btn-start').disabled = false;
+          }
+        }
+        panelExc.classList.add('hidden');
+        panelCr.classList.remove('hidden');
+        btnCr.className = 'glass-card glass-card-cyan rounded-2xl p-5 text-left transition-all hover:scale-[1.01] border-2 border-cyan-400/70';
+        btnExc.className = 'glass-card rounded-2xl p-5 text-left transition-all hover:scale-[1.01] border-2 border-slate-800 opacity-80 hover:opacity-100';
+
+        if (ContrarrelojState.active && !ContrarrelojState.answered) {
+          startContrarrelojTick();
+        }
+      }
+    }
+
+    /* --- 9A. RETO EXCELENCIA ("Asume el RETO") --- */
+    const ExcelenciaState = {
+      started: false,
+      finished: false,
+      timeLeft: RETO_EXCELENCIA.timeLimit,
+      hintLevel: 0,
+      timerId: null
+    };
+
+    function renderExcelenciaMatrix(highlight = false, solved = false) {
+      document.getElementById('exc-matrix').innerHTML = renderMatrixHTML(RETO_EXCELENCIA.matrix, {
+        orientation: RETO_EXCELENCIA.orientation,
+        highlightMode: highlight ? 'bands' : 'none',
+        solvedValue: solved ? RETO_EXCELENCIA.answer : null
+      });
+    }
+
+    function startExcelencia() {
+      SoundFX.click();
+      if (ExcelenciaState.finished) {
+        // Reiniciar Reto Excelencia
+        ExcelenciaState.finished = false;
+        ExcelenciaState.timeLeft = RETO_EXCELENCIA.timeLimit;
+        ExcelenciaState.hintLevel = 0;
+        document.getElementById('exc-hints-box').classList.add('hidden');
+        document.getElementById('exc-hints-box').innerHTML = '';
+        document.getElementById('exc-feedback-box').classList.add('hidden');
+        document.getElementById('exc-input').value = '';
+        renderExcelenciaMatrix(false, false);
+      }
+
+      ExcelenciaState.started = true;
+      document.getElementById('exc-prestart-msg').classList.add('hidden');
+      document.getElementById('exc-input').disabled = false;
+      document.getElementById('exc-btn-submit').disabled = false;
+      document.getElementById('exc-btn-hint1').disabled = false;
+      document.getElementById('exc-btn-hint2').disabled = false;
+      document.getElementById('exc-btn-start').textContent = 'En curso...';
+      document.getElementById('exc-btn-start').disabled = true;
+
+      updateExcelenciaTimerUI();
+      if (ExcelenciaState.timerId) clearInterval(ExcelenciaState.timerId);
+      ExcelenciaState.timerId = setInterval(() => {
+        ExcelenciaState.timeLeft--;
+        updateExcelenciaTimerUI();
+        if (ExcelenciaState.timeLeft <= 10 && ExcelenciaState.timeLeft > 0) SoundFX.tick();
+        if (ExcelenciaState.timeLeft <= 0) {
+          clearInterval(ExcelenciaState.timerId);
+          ExcelenciaState.timerId = null;
+          evaluateExcelencia(null, true);
+        }
+      }, 1000);
+
+      setTimeout(() => document.getElementById('exc-input').focus(), 50);
+    }
+
+    function updateExcelenciaTimerUI() {
+      const pct = Math.max(0, (ExcelenciaState.timeLeft / RETO_EXCELENCIA.timeLimit) * 100);
+      document.getElementById('exc-timer-text').textContent = `${ExcelenciaState.timeLeft}s`;
+      document.getElementById('exc-timer-bar').style.width = `${pct}%`;
+
+      const pill = document.getElementById('exc-timer-pill');
+      if (ExcelenciaState.timeLeft <= 15) {
+        pill.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-500/20 border border-rose-400/60 font-mono text-base font-bold text-rose-300 animate-pulse';
+      } else {
+        pill.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/35 font-mono text-base font-bold text-amber-300';
+      }
+    }
+
+    function showExcelenciaHint(num) {
+      if (!ExcelenciaState.started || ExcelenciaState.finished) return;
+      if (ExcelenciaState.hintLevel < num) ExcelenciaState.hintLevel = num;
+      SoundFX.hint();
+
+      const box = document.getElementById('exc-hints-box');
+      box.classList.remove('hidden');
+      let h = '';
+      if (ExcelenciaState.hintLevel >= 1) {
+        h += `<div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-400/30 text-xs sm:text-sm text-cyan-100"><strong class="text-cyan-300">Pista 1:</strong> ${RETO_EXCELENCIA.hint1}</div>`;
+      }
+      if (ExcelenciaState.hintLevel >= 2) {
+        h += `<div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-400/30 text-xs sm:text-sm text-indigo-100"><strong class="text-indigo-300">Pista 2:</strong> ${RETO_EXCELENCIA.hint2}</div>`;
+      }
+      box.innerHTML = h;
+      renderExcelenciaMatrix(true, false);
+    }
+
+    function triggerExcelenciaConfetti() {
+      const container = document.getElementById('excelencia-confetti');
+      container.innerHTML = '';
+      const colors = ['#fbbf24', '#22d3ee', '#34d399', '#a78bfa', '#f472b6'];
+      for (let i = 0; i < 38; i++) {
+        const piece = document.createElement('span');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.backgroundColor = colors[i % colors.length];
+        piece.style.animationDelay = `${Math.random() * 0.45}s`;
+        piece.style.width = `${6 + Math.random() * 6}px`;
+        piece.style.height = `${6 + Math.random() * 6}px`;
+        container.appendChild(piece);
+      }
+      setTimeout(() => { container.innerHTML = ''; }, 2800);
+    }
+
+    function evaluateExcelencia(userVal, timedOut) {
+      if (ExcelenciaState.timerId) {
+        clearInterval(ExcelenciaState.timerId);
+        ExcelenciaState.timerId = null;
+      }
+      ExcelenciaState.finished = true;
+      document.getElementById('exc-input').disabled = true;
+      document.getElementById('exc-btn-submit').disabled = true;
+      document.getElementById('exc-btn-hint1').disabled = true;
+      document.getElementById('exc-btn-hint2').disabled = true;
+
+      const startBtn = document.getElementById('exc-btn-start');
+      startBtn.disabled = false;
+      startBtn.textContent = 'Intentar de nuevo';
+
+      renderExcelenciaMatrix(true, true);
+
+      const fb = document.getElementById('exc-feedback-box');
+      fb.classList.remove('hidden');
+
+      if (!timedOut && userVal === RETO_EXCELENCIA.answer) {
+        SoundFX.fanfare();
+        triggerExcelenciaConfetti();
+        const earned = Math.max(50, 100 - ExcelenciaState.hintLevel * 15);
+        registerSolve(RETO_EXCELENCIA.id, earned);
+
+        fb.className = 'rounded-2xl p-5 border bg-gradient-to-br from-amber-500/15 to-emerald-500/15 border-amber-400/50 animate-fade-in space-y-3';
+        fb.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-amber-300 font-display font-bold text-lg">★ ¡Reto Excelencia Superado! ★</div>
+            <span class="font-mono text-xs font-bold px-3 py-1 rounded-lg bg-amber-500/20 border border-amber-400/40 text-amber-200">+${earned} pts</span>
+          </div>
+          <p class="text-sm text-slate-200">Has demostrado un nivel sobresaliente de deducción matemática.</p>
+          <div class="space-y-2">${formatResolutionSteps(RETO_EXCELENCIA.resolution)}</div>
+        `;
+      } else {
+        SoundFX.wrong();
+        const msg = timedOut
+          ? 'Se agotó el tiempo del Reto Excelencia.'
+          : `Ingresaste x = ${userVal}, pero el valor correcto es x = ${RETO_EXCELENCIA.answer}.`;
+        fb.className = 'rounded-2xl p-5 border bg-rose-500/10 border-rose-400/40 animate-fade-in space-y-3';
+        fb.innerHTML = `
+          <div class="text-rose-300 font-display font-bold text-base">${msg}</div>
+          <p class="text-sm text-slate-300">Revisa el patrón de cuadrados perfectos paso a paso:</p>
+          <div class="space-y-2">${formatResolutionSteps(RETO_EXCELENCIA.resolution)}</div>
+        `;
+      }
+    }
+
+    function setupExcelencia() {
+      renderExcelenciaMatrix(false, false);
+
+      const handleCheck = () => {
+        if (!ExcelenciaState.started || ExcelenciaState.finished) return;
+        const input = document.getElementById('exc-input');
+        const warn = document.getElementById('exc-input-warn');
+        const raw = input.value.trim();
+        if (raw === '' || isNaN(Number(raw))) {
+          warn.classList.remove('hidden');
+          input.focus();
+          return;
+        }
+        warn.classList.add('hidden');
+        evaluateExcelencia(Number(raw), false);
+      };
+
+      document.getElementById('exc-btn-submit').addEventListener('click', handleCheck);
+      document.getElementById('exc-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleCheck();
+      });
+      document.getElementById('exc-btn-hint1').addEventListener('click', () => showExcelenciaHint(1));
+      document.getElementById('exc-btn-hint2').addEventListener('click', () => showExcelenciaHint(2));
+    }
+
+    /* --- 9B. DESAFÍO CONTRARRELOJ (11 RETOS CON ALTERNATIVAS a, b, c, d) --- */
+    const ContrarrelojState = {
+      active: false,
+      index: 0,
+      timeLeft: 45,
+      maxTime: 45,
+      score: 0,
+      hits: 0,
+      streak: 0,
+      bestStreak: 0,
+      hintLevel: 0,
+      answered: false,
+      timerId: null
+    };
+
+    function startContrarreloj() {
+      SoundFX.click();
+      stopAllTimers();
+
+      ContrarrelojState.active = true;
+      ContrarrelojState.index = 0;
+      ContrarrelojState.score = 0;
+      ContrarrelojState.hits = 0;
+      ContrarrelojState.streak = 0;
+      ContrarrelojState.bestStreak = 0;
+
+      document.getElementById('cr-intro').classList.add('hidden');
+      document.getElementById('cr-results').classList.add('hidden');
+      document.getElementById('cr-active').classList.remove('hidden');
+
+      loadContrarrelojQuestion();
+    }
+
+    function loadContrarrelojQuestion() {
+      const item = CONTRARRELOJ_DATA[ContrarrelojState.index];
+      ContrarrelojState.timeLeft = ContrarrelojState.maxTime;
+      ContrarrelojState.hintLevel = 0;
+      ContrarrelojState.answered = false;
+
+      document.getElementById('cr-counter').textContent = `Reto ${ContrarrelojState.index + 1} / ${CONTRARRELOJ_DATA.length}`;
+      document.getElementById('cr-streak').textContent = ContrarrelojState.streak;
+      document.getElementById('cr-score').textContent = ContrarrelojState.score;
+
+      document.getElementById('cr-matrix').innerHTML = renderMatrixHTML(item.matrix);
+
+      // Renderizar botones a, b, c, d
+      const letters = ['a', 'b', 'c', 'd'];
+      const optBox = document.getElementById('cr-options');
+      optBox.innerHTML = item.options.map((val, i) => `
+        <button type="button" data-opt-val="${val}" onclick="selectContrarrelojOption(${val})"
+          class="cr-opt-btn flex items-center gap-3 p-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 hover:border-cyan-400/60 transition-all text-left group active:scale-[0.98]">
+          <span class="w-8 h-8 rounded-lg bg-slate-800 group-hover:bg-cyan-500/20 border border-slate-700 group-hover:border-cyan-400/40 flex items-center justify-center font-mono text-xs font-bold text-cyan-300">
+            ${letters[i]}.
+          </span>
+          <span class="font-mono text-xl font-bold text-white">${val}</span>
+        </button>
+      `).join('');
+
+      document.getElementById('cr-btn-hint1').disabled = false;
+      document.getElementById('cr-btn-hint2').disabled = false;
+      document.getElementById('cr-hint-indicator').textContent = '2 pistas disponibles';
+      document.getElementById('cr-hints-box').classList.add('hidden');
+      document.getElementById('cr-hints-box').innerHTML = '';
+      document.getElementById('cr-feedback-box').classList.add('hidden');
+      document.getElementById('cr-next-wrap').classList.add('hidden');
+
+      updateContrarrelojTimerUI();
+      startContrarrelojTick();
+    }
+
+    function startContrarrelojTick() {
+      if (ContrarrelojState.timerId) clearInterval(ContrarrelojState.timerId);
+      ContrarrelojState.timerId = setInterval(() => {
+        if (ContrarrelojState.answered) return;
+        ContrarrelojState.timeLeft--;
+        updateContrarrelojTimerUI();
+        if (ContrarrelojState.timeLeft <= 10 && ContrarrelojState.timeLeft > 0) SoundFX.tick();
+        if (ContrarrelojState.timeLeft <= 0) {
+          clearInterval(ContrarrelojState.timerId);
+          ContrarrelojState.timerId = null;
+          evaluateContrarreloj(null, true);
+        }
+      }, 1000);
+    }
+
+    function updateContrarrelojTimerUI() {
+      const pct = Math.max(0, (ContrarrelojState.timeLeft / ContrarrelojState.maxTime) * 100);
+      document.getElementById('cr-timer-text').textContent = `${ContrarrelojState.timeLeft}s`;
+      const bar = document.getElementById('cr-timer-bar');
+      const pill = document.getElementById('cr-timer-pill');
+      bar.style.width = `${pct}%`;
+
+      if (ContrarrelojState.timeLeft <= 12) {
+        pill.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-500/20 border border-rose-400/60 font-mono text-sm font-bold text-rose-300 animate-pulse';
+        bar.className = 'h-full rounded-full bg-gradient-to-r from-rose-500 to-amber-400 transition-all duration-1000 ease-linear';
+      } else {
+        pill.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-500/15 border border-cyan-400/35 font-mono text-sm font-bold text-cyan-300';
+        bar.className = 'h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-400 transition-all duration-1000 ease-linear';
+      }
+    }
+
+    function selectContrarrelojOption(val) {
+      if (ContrarrelojState.answered) return;
+      evaluateContrarreloj(val, false);
+    }
+
+    function showContrarrelojHint(num) {
+      if (ContrarrelojState.answered) return;
+      const item = CONTRARRELOJ_DATA[ContrarrelojState.index];
+      if (ContrarrelojState.hintLevel < num) ContrarrelojState.hintLevel = num;
+      SoundFX.hint();
+
+      const box = document.getElementById('cr-hints-box');
+      box.classList.remove('hidden');
+      let h = '';
+      if (ContrarrelojState.hintLevel >= 1) {
+        h += `<div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-400/30 text-xs sm:text-sm text-cyan-100"><strong class="text-cyan-300">Pista 1:</strong> ${item.hint1}</div>`;
+      }
+      if (ContrarrelojState.hintLevel >= 2) {
+        h += `<div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-400/30 text-xs sm:text-sm text-indigo-100"><strong class="text-indigo-300">Pista 2:</strong> ${item.hint2}</div>`;
+      }
+      box.innerHTML = h;
+      const rem = Math.max(0, 2 - ContrarrelojState.hintLevel);
+      document.getElementById('cr-hint-indicator').textContent = rem > 0 ? `Queda ${rem} pista` : 'Pistas mostradas';
+
+      document.getElementById('cr-matrix').innerHTML = renderMatrixHTML(item.matrix, {
+        orientation: item.orientation,
+        highlightMode: 'bands'
+      });
+    }
+
+    function evaluateContrarreloj(selectedVal, timedOut) {
+      ContrarrelojState.answered = true;
+      if (ContrarrelojState.timerId) {
+        clearInterval(ContrarrelojState.timerId);
+        ContrarrelojState.timerId = null;
+      }
+
+      const item = CONTRARRELOJ_DATA[ContrarrelojState.index];
+      const isCorrect = !timedOut && selectedVal === item.answer;
+
+      // Deshabilitar y colorear opciones
+      document.querySelectorAll('.cr-opt-btn').forEach(btn => {
+        btn.disabled = true;
+        const optVal = Number(btn.dataset.optVal);
+        if (optVal === item.answer) {
+          btn.className = 'cr-opt-btn flex items-center gap-3 p-4 rounded-xl bg-emerald-500/20 border-2 border-emerald-400 text-left shadow-lg shadow-emerald-950/50';
+        } else if (!timedOut && optVal === selectedVal) {
+          btn.className = 'cr-opt-btn flex items-center gap-3 p-4 rounded-xl bg-rose-500/20 border-2 border-rose-400 text-left';
+        } else {
+          btn.className = 'cr-opt-btn flex items-center gap-3 p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-left opacity-45';
+        }
+      });
+
+      document.getElementById('cr-btn-hint1').disabled = true;
+      document.getElementById('cr-btn-hint2').disabled = true;
+
+      document.getElementById('cr-matrix').innerHTML = renderMatrixHTML(item.matrix, {
+        orientation: item.orientation,
+        highlightMode: 'bands',
+        solvedValue: item.answer
+      });
+
+      const fb = document.getElementById('cr-feedback-box');
+      fb.classList.remove('hidden');
+
+      if (isCorrect) {
+        SoundFX.correct();
+        ContrarrelojState.hits++;
+        ContrarrelojState.streak++;
+        if (ContrarrelojState.streak > ContrarrelojState.bestStreak) {
+          ContrarrelojState.bestStreak = ContrarrelojState.streak;
+        }
+        const earned = Math.max(15, 25 + Math.round(ContrarrelojState.timeLeft * 0.5) - ContrarrelojState.hintLevel * 5);
+        ContrarrelojState.score += earned;
+        registerSolve(item.id, earned);
+
+        fb.className = 'rounded-2xl p-5 border bg-emerald-500/10 border-emerald-400/40 animate-fade-in space-y-3';
+        fb.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-emerald-300 font-display font-bold text-base">¡Respuesta Correcta! x = ${item.answer}</span>
+            <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300">+${earned} pts</span>
+          </div>
+          <div class="space-y-2">${formatResolutionSteps(item.resolution)}</div>
+        `;
+      } else {
+        SoundFX.wrong();
+        ContrarrelojState.streak = 0;
+        const msg = timedOut
+          ? `¡Tiempo agotado! La respuesta correcta es x = ${item.answer}`
+          : `Seleccionaste ${selectedVal}, pero la respuesta correcta es x = ${item.answer}`;
+
+        fb.className = 'rounded-2xl p-5 border bg-rose-500/10 border-rose-400/40 animate-fade-in space-y-3';
+        fb.innerHTML = `
+          <div class="text-rose-300 font-display font-bold text-base">${msg}</div>
+          <div class="space-y-2">${formatResolutionSteps(item.resolution)}</div>
+        `;
+      }
+
+      document.getElementById('cr-streak').textContent = ContrarrelojState.streak;
+      document.getElementById('cr-score').textContent = ContrarrelojState.score;
+
+      const nextWrap = document.getElementById('cr-next-wrap');
+      const nextBtn = document.getElementById('cr-btn-next');
+      nextWrap.classList.remove('hidden');
+      nextBtn.textContent = ContrarrelojState.index < CONTRARRELOJ_DATA.length - 1
+        ? 'Siguiente Reto →'
+        : 'Ver Resultados del Desafío →';
+    }
+
+    function nextContrarreloj() {
+      SoundFX.click();
+      if (ContrarrelojState.index < CONTRARRELOJ_DATA.length - 1) {
+        ContrarrelojState.index++;
+        loadContrarrelojQuestion();
+      } else {
+        finishContrarreloj();
+      }
+    }
+
+    function finishContrarreloj() {
+      ContrarrelojState.active = false;
+      stopAllTimers();
+      SoundFX.fanfare();
+
+      const total = CONTRARRELOJ_DATA.length;
+      const ratio = ContrarrelojState.hits / total;
+
+      if (!AppState.bestContrarreloj || ContrarrelojState.score > AppState.bestContrarreloj.score) {
+        AppState.bestContrarreloj = { hits: ContrarrelojState.hits, score: ContrarrelojState.score };
+        saveProgress();
+        updateGlobalUI();
+      }
+
+      document.getElementById('cr-active').classList.add('hidden');
+      document.getElementById('cr-results').classList.remove('hidden');
+
+      const medalEl = document.getElementById('cr-res-medal');
+      const titleEl = document.getElementById('cr-res-title');
+      const subEl = document.getElementById('cr-res-subtitle');
+
+      if (ratio >= 0.85) {
+        medalEl.className = 'w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-5 border bg-amber-500/20 border-amber-400/50 text-amber-300';
+        medalEl.innerHTML = `<svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/></svg>`;
+        titleEl.textContent = '¡Maestro de las Distribuciones!';
+        subEl.textContent = 'Velocidad y precisión extraordinarias en el Desafío Contrarreloj.';
+      } else if (ratio >= 0.6) {
+        medalEl.className = 'w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-5 border bg-cyan-500/20 border-cyan-400/50 text-cyan-300';
+        medalEl.innerHTML = `<svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
+        titleEl.textContent = '¡Gran Desempeño Contrarreloj!';
+        subEl.textContent = 'Dominas la mayoría de los patrones bajo presión.';
+      } else {
+        medalEl.className = 'w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-5 border bg-indigo-500/20 border-indigo-400/50 text-indigo-300';
+        medalEl.innerHTML = `<svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>`;
+        titleEl.textContent = '¡Desafío Completado!';
+        subEl.textContent = 'Cada intento fortalece tu agilidad mental. ¡Inténtalo de nuevo!';
+      }
+
+      document.getElementById('cr-res-hits').textContent = `${ContrarrelojState.hits}/${total}`;
+      document.getElementById('cr-res-score').textContent = ContrarrelojState.score;
+      document.getElementById('cr-res-streak').textContent = ContrarrelojState.bestStreak;
+    }
+
+    function setupContrarreloj() {
+      document.getElementById('cr-btn-hint1').addEventListener('click', () => showContrarrelojHint(1));
+      document.getElementById('cr-btn-hint2').addEventListener('click', () => showContrarrelojHint(2));
+      document.getElementById('cr-btn-next').addEventListener('click', nextContrarreloj);
+    }
+
+    /* ========================================================================
+       10. INICIALIZACIÓN GENERAL DE LA APLICACIÓN
+       ======================================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProgress();
+      updateGlobalUI();
+
+      // Configurar botones de pestañas superiores
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+      // Activar estilos iniciales de la pestaña "Teoría"
+      AppState.activeTab = '';
+      switchTab('teoria');
+
+      // Configurar botón de sonido
+      document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+        const isOn = SoundFX.toggle();
+        document.getElementById('icon-sound-on').classList.toggle('hidden', !isOn);
+        document.getElementById('icon-sound-off').classList.toggle('hidden', isOn);
+      });
+
+      // Inicializar todos los módulos educativos
+      setupTheoryExamples();
+      setupPractice();
+      setupTimedLevels();
+      setupExcelencia();
+      setupContrarreloj();
+    });
+  </script>
+</body>
+</html>
